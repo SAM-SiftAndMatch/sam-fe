@@ -41,5 +41,10 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,css,json,md}": ["biome check --write --no-errors-on-unmatched"]
-  }
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=11.0.0"
+  },
+  "packageManager": "pnpm@11.8.0"
 }
