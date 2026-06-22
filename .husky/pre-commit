@@ -1,1 +1,50 @@
-npx lint-staged
+#!/bin/sh
+
+# Load nvm node/pnpm into PATH
+export PATH="$HOME/.nvm/versions/node/v22.19.0/bin:$PATH"
+
+# === Protected Branch Check ===
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+PROTECTED_BRANCHES="^(main|master)$"
+
+if echo "$BRANCH" | grep -qE "$PROTECTED_BRANCHES"; then
+  echo "❌ Direct commits to '$BRANCH' are not allowed!"
+  echo "   Please create a feature branch: git checkout -b feat/your-feature"
+  exit 1
+fi
+
+# === Branch Naming Convention ===
+BRANCH_PATTERN="^(feat|fix|chore|docs|style|refactor|test|hotfix|release)/[a-z0-9._-]+$"
+
+if ! echo "$BRANCH" | grep -qE "$BRANCH_PATTERN"; then
+  echo "❌ Invalid branch name: '$BRANCH'"
+  echo "   Branch must follow pattern: <type>/<description>"
+  echo "   Types: feat, fix, chore, docs, style, refactor, test, hotfix, release"
+  echo "   Example: feat/add-user-auth, fix/login-bug"
+  exit 1
+fi
+
+# === File Size Limit (5MB) ===
+MAX_FILE_SIZE=5242880  # 5MB in bytes
+
+for file in $(git diff --cached --name-only --diff-filter=ACM); do
+  if [ -f "$file" ]; then
+    FILE_SIZE=$(wc -c < "$file")
+    if [ "$FILE_SIZE" -gt "$MAX_FILE_SIZE" ]; then
+      FILE_SIZE_MB=$((FILE_SIZE / 1048576))
+      echo "❌ File '$file' exceeds 5MB limit (${FILE_SIZE_MB}MB)"
+      echo "   Consider using Git LFS for large files"
+      exit 1
+    fi
+  fi
+done
+
+# === Biome Lint & Format ===
+pnpm exec biome check --staged --write --no-errors-on-unmatched
+git update-index --again
+
+# === TypeScript Type Check ===
+pnpm exec tsc --noEmit
+
+# === Deep Import Check ===
+./scripts/check-features-imports.sh
