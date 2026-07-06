@@ -2,7 +2,7 @@ import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
-import { PATH_CLIENT_PROJECTS, PATH_CLIENT_AI_BRIEF } from '../routes/paths';
+import { PATH_CLIENT_PROJECTS, PATH_CLIENT_AI_BRIEF, PATH_CLIENT_PRICING } from '../routes/paths';
 
 // === MOCK DATA ===
 const STATS = [
@@ -204,6 +204,7 @@ const ClientDashboardPage: React.FC = () => {
             </p>
             <button
               type="button"
+              onClick={() => navigate(PATH_CLIENT_PRICING)}
               className="bg-white text-[#1D4ED8] hover:bg-gray-50 font-bold px-8 py-3 rounded-full shadow-md transition-colors cursor-pointer border-0 text-sm"
             >
               Nâng cấp VIP

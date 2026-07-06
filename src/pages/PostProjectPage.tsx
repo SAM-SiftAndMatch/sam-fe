@@ -31,8 +31,8 @@ type LocationState = {
 const PostProjectPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { 
-    keyword = '', 
+  const {
+    keyword = '',
     selectedTags: initialTags = [],
     projectName: initialProjectName = '',
     category: initialCategory = '',
@@ -272,11 +272,10 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   value={projectName}
                   onChange={(e) => { setProjectName(e.target.value); setStep1Errors(p => ({ ...p, projectName: false })); }}
                   placeholder="Ví dụ: Thiết kế Website Landing Page cho Startup AI"
-                  className={`w-full bg-white border rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-1 transition-colors placeholder:text-gray-400 ${
-                    step1Errors.projectName 
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                      : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
-                  }`}
+                  className={`w-full bg-white border rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-1 transition-colors placeholder:text-gray-400 ${step1Errors.projectName
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
+                    }`}
                 />
                 {step1Errors.projectName && <p className="text-red-500 text-xs mt-1">Vui lòng nhập tên dự án</p>}
               </div>
@@ -290,11 +289,10 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     id="category"
                     value={category}
                     onChange={(e) => { setCategory(e.target.value); setStep1Errors(p => ({ ...p, category: false })); }}
-                    className={`w-full bg-white border rounded-xl pl-4 pr-10 py-3 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 transition-colors cursor-pointer ${
-                      step1Errors.category
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                        : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
-                    }`}
+                    className={`w-full bg-white border rounded-xl pl-4 pr-10 py-3 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 transition-colors cursor-pointer ${step1Errors.category
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
+                      }`}
                   >
                     <option value="" disabled>
                       -- Chọn danh mục --
@@ -325,11 +323,10 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     value={description}
                     onChange={(e) => { setDescription(e.target.value); setStep1Errors(p => ({ ...p, description: false })); }}
                     placeholder="Mô tả các tính năng cần có, công nghệ yêu cầu, hoặc bất kỳ thông tin nào giúp chuyên gia hiểu rõ dự án của bạn..."
-                    className={`w-full bg-white border rounded-xl p-4 text-sm text-gray-800 focus:outline-none focus:ring-1 transition-colors placeholder:text-gray-400 resize-none ${
-                      step1Errors.description
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                        : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
-                    }`}
+                    className={`w-full bg-white border rounded-xl p-4 text-sm text-gray-800 focus:outline-none focus:ring-1 transition-colors placeholder:text-gray-400 resize-none ${step1Errors.description
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
+                      }`}
                   />
                   <div className="absolute bottom-4 right-4 flex items-center gap-2">
                     <button
@@ -899,8 +896,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
               </div>
               <h4 className="text-xl font-bold text-white mb-2 relative z-10">Gói Bảo Hành (Gợi ý sử dụng)</h4>
               <p className="text-sm text-white/80 mb-8 max-w-sm leading-relaxed relative z-10">
-                SAM AI sẽ tự động phân tích yêu cầu và đề xuất danh sách 5 chuyên gia phù hợp nhất
-                cho dự án của bạn.
+                SAM AI sẽ tự động kiểm tra sản phẩm đầu ra, hỗ trợ khắc phục lỗi và giải quyết các vấn đề phát sinh trong 30 ngày sau nghiệm thu.
               </p>
               <div className="text-2xl font-black text-white relative z-10">59.000 VNĐ</div>
 
@@ -1269,8 +1265,8 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
               </button>
               <button
                 type="button"
-                onClick={() => navigate(PATH_CLIENT_CONFIRM_PROJECT, { 
-                  state: { projectName, description, category, budgetAmount, upgrades, selectedSkills, selectedTags } 
+                onClick={() => navigate(PATH_CLIENT_CONFIRM_PROJECT, {
+                  state: { projectName, description, category, budgetAmount, upgrades, selectedSkills, selectedTags }
                 })}
                 className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-bold px-10 py-4 rounded-full shadow-[0_4px_20px_rgba(37,99,235,0.4)] transition-all flex items-center gap-2 cursor-pointer border-0"
               >
