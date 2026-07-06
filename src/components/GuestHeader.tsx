@@ -60,7 +60,7 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
       </div>
 
       {/* Navigation - Center (Absolute) */}
-      <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2">
+      <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-4 lg:gap-6">
         {navItems ? (
           navItems.map((item) => {
             const isActive = activeId === item.id;
@@ -69,11 +69,10 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
                 key={item.id}
                 type="button"
                 onClick={() => scrollToSection(item.id)}
-                className={`text-sm font-semibold px-4 py-1.5 rounded-full cursor-pointer border-0 transition-colors ${
-                  isActive
-                    ? 'bg-[#EEF2FF] text-[#1D4ED8]'
-                    : 'text-gray-600 hover:text-[#0047FF] bg-transparent hover:bg-gray-50'
-                }`}
+                className={`text-sm font-semibold px-4 py-1.5 rounded-full cursor-pointer border-0 transition-colors ${isActive
+                  ? 'bg-[#EEF2FF] text-[#1D4ED8]'
+                  : 'text-gray-600 hover:text-[#0047FF] bg-transparent hover:bg-gray-50'
+                  }`}
               >
                 {item.label}
               </button>
