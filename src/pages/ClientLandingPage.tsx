@@ -95,7 +95,8 @@ const ClientLandingPage: React.FC = () => {
           { label: 'Tổng quan', id: 'hero' },
           { label: 'Lĩnh vực', id: 'categories' },
           { label: 'Quy trình', id: 'process' },
-          { label: 'Dịch vụ', id: 'pricing' }
+          { label: 'Dịch vụ', id: 'pricing' },
+          { label: 'Đánh giá', id: 'testimonials' }
         ]} 
       />
 
@@ -569,7 +570,7 @@ const ClientLandingPage: React.FC = () => {
         </section>
 
         {/* ================= TESTIMONIALS SECTION ================= */}
-        <section className="w-full bg-[#F4F7FF] py-20 px-4">
+        <section id="testimonials" className="w-full bg-[#F4F7FF] py-20 px-4">
           <div className="max-w-6xl mx-auto flex flex-col items-center">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-12 text-center">
               Khách hàng nói về SAM
