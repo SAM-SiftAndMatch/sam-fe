@@ -1,8 +1,9 @@
 import type React from 'react';
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
+import { PATH_CLIENT_CONFIRM_PROJECT } from '../routes/paths';
 
 // === MOCK DATA ===
 const SKILLS_SUGGESTION = [
@@ -18,28 +19,46 @@ const SKILLS_SUGGESTION = [
 type LocationState = {
   keyword?: string;
   selectedTags?: string[];
+  projectName?: string;
+  category?: string;
+  description?: string;
+  selectedSkills?: string[];
+  budgetAmount?: number;
+  upgrades?: { featured: boolean; urgent: boolean; warranty: boolean };
+  restoreStep?: number;
 };
 
 const PostProjectPage: React.FC = () => {
   const location = useLocation();
-  const { keyword = '', selectedTags: initialTags = [] } = (location.state as LocationState) || {};
+  const navigate = useNavigate();
+  const { 
+    keyword = '', 
+    selectedTags: initialTags = [],
+    projectName: initialProjectName = '',
+    category: initialCategory = '',
+    description: initialDescription = '',
+    selectedSkills: initialSkills = [],
+    budgetAmount: initialBudgetAmount = 1000000,
+    upgrades: initialUpgrades = { featured: false, urgent: false, warranty: true },
+    restoreStep = 1
+  } = (location.state as LocationState) || {};
   const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
 
   // Quản lý Step hiện tại (1 -> 4)
-  const [currentStep, setCurrentStep] = useState(1);
-  const [highestStep, setHighestStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(restoreStep);
+  const [highestStep, setHighestStep] = useState(restoreStep);
 
   useEffect(() => {
     setHighestStep((prev) => Math.max(prev, currentStep));
   }, [currentStep]);
 
   // States lưu trữ dữ liệu các bước (Thực tế sẽ dùng chung 1 Object formData, ở đây chia nhỏ cho dễ nhìn)
-  const [projectName, setProjectName] = useState('');
-  const [category, setCategory] = useState('');
-  const [description, setDescription] = useState('');
+  const [projectName, setProjectName] = useState(initialProjectName);
+  const [category, setCategory] = useState(initialCategory);
+  const [description, setDescription] = useState(initialDescription);
 
   // State quản lý kỹ năng yêu cầu
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(initialSkills);
   const [showCustomSkillInput, setShowCustomSkillInput] = useState(false);
   const [customSkill, setCustomSkill] = useState('');
 
@@ -95,9 +114,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
   }, [selectedTags, keyword, description]);
 
   const [budgetType, setBudgetType] = useState('ai'); // 'min', 'ai', 'max', 'custom'
-  const [budgetAmount, setBudgetAmount] = useState(1000000); // Giá trị mặc định
+  const [budgetAmount, setBudgetAmount] = useState(initialBudgetAmount); // Giá trị mặc định
   const [aiPricingState, setAiPricingState] = useState<'idle' | 'analyzing' | 'done'>('idle');
-  const [aiSuggestedPrice, setAiSuggestedPrice] = useState(1000000);
+  const [aiSuggestedPrice, setAiSuggestedPrice] = useState(initialBudgetAmount);
   const [isInsightExpanded, setIsInsightExpanded] = useState(false);
   const [duration, setDuration] = useState('fast'); // 'fast', 'normal', 'slow'
 
@@ -122,7 +141,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
     }
   }, [currentStep, aiPricingState, description, selectedTags]);
 
-  const [upgrades, setUpgrades] = useState({ featured: false, urgent: false, warranty: true });
+  const [upgrades, setUpgrades] = useState(initialUpgrades);
 
   const totalUpgradesCost =
     (upgrades.featured ? 59000 : 0) +
@@ -1212,7 +1231,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
               </button>
               <button
                 type="button"
-                onClick={() => alert('Đăng dự án thành công!')}
+                onClick={() => navigate(PATH_CLIENT_CONFIRM_PROJECT, { 
+                  state: { projectName, description, category, budgetAmount, upgrades, selectedSkills, selectedTags } 
+                })}
                 className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-bold px-10 py-4 rounded-full shadow-[0_4px_20px_rgba(37,99,235,0.4)] transition-all flex items-center gap-2 cursor-pointer border-0"
               >
                 Đăng dự án ngay
