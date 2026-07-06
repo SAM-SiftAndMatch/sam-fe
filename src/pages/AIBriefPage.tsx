@@ -80,12 +80,14 @@ const AIBriefPage: React.FC = () => {
   };
 
   const handleComplete = () => {
-    // Điều hướng sang trang Confirm Project hoặc New Project Flow
-    navigate(paths.PATH_CLIENT_PROJECT_NEW);
+    // Điều hướng sang trang Đăng dự án (PostProjectPage), truyền keyword và selectedTags để tự động điền Brief
+    navigate(paths.PATH_CLIENT_POST_PROJECT, { 
+      state: { keyword, selectedTags } 
+    });
   };
   
   const handleSkip = () => {
-    navigate(paths.PATH_CLIENT_PROJECT_NEW);
+    navigate(paths.PATH_CLIENT_POST_PROJECT);
   };
 
   return (

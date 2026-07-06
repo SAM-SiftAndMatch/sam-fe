@@ -9,8 +9,8 @@ export const PATH_CLIENT_PRICING = '/client/pricing';
 
 export const PATH_CLIENT_POST_PROJECT = '/client/projects/new';
 export const PATH_CLIENT_AI_BRIEF = '/client/projects/ai-brief';
-export const PATH_CLIENT_CONFIRM_PROJECT = '/client/projects/new/confirm';
-export const PATH_CLIENT_SUCCESS_PROJECT = '/client/projects/new/success';
+export const PATH_CLIENT_CONFIRM_PROJECT = '/client/projects/confirm';
+export const PATH_CLIENT_SUCCESS_PROJECT = '/client/projects/success';
 
 export const PATH_FREELANCER = '/freelancer';
 export const PATH_FREELANCER_PRICING = '/freelancer/pricing';
