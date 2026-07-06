@@ -43,7 +43,13 @@ const LoginPage: React.FC = () => {
         to={paths.PATH_HOME}
         className="absolute top-6 left-6 md:top-10 md:left-10 text-sm font-bold text-gray-500 hover:text-[#1D4ED8] transition-colors flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100"
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
           <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
         Về trang chủ
@@ -56,7 +62,12 @@ const LoginPage: React.FC = () => {
       <div className="bg-white rounded-[32px] shadow-xl border border-gray-100 flex max-w-5xl w-full overflow-hidden min-h-[600px]">
         {/* Left Pane: Gradient Banner */}
         <div className="hidden md:flex md:w-5/12 bg-gradient-to-br from-[#00A3FF] via-[#1A83FF] to-[#1D4ED8] p-12 flex-col justify-start text-white relative">
-          <div className="text-4xl font-black tracking-tighter mb-4" style={{ fontFamily: "'Quedora', sans-serif" }}>SAM</div>
+          <div
+            className="text-4xl font-black tracking-tighter mb-4"
+            style={{ fontFamily: "'Quedora', sans-serif" }}
+          >
+            SAM
+          </div>
           <p className="text-lg font-medium leading-relaxed opacity-90 max-w-xs">
             Kiến tạo tương lai cho việc kết nối khách hàng và freelancer
           </p>

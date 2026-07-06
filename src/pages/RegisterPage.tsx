@@ -37,7 +37,13 @@ const RegisterPage: React.FC = () => {
         to={paths.PATH_HOME}
         className="absolute top-6 left-6 md:top-10 md:left-10 text-sm font-bold text-gray-500 hover:text-[#1D4ED8] transition-colors flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100"
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
           <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
         Về trang chủ

@@ -1,6 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { PATH_CLIENT_AI_BRIEF, PATH_CLIENT_PROJECTS, PATH_WORKSPACES, PATH_CLIENT_FIND_FREELANCER, PATH_CLIENT_DASHBOARD, PATH_LOGIN } from '../routes/paths';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  PATH_CLIENT_AI_BRIEF,
+  PATH_CLIENT_DASHBOARD,
+  PATH_CLIENT_FIND_FREELANCER,
+  PATH_CLIENT_PROJECTS,
+  PATH_LOGIN,
+  PATH_WORKSPACES,
+} from '../routes/paths';
 
 const ClientDashboardHeader: React.FC = () => {
   const navigate = useNavigate();
@@ -22,8 +30,8 @@ const ClientDashboardHeader: React.FC = () => {
     // Check if the current path starts with the given path (so /workspace/:id also matches /workspaces if we check carefully, but let's just use exact or prefix)
     const isActive = location.pathname.startsWith(path);
     return isActive
-      ? "text-sm font-bold bg-[#EEF2FF] text-[#1D4ED8] px-4 py-1.5 rounded-full cursor-pointer border-0 transition-colors"
-      : "text-sm font-medium text-gray-500 hover:text-[#0047FF] hover:bg-gray-50 px-4 py-1.5 rounded-full cursor-pointer bg-transparent border-0 transition-colors";
+      ? 'text-sm font-bold bg-[#EEF2FF] text-[#1D4ED8] px-4 py-1.5 rounded-full cursor-pointer border-0 transition-colors'
+      : 'text-sm font-medium text-gray-500 hover:text-[#0047FF] hover:bg-gray-50 px-4 py-1.5 rounded-full cursor-pointer bg-transparent border-0 transition-colors';
   };
 
   return (

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import Header from '../components/Header';
 
 const WorkspacePage: React.FC = () => {
   const [role, setRole] = useState<'client' | 'freelancer'>('client');

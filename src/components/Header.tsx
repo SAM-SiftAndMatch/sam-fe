@@ -1,6 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { PATH_WORKSPACES, PATH_FREELANCER, PATH_CLIENT_DASHBOARD, PATH_LOGIN } from '../routes/paths';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  PATH_CLIENT_DASHBOARD,
+  PATH_FREELANCER,
+  PATH_LOGIN,
+  PATH_WORKSPACES,
+} from '../routes/paths';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -18,21 +24,22 @@ const Header: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const getNavClass = (path: string, hasIcon: boolean = false) => {
+  const getNavClass = (path: string, hasIcon = false) => {
     // If we only have /freelancer as root, we should exact match, but let's just use startsWith for now with a fallback
     const isActive = path === '/' ? location.pathname === path : location.pathname.startsWith(path);
-    const baseClass = "text-sm px-4 py-2 rounded-full cursor-pointer border-0 transition-colors";
-    const activeClass = "font-bold bg-[#EEF2FF] text-[#0047FF]";
-    const inactiveClass = "font-medium text-gray-600 hover:text-[#0047FF] hover:bg-gray-50 bg-transparent";
-    const iconClass = hasIcon ? "flex items-center gap-1" : "";
-    
+    const baseClass = 'text-sm px-4 py-2 rounded-full cursor-pointer border-0 transition-colors';
+    const activeClass = 'font-bold bg-[#EEF2FF] text-[#0047FF]';
+    const inactiveClass =
+      'font-medium text-gray-600 hover:text-[#0047FF] hover:bg-gray-50 bg-transparent';
+    const iconClass = hasIcon ? 'flex items-center gap-1' : '';
+
     return `${baseClass} ${isActive ? activeClass : inactiveClass} ${iconClass}`.trim();
   };
 
   return (
     <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
       <div className="flex items-center gap-10">
-        <span 
+        <span
           onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
           className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer"
           style={{ fontFamily: "'Quedora', sans-serif" }}
@@ -65,16 +72,10 @@ const Header: React.FC = () => {
           >
             Tin nhắn
           </button>
-          <button
-            type="button"
-            className={getNavClass('/my-projects')}
-          >
+          <button type="button" className={getNavClass('/my-projects')}>
             Dự án của tôi
           </button>
-          <button
-            type="button"
-            className={getNavClass('/income')}
-          >
+          <button type="button" className={getNavClass('/income')}>
             Thu nhập
           </button>
         </nav>
@@ -128,7 +129,7 @@ const Header: React.FC = () => {
               />
             </svg>
           </button>
-          
+
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1 border border-gray-100">
               <button

@@ -2,7 +2,7 @@ import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import FooterDashboard from '../components/FooterDashboard';
-import { PATH_CLIENT_PROJECTS, PATH_CLIENT_AI_BRIEF, PATH_CLIENT_PRICING } from '../routes/paths';
+import { PATH_CLIENT_AI_BRIEF, PATH_CLIENT_PRICING, PATH_CLIENT_PROJECTS } from '../routes/paths';
 
 // === MOCK DATA ===
 const STATS = [

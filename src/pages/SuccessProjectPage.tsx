@@ -1,8 +1,8 @@
 import type React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
-import { PATH_CLIENT_PROJECT_DETAIL, PATH_CLIENT_DASHBOARD } from '../routes/paths';
+import { PATH_CLIENT_DASHBOARD, PATH_CLIENT_PROJECT_DETAIL } from '../routes/paths';
 
 const SuccessProjectPage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const SuccessProjectPage: React.FC = () => {
           {/* Icon Success */}
           <div className="relative mb-8 mt-4">
             {/* Glow background */}
-            <div className="absolute inset-0 bg-[#0AAAD7] rounded-full opacity-20 blur-lg scale-[1.2]"></div>
+            <div className="absolute inset-0 bg-[#0AAAD7] rounded-full opacity-20 blur-lg scale-[1.2]" />
             {/* Main Icon Container */}
             <div className="relative w-20 h-20 rounded-full bg-white border-[1px] border-cyan-400 flex items-center justify-center shadow-lg">
               <svg
@@ -41,7 +41,9 @@ const SuccessProjectPage: React.FC = () => {
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] mb-3">Dự án đã được đăng thành công</h1>
+          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] mb-3">
+            Dự án đã được đăng thành công
+          </h1>
           <p className="text-gray-500 text-sm leading-relaxed mb-8">
             Freelancer sẽ sớm gửi đề xuất cho dự án của bạn
           </p>

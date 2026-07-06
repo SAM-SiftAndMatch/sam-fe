@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as paths from '../routes/paths';
 
@@ -69,10 +70,11 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
                 key={item.id}
                 type="button"
                 onClick={() => scrollToSection(item.id)}
-                className={`text-sm font-semibold px-4 py-1.5 rounded-full cursor-pointer border-0 transition-colors ${isActive
-                  ? 'bg-[#EEF2FF] text-[#1D4ED8]'
-                  : 'text-gray-600 hover:text-[#0047FF] bg-transparent hover:bg-gray-50'
-                  }`}
+                className={`text-sm font-semibold px-4 py-1.5 rounded-full cursor-pointer border-0 transition-colors ${
+                  isActive
+                    ? 'bg-[#EEF2FF] text-[#1D4ED8]'
+                    : 'text-gray-600 hover:text-[#0047FF] bg-transparent hover:bg-gray-50'
+                }`}
               >
                 {item.label}
               </button>

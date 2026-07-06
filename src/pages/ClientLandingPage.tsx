@@ -1,8 +1,8 @@
+import FooterDashboard from '@/components/FooterDashboard';
 import type React from 'react';
 import { Link } from 'react-router-dom';
 import GuestHeader from '../components/GuestHeader';
 import * as paths from '../routes/paths';
-import FooterDashboard from '@/components/FooterDashboard';
 
 const CATEGORIES = [
   {
@@ -89,19 +89,22 @@ const ClientLandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       {/* HEADER */}
-      <GuestHeader 
+      <GuestHeader
         navItems={[
           { label: 'Tổng quan', id: 'hero' },
           { label: 'Lĩnh vực', id: 'categories' },
           { label: 'Quy trình', id: 'process' },
           { label: 'Dịch vụ', id: 'pricing' },
-          { label: 'Đánh giá', id: 'testimonials' }
-        ]} 
+          { label: 'Đánh giá', id: 'testimonials' },
+        ]}
       />
 
       <main className="flex-1 w-full flex flex-col items-center">
         {/* ================= HERO SECTION ================= */}
-        <section id="hero" className="w-full relative pt-20 pb-16 px-4 flex flex-col items-center text-center overflow-hidden">
+        <section
+          id="hero"
+          className="w-full relative pt-20 pb-16 px-4 flex flex-col items-center text-center overflow-hidden"
+        >
           {/* Background Blur */}
           <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-[#0AAAD7]/20 to-[#1D4ED8]/10 blur-[100px] rounded-full pointer-events-none" />
 
@@ -266,7 +269,10 @@ const ClientLandingPage: React.FC = () => {
         </section>
 
         {/* ================= PROCESS SECTION ================= */}
-        <section id="process" className="w-full bg-gradient-to-b from-white to-[#F4F7FF] py-20 px-4 relative overflow-hidden">
+        <section
+          id="process"
+          className="w-full bg-gradient-to-b from-white to-[#F4F7FF] py-20 px-4 relative overflow-hidden"
+        >
           <div className="max-w-5xl mx-auto text-center relative z-10">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
               Quy trình tuyển dụng thông minh
@@ -316,7 +322,10 @@ const ClientLandingPage: React.FC = () => {
         </section>
 
         {/* ================= PRICING SECTION (Tái sử dụng HTML Bảng giá) ================= */}
-        <section id="pricing" className="w-full max-w-5xl mx-auto px-4 py-20 flex flex-col items-center">
+        <section
+          id="pricing"
+          className="w-full max-w-5xl mx-auto px-4 py-20 flex flex-col items-center"
+        >
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Gói dịch vụ linh hoạt</h2>
             <p className="text-gray-500 text-sm">

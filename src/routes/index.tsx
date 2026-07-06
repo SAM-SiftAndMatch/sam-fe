@@ -11,20 +11,20 @@ import ClientLandingPage from '../pages/ClientLandingPage';
 import ClientPricingPage from '../pages/ClientPricingPage';
 
 import AIBriefPage from '../pages/AIBriefPage';
+import ClientProjectDetailPage from '../pages/ClientProjectDetailPage';
+import ClientProjectListPage from '../pages/ClientProjectListPage';
 import ConfirmProjectPage from '../pages/ConfirmProjectPage';
 import PostProjectPage from '../pages/PostProjectPage';
 import SuccessProjectPage from '../pages/SuccessProjectPage';
-import ClientProjectListPage from '../pages/ClientProjectListPage';
-import ClientProjectDetailPage from '../pages/ClientProjectDetailPage';
 
 import FreelancerPage from '../pages/FreelancerPage';
 import FreelancerPricingPage from '../pages/FreelancerPricingPage';
 
 import ApplyJobPage from '../pages/ApplyJobPage';
-import JobDetailPage from '../pages/JobDetailPage';
-import WorkspacesPage from '../pages/WorkspacesPage';
-import WorkspacePage from '../pages/WorkspacePage';
 import FindFreelancerPage from '../pages/FindFreelancerPage';
+import JobDetailPage from '../pages/JobDetailPage';
+import WorkspacePage from '../pages/WorkspacePage';
+import WorkspacesPage from '../pages/WorkspacesPage';
 
 const AppRoutes = () => {
   return (

@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_SUCCESS_PROJECT } from '../routes/paths';
@@ -45,7 +45,9 @@ const ConfirmProjectPage: React.FC = () => {
           <div className="flex items-center justify-center gap-4 w-full mb-8">
             <button
               type="button"
-              onClick={() => navigate(PATH_CLIENT_POST_PROJECT, { state: { ...state, restoreStep: 4 } })}
+              onClick={() =>
+                navigate(PATH_CLIENT_POST_PROJECT, { state: { ...state, restoreStep: 4 } })
+              }
               className="flex items-center gap-2 px-6 py-3 rounded-full border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors cursor-pointer text-sm"
             >
               <svg
@@ -69,20 +71,25 @@ const ConfirmProjectPage: React.FC = () => {
               type="button"
               onClick={() => {
                 const newProject = {
-                  id: 'new_' + Date.now(),
+                  id: `new_${Date.now()}`,
                   title: state.projectName || 'Dự án mới chưa đặt tên',
                   status: 'open',
-                  budget: state.budgetAmount ? `${Number(state.budgetAmount).toLocaleString('vi-VN')} VND` : 'Thỏa thuận',
+                  budget: state.budgetAmount
+                    ? `${Number(state.budgetAmount).toLocaleString('vi-VN')} VND`
+                    : 'Thỏa thuận',
                   proposalsCount: 0,
                   createdAt: 'Vừa xong',
-                  code: 'ID_SAM' + new Date().getFullYear(),
+                  code: `ID_SAM${new Date().getFullYear()}`,
                   description: state.description || 'Chưa có mô tả chi tiết.',
                   skills: state.selectedSkills || [],
                   upgrades: state.upgrades || [],
                 };
-                
+
                 const existing = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
-                localStorage.setItem('SAM_USER_PROJECTS', JSON.stringify([newProject, ...existing]));
+                localStorage.setItem(
+                  'SAM_USER_PROJECTS',
+                  JSON.stringify([newProject, ...existing])
+                );
 
                 navigate(PATH_CLIENT_SUCCESS_PROJECT, { state: { newProjectId: newProject.id } });
               }}

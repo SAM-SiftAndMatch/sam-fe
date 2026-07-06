@@ -1,8 +1,8 @@
 import type React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as paths from '../routes/paths';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import * as paths from '../routes/paths';
 
 // === MOCK DATA ===
 const MOCK_QUESTIONS = [
@@ -50,7 +50,7 @@ const AIBriefPage: React.FC = () => {
   const [aiState, setAiState] = useState<AIState>('idle');
   const [keyword, setKeyword] = useState('');
   const [loadingText, setLoadingText] = useState('Đang kết nối với SAM AI...');
-  
+
   // Lưu danh sách các tag đã được chọn (lưu theo định dạng: "questionId-tag")
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
@@ -65,7 +65,7 @@ const AIBriefPage: React.FC = () => {
     // Simulate AI thinking process
     setTimeout(() => {
       setLoadingText('Đang phân tích và tự động sinh bảng câu hỏi tối ưu...');
-      
+
       setTimeout(() => {
         setAiState('result');
       }, 1500);
@@ -74,18 +74,18 @@ const AIBriefPage: React.FC = () => {
 
   const toggleTag = (qId: number, tag: string) => {
     const tagId = `${qId}-${tag}`;
-    setSelectedTags((prev) => 
+    setSelectedTags((prev) =>
       prev.includes(tagId) ? prev.filter((t) => t !== tagId) : [...prev, tagId]
     );
   };
 
   const handleComplete = () => {
     // Điều hướng sang trang Đăng dự án (PostProjectPage), truyền keyword và selectedTags để tự động điền Brief
-    navigate(paths.PATH_CLIENT_POST_PROJECT, { 
-      state: { keyword, selectedTags } 
+    navigate(paths.PATH_CLIENT_POST_PROJECT, {
+      state: { keyword, selectedTags },
     });
   };
-  
+
   const handleSkip = () => {
     navigate(paths.PATH_CLIENT_POST_PROJECT);
   };
@@ -97,12 +97,21 @@ const AIBriefPage: React.FC = () => {
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col">
         {/* White Card Container - Chiều cao tự động mở rộng theo nội dung */}
         <div className="bg-white rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-6 md:p-8 flex flex-col relative border border-gray-100">
-          
           {/* Header Section (Cố định, không cuộn) */}
           <div className="shrink-0 mb-4">
             <div className="inline-flex items-center gap-2 bg-[#F0F7FF] text-[#1D4ED8] px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-widest mb-4 w-fit border border-[#DCE4FF]">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                />
               </svg>
               Trợ lý AI Thông minh
             </div>
@@ -119,8 +128,18 @@ const AIBriefPage: React.FC = () => {
             {aiState === 'idle' && (
               <div className="w-full relative flex flex-col md:flex-row items-center p-2 bg-white border border-gray-200 rounded-2xl md:rounded-full focus-within:border-[#3B82F6] focus-within:ring-1 focus-within:ring-[#3B82F6] transition-all shadow-sm mb-2 gap-2 md:gap-0">
                 <div className="hidden md:flex pl-4 pr-2 text-gray-400">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                 </div>
                 <input
@@ -145,8 +164,18 @@ const AIBriefPage: React.FC = () => {
             {aiState === 'analyzing' && (
               <div className="flex items-center gap-4 mb-2 p-5 bg-blue-50/50 rounded-2xl border border-blue-100">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1D4ED8] to-[#3B82F6] text-white flex items-center justify-center shadow-md shrink-0">
-                  <svg className="w-6 h-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  <svg
+                    className="w-6 h-6 animate-pulse"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                    />
                   </svg>
                 </div>
                 <div className="flex flex-col gap-2 flex-1 max-w-md">
@@ -166,12 +195,18 @@ const AIBriefPage: React.FC = () => {
             <div className="pt-2 pb-6 space-y-6">
               <div className="flex items-center justify-between mb-4 sticky top-0 bg-white z-10 py-2 border-b border-gray-100">
                 <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <svg
+                    className="w-5 h-5 text-green-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                   Đã tạo xong bộ câu hỏi cho: "{keyword}"
                 </h2>
-                <button 
+                <button
                   type="button"
                   onClick={() => setAiState('idle')}
                   className="text-sm text-[#3B82F6] hover:underline font-semibold cursor-pointer border-0 bg-transparent"
@@ -186,8 +221,10 @@ const AIBriefPage: React.FC = () => {
                     key={q.id}
                     className="relative bg-white border border-gray-200 rounded-2xl p-5 hover:border-blue-300 hover:shadow-md transition-all flex flex-col group"
                   >
-                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl ${q.accentColor}`} />
-                    
+                    <div
+                      className={`absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl ${q.accentColor}`}
+                    />
+
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 pl-2">
                       {q.category}
                     </span>
@@ -205,8 +242,8 @@ const AIBriefPage: React.FC = () => {
                             type="button"
                             onClick={() => toggleTag(q.id, tag)}
                             className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer border ${
-                              isSelected 
-                                ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm' 
+                              isSelected
+                                ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm'
                                 : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                             }`}
                           >
@@ -227,8 +264,18 @@ const AIBriefPage: React.FC = () => {
                   className="w-full md:w-auto bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-bold px-12 py-3.5 rounded-full shadow-[0_4px_15px_rgba(59,130,246,0.3)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
                 >
                   Tạo bản brief hoàn chỉnh
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
                   </svg>
                 </button>
               </div>
@@ -247,7 +294,6 @@ const AIBriefPage: React.FC = () => {
               </button>
             </div>
           )}
-
         </div>
       </main>
     </div>
