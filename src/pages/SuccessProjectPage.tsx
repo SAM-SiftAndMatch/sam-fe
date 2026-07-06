@@ -1,8 +1,14 @@
 import type React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
+import { PATH_CLIENT_PROJECT_DETAIL, PATH_CLIENT_DASHBOARD } from '../routes/paths';
 
 const SuccessProjectPage: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const newProjectId = location.state?.newProjectId || '1';
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <ClientDashboardHeader />
@@ -69,6 +75,7 @@ const SuccessProjectPage: React.FC = () => {
           <div className="flex w-full gap-3">
             <button
               type="button"
+              onClick={() => navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', newProjectId))}
               className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white font-bold transition-opacity cursor-pointer text-sm border-0 shadow-md"
             >
               <svg
@@ -95,6 +102,7 @@ const SuccessProjectPage: React.FC = () => {
             </button>
             <button
               type="button"
+              onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
               className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border border-dashed border-[#1D4ED8] text-[#1D4ED8] font-bold hover:bg-[#EEF2FF] transition-colors cursor-pointer text-sm"
             >
               <svg

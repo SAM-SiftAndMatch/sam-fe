@@ -67,7 +67,25 @@ const ConfirmProjectPage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate(PATH_CLIENT_SUCCESS_PROJECT)}
+              onClick={() => {
+                const newProject = {
+                  id: 'new_' + Date.now(),
+                  title: state.projectName || 'Dự án mới chưa đặt tên',
+                  status: 'open',
+                  budget: state.budgetAmount ? `${Number(state.budgetAmount).toLocaleString('vi-VN')} VND` : 'Thỏa thuận',
+                  proposalsCount: 0,
+                  createdAt: 'Vừa xong',
+                  code: 'ID_SAM' + new Date().getFullYear(),
+                  description: state.description || 'Chưa có mô tả chi tiết.',
+                  skills: state.selectedSkills || [],
+                  upgrades: state.upgrades || [],
+                };
+                
+                const existing = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
+                localStorage.setItem('SAM_USER_PROJECTS', JSON.stringify([newProject, ...existing]));
+
+                navigate(PATH_CLIENT_SUCCESS_PROJECT, { state: { newProjectId: newProject.id } });
+              }}
               className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold hover:opacity-90 shadow-md transition-opacity cursor-pointer text-sm border-0"
             >
               Xác nhận đăng dự án

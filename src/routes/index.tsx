@@ -14,6 +14,8 @@ import AIBriefPage from '../pages/AIBriefPage';
 import ConfirmProjectPage from '../pages/ConfirmProjectPage';
 import PostProjectPage from '../pages/PostProjectPage';
 import SuccessProjectPage from '../pages/SuccessProjectPage';
+import ClientProjectListPage from '../pages/ClientProjectListPage';
+import ClientProjectDetailPage from '../pages/ClientProjectDetailPage';
 
 import FreelancerPage from '../pages/FreelancerPage';
 import FreelancerPricingPage from '../pages/FreelancerPricingPage';
@@ -38,6 +40,8 @@ const AppRoutes = () => {
       <Route path={paths.PATH_CLIENT_AI_BRIEF} element={<AIBriefPage />} />
       <Route path={paths.PATH_CLIENT_CONFIRM_PROJECT} element={<ConfirmProjectPage />} />
       <Route path={paths.PATH_CLIENT_SUCCESS_PROJECT} element={<SuccessProjectPage />} />
+      <Route path={paths.PATH_CLIENT_PROJECTS} element={<ClientProjectListPage />} />
+      <Route path={paths.PATH_CLIENT_PROJECT_DETAIL} element={<ClientProjectDetailPage />} />
 
       <Route path={paths.PATH_FREELANCER} element={<FreelancerPage />} />
       <Route path={paths.PATH_FREELANCER_PRICING} element={<FreelancerPricingPage />} />

@@ -1,6 +1,8 @@
 import type React from 'react';
+import { useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
+import { PATH_CLIENT_PROJECTS } from '../routes/paths';
 
 // === MOCK DATA ===
 const STATS = [
@@ -100,6 +102,7 @@ const NOTIFICATIONS = [
 ];
 
 const ClientDashboardPage: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       {/* 1. Kế thừa Header riêng biệt */}
@@ -229,6 +232,7 @@ const ClientDashboardPage: React.FC = () => {
                 <h3 className="text-xl font-bold text-gray-900">Các yêu cầu nháp</h3>
                 <button
                   type="button"
+                  onClick={() => navigate(PATH_CLIENT_PROJECTS)}
                   className="text-xs font-bold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0"
                 >
                   Xem tất cả
@@ -298,6 +302,13 @@ const ClientDashboardPage: React.FC = () => {
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-xl font-bold text-gray-900">Lịch sử công việc</h3>
                 <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate(PATH_CLIENT_PROJECTS)}
+                    className="text-xs font-bold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0 mr-2"
+                  >
+                    Xem tất cả
+                  </button>
                   <button
                     type="button"
                     className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer"
