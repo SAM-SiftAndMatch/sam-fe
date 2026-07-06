@@ -1,8 +1,12 @@
-import PostProjectPage from './pages/PostProjectPage.tsx';
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './routes';
+
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
-      <PostProjectPage />
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
     </div>
   );
 }
