@@ -66,7 +66,7 @@ const SuccessProjectPage: React.FC = () => {
               </span>
               <span className="text-xs font-bold text-[#1D4ED8] flex items-center gap-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#1D4ED8] animate-pulse" />
-                Đang nhận đề xuất
+                Đang chờ đề xuất
               </span>
             </div>
           </div>

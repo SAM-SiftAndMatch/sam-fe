@@ -1,12 +1,22 @@
-import type React from 'react';
+import React, { useState, useEffect } from 'react';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import ClientDashboardHeader from '../components/ClientDashboardHeader';
 
 const WorkspacePage: React.FC = () => {
+  const [role, setRole] = useState<'client' | 'freelancer'>('client');
+
+  useEffect(() => {
+    const savedRole = localStorage.getItem('SAM_ROLE');
+    if (savedRole === 'freelancer') {
+      setRole('freelancer');
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      {/* 1. Kế thừa Header */}
-      <Header />
+      {/* 1. Kế thừa Header linh hoạt theo Role */}
+      {role === 'client' ? <ClientDashboardHeader /> : <Header />}
 
       {/* 2. Main Workspace Layout */}
       <main className="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6">
@@ -714,9 +724,6 @@ const WorkspacePage: React.FC = () => {
           </div>
         </aside>
       </main>
-
-      {/* 3. Kế thừa Footer (Tái sử dụng nguyên vẹn) */}
-      <Footer />
     </div>
   );
 };

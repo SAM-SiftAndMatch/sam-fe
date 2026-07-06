@@ -7,7 +7,7 @@ const GuestHeader: React.FC = () => {
       <div className="flex items-center gap-10">
         {/* Logo */}
         <Link
-          to={paths.PATH_HOME}
+          to={paths.PATH_CLIENT_DASHBOARD}
           className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer"
           style={{ fontFamily: "'Quedora', sans-serif" }}
         >

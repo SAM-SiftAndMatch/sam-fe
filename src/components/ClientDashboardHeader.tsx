@@ -1,43 +1,50 @@
 import type React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PATH_CLIENT_AI_BRIEF, PATH_CLIENT_PROJECTS } from '../routes/paths';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { PATH_CLIENT_AI_BRIEF, PATH_CLIENT_PROJECTS, PATH_WORKSPACES, PATH_CLIENT_FIND_FREELANCER, PATH_CLIENT_DASHBOARD } from '../routes/paths';
 
 const ClientDashboardHeader: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getNavClass = (path: string) => {
+    // Check if the current path starts with the given path (so /workspace/:id also matches /workspaces if we check carefully, but let's just use exact or prefix)
+    const isActive = location.pathname.startsWith(path);
+    return isActive
+      ? "text-sm font-bold bg-[#EEF2FF] text-[#1D4ED8] px-4 py-1.5 rounded-full cursor-pointer border-0 transition-colors"
+      : "text-sm font-medium text-gray-500 hover:text-[#0047FF] hover:bg-gray-50 px-4 py-1.5 rounded-full cursor-pointer bg-transparent border-0 transition-colors";
+  };
+
   return (
     <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
       <div className="flex items-center gap-10">
         <span
+          onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
           className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer"
           style={{ fontFamily: "'Quedora', sans-serif" }}
         >
           SAM
         </span>
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-2">
           <button
             type="button"
             onClick={() => navigate(PATH_CLIENT_PROJECTS)}
-            className="text-sm font-bold bg-[#EEF2FF] text-[#1D4ED8] px-4 py-1.5 rounded-full cursor-pointer border-0"
+            className={getNavClass(PATH_CLIENT_PROJECTS)}
           >
             Dự án
           </button>
           <button
             type="button"
-            className="text-sm font-medium text-gray-500 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0 transition-colors"
+            onClick={() => navigate(PATH_WORKSPACES)}
+            className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
           >
             Tin nhắn
           </button>
           <button
             type="button"
-            className="text-sm font-medium text-gray-500 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0 transition-colors"
+            onClick={() => navigate(PATH_CLIENT_FIND_FREELANCER)}
+            className={getNavClass(PATH_CLIENT_FIND_FREELANCER)}
           >
             Tìm Freelancer
-          </button>
-          <button
-            type="button"
-            className="text-sm font-medium text-gray-500 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0 transition-colors"
-          >
-            Cộng đồng
           </button>
         </nav>
       </div>

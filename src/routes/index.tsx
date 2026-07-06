@@ -22,7 +22,9 @@ import FreelancerPricingPage from '../pages/FreelancerPricingPage';
 
 import ApplyJobPage from '../pages/ApplyJobPage';
 import JobDetailPage from '../pages/JobDetailPage';
+import WorkspacesPage from '../pages/WorkspacesPage';
 import WorkspacePage from '../pages/WorkspacePage';
+import FindFreelancerPage from '../pages/FindFreelancerPage';
 
 const AppRoutes = () => {
   return (
@@ -42,15 +44,19 @@ const AppRoutes = () => {
       <Route path={paths.PATH_CLIENT_SUCCESS_PROJECT} element={<SuccessProjectPage />} />
       <Route path={paths.PATH_CLIENT_PROJECTS} element={<ClientProjectListPage />} />
       <Route path={paths.PATH_CLIENT_PROJECT_DETAIL} element={<ClientProjectDetailPage />} />
+      <Route path={paths.PATH_CLIENT_FIND_FREELANCER} element={<FindFreelancerPage />} />
 
       <Route path={paths.PATH_FREELANCER} element={<FreelancerPage />} />
       <Route path={paths.PATH_FREELANCER_PRICING} element={<FreelancerPricingPage />} />
 
       <Route path={paths.PATH_JOB_DETAIL} element={<JobDetailPage />} />
       <Route path={paths.PATH_JOB_APPLY} element={<ApplyJobPage />} />
+      <Route path={paths.PATH_WORKSPACES} element={<WorkspacesPage />} />
       <Route path={paths.PATH_WORKSPACE} element={<WorkspacePage />} />
     </Routes>
   );
 };
 
 export default AppRoutes;
+
+// Triggering TS Server update

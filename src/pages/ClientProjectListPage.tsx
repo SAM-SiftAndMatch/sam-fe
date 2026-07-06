@@ -64,9 +64,9 @@ const ClientProjectListPage: React.FC = () => {
     switch (status) {
       case 'open':
         return (
-          <span className="px-3 py-1 bg-blue-50 text-[#1D4ED8] rounded-full text-xs font-bold border border-blue-100 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-[#1D4ED8] rounded-full animate-pulse" />
-            Đang nhận báo giá
+          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 flex items-center gap-1.5 w-fit">
+            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+            Đang chờ đề xuất
           </span>
         );
       case 'in_progress':
@@ -120,7 +120,7 @@ const ClientProjectListPage: React.FC = () => {
             <div className="flex items-center gap-2 bg-white p-1.5 rounded-full border border-gray-200 shadow-sm overflow-x-auto w-full md:w-auto">
               {[
                 { id: 'all', label: 'Tất cả' },
-                { id: 'open', label: 'Đang mở' },
+                { id: 'open', label: 'Đang chờ' },
                 { id: 'in_progress', label: 'Đang thực hiện' },
                 { id: 'completed', label: 'Hoàn thành' },
               ].map((f) => (
@@ -128,11 +128,10 @@ const ClientProjectListPage: React.FC = () => {
                   key={f.id}
                   type="button"
                   onClick={() => setFilter(f.id as any)}
-                  className={`px-5 py-2 rounded-full text-sm font-bold transition-colors whitespace-nowrap cursor-pointer border-0 ${
-                    filter === f.id
+                  className={`px-5 py-2 rounded-full text-sm font-bold transition-colors whitespace-nowrap cursor-pointer border-0 ${filter === f.id
                       ? 'bg-[#1D4ED8] text-white shadow-md'
                       : 'bg-transparent text-gray-600 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {f.label}
                 </button>
@@ -182,7 +181,7 @@ const ClientProjectListPage: React.FC = () => {
               </div>
             </div>
           ))}
-          
+
           {filteredProjects.length === 0 && (
             <div className="col-span-1 md:col-span-2 py-20 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-dashed border-gray-200">
               <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-400">

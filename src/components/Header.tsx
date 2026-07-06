@@ -1,19 +1,37 @@
 import type React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { PATH_WORKSPACES, PATH_FREELANCER, PATH_CLIENT_DASHBOARD } from '../routes/paths';
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const getNavClass = (path: string, hasIcon: boolean = false) => {
+    // If we only have /freelancer as root, we should exact match, but let's just use startsWith for now with a fallback
+    const isActive = path === '/' ? location.pathname === path : location.pathname.startsWith(path);
+    const baseClass = "text-sm px-4 py-2 rounded-full cursor-pointer border-0 transition-colors";
+    const activeClass = "font-bold bg-[#EEF2FF] text-[#0047FF]";
+    const inactiveClass = "font-medium text-gray-600 hover:text-[#0047FF] hover:bg-gray-50 bg-transparent";
+    const iconClass = hasIcon ? "flex items-center gap-1" : "";
+    
+    return `${baseClass} ${isActive ? activeClass : inactiveClass} ${iconClass}`.trim();
+  };
+
   return (
     <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
       <div className="flex items-center gap-10">
         <span 
+          onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
           className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer"
           style={{ fontFamily: "'Quedora', sans-serif" }}
         >
           SAM
         </span>
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-2">
           <button
             type="button"
-            className="flex items-center gap-1 text-sm font-semibold bg-[#EEF2FF] text-[#0047FF] px-4 py-2 rounded-full cursor-pointer border-0"
+            onClick={() => navigate(PATH_FREELANCER)}
+            className={getNavClass(PATH_FREELANCER, true)}
           >
             Tìm việc
             <svg
@@ -30,19 +48,20 @@ const Header: React.FC = () => {
           </button>
           <button
             type="button"
-            className="text-sm font-medium text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0"
+            onClick={() => navigate(PATH_WORKSPACES)}
+            className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
           >
             Tin nhắn
           </button>
           <button
             type="button"
-            className="text-sm font-medium text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0"
+            className={getNavClass('/my-projects')}
           >
             Dự án của tôi
           </button>
           <button
             type="button"
-            className="text-sm font-medium text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0"
+            className={getNavClass('/income')}
           >
             Thu nhập
           </button>

@@ -48,6 +48,34 @@ const ClientProjectDetailPage: React.FC = () => {
   const { id } = useParams();
   const [project, setProject] = useState<any>(PROJECT_DETAIL);
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'open':
+        return (
+          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 flex items-center gap-1.5 w-fit">
+            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+            Đang chờ đề xuất
+          </span>
+        );
+      case 'in_progress':
+        return (
+          <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-xs font-bold border border-orange-100 flex items-center gap-1.5 w-fit">
+            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
+            Đang thực hiện
+          </span>
+        );
+      case 'completed':
+        return (
+          <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5 w-fit">
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+            Đã hoàn thành
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
     const found = saved.find((p: any) => p.id === id);
@@ -85,10 +113,7 @@ const ClientProjectDetailPage: React.FC = () => {
           <div className="lg:w-2/3 flex flex-col gap-6">
             <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
               <div className="flex justify-between items-start mb-4">
-                <span className="px-3 py-1 bg-blue-50 text-[#1D4ED8] rounded-full text-xs font-bold border border-blue-100 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-[#1D4ED8] rounded-full animate-pulse" />
-                  Đang nhận báo giá
-                </span>
+                {getStatusBadge(project.status)}
                 <span className="text-xs font-semibold text-gray-400">{project.createdAt}</span>
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">{project.title}</h1>
@@ -174,7 +199,7 @@ const ClientProjectDetailPage: React.FC = () => {
             <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Gói nâng cấp đã mua</h3>
               <div className="flex flex-col gap-3">
-                {project.upgrades.includes('featured') && (
+                {(Array.isArray(project.upgrades) ? project.upgrades : Object.keys(project.upgrades || {}).filter(k => project.upgrades[k])).includes('featured') && (
                   <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-xl border border-yellow-100">
                     <div className="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg>
@@ -185,7 +210,7 @@ const ClientProjectDetailPage: React.FC = () => {
                     </div>
                   </div>
                 )}
-                {project.upgrades.includes('urgent') && (
+                {(Array.isArray(project.upgrades) ? project.upgrades : Object.keys(project.upgrades || {}).filter(k => project.upgrades[k])).includes('urgent') && (
                   <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl border border-red-100">
                     <div className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -193,6 +218,19 @@ const ClientProjectDetailPage: React.FC = () => {
                     <div>
                       <div className="font-bold text-sm text-red-700">Tuyển gấp</div>
                       <div className="text-xs text-red-600">Thông báo đẩy tới Freelancers</div>
+                    </div>
+                  </div>
+                )}
+                {(Array.isArray(project.upgrades) ? project.upgrades : Object.keys(project.upgrades || {}).filter(k => project.upgrades[k])).includes('warranty') && (
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm text-blue-700">Gói Bảo Hành</div>
+                      <div className="text-xs text-blue-600">Đảm bảo hoàn tiền 100%</div>
                     </div>
                   </div>
                 )}

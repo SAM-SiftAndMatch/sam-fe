@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
-import { PATH_CLIENT_CONFIRM_PROJECT } from '../routes/paths';
+import { PATH_CLIENT_CONFIRM_PROJECT, PATH_CLIENT_AI_BRIEF } from '../routes/paths';
 
 // === MOCK DATA ===
 const SKILLS_SUGGESTION = [
@@ -153,6 +153,24 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
   const goToStep = (step: number) => setCurrentStep(step);
 
+  const [step1Errors, setStep1Errors] = useState({
+    projectName: false,
+    category: false,
+    description: false,
+  });
+
+  const handleNextStep1 = () => {
+    const errors = {
+      projectName: !projectName.trim(),
+      category: !category,
+      description: !description.trim(),
+    };
+    setStep1Errors(errors);
+    if (!errors.projectName && !errors.category && !errors.description) {
+      nextStep();
+    }
+  };
+
   // Component Render Thanh Tiến Trình (Stepper)
   const renderStepper = () => {
     const steps = [
@@ -184,7 +202,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 onClick={() => {
                   if (step.id <= highestStep) goToStep(step.id);
                 }}
-                className={`flex flex-col items-center gap-2 relative z-10 bg-[#F8FAFC] px-2 w-20 ${step.id <= highestStep ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'opacity-70 cursor-not-allowed'}`}
+                className={`flex flex-col items-center gap-2 relative z-10 bg-[#F8FAFC] px-2 w-20 ${step.id <= highestStep ? 'cursor-pointer hover:-translate-y-0.5 transition-transform' : 'cursor-not-allowed'}`}
               >
                 {isCompleted ? (
                   <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow-md">
@@ -243,7 +261,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
               </p>
             </div>
 
-            <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col gap-6" onSubmit={(e) => { e.preventDefault(); handleNextStep1(); }}>
               <div>
                 <label htmlFor="projectName" className="block text-sm font-bold text-gray-900 mb-2">
                   Tên dự án là gì? <span className="text-red-500">*</span>
@@ -252,10 +270,15 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   id="projectName"
                   type="text"
                   value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
+                  onChange={(e) => { setProjectName(e.target.value); setStep1Errors(p => ({ ...p, projectName: false })); }}
                   placeholder="Ví dụ: Thiết kế Website Landing Page cho Startup AI"
-                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-colors placeholder:text-gray-400"
+                  className={`w-full bg-white border rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-1 transition-colors placeholder:text-gray-400 ${
+                    step1Errors.projectName 
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                      : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
+                  }`}
                 />
+                {step1Errors.projectName && <p className="text-red-500 text-xs mt-1">Vui lòng nhập tên dự án</p>}
               </div>
 
               <div>
@@ -266,8 +289,12 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   <select
                     id="category"
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-white border border-gray-200 rounded-xl pl-4 pr-10 py-3 text-sm text-gray-800 appearance-none focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-colors cursor-pointer"
+                    onChange={(e) => { setCategory(e.target.value); setStep1Errors(p => ({ ...p, category: false })); }}
+                    className={`w-full bg-white border rounded-xl pl-4 pr-10 py-3 text-sm text-gray-800 appearance-none focus:outline-none focus:ring-1 transition-colors cursor-pointer ${
+                      step1Errors.category
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
+                    }`}
                   >
                     <option value="" disabled>
                       -- Chọn danh mục --
@@ -279,33 +306,45 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     <option value="data">Dữ liệu & Phân tích</option>
                   </select>
                   <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      role="img"
-                      aria-label="Chevron Down"
-                    >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
                   </div>
                 </div>
+                {step1Errors.category && <p className="text-red-500 text-xs mt-1">Vui lòng chọn danh mục</p>}
               </div>
 
               <div>
                 <label htmlFor="description" className="block text-sm font-bold text-gray-900 mb-2">
                   Mô tả chi tiết yêu cầu <span className="text-red-500">*</span>
                 </label>
-                <textarea
-                  id="description"
-                  rows={15}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Mô tả công việc, mục tiêu và bất kỳ yêu cầu cụ thể nào..."
-                  className="w-full bg-white border border-gray-200 rounded-xl p-4 text-sm text-gray-800 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-colors resize-none placeholder:text-gray-400"
-                />
+                <div className="relative">
+                  <textarea
+                    id="description"
+                    rows={6}
+                    value={description}
+                    onChange={(e) => { setDescription(e.target.value); setStep1Errors(p => ({ ...p, description: false })); }}
+                    placeholder="Mô tả các tính năng cần có, công nghệ yêu cầu, hoặc bất kỳ thông tin nào giúp chuyên gia hiểu rõ dự án của bạn..."
+                    className={`w-full bg-white border rounded-xl p-4 text-sm text-gray-800 focus:outline-none focus:ring-1 transition-colors placeholder:text-gray-400 resize-none ${
+                      step1Errors.description
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
+                    }`}
+                  />
+                  <div className="absolute bottom-4 right-4 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => navigate(PATH_CLIENT_AI_BRIEF)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 text-blue-600 rounded-lg text-xs font-bold hover:shadow-sm transition-all group cursor-pointer"
+                    >
+                      <svg className="w-4 h-4 group-hover:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Dùng SAM AI
+                    </button>
+                  </div>
+                </div>
+                {step1Errors.description && <p className="text-red-500 text-xs mt-1">Vui lòng nhập mô tả chi tiết dự án</p>}
               </div>
 
               {/* 
@@ -414,9 +453,8 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
 
               <div className="flex justify-end pt-4 border-t border-gray-100">
                 <button
-                  type="button"
-                  onClick={nextStep}
-                  className="bg-[#0AAAD7] hover:bg-[#0896BD] text-white text-sm font-bold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border-0"
+                  type="submit"
+                  className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border-0"
                 >
                   Tiếp tục đến bước 2
                   <svg
@@ -701,7 +739,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="bg-[#1D4ED8] hover:bg-[#153bb5] text-white text-sm font-bold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border-0"
+                    className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border-0"
                   >
                     Tiếp tục đến bước 3
                     <svg
@@ -911,7 +949,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="w-full md:w-auto bg-[#0AAAD7] hover:bg-[#0896BD] text-white text-sm font-bold px-8 py-3.5 rounded-full shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
+                  className="w-full md:w-auto bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-8 py-3.5 rounded-full shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
                 >
                   Tiếp tục đến bước 4
                   <svg
