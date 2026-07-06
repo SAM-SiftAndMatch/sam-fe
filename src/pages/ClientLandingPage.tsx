@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import GuestHeader from '../components/GuestHeader';
 import * as paths from '../routes/paths';
+import FooterDashboard from '@/components/FooterDashboard';
 
 const CATEGORIES = [
   {
@@ -89,11 +90,18 @@ const ClientLandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       {/* HEADER */}
-      <GuestHeader />
+      <GuestHeader 
+        navItems={[
+          { label: 'Tổng quan', id: 'hero' },
+          { label: 'Lĩnh vực', id: 'categories' },
+          { label: 'Quy trình', id: 'process' },
+          { label: 'Dịch vụ', id: 'pricing' }
+        ]} 
+      />
 
       <main className="flex-1 w-full flex flex-col items-center">
         {/* ================= HERO SECTION ================= */}
-        <section className="w-full relative pt-20 pb-16 px-4 flex flex-col items-center text-center overflow-hidden">
+        <section id="hero" className="w-full relative pt-20 pb-16 px-4 flex flex-col items-center text-center overflow-hidden">
           {/* Background Blur */}
           <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-[#0AAAD7]/20 to-[#1D4ED8]/10 blur-[100px] rounded-full pointer-events-none" />
 
@@ -206,7 +214,7 @@ const ClientLandingPage: React.FC = () => {
         </section>
 
         {/* ================= CATEGORIES SECTION ================= */}
-        <section className="w-full max-w-6xl mx-auto px-4 py-16">
+        <section id="categories" className="w-full max-w-6xl mx-auto px-4 py-16">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Lĩnh vực phổ biến</h2>
@@ -258,7 +266,7 @@ const ClientLandingPage: React.FC = () => {
         </section>
 
         {/* ================= PROCESS SECTION ================= */}
-        <section className="w-full bg-gradient-to-b from-white to-[#F4F7FF] py-20 px-4 relative overflow-hidden">
+        <section id="process" className="w-full bg-gradient-to-b from-white to-[#F4F7FF] py-20 px-4 relative overflow-hidden">
           <div className="max-w-5xl mx-auto text-center relative z-10">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
               Quy trình tuyển dụng thông minh
@@ -308,7 +316,7 @@ const ClientLandingPage: React.FC = () => {
         </section>
 
         {/* ================= PRICING SECTION (Tái sử dụng HTML Bảng giá) ================= */}
-        <section className="w-full max-w-5xl mx-auto px-4 py-20 flex flex-col items-center">
+        <section id="pricing" className="w-full max-w-5xl mx-auto px-4 py-20 flex flex-col items-center">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Gói dịch vụ linh hoạt</h2>
             <p className="text-gray-500 text-sm">
@@ -625,7 +633,7 @@ const ClientLandingPage: React.FC = () => {
       </main>
 
       {/* FOOTER */}
-      <Footer />
+      <FooterDashboard />
     </div>
   );
 };
