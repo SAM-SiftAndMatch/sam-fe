@@ -42,7 +42,7 @@ const PostProjectPage: React.FC = () => {
     upgrades: initialUpgrades = { featured: false, urgent: false, warranty: true },
     restoreStep = 1
   } = (location.state as LocationState) || {};
-  const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
+  const [selectedTags] = useState<string[]>(initialTags);
 
   // Quản lý Step hiện tại (1 -> 4)
   const [currentStep, setCurrentStep] = useState(restoreStep);

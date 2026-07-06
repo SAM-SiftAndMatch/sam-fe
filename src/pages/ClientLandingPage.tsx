@@ -1,6 +1,5 @@
 import type React from 'react';
 import { Link } from 'react-router-dom';
-import Footer from '../components/Footer';
 import GuestHeader from '../components/GuestHeader';
 import * as paths from '../routes/paths';
 import FooterDashboard from '@/components/FooterDashboard';

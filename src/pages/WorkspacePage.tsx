@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Footer from '../components/Footer';
 import Header from '../components/Header';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 

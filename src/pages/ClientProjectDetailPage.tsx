@@ -130,7 +130,7 @@ const ClientProjectDetailPage: React.FC = () => {
 
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-3">Kỹ năng yêu cầu</h3>
               <div className="flex flex-wrap gap-2 mb-6">
-                {project.skills.map((skill, index) => (
+                {project.skills.map((skill: string, index: number) => (
                   <span key={index} className="px-4 py-2 bg-gray-50 text-gray-700 rounded-full text-xs font-bold border border-gray-200">
                     {skill}
                   </span>
