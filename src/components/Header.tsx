@@ -2,10 +2,9 @@ import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  PATH_CLIENT_DASHBOARD,
-  PATH_FREELANCER_JOBS,
-  PATH_FREELANCER_APPLICATIONS,
   PATH_FREELANCER,
+  PATH_FREELANCER_APPLICATIONS,
+  PATH_FREELANCER_JOBS,
   PATH_LOGIN,
   PATH_WORKSPACES,
 } from '../routes/paths';
@@ -46,7 +45,7 @@ const Header: React.FC = () => {
           onClick={() => navigate(PATH_FREELANCER)}
           className="flex items-center gap-1 cursor-pointer group"
         >
-          <div 
+          <div
             className="text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300"
             style={{ fontFamily: "'Quedora', sans-serif" }}
           >
@@ -58,33 +57,33 @@ const Header: React.FC = () => {
       {/* Navigation - Center */}
       <nav className="hidden md:flex items-center justify-center gap-2 flex-1">
         <button
-            type="button"
-            onClick={() => navigate(PATH_FREELANCER_JOBS)}
-            className={getNavClass(PATH_FREELANCER_JOBS, true)}
-          >
-            Tìm việc
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate(PATH_FREELANCER_APPLICATIONS)}
-            className={getNavClass(PATH_FREELANCER_APPLICATIONS)}
-          >
-            Chờ phản hồi
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate(PATH_WORKSPACES, { state: { role: 'freelancer' } })}
-            className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
-          >
-            Tin nhắn
-          </button>
-          <button type="button" className={getNavClass('/my-projects')}>
-            Dự án của tôi
-          </button>
-          <button type="button" className={getNavClass('/income')}>
-            Thu nhập
-          </button>
-        </nav>
+          type="button"
+          onClick={() => navigate(PATH_FREELANCER_JOBS)}
+          className={getNavClass(PATH_FREELANCER_JOBS, true)}
+        >
+          Tìm việc
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(PATH_FREELANCER_APPLICATIONS)}
+          className={getNavClass(PATH_FREELANCER_APPLICATIONS)}
+        >
+          Chờ phản hồi
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(PATH_WORKSPACES, { state: { role: 'freelancer' } })}
+          className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
+        >
+          Tin nhắn
+        </button>
+        <button type="button" className={getNavClass('/my-projects')}>
+          Dự án của tôi
+        </button>
+        <button type="button" className={getNavClass('/income')}>
+          Thu nhập
+        </button>
+      </nav>
 
       {/* Actions - Right */}
       <div className="flex-1 flex items-center justify-end gap-5">

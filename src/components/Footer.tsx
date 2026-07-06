@@ -5,7 +5,7 @@ const Footer: React.FC = () => {
     <footer className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-5 sm:px-12 py-6 sm:py-10 bg-white gap-6 sm:gap-0 border-t border-gray-100 mt-auto">
       {/* Phần bên trái: Logo và Bản quyền */}
       <div className="flex flex-col gap-2">
-        <div 
+        <div
           className="w-fit text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7]"
           style={{ fontFamily: "'Quedora', sans-serif" }}
         >

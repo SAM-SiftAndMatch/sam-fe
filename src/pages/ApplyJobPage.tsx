@@ -1,10 +1,10 @@
 import type React from 'react';
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import { PATH_JOB_APPLY_SUCCESS } from '../routes/paths';
 import { MOCK_JOBS } from './FreelancerJobsPage';
-import { PATH_JOB_APPLY_SUCCESS, PATH_FREELANCER_APPLICATIONS } from '../routes/paths';
 
 const ApplyJobPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -52,9 +52,7 @@ const ApplyJobPage: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-[#E2E8F0]">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                  {job.title}
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900 mb-4">{job.title}</h1>
                 <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-500">
                   <div className="flex items-center gap-1.5">
                     <svg
@@ -166,8 +164,18 @@ const ApplyJobPage: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-[#E2E8F0]">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 bg-[#EEF2FF] text-[#1D4ED8] rounded-xl flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+                  />
                 </svg>
               </div>
               <div>
@@ -175,7 +183,9 @@ const ApplyJobPage: React.FC = () => {
                   Đính kèm Hồ sơ Cá nhân tự động
                 </h3>
                 <p className="text-xs text-gray-500 leading-relaxed">
-                  Hồ sơ cá nhân SAM của bạn (bao gồm Kinh nghiệm làm việc, Kỹ năng và các Chứng chỉ) sẽ tự động được gửi kèm cho Khách hàng cùng với Thư ứng tuyển này. Bạn không cần phải tải lại file CV.
+                  Hồ sơ cá nhân SAM của bạn (bao gồm Kinh nghiệm làm việc, Kỹ năng và các Chứng chỉ)
+                  sẽ tự động được gửi kèm cho Khách hàng cùng với Thư ứng tuyển này. Bạn không cần
+                  phải tải lại file CV.
                 </p>
               </div>
             </div>

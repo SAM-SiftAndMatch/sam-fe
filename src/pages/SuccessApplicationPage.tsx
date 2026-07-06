@@ -1,12 +1,11 @@
 import type React from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import Header from '../components/Header';
+import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
+import Header from '../components/Header';
 import { PATH_FREELANCER_APPLICATIONS, PATH_FREELANCER_JOBS } from '../routes/paths';
 
 const SuccessApplicationPage: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
@@ -44,7 +43,8 @@ const SuccessApplicationPage: React.FC = () => {
             Gửi hồ sơ ứng tuyển thành công
           </h1>
           <p className="text-gray-500 text-sm leading-relaxed mb-10">
-            Hồ sơ của bạn đã được gửi đến khách hàng. Khách hàng sẽ xem xét và phản hồi trong thời gian sớm nhất.
+            Hồ sơ của bạn đã được gửi đến khách hàng. Khách hàng sẽ xem xét và phản hồi trong thời
+            gian sớm nhất.
           </p>
 
           <div className="flex flex-col gap-3 w-full">

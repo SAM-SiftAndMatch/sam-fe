@@ -56,7 +56,7 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className="flex items-center gap-1 cursor-pointer group"
         >
-          <div 
+          <div
             className="text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300"
             style={{ fontFamily: "'Quedora', sans-serif" }}
           >

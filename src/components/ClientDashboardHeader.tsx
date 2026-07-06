@@ -42,7 +42,7 @@ const ClientDashboardHeader: React.FC = () => {
           onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
           className="flex items-center gap-1 cursor-pointer group"
         >
-          <div 
+          <div
             className="text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300"
             style={{ fontFamily: "'Quedora', sans-serif" }}
           >
@@ -54,27 +54,27 @@ const ClientDashboardHeader: React.FC = () => {
       {/* Navigation - Center */}
       <nav className="hidden md:flex items-center justify-center gap-2 flex-1">
         <button
-            type="button"
-            onClick={() => navigate(PATH_CLIENT_PROJECTS)}
-            className={getNavClass(PATH_CLIENT_PROJECTS)}
-          >
-            Dự án
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate(PATH_WORKSPACES, { state: { role: 'client' } })}
-            className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
-          >
-            Tin nhắn
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate(PATH_CLIENT_FIND_FREELANCER)}
-            className={getNavClass(PATH_CLIENT_FIND_FREELANCER)}
-          >
-            Tìm Freelancer
-          </button>
-        </nav>
+          type="button"
+          onClick={() => navigate(PATH_CLIENT_PROJECTS)}
+          className={getNavClass(PATH_CLIENT_PROJECTS)}
+        >
+          Dự án
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(PATH_WORKSPACES, { state: { role: 'client' } })}
+          className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
+        >
+          Tin nhắn
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(PATH_CLIENT_FIND_FREELANCER)}
+          className={getNavClass(PATH_CLIENT_FIND_FREELANCER)}
+        >
+          Tìm Freelancer
+        </button>
+      </nav>
 
       {/* Actions - Right */}
       <div className="flex-1 flex items-center justify-end gap-5">

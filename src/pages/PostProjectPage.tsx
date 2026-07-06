@@ -363,7 +363,6 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                         : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
                     }`}
                   />
-
                 </div>
                 {step1Errors.description && (
                   <p className="text-red-500 text-xs mt-1">Vui lòng nhập mô tả chi tiết dự án</p>
