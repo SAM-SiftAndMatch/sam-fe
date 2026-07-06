@@ -56,7 +56,7 @@ const LoginPage: React.FC = () => {
       <div className="bg-white rounded-[32px] shadow-xl border border-gray-100 flex max-w-5xl w-full overflow-hidden min-h-[600px]">
         {/* Left Pane: Gradient Banner */}
         <div className="hidden md:flex md:w-5/12 bg-gradient-to-br from-[#00A3FF] via-[#1A83FF] to-[#1D4ED8] p-12 flex-col justify-start text-white relative">
-          <div className="text-4xl font-black tracking-tighter mb-6" style={{ fontFamily: "'Quedora', sans-serif" }}>SAM</div>
+          <div className="text-4xl font-black tracking-tighter mb-4" style={{ fontFamily: "'Quedora', sans-serif" }}>SAM</div>
           <p className="text-lg font-medium leading-relaxed opacity-90 max-w-xs">
             Kiến tạo tương lai cho việc kết nối khách hàng và freelancer
           </p>
@@ -65,11 +65,11 @@ const LoginPage: React.FC = () => {
         </div>
 
         {/* Right Pane: Form Đăng Nhập */}
-        <div className="w-full md:w-7/12 p-8 md:p-14 flex flex-col justify-center bg-white">
+        <div className="w-full md:w-7/12 p-4 md:p-8 flex flex-col justify-center bg-white">
           <h2 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
             Chào mừng quay trở lại
           </h2>
-          <p className="text-gray-500 text-sm mb-8 leading-relaxed max-w-md">
+          <p className="text-gray-500 text-sm mb-4 leading-relaxed max-w-md">
             Đăng nhập vào không gian làm việc SAM của bạn để tiếp tục kết nối.
           </p>
 
