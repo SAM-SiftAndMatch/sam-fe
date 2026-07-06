@@ -5,7 +5,7 @@ import Footer from '../components/FooterDashboard';
 import * as paths from '../routes/paths';
 
 // Lấy mock data phù hợp với developer & văn phòng
-const MOCK_JOBS = [
+export const MOCK_JOBS = [
   {
     id: 1,
     type: 'KỸ SƯ PHẦN MỀM',
@@ -13,6 +13,17 @@ const MOCK_JOBS = [
     price: '5.000.000đ - 10.000.000đ',
     tags: ['Next.js', 'Node.js', 'VNPay API'],
     postedAt: '2 giờ trước',
+    description: 'Chúng tôi đang cần tích hợp cổng thanh toán VNPay vào hệ thống website thương mại điện tử viết bằng Next.js và Node.js. Website hiện đã hoàn thiện UI và giỏ hàng, chỉ cần xử lý quy trình thanh toán, webhook và xác thực giao dịch.',
+    scope: [
+      'Nghiên cứu tài liệu API của VNPay.',
+      'Tạo URL thanh toán và xử lý redirect từ phía client.',
+      'Viết API Node.js để nhận Webhook (IPN) từ VNPay và cập nhật trạng thái đơn hàng.',
+      'Kiểm thử trên môi trường Sandbox của VNPay.'
+    ],
+    projectType: 'Dự án ngắn hạn',
+    experience: 'Middle (2+ năm)',
+    duration: '1 - 2 tuần',
+    languages: 'Tiếng Việt'
   },
   {
     id: 2,
@@ -21,6 +32,16 @@ const MOCK_JOBS = [
     price: '3.500.000đ',
     tags: ['Dịch thuật', 'Tiếng Anh', 'Word'],
     postedAt: '4 giờ trước',
+    description: 'Dự án cần dịch thuật một bộ hợp đồng kinh tế và các phụ lục từ tiếng Việt sang tiếng Anh. Yêu cầu dịch thuật chính xác các thuật ngữ pháp lý và thương mại quốc tế, văn phong chuẩn doanh nghiệp.',
+    scope: [
+      'Dịch 50 trang tài liệu A4 (khoảng 15,000 từ).',
+      'Đảm bảo format Word giữ nguyên so với bản gốc.',
+      'Chỉnh sửa (revise) 1-2 lần theo phản hồi của luật sư công ty.'
+    ],
+    projectType: 'Dự án ngắn hạn',
+    experience: 'Chuyên gia (3+ năm)',
+    duration: '10 ngày',
+    languages: 'Tiếng Việt, Tiếng Anh'
   },
   {
     id: 3,
@@ -29,6 +50,17 @@ const MOCK_JOBS = [
     price: '2.000.000đ',
     tags: ['Python', 'Data Crawling', 'BeautifulSoup'],
     postedAt: '1 ngày trước',
+    description: 'Cần viết một công cụ bằng Python (dùng BeautifulSoup hoặc Selenium) để tự động crawl dữ liệu giá cả, khối lượng giao dịch từ 3 trang web tài chính lớn của Việt Nam và xuất ra file CSV mỗi ngày.',
+    scope: [
+      'Viết script thu thập dữ liệu theo các mã cổ phiếu được chỉ định.',
+      'Xử lý CAPTCHA hoặc block IP (nếu có) bằng proxy.',
+      'Lên lịch tự động chạy script vào 15:30 mỗi ngày (Cron job).',
+      'Định dạng đầu ra là file CSV chuẩn.'
+    ],
+    projectType: 'Dự án ngắn hạn',
+    experience: 'Junior (1+ năm)',
+    duration: 'Dưới 1 tuần',
+    languages: 'Tiếng Việt'
   },
   {
     id: 4,
@@ -37,6 +69,16 @@ const MOCK_JOBS = [
     price: '1.500.000đ - 2.500.000đ',
     tags: ['Excel', 'Nhập liệu', 'Kế toán'],
     postedAt: '1 ngày trước',
+    description: 'Chúng tôi có một kho hình ảnh chụp 5000 tờ hóa đơn VAT (bản cứng). Cần tìm một bạn Freelancer cẩn thận để nhập thông tin (Mã số thuế, tên công ty, số tiền, ngày tháng) vào file Excel theo biểu mẫu cung cấp sẵn.',
+    scope: [
+      'Đọc thông tin từ file ảnh/PDF.',
+      'Nhập liệu chính xác 100% vào các cột Excel quy định.',
+      'Kiểm tra lại (double-check) để tránh sai sót chữ số.'
+    ],
+    projectType: 'Dự án ngắn hạn',
+    experience: 'Chưa có kinh nghiệm',
+    duration: '2 - 3 tuần',
+    languages: 'Tiếng Việt'
   },
   {
     id: 5,
@@ -45,6 +87,17 @@ const MOCK_JOBS = [
     price: '30.000.000đ - 50.000.000đ',
     tags: ['Golang', 'Docker', 'K8s'],
     postedAt: '2 ngày trước',
+    description: 'Hệ thống Backend của chúng tôi đang chạy trên kiến trúc Microservices viết bằng Golang và deploy trên Kubernetes. Cần tìm một Senior Backend Engineer để tối ưu hóa performance, fix một số memory leak và thiết lập CI/CD pipeline chuẩn.',
+    scope: [
+      'Review lại toàn bộ code base của 4 core services.',
+      'Tối ưu hóa query Database (PostgreSQL) và caching (Redis).',
+      'Viết lại Dockerfile để giảm dung lượng image.',
+      'Hỗ trợ thiết lập monitor bằng Prometheus/Grafana.'
+    ],
+    projectType: 'Dự án dài hạn',
+    experience: 'Senior (5+ năm)',
+    duration: '3 - 6 tháng',
+    languages: 'Tiếng Việt, Tiếng Anh'
   }
 ];
 
@@ -149,7 +202,11 @@ const FreelancerJobsPage: React.FC = () => {
           <div className="space-y-4">
             {filteredJobs.length > 0 ? (
               filteredJobs.map(job => (
-                <div key={job.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-[#3B82F6] hover:shadow-md transition-all group cursor-pointer flex flex-col md:flex-row md:items-start gap-4">
+                <div 
+                  key={job.id} 
+                  onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', job.id.toString()))}
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-[#3B82F6] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all group cursor-pointer flex flex-col md:flex-row md:items-start gap-4"
+                >
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs font-bold text-[#3B82F6] bg-blue-50 px-2 py-1 rounded-md">
@@ -160,10 +217,7 @@ const FreelancerJobsPage: React.FC = () => {
                       </span>
                     </div>
                     
-                    <h3 
-                      onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', job.id.toString()))}
-                      className="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#3B82F6] transition-colors"
-                    >
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#1D4ED8] transition-colors">
                       {job.title}
                     </h3>
                     

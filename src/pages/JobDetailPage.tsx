@@ -1,45 +1,56 @@
 import type React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import { MOCK_JOBS } from './FreelancerJobsPage';
 
 const JobDetailPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  // Use first job as fallback if not found
+  const job = MOCK_JOBS.find((j) => j.id.toString() === id) || MOCK_JOBS[0];
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <Header />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-10 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* ================= CỘT TRÁI ================= */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-10 py-10">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="flex items-center gap-2 text-gray-500 hover:text-[#1D4ED8] mb-6 font-semibold transition-colors bg-transparent border-none cursor-pointer p-0"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Quay lại
+        </button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* ================= CỘT TRÁI ================= */}
         <div className="lg:col-span-8 flex flex-col gap-8">
           <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-snug mb-4">
-              Phát triển Hệ thống Chatbot AI đa ngôn ngữ cho E-commerce
+              {job.title}
             </h1>
 
             <div className="flex flex-wrap gap-2 mb-8">
-              <span className="text-xs font-semibold text-[#1D4ED8] bg-[#EEF2FF] px-3 py-1.5 rounded-full">
-                AI & ML
-              </span>
-              <span className="text-xs font-semibold text-[#1D4ED8] bg-[#EEF2FF] px-3 py-1.5 rounded-full">
-                Python
-              </span>
-              <span className="text-xs font-semibold text-[#1D4ED8] bg-[#EEF2FF] px-3 py-1.5 rounded-full">
-                NLP
-              </span>
+              {job.tags.map((tag) => (
+                <span key={tag} className="text-xs font-semibold text-[#1D4ED8] bg-[#EEF2FF] px-3 py-1.5 rounded-full">
+                  {tag}
+                </span>
+              ))}
             </div>
 
             <h2 className="text-lg font-bold text-gray-900 mb-3">Mô tả dự án</h2>
             <p className="text-gray-600 text-sm leading-relaxed mb-6">
-              Chúng tôi đang tìm kiếm một chuyên gia AI/ML để xây dựng một giải pháp chatbot thế hệ
-              mới. Hệ thống cần có khả năng hiểu ngữ cảnh sâu sắc, hỗ trợ khách hàng mua sắm trực
-              tuyến trên nền tảng thương mại điện tử quốc tế.
+              {job.description || 'Đang cập nhật mô tả...'}
             </p>
 
             <h2 className="text-lg font-bold text-gray-900 mb-3">Phạm vi công việc:</h2>
             <ul className="list-disc pl-5 text-gray-600 text-sm leading-relaxed mb-10 space-y-2">
-              <li>Xây dựng mô hình NLP tối ưu hóa cho tiếng Việt, tiếng Anh và tiếng Thái.</li>
-              <li>Tích hợp với API của các nền tảng Shopify và Magento.</li>
-              <li>Thiết kế hệ thống lưu trữ và truy xuất dữ liệu sản phẩm theo thời gian thực.</li>
-              <li>Tối ưu hóa tốc độ phản hồi dưới 2 giây.</li>
+              {(job.scope || []).map((item: string, index: number) => (
+                <li key={index}>{item}</li>
+              ))}
             </ul>
 
             <button
@@ -75,7 +86,7 @@ const JobDetailPage: React.FC = () => {
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                   Thời hạn
                 </span>
-                <span className="text-sm font-bold text-gray-900">3 tháng (Dự án)</span>
+                <span className="text-sm font-bold text-gray-900">{job.duration || 'Thỏa thuận'}</span>
               </div>
 
               <div className="bg-[#F8FAFC] p-4 rounded-2xl flex flex-col items-start gap-2 border border-gray-100">
@@ -97,7 +108,7 @@ const JobDetailPage: React.FC = () => {
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                   Kỹ năng
                 </span>
-                <span className="text-sm font-bold text-gray-900">PyTorch, LLM, LangChain</span>
+                <span className="text-sm font-bold text-gray-900">{job.tags?.join(', ')}</span>
               </div>
 
               <div className="bg-[#F8FAFC] p-4 rounded-2xl flex flex-col items-start gap-2 border border-gray-100">
@@ -119,7 +130,7 @@ const JobDetailPage: React.FC = () => {
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                   Cấp độ
                 </span>
-                <span className="text-sm font-bold text-gray-900">Senior / Expert</span>
+                <span className="text-sm font-bold text-gray-900">{job.experience || 'Tùy chọn'}</span>
               </div>
 
               <div className="bg-[#F8FAFC] p-4 rounded-2xl flex flex-col items-start gap-2 border border-gray-100">
@@ -141,7 +152,7 @@ const JobDetailPage: React.FC = () => {
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                   Ngôn ngữ
                 </span>
-                <span className="text-sm font-bold text-gray-900">Tiếng Anh & Việt</span>
+                <span className="text-sm font-bold text-gray-900">{job.languages || 'Tiếng Việt'}</span>
               </div>
             </div>
           </section>
@@ -332,7 +343,7 @@ const JobDetailPage: React.FC = () => {
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
                     Ngân sách
                   </div>
-                  <div className="text-xl font-black text-[#1D4ED8]">₫25M - ₫40M</div>
+                  <div className="text-xl font-black text-[#1D4ED8]">{job.price}</div>
                 </div>
               </div>
 
@@ -505,6 +516,7 @@ const JobDetailPage: React.FC = () => {
               Liên hệ khách hàng
             </button>
           </section>
+        </div>
         </div>
       </main>
 
