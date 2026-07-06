@@ -1,5 +1,7 @@
 import type React from 'react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import * as paths from '../routes/paths';
 
 const RegisterPage: React.FC = () => {
   const [accountType, setAccountType] = useState<'client' | 'freelancer'>('client');
@@ -30,14 +32,26 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center font-sans py-10 px-4">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center font-sans py-10 px-4 relative">
+      <Link
+        to={paths.PATH_HOME}
+        className="absolute top-6 left-6 md:top-10 md:left-10 text-sm font-bold text-gray-500 hover:text-[#1D4ED8] transition-colors flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Về trang chủ
+      </Link>
       {/* Main Card */}
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-[520px] p-8 md:p-10 border border-gray-100">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center items-center mb-4">
             {/* Logo SAM (Gradient text mockup) */}
-            <span className="text-[40px] font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF]">
+            <span
+              className="text-[40px] font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF]"
+              style={{ fontFamily: "'Quedora', sans-serif" }}
+            >
               SAM
             </span>
           </div>
@@ -315,12 +329,12 @@ const RegisterPage: React.FC = () => {
       {/* Under Card Links */}
       <div className="mt-8 text-center text-sm text-gray-600">
         Đã có tài khoản?{' '}
-        <button
-          type="button"
+        <Link
+          to={paths.PATH_LOGIN}
           className="text-[#0047FF] font-medium hover:underline cursor-pointer bg-transparent border-0 p-0"
         >
           Đăng nhập ngay
-        </button>
+        </Link>
       </div>
 
       {/* Trust Badges & Copyright Footer */}

@@ -8,7 +8,10 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">
           {/* Cột 1: Logo & Thông tin */}
           <div className="flex flex-col items-start col-span-1">
-            <span className="text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] mb-4">
+            <span
+              className="text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] mb-4"
+              style={{ fontFamily: "'Quedora', sans-serif" }}
+            >
               SAM
             </span>
             <p className="text-gray-500 text-sm leading-relaxed mb-6">

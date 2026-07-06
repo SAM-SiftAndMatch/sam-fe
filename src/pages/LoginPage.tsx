@@ -56,7 +56,7 @@ const LoginPage: React.FC = () => {
       <div className="bg-white rounded-[32px] shadow-xl border border-gray-100 flex max-w-5xl w-full overflow-hidden min-h-[600px]">
         {/* Left Pane: Gradient Banner */}
         <div className="hidden md:flex md:w-5/12 bg-gradient-to-br from-[#00A3FF] via-[#1A83FF] to-[#1D4ED8] p-12 flex-col justify-start text-white relative">
-          <div className="text-4xl font-black tracking-tighter mb-6">SAM</div>
+          <div className="text-4xl font-black tracking-tighter mb-6" style={{ fontFamily: "'Quedora', sans-serif" }}>SAM</div>
           <p className="text-lg font-medium leading-relaxed opacity-90 max-w-xs">
             Kiến tạo tương lai cho việc kết nối khách hàng và freelancer
           </p>

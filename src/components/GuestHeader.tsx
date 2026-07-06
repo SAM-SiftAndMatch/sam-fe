@@ -6,9 +6,13 @@ const GuestHeader: React.FC = () => {
     <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
       <div className="flex items-center gap-10">
         {/* Logo */}
-        <span className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer">
+        <Link
+          to={paths.PATH_HOME}
+          className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer"
+          style={{ fontFamily: "'Quedora', sans-serif" }}
+        >
           SAM
-        </span>
+        </Link>
 
         {/* Navigation Center */}
         <nav className="hidden md:flex items-center gap-8">
