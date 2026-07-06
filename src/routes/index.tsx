@@ -21,8 +21,12 @@ import FreelancerPage from '../pages/FreelancerPage';
 import FreelancerPricingPage from '../pages/FreelancerPricingPage';
 
 import ApplyJobPage from '../pages/ApplyJobPage';
+import CreateFreelancerProfilePage from '../pages/CreateFreelancerProfilePage';
 import FindFreelancerPage from '../pages/FindFreelancerPage';
+import FreelancerApplicationsPage from '../pages/FreelancerApplicationsPage';
+import FreelancerJobsPage from '../pages/FreelancerJobsPage';
 import JobDetailPage from '../pages/JobDetailPage';
+import SuccessApplicationPage from '../pages/SuccessApplicationPage';
 import WorkspacePage from '../pages/WorkspacePage';
 import WorkspacesPage from '../pages/WorkspacesPage';
 
@@ -48,9 +52,16 @@ const AppRoutes = () => {
 
       <Route path={paths.PATH_FREELANCER} element={<FreelancerPage />} />
       <Route path={paths.PATH_FREELANCER_PRICING} element={<FreelancerPricingPage />} />
+      <Route path={paths.PATH_FREELANCER_JOBS} element={<FreelancerJobsPage />} />
+      <Route
+        path={paths.PATH_FREELANCER_CREATE_PROFILE}
+        element={<CreateFreelancerProfilePage />}
+      />
+      <Route path={paths.PATH_FREELANCER_APPLICATIONS} element={<FreelancerApplicationsPage />} />
 
       <Route path={paths.PATH_JOB_DETAIL} element={<JobDetailPage />} />
       <Route path={paths.PATH_JOB_APPLY} element={<ApplyJobPage />} />
+      <Route path={paths.PATH_JOB_APPLY_SUCCESS} element={<SuccessApplicationPage />} />
       <Route path={paths.PATH_WORKSPACES} element={<WorkspacesPage />} />
       <Route path={paths.PATH_WORKSPACE} element={<WorkspacePage />} />
     </Routes>

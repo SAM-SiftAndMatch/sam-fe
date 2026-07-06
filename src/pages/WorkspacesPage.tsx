@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
@@ -44,14 +44,21 @@ const WORKSPACES = [
 
 const WorkspacesPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [role, setRole] = useState<'client' | 'freelancer'>('client');
 
   useEffect(() => {
+    const passedRole = location.state?.role;
     const savedRole = localStorage.getItem('SAM_ROLE');
-    if (savedRole === 'freelancer') {
+
+    if (passedRole === 'freelancer' || savedRole === 'freelancer') {
       setRole('freelancer');
+      localStorage.setItem('SAM_ROLE', 'freelancer');
+    } else {
+      setRole('client');
+      localStorage.setItem('SAM_ROLE', 'client');
     }
-  }, []);
+  }, [location.state]);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
@@ -63,7 +70,10 @@ const WorkspacesPage: React.FC = () => {
             <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-2">
               Tin nhắn & Không gian làm việc
             </h1>
-            <p className="text-gray-500">Quản lý các cuộc trao đổi với Freelancer của bạn.</p>
+            <p className="text-gray-500">
+              Quản lý các cuộc trao đổi với {role === 'client' ? 'Freelancer' : 'Khách hàng'} của
+              bạn.
+            </p>
           </div>
           <div className="flex gap-2">
             <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer">
@@ -79,7 +89,7 @@ const WorkspacesPage: React.FC = () => {
           {WORKSPACES.map((workspace) => (
             <div
               key={workspace.id}
-              onClick={() => navigate(`/workspace/${workspace.projectId}`)}
+              onClick={() => navigate(`/workspace/${workspace.projectId}`, { state: { role } })}
               className="flex items-start gap-4 p-5 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
             >
               <div className="relative">
@@ -143,7 +153,8 @@ const WorkspacesPage: React.FC = () => {
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Chưa có tin nhắn nào</h3>
               <p className="text-gray-500 text-sm">
-                Bạn chưa có cuộc trò chuyện nào với freelancer.
+                Bạn chưa có cuộc trò chuyện nào với{' '}
+                {role === 'client' ? 'freelancer' : 'khách hàng'}.
               </p>
             </div>
           )}

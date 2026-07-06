@@ -1,17 +1,24 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Header from '../components/Header';
 
 const WorkspacePage: React.FC = () => {
+  const location = useLocation();
   const [role, setRole] = useState<'client' | 'freelancer'>('client');
 
   useEffect(() => {
+    const passedRole = location.state?.role;
     const savedRole = localStorage.getItem('SAM_ROLE');
-    if (savedRole === 'freelancer') {
+    if (passedRole === 'freelancer' || savedRole === 'freelancer') {
       setRole('freelancer');
+      localStorage.setItem('SAM_ROLE', 'freelancer');
+    } else {
+      setRole('client');
+      localStorage.setItem('SAM_ROLE', 'client');
     }
-  }, []);
+  }, [location.state]);
 
   return (
     <div className="h-screen bg-[#F8FAFC] font-sans flex flex-col overflow-hidden">
@@ -19,7 +26,7 @@ const WorkspacePage: React.FC = () => {
       {role === 'client' ? <ClientDashboardHeader /> : <Header />}
 
       {/* 2. Main Workspace Layout */}
-      <main className="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden">
+      <main className="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6 min-h-0 overflow-y-auto lg:overflow-hidden">
         {/* ================= CỘT TRÁI (LEFT SIDEBAR) ================= */}
         <aside className="w-full lg:w-64 shrink-0 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-2 hidden lg:flex">
           {/* Project Identity */}
@@ -56,7 +63,7 @@ const WorkspacePage: React.FC = () => {
                   d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
                 />
               </svg>
-              <span className="font-semibold text-sm">Chat</span>
+              <span className="font-semibold text-sm">Tin nhắn</span>
             </button>
             <button
               type="button"
@@ -77,7 +84,7 @@ const WorkspacePage: React.FC = () => {
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
                 />
               </svg>
-              <span className="font-medium text-sm">Tasks</span>
+              <span className="font-medium text-sm">Công việc</span>
             </button>
             <button
               type="button"
@@ -98,7 +105,7 @@ const WorkspacePage: React.FC = () => {
                   d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
                 />
               </svg>
-              <span className="font-medium text-sm">Files</span>
+              <span className="font-medium text-sm">Tài liệu</span>
             </button>
             <button
               type="button"
@@ -124,7 +131,7 @@ const WorkspacePage: React.FC = () => {
                   d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
-              <span className="font-medium text-sm">Milestones</span>
+              <span className="font-medium text-sm">Tiến độ</span>
             </button>
             <button
               type="button"
@@ -145,7 +152,7 @@ const WorkspacePage: React.FC = () => {
                   d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
                 />
               </svg>
-              <span className="font-medium text-sm">Analytics</span>
+              <span className="font-medium text-sm">Thống kê</span>
             </button>
           </nav>
 
@@ -165,7 +172,7 @@ const WorkspacePage: React.FC = () => {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              <span className="font-bold text-sm">Hire Expert</span>
+              <span className="font-bold text-sm">Thuê chuyên gia</span>
             </button>
           </div>
 
@@ -189,7 +196,7 @@ const WorkspacePage: React.FC = () => {
                   d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
                 />
               </svg>
-              <span className="font-medium text-sm">Archive</span>
+              <span className="font-medium text-sm">Lưu trữ</span>
             </button>
             <button
               type="button"
@@ -210,7 +217,7 @@ const WorkspacePage: React.FC = () => {
                   d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span className="font-medium text-sm">Support</span>
+              <span className="font-medium text-sm">Hỗ trợ</span>
             </button>
           </nav>
         </aside>
@@ -498,7 +505,7 @@ const WorkspacePage: React.FC = () => {
         </section>
 
         {/* ================= CỘT PHẢI (RIGHT SIDEBAR) ================= */}
-        <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-5">
+        <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-4 lg:h-full lg:overflow-y-auto lg:pr-2 pb-10 lg:pb-0">
           {/* 1. Project Info Card */}
           <div className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
             <div className="flex justify-between items-start mb-3">

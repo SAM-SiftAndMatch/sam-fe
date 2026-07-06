@@ -1,12 +1,17 @@
 import type React from 'react';
 import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import { PATH_JOB_APPLY_SUCCESS } from '../routes/paths';
+import { MOCK_JOBS } from './FreelancerJobsPage';
 
 const ApplyJobPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const job = MOCK_JOBS.find((j) => j.id.toString() === id) || MOCK_JOBS[0];
   const [paymentType, setPaymentType] = useState<'project' | 'milestone'>('project');
   const [amount, setAmount] = useState<string>('20000000');
-  const [experience, setExperience] = useState('');
   const [timeframe, setTimeframe] = useState('1 - 3 tháng');
   const [plan, setPlan] = useState('');
 
@@ -18,9 +23,24 @@ const ApplyJobPage: React.FC = () => {
     return `${new Intl.NumberFormat('vi-VN').format(val)}đ`;
   };
 
+  const handleSave = (status: 'draft' | 'pending') => {
+    const saved = JSON.parse(localStorage.getItem('SAM_FREELANCER_APPLICATIONS') || '[]');
+    const newApplication = {
+      id: Date.now(),
+      jobId: job.id,
+      jobTitle: job.title,
+      price: job.price,
+      status: status,
+      coverLetter: plan,
+      appliedAt: new Date().toISOString(),
+    };
+    localStorage.setItem('SAM_FREELANCER_APPLICATIONS', JSON.stringify([...saved, newApplication]));
+    navigate(PATH_JOB_APPLY_SUCCESS.replace(':id', id || ''));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Đã lưu hồ sơ ứng tuyển! (Mock)');
+    handleSave('pending');
   };
 
   return (
@@ -32,9 +52,7 @@ const ApplyJobPage: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-[#E2E8F0]">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                  Phát triển Hệ thống Chatbot AI
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900 mb-4">{job.title}</h1>
                 <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-500">
                   <div className="flex items-center gap-1.5">
                     <svg
@@ -52,7 +70,7 @@ const ApplyJobPage: React.FC = () => {
                         d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
                       />
                     </svg>
-                    15.000.000đ - 25.000.000đ
+                    {job.price}
                   </div>
                   <div className="flex items-center gap-1.5">
                     <svg
@@ -93,7 +111,7 @@ const ApplyJobPage: React.FC = () => {
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    Đăng 2 giờ trước
+                    Đăng {job.postedAt}
                   </div>
                 </div>
               </div>
@@ -144,117 +162,32 @@ const ApplyJobPage: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-[#E2E8F0]">
-            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <span className="w-8 h-8 bg-[#EEF2FF] text-[#1D4ED8] rounded-lg flex items-center justify-center shrink-0">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-[#EEF2FF] text-[#1D4ED8] rounded-xl flex items-center justify-center shrink-0">
                 <svg
                   className="w-5 h-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   strokeWidth={2}
-                  role="img"
-                  aria-label="Experience"
                 >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-              </span>
-              Kinh nghiệm & Kỹ năng
-            </h2>
-
-            <div className="mb-6">
-              <label
-                htmlFor="experience"
-                className="block text-xs font-semibold text-gray-500 mb-2"
-              >
-                Mô tả các dự án tương tự bạn đã làm
-              </label>
-              <textarea
-                id="experience"
-                rows={4}
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
-                placeholder="Ví dụ: Tôi đã xây dựng 3 hệ thống Chatbot cho lĩnh vực E-commerce sử dụng OpenAI API..."
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl p-4 text-sm text-gray-700 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-colors resize-none placeholder:text-gray-400"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="skills-dummy"
-                className="block text-xs font-semibold text-gray-500 mb-3"
-              >
-                Kỹ năng áp dụng cho dự án này
-              </label>
-              <div id="skills-dummy" className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-semibold text-gray-700 bg-[#F1F5F9] border border-[#E2E8F0] px-3 py-1.5 rounded-full">
-                  Python
-                </span>
-                <span className="text-[11px] font-semibold text-gray-700 bg-[#F1F5F9] border border-[#E2E8F0] px-3 py-1.5 rounded-full">
-                  OpenAI API
-                </span>
-                <span className="text-[11px] font-semibold text-gray-700 bg-[#F1F5F9] border border-[#E2E8F0] px-3 py-1.5 rounded-full">
-                  LangChain
-                </span>
-                <button
-                  type="button"
-                  className="text-[11px] font-bold text-[#1D4ED8] bg-white border border-[#1D4ED8] hover:bg-[#EEF2FF] px-3 py-1.5 rounded-full flex items-center gap-1 transition-colors cursor-pointer"
-                >
-                  <span>+</span> Thêm kỹ năng
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-[#E2E8F0]">
-            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <span className="w-8 h-8 bg-[#EEF2FF] text-[#1D4ED8] rounded-lg flex items-center justify-center shrink-0">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  role="img"
-                  aria-label="File"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </span>
-              Nộp hồ sơ
-            </h2>
-
-            <div className="w-full border-2 border-dashed border-[#A5B4FC] bg-[#F8FAFC] hover:bg-[#EEF2FF] transition-colors rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer">
-              <div className="w-12 h-12 bg-[#1D4ED8] text-white rounded-xl flex items-center justify-center mb-3 shadow-md">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  role="img"
-                  aria-label="Upload"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                    d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
                   />
                 </svg>
               </div>
-              <span className="text-sm font-bold text-gray-900 mb-1">
-                Tải lên CV hoặc Portfolio
-              </span>
-              <span className="text-[11px] font-medium text-gray-500">
-                Kéo thả file hoặc click để chọn (PDF, DOCX lên tới 10MB)
-              </span>
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 mb-1">
+                  Đính kèm Hồ sơ Cá nhân tự động
+                </h3>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Hồ sơ cá nhân SAM của bạn (bao gồm Kinh nghiệm làm việc, Kỹ năng và các Chứng chỉ)
+                  sẽ tự động được gửi kèm cho Khách hàng cùng với Thư ứng tuyển này. Bạn không cần
+                  phải tải lại file CV.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -477,6 +410,7 @@ const ApplyJobPage: React.FC = () => {
             </button>
             <button
               type="button"
+              onClick={() => handleSave('draft')}
               className="sm:w-40 bg-white hover:bg-gray-50 text-gray-700 font-bold py-4 rounded-full transition-colors border border-[#E2E8F0] shadow-sm cursor-pointer"
             >
               Lưu nháp

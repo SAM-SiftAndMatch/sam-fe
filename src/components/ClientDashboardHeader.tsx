@@ -36,39 +36,48 @@ const ClientDashboardHeader: React.FC = () => {
 
   return (
     <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
-      <div className="flex items-center gap-10">
+      {/* Logo - Left */}
+      <div className="flex-1 flex items-center">
         <span
           onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
-          className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer"
-          style={{ fontFamily: "'Quedora', sans-serif" }}
+          className="flex items-center gap-1 cursor-pointer group"
         >
-          SAM
+          <div
+            className="text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300"
+            style={{ fontFamily: "'Quedora', sans-serif" }}
+          >
+            SAM
+          </div>
         </span>
-        <nav className="hidden md:flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => navigate(PATH_CLIENT_PROJECTS)}
-            className={getNavClass(PATH_CLIENT_PROJECTS)}
-          >
-            Dự án
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate(PATH_WORKSPACES)}
-            className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
-          >
-            Tin nhắn
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate(PATH_CLIENT_FIND_FREELANCER)}
-            className={getNavClass(PATH_CLIENT_FIND_FREELANCER)}
-          >
-            Tìm Freelancer
-          </button>
-        </nav>
       </div>
-      <div className="flex items-center gap-5">
+
+      {/* Navigation - Center */}
+      <nav className="hidden md:flex items-center justify-center gap-2 flex-1">
+        <button
+          type="button"
+          onClick={() => navigate(PATH_CLIENT_PROJECTS)}
+          className={getNavClass(PATH_CLIENT_PROJECTS)}
+        >
+          Dự án
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(PATH_WORKSPACES, { state: { role: 'client' } })}
+          className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
+        >
+          Tin nhắn
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(PATH_CLIENT_FIND_FREELANCER)}
+          className={getNavClass(PATH_CLIENT_FIND_FREELANCER)}
+        >
+          Tìm Freelancer
+        </button>
+      </nav>
+
+      {/* Actions - Right */}
+      <div className="flex-1 flex items-center justify-end gap-5">
         <button
           type="button"
           onClick={() => navigate(PATH_CLIENT_AI_BRIEF)}

@@ -52,11 +52,16 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
       {/* Logo - Left */}
       <div className="flex-1 flex items-center">
         <Link
-          to={paths.PATH_CLIENT_DASHBOARD}
-          className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer"
-          style={{ fontFamily: "'Quedora', sans-serif" }}
+          to={paths.PATH_HOME}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex items-center gap-1 cursor-pointer group"
         >
-          SAM
+          <div
+            className="text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300"
+            style={{ fontFamily: "'Quedora', sans-serif" }}
+          >
+            SAM
+          </div>
         </Link>
       </div>
 
