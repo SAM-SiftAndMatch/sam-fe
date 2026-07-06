@@ -1,16 +1,56 @@
 import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  PATH_CLIENT_DASHBOARD,
+  PATH_FREELANCER,
+  PATH_LOGIN,
+  PATH_WORKSPACES,
+} from '../routes/paths';
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getNavClass = (path: string, hasIcon = false) => {
+    // If we only have /freelancer as root, we should exact match, but let's just use startsWith for now with a fallback
+    const isActive = path === '/' ? location.pathname === path : location.pathname.startsWith(path);
+    const baseClass = 'text-sm px-4 py-2 rounded-full cursor-pointer border-0 transition-colors';
+    const activeClass = 'font-bold bg-[#EEF2FF] text-[#0047FF]';
+    const inactiveClass =
+      'font-medium text-gray-600 hover:text-[#0047FF] hover:bg-gray-50 bg-transparent';
+    const iconClass = hasIcon ? 'flex items-center gap-1' : '';
+
+    return `${baseClass} ${isActive ? activeClass : inactiveClass} ${iconClass}`.trim();
+  };
+
   return (
     <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
       <div className="flex items-center gap-10">
-        <span className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer">
+        <span
+          onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
+          className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer"
+          style={{ fontFamily: "'Quedora', sans-serif" }}
+        >
           SAM
         </span>
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-2">
           <button
             type="button"
-            className="flex items-center gap-1 text-sm font-semibold bg-[#EEF2FF] text-[#0047FF] px-4 py-2 rounded-full cursor-pointer border-0"
+            onClick={() => navigate(PATH_FREELANCER)}
+            className={getNavClass(PATH_FREELANCER, true)}
           >
             Tìm việc
             <svg
@@ -27,20 +67,15 @@ const Header: React.FC = () => {
           </button>
           <button
             type="button"
-            className="text-sm font-medium text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0"
+            onClick={() => navigate(PATH_WORKSPACES)}
+            className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
           >
             Tin nhắn
           </button>
-          <button
-            type="button"
-            className="text-sm font-medium text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0"
-          >
+          <button type="button" className={getNavClass('/my-projects')}>
             Dự án của tôi
           </button>
-          <button
-            type="button"
-            className="text-sm font-medium text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0"
-          >
+          <button type="button" className={getNavClass('/income')}>
             Thu nhập
           </button>
         </nav>
@@ -72,26 +107,44 @@ const Header: React.FC = () => {
             />
           </svg>
         </button>
-        <button
-          type="button"
-          className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 cursor-pointer"
-        >
-          <svg
-            className="w-5 h-5 text-gray-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            role="img"
-            aria-label="Profile"
+        <div className="relative" ref={dropdownRef}>
+          <button
+            type="button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
-        </button>
+            <svg
+              className="w-5 h-5 text-gray-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              role="img"
+              aria-label="Profile"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          </button>
+
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1 border border-gray-100">
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem('SAM_ROLE');
+                  navigate(PATH_LOGIN);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold cursor-pointer border-0 bg-transparent transition-colors"
+              >
+                Đăng xuất
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

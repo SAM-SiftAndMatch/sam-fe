@@ -1,8 +1,11 @@
 import type React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import GuestHeader from '../components/GuestHeader';
+import { PATH_CLIENT_DASHBOARD, PATH_FREELANCER } from '../routes/paths';
 
 const RoleSelectionPage: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       {/* Gọi Header Dành cho khách */}
@@ -45,6 +48,10 @@ const RoleSelectionPage: React.FC = () => {
             </p>
             <button
               type="button"
+              onClick={() => {
+                localStorage.setItem('SAM_ROLE', 'client');
+                navigate(PATH_CLIENT_DASHBOARD);
+              }}
               className="w-full bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold py-3.5 rounded-xl transition-colors cursor-pointer border-0 mb-4 shadow-md"
             >
               Tiếp tục với tư cách Khách hàng
@@ -95,6 +102,10 @@ const RoleSelectionPage: React.FC = () => {
             </p>
             <button
               type="button"
+              onClick={() => {
+                localStorage.setItem('SAM_ROLE', 'freelancer');
+                navigate(PATH_FREELANCER);
+              }}
               className="w-full bg-[#0AAAD7] hover:bg-[#0896BD] text-white font-bold py-3.5 rounded-xl transition-colors cursor-pointer border-0 mb-4 shadow-md"
             >
               Tiếp tục với tư cách Freelancer

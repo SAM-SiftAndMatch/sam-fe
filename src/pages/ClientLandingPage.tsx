@@ -1,8 +1,9 @@
+import FooterDashboard from '@/components/FooterDashboard';
 import type React from 'react';
-import Footer from '../components/Footer';
+import { Link } from 'react-router-dom';
 import GuestHeader from '../components/GuestHeader';
+import * as paths from '../routes/paths';
 
-// MOCK DATA: Giúp code JSX bên dưới gọn gàng, đúng chuẩn Clean Code
 const CATEGORIES = [
   {
     id: 1,
@@ -88,11 +89,22 @@ const ClientLandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       {/* HEADER */}
-      <GuestHeader />
+      <GuestHeader
+        navItems={[
+          { label: 'Tổng quan', id: 'hero' },
+          { label: 'Lĩnh vực', id: 'categories' },
+          { label: 'Quy trình', id: 'process' },
+          { label: 'Dịch vụ', id: 'pricing' },
+          { label: 'Đánh giá', id: 'testimonials' },
+        ]}
+      />
 
       <main className="flex-1 w-full flex flex-col items-center">
         {/* ================= HERO SECTION ================= */}
-        <section className="w-full relative pt-20 pb-16 px-4 flex flex-col items-center text-center overflow-hidden">
+        <section
+          id="hero"
+          className="w-full relative pt-20 pb-16 px-4 flex flex-col items-center text-center overflow-hidden"
+        >
           {/* Background Blur */}
           <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-[#0AAAD7]/20 to-[#1D4ED8]/10 blur-[100px] rounded-full pointer-events-none" />
 
@@ -167,18 +179,18 @@ const ClientLandingPage: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 relative z-10 mb-16">
-            <button
-              type="button"
-              className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:shadow-lg text-white font-bold px-8 py-3.5 rounded-2xl transition-all cursor-pointer border-0"
+            <Link
+              to={paths.PATH_CLIENT_AI_BRIEF}
+              className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:shadow-lg text-white font-bold px-8 py-3.5 rounded-2xl transition-all cursor-pointer border-0 text-center flex items-center justify-center"
             >
               Tạo yêu cầu công việc
-            </button>
-            <button
-              type="button"
-              className="bg-white hover:bg-gray-50 text-[#1D4ED8] font-bold px-8 py-3.5 rounded-2xl border border-gray-200 shadow-sm transition-colors cursor-pointer"
+            </Link>
+            <Link
+              to={paths.PATH_FREELANCER}
+              className="bg-white hover:bg-gray-50 text-[#1D4ED8] font-bold px-8 py-3.5 rounded-2xl border border-gray-200 shadow-sm transition-colors cursor-pointer text-center flex items-center justify-center"
             >
               Tìm Việc Freelance
-            </button>
+            </Link>
           </div>
 
           {/* Stats Box */}
@@ -205,7 +217,7 @@ const ClientLandingPage: React.FC = () => {
         </section>
 
         {/* ================= CATEGORIES SECTION ================= */}
-        <section className="w-full max-w-6xl mx-auto px-4 py-16">
+        <section id="categories" className="w-full max-w-6xl mx-auto px-4 py-16">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Lĩnh vực phổ biến</h2>
@@ -257,7 +269,10 @@ const ClientLandingPage: React.FC = () => {
         </section>
 
         {/* ================= PROCESS SECTION ================= */}
-        <section className="w-full bg-gradient-to-b from-white to-[#F4F7FF] py-20 px-4 relative overflow-hidden">
+        <section
+          id="process"
+          className="w-full bg-gradient-to-b from-white to-[#F4F7FF] py-20 px-4 relative overflow-hidden"
+        >
           <div className="max-w-5xl mx-auto text-center relative z-10">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
               Quy trình tuyển dụng thông minh
@@ -307,7 +322,10 @@ const ClientLandingPage: React.FC = () => {
         </section>
 
         {/* ================= PRICING SECTION (Tái sử dụng HTML Bảng giá) ================= */}
-        <section className="w-full max-w-5xl mx-auto px-4 py-20 flex flex-col items-center">
+        <section
+          id="pricing"
+          className="w-full max-w-5xl mx-auto px-4 py-20 flex flex-col items-center"
+        >
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Gói dịch vụ linh hoạt</h2>
             <p className="text-gray-500 text-sm">
@@ -560,7 +578,7 @@ const ClientLandingPage: React.FC = () => {
         </section>
 
         {/* ================= TESTIMONIALS SECTION ================= */}
-        <section className="w-full bg-[#F4F7FF] py-20 px-4">
+        <section id="testimonials" className="w-full bg-[#F4F7FF] py-20 px-4">
           <div className="max-w-6xl mx-auto flex flex-col items-center">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-12 text-center">
               Khách hàng nói về SAM
@@ -606,12 +624,12 @@ const ClientLandingPage: React.FC = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 relative z-10 w-full sm:w-auto">
-              <button
-                type="button"
-                className="bg-white text-[#1D4ED8] font-bold px-8 py-4 rounded-2xl shadow-lg hover:bg-gray-50 transition-colors cursor-pointer border-0"
+              <Link
+                to={paths.PATH_CLIENT_AI_BRIEF}
+                className="bg-white text-[#1D4ED8] font-bold px-8 py-4 rounded-2xl shadow-lg hover:bg-gray-50 transition-colors cursor-pointer border-0 text-center flex items-center justify-center"
               >
                 Đăng dự án miễn phí
-              </button>
+              </Link>
               <button
                 type="button"
                 className="bg-white/10 backdrop-blur-md text-white border border-white/30 font-bold px-8 py-4 rounded-2xl hover:bg-white/20 transition-colors cursor-pointer"
@@ -624,7 +642,7 @@ const ClientLandingPage: React.FC = () => {
       </main>
 
       {/* FOOTER */}
-      <Footer />
+      <FooterDashboard />
     </div>
   );
 };

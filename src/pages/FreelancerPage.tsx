@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useState } from 'react';
-import Footer from '../components/Footer';
+import FooterDashboard from '../components/FooterDashboard';
 import Header from '../components/Header';
 
 const MOCK_JOBS = [
@@ -304,7 +304,7 @@ const FreelancerPage: React.FC = () => {
         </div>
       </section>
 
-      <Footer />
+      <FooterDashboard />
     </div>
   );
 };

@@ -1,30 +1,49 @@
 import type React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
+import { PATH_CLIENT_DASHBOARD, PATH_CLIENT_PROJECT_DETAIL } from '../routes/paths';
 
 const SuccessProjectPage: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const newProjectId = location.state?.newProjectId || '1';
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <ClientDashboardHeader />
 
       <main className="flex-1 flex items-center justify-center py-12 px-4">
-        <div className="bg-white rounded-[32px] p-10 shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-gray-100 w-full max-w-lg flex flex-col items-center text-center">
+        <div className="bg-white rounded-[32px] p-10 shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-gray-100 w-full max-w-lg flex flex-col items-center text-center px-7">
           {/* Icon Success */}
-          <div className="w-20 h-20 rounded-full bg-cyan-50 text-[#0AAAD7] border-4 border-cyan-100 flex items-center justify-center mb-6 shadow-inner">
-            <svg
-              className="w-10 h-10"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
-              role="img"
-              aria-label="Success"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+          <div className="relative mb-8 mt-4">
+            {/* Glow background */}
+            <div className="absolute inset-0 bg-[#0AAAD7] rounded-full opacity-20 blur-lg scale-[1.2]" />
+            {/* Main Icon Container */}
+            <div className="relative w-20 h-20 rounded-full bg-white border-[1px] border-cyan-400 flex items-center justify-center shadow-lg">
+              <svg
+                className="w-10 h-10"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="url(#samGradient)"
+                strokeWidth={3}
+                role="img"
+                aria-label="Success"
+              >
+                <defs>
+                  <linearGradient id="samGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#1D4ED8" />
+                    <stop offset="100%" stopColor="#0AAAD7" />
+                  </linearGradient>
+                </defs>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-[#0AAAD7] mb-3">Dự án đã được đăng thành công</h1>
+          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] mb-3">
+            Dự án đã được đăng thành công
+          </h1>
           <p className="text-gray-500 text-sm leading-relaxed mb-8">
             Freelancer sẽ sớm gửi đề xuất cho dự án của bạn
           </p>
@@ -49,7 +68,7 @@ const SuccessProjectPage: React.FC = () => {
               </span>
               <span className="text-xs font-bold text-[#1D4ED8] flex items-center gap-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#1D4ED8] animate-pulse" />
-                Đang nhận đề xuất
+                Đang chờ đề xuất
               </span>
             </div>
           </div>
@@ -58,7 +77,8 @@ const SuccessProjectPage: React.FC = () => {
           <div className="flex w-full gap-3">
             <button
               type="button"
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold transition-colors cursor-pointer text-sm border-0 shadow-md"
+              onClick={() => navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', newProjectId))}
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white font-bold transition-opacity cursor-pointer text-sm border-0 shadow-md"
             >
               <svg
                 className="w-4 h-4"
@@ -84,6 +104,7 @@ const SuccessProjectPage: React.FC = () => {
             </button>
             <button
               type="button"
+              onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
               className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border border-dashed border-[#1D4ED8] text-[#1D4ED8] font-bold hover:bg-[#EEF2FF] transition-colors cursor-pointer text-sm"
             >
               <svg

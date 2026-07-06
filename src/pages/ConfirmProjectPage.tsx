@@ -1,14 +1,19 @@
 import type React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
+import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_SUCCESS_PROJECT } from '../routes/paths';
 
 const ConfirmProjectPage: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state || {};
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <ClientDashboardHeader />
 
       <main className="flex-1 flex items-center justify-center py-12 px-4">
-        <div className="bg-white rounded-[32px] p-10 shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-gray-100 w-full max-w-lg flex flex-col items-center text-center">
+        <div className="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-gray-100 w-full max-w-lg flex flex-col items-center text-center">
           {/* Icon Question */}
           <div className="w-20 h-20 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center mb-6 shadow-inner">
             <svg
@@ -40,6 +45,9 @@ const ConfirmProjectPage: React.FC = () => {
           <div className="flex items-center justify-center gap-4 w-full mb-8">
             <button
               type="button"
+              onClick={() =>
+                navigate(PATH_CLIENT_POST_PROJECT, { state: { ...state, restoreStep: 4 } })
+              }
               className="flex items-center gap-2 px-6 py-3 rounded-full border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors cursor-pointer text-sm"
             >
               <svg
@@ -61,42 +69,34 @@ const ConfirmProjectPage: React.FC = () => {
             </button>
             <button
               type="button"
+              onClick={() => {
+                const newProject = {
+                  id: `new_${Date.now()}`,
+                  title: state.projectName || 'Dự án mới chưa đặt tên',
+                  status: 'open',
+                  budget: state.budgetAmount
+                    ? `${Number(state.budgetAmount).toLocaleString('vi-VN')} VND`
+                    : 'Thỏa thuận',
+                  proposalsCount: 0,
+                  createdAt: 'Vừa xong',
+                  code: `ID_SAM${new Date().getFullYear()}`,
+                  description: state.description || 'Chưa có mô tả chi tiết.',
+                  skills: state.selectedSkills || [],
+                  upgrades: state.upgrades || [],
+                };
+
+                const existing = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
+                localStorage.setItem(
+                  'SAM_USER_PROJECTS',
+                  JSON.stringify([newProject, ...existing])
+                );
+
+                navigate(PATH_CLIENT_SUCCESS_PROJECT, { state: { newProjectId: newProject.id } });
+              }}
               className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold hover:opacity-90 shadow-md transition-opacity cursor-pointer text-sm border-0"
             >
               Xác nhận đăng dự án
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                role="img"
-                aria-label="Rocket"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 10.5L21 3m-7.5 7.5L8.25 15.75m5.25-5.25v6.75a1.5 1.5 0 01-2.483 1.13L8.25 15.75m5.25-5.25H6.75a1.5 1.5 0 01-1.13-2.483L10.5 8.25M13.5 10.5L8.25 15.75m0 0L3 21"
-                />
-              </svg>
             </button>
-          </div>
-
-          {/* Project Preview */}
-          <div className="w-full flex items-center gap-4 bg-[#F8FAFC] p-4 rounded-2xl border border-gray-100">
-            <img
-              src="https://images.unsplash.com/photo-1616077168079-7e09a6a71bb2?auto=format&fit=crop&w=100&q=80"
-              alt="Preview"
-              className="w-12 h-12 rounded-lg object-cover"
-            />
-            <div className="text-left">
-              <span className="text-[10px] font-bold text-[#1D4ED8] uppercase tracking-widest block mb-0.5">
-                DỰ ÁN
-              </span>
-              <span className="text-sm font-bold text-gray-900 leading-tight">
-                Thiết kế UI/UX App Fintech & AI Integration
-              </span>
-            </div>
           </div>
         </div>
       </main>

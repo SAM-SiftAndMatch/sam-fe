@@ -1,51 +1,123 @@
 import type React from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import * as paths from '../routes/paths';
 
-const GuestHeader: React.FC = () => {
+export type NavItem = {
+  label: string;
+  id: string;
+};
+
+interface GuestHeaderProps {
+  navItems?: NavItem[];
+}
+
+const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
+  const [activeId, setActiveId] = useState<string>('');
+
+  useEffect(() => {
+    if (!navItems) return;
+
+    const handleScroll = () => {
+      let currentActive = '';
+      for (const item of navItems) {
+        const element = document.getElementById(item.id);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          // Adjust 150 based on header height + offset
+          if (rect.top <= 150 && rect.bottom >= 150) {
+            currentActive = item.id;
+          }
+        }
+      }
+      if (currentActive !== activeId) {
+        setActiveId(currentActive);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check on mount
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [navItems, activeId]);
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
-      <div className="flex items-center gap-10">
-        {/* Logo */}
-        <span className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer">
+    <header className="w-full h-[72px] px-6 md:px-10 flex items-center relative border-b border-gray-100 bg-white sticky top-0 z-50">
+      {/* Logo - Left */}
+      <div className="flex-1 flex items-center">
+        <Link
+          to={paths.PATH_CLIENT_DASHBOARD}
+          className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer"
+          style={{ fontFamily: "'Quedora', sans-serif" }}
+        >
           SAM
-        </span>
-
-        {/* Navigation Center */}
-        <nav className="hidden md:flex items-center gap-8">
-          <button
-            type="button"
-            className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0"
-          >
-            Khách hàng
-          </button>
-          <button
-            type="button"
-            className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0"
-          >
-            Freelancer
-          </button>
-          <button
-            type="button"
-            className="text-sm font-bold bg-[#EEF2FF] text-[#1D4ED8] px-4 py-1.5 rounded-full cursor-pointer border-0 hover:bg-[#E0E7FF] transition-colors"
-          >
-            Gói dịch vụ
-          </button>
-        </nav>
+        </Link>
       </div>
 
+      {/* Navigation - Center (Absolute) */}
+      <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-4 lg:gap-6">
+        {navItems ? (
+          navItems.map((item) => {
+            const isActive = activeId === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => scrollToSection(item.id)}
+                className={`text-sm font-semibold px-4 py-1.5 rounded-full cursor-pointer border-0 transition-colors ${
+                  isActive
+                    ? 'bg-[#EEF2FF] text-[#1D4ED8]'
+                    : 'text-gray-600 hover:text-[#0047FF] bg-transparent hover:bg-gray-50'
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })
+        ) : (
+          <>
+            <button
+              type="button"
+              className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] hover:bg-gray-50 px-4 py-1.5 rounded-full cursor-pointer bg-transparent border-0 transition-colors"
+            >
+              Khách hàng
+            </button>
+            <button
+              type="button"
+              className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] hover:bg-gray-50 px-4 py-1.5 rounded-full cursor-pointer bg-transparent border-0 transition-colors"
+            >
+              Freelancer
+            </button>
+            <button
+              type="button"
+              className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] hover:bg-gray-50 px-4 py-1.5 rounded-full cursor-pointer bg-transparent border-0 transition-colors"
+            >
+              Dịch vụ
+            </button>
+          </>
+        )}
+      </nav>
+
       {/* Navigation Right */}
-      <div className="flex items-center gap-6">
-        <button
-          type="button"
+      <div className="flex-1 flex items-center justify-end gap-6">
+        <Link
+          to={paths.PATH_LOGIN}
           className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0 hidden md:block"
         >
           Đăng nhập
-        </button>
-        <button
-          type="button"
+        </Link>
+        <Link
+          to={paths.PATH_REGISTER}
           className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-md transition-opacity cursor-pointer border-0"
         >
           Bắt đầu ngay
-        </button>
+        </Link>
       </div>
     </header>
   );
