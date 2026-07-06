@@ -39,10 +39,14 @@ const ClientDashboardHeader: React.FC = () => {
       <div className="flex items-center gap-10">
         <span
           onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
-          className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] cursor-pointer"
-          style={{ fontFamily: "'Quedora', sans-serif" }}
+          className="flex items-center gap-1 cursor-pointer group"
         >
-          SAM
+          <div 
+            className="text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300"
+            style={{ fontFamily: "'Quedora', sans-serif" }}
+          >
+            SAM
+          </div>
         </span>
         <nav className="hidden md:flex items-center gap-2">
           <button
