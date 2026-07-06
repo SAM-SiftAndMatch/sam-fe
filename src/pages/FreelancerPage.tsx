@@ -1,7 +1,9 @@
 import type React from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FooterDashboard from '../components/FooterDashboard';
 import Header from '../components/Header';
+import * as paths from '../routes/paths';
 
 const MOCK_JOBS = [
   {
@@ -99,6 +101,7 @@ const MOCK_JOBS = [
 ];
 
 const FreelancerPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('Tất cả');
 
   return (
@@ -121,6 +124,7 @@ const FreelancerPage: React.FC = () => {
         </p>
         <button
           type="button"
+          onClick={() => navigate(paths.PATH_FREELANCER_CREATE_PROFILE)}
           className="bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:shadow-[0_8px_25px_rgba(0,178,255,0.4)] text-white font-bold px-8 py-3.5 rounded-full transition-all flex items-center gap-2 z-10 cursor-pointer border-0"
         >
           Tạo hồ sơ của bạn
