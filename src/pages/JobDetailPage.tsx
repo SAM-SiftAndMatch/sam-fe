@@ -3,12 +3,41 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import { MOCK_JOBS } from './FreelancerJobsPage';
+import * as paths from '../routes/paths';
 
 const JobDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   // Use first job as fallback if not found
   const job = MOCK_JOBS.find((j) => j.id.toString() === id) || MOCK_JOBS[0];
+
+  const savedApplications = JSON.parse(localStorage.getItem('SAM_FREELANCER_APPLICATIONS') || '[]');
+  const existingApplication = savedApplications.find((app: any) => app.jobId.toString() === job.id.toString());
+
+  const getButtonText = () => {
+    if (!existingApplication) return 'Kết Nối Công Việc';
+    switch(existingApplication.status) {
+      case 'pending': return 'Đang chờ phản hồi';
+      case 'draft': return 'Tiếp tục ứng tuyển';
+      case 'approved': return 'Đã được duyệt';
+      case 'rejected': return 'Đã từ chối';
+      default: return 'Kết Nối Công Việc';
+    }
+  };
+
+  const getButtonClass = () => {
+    const baseClass = "font-bold px-10 py-4 rounded-full transition-shadow text-lg border-0 ";
+    if (!existingApplication || existingApplication.status === 'draft') {
+      return baseClass + "bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:shadow-lg text-white cursor-pointer";
+    }
+    return baseClass + "bg-gray-200 text-gray-500 cursor-not-allowed";
+  };
+
+  const handleApplyClick = () => {
+    if (!existingApplication || existingApplication.status === 'draft') {
+      navigate(paths.PATH_JOB_APPLY.replace(':id', job.id.toString()));
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
@@ -55,9 +84,10 @@ const JobDetailPage: React.FC = () => {
 
             <button
               type="button"
-              className="bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:shadow-lg text-white font-bold px-10 py-4 rounded-full transition-shadow text-lg cursor-pointer border-0"
+              onClick={handleApplyClick}
+              className={getButtonClass()}
             >
-              Kết Nối Công Việc
+              {getButtonText()}
             </button>
           </section>
 

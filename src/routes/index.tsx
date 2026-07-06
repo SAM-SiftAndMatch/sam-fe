@@ -27,6 +27,7 @@ import WorkspacePage from '../pages/WorkspacePage';
 import WorkspacesPage from '../pages/WorkspacesPage';
 import CreateFreelancerProfilePage from '../pages/CreateFreelancerProfilePage';
 import FreelancerJobsPage from '../pages/FreelancerJobsPage';
+import FreelancerApplicationsPage from '../pages/FreelancerApplicationsPage';
 
 const AppRoutes = () => {
   return (
@@ -52,6 +53,7 @@ const AppRoutes = () => {
       <Route path={paths.PATH_FREELANCER_PRICING} element={<FreelancerPricingPage />} />
       <Route path={paths.PATH_FREELANCER_JOBS} element={<FreelancerJobsPage />} />
       <Route path={paths.PATH_FREELANCER_CREATE_PROFILE} element={<CreateFreelancerProfilePage />} />
+      <Route path={paths.PATH_FREELANCER_APPLICATIONS} element={<FreelancerApplicationsPage />} />
 
       <Route path={paths.PATH_JOB_DETAIL} element={<JobDetailPage />} />
       <Route path={paths.PATH_JOB_APPLY} element={<ApplyJobPage />} />

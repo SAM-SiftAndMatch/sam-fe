@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   PATH_CLIENT_DASHBOARD,
   PATH_FREELANCER_JOBS,
+  PATH_FREELANCER_APPLICATIONS,
   PATH_LOGIN,
   PATH_WORKSPACES,
 } from '../routes/paths';
@@ -57,6 +58,13 @@ const Header: React.FC = () => {
             className={getNavClass(PATH_FREELANCER_JOBS, true)}
           >
             Tìm việc
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(PATH_FREELANCER_APPLICATIONS)}
+            className={getNavClass(PATH_FREELANCER_APPLICATIONS)}
+          >
+            Chờ phản hồi
           </button>
           <button
             type="button"

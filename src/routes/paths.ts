@@ -19,6 +19,7 @@ export const PATH_FREELANCER = '/freelancer';
 export const PATH_FREELANCER_PRICING = '/freelancer/pricing';
 export const PATH_FREELANCER_JOBS = '/freelancer/jobs';
 export const PATH_FREELANCER_CREATE_PROFILE = '/freelancer/profile/create';
+export const PATH_FREELANCER_APPLICATIONS = '/freelancer/applications';
 
 export const PATH_JOB_DETAIL = '/jobs/:id';
 export const PATH_JOB_APPLY = '/jobs/:id/apply';
