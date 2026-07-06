@@ -1,8 +1,9 @@
 import type React from 'react';
+import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import GuestHeader from '../components/GuestHeader';
+import * as paths from '../routes/paths';
 
-// MOCK DATA: Giúp code JSX bên dưới gọn gàng, đúng chuẩn Clean Code
 const CATEGORIES = [
   {
     id: 1,
@@ -167,18 +168,18 @@ const ClientLandingPage: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 relative z-10 mb-16">
-            <button
-              type="button"
-              className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:shadow-lg text-white font-bold px-8 py-3.5 rounded-2xl transition-all cursor-pointer border-0"
+            <Link
+              to={paths.PATH_CLIENT_AI_BRIEF}
+              className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:shadow-lg text-white font-bold px-8 py-3.5 rounded-2xl transition-all cursor-pointer border-0 text-center flex items-center justify-center"
             >
               Tạo yêu cầu công việc
-            </button>
-            <button
-              type="button"
-              className="bg-white hover:bg-gray-50 text-[#1D4ED8] font-bold px-8 py-3.5 rounded-2xl border border-gray-200 shadow-sm transition-colors cursor-pointer"
+            </Link>
+            <Link
+              to={paths.PATH_FREELANCER}
+              className="bg-white hover:bg-gray-50 text-[#1D4ED8] font-bold px-8 py-3.5 rounded-2xl border border-gray-200 shadow-sm transition-colors cursor-pointer text-center flex items-center justify-center"
             >
               Tìm Việc Freelance
-            </button>
+            </Link>
           </div>
 
           {/* Stats Box */}
@@ -606,12 +607,12 @@ const ClientLandingPage: React.FC = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 relative z-10 w-full sm:w-auto">
-              <button
-                type="button"
-                className="bg-white text-[#1D4ED8] font-bold px-8 py-4 rounded-2xl shadow-lg hover:bg-gray-50 transition-colors cursor-pointer border-0"
+              <Link
+                to={paths.PATH_CLIENT_AI_BRIEF}
+                className="bg-white text-[#1D4ED8] font-bold px-8 py-4 rounded-2xl shadow-lg hover:bg-gray-50 transition-colors cursor-pointer border-0 text-center flex items-center justify-center"
               >
                 Đăng dự án miễn phí
-              </button>
+              </Link>
               <button
                 type="button"
                 className="bg-white/10 backdrop-blur-md text-white border border-white/30 font-bold px-8 py-4 rounded-2xl hover:bg-white/20 transition-colors cursor-pointer"
