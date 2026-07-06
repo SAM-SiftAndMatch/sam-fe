@@ -2,7 +2,7 @@ import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
-import { PATH_CLIENT_PROJECTS } from '../routes/paths';
+import { PATH_CLIENT_PROJECTS, PATH_CLIENT_AI_BRIEF } from '../routes/paths';
 
 // === MOCK DATA ===
 const STATS = [
@@ -123,6 +123,7 @@ const ClientDashboardPage: React.FC = () => {
           </p>
           <button
             type="button"
+            onClick={() => navigate(PATH_CLIENT_AI_BRIEF)}
             className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white font-bold px-8 py-3.5 rounded-full shadow-[0_8px_20px_rgba(29,78,216,0.25)] transition-all flex items-center gap-2 cursor-pointer border-0"
           >
             <svg

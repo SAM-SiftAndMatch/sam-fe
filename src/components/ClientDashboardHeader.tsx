@@ -1,6 +1,9 @@
 import type React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PATH_CLIENT_AI_BRIEF, PATH_CLIENT_PROJECTS } from '../routes/paths';
 
 const ClientDashboardHeader: React.FC = () => {
+  const navigate = useNavigate();
   return (
     <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
       <div className="flex items-center gap-10">
@@ -13,6 +16,7 @@ const ClientDashboardHeader: React.FC = () => {
         <nav className="hidden md:flex items-center gap-6">
           <button
             type="button"
+            onClick={() => navigate(PATH_CLIENT_PROJECTS)}
             className="text-sm font-bold bg-[#EEF2FF] text-[#1D4ED8] px-4 py-1.5 rounded-full cursor-pointer border-0"
           >
             Dự án
@@ -40,6 +44,7 @@ const ClientDashboardHeader: React.FC = () => {
       <div className="flex items-center gap-5">
         <button
           type="button"
+          onClick={() => navigate(PATH_CLIENT_AI_BRIEF)}
           className="hidden md:block bg-[#1D4ED8] hover:bg-[#153bb5] text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-sm transition-colors cursor-pointer border-0"
         >
           Đăng dự án

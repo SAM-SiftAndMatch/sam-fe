@@ -91,15 +91,12 @@ const AIBriefPage: React.FC = () => {
   };
 
   return (
-    // Sử dụng h-screen và overflow-hidden để khóa scroll bên ngoài
-    <div className="h-screen bg-[#F8FAFC] font-sans flex flex-col overflow-hidden">
-      <div className="shrink-0">
-        <ClientDashboardHeader />
-      </div>
+    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+      <ClientDashboardHeader />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-4 md:py-6 flex flex-col overflow-hidden">
-        {/* White Card Container - Tự động flex để chiếm chiều cao và cho phép nội dung bên trong cuộn */}
-        <div className="bg-white rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-6 md:p-8 flex flex-col relative border border-gray-100 flex-1 overflow-hidden">
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col">
+        {/* White Card Container - Chiều cao tự động mở rộng theo nội dung */}
+        <div className="bg-white rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-6 md:p-8 flex flex-col relative border border-gray-100">
           
           {/* Header Section (Cố định, không cuộn) */}
           <div className="shrink-0 mb-4">
@@ -164,9 +161,9 @@ const AIBriefPage: React.FC = () => {
             )}
           </div>
 
-          {/* Result Content - Vùng có thể cuộn (Scrollable Area) */}
+          {/* Result Content */}
           {aiState === 'result' && (
-            <div className="flex-1 overflow-y-auto pr-3 pb-6 space-y-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full">
+            <div className="pt-2 pb-6 space-y-6">
               <div className="flex items-center justify-between mb-4 sticky top-0 bg-white z-10 py-2 border-b border-gray-100">
                 <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -240,7 +237,7 @@ const AIBriefPage: React.FC = () => {
 
           {/* Bottom Action for Idle state */}
           {aiState === 'idle' && (
-            <div className="mt-auto pt-4 text-center pb-2">
+            <div className="mt-4 pt-4 text-center">
               <button
                 type="button"
                 onClick={handleSkip}
