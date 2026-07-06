@@ -1,17 +1,24 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Header from '../components/Header';
 
 const WorkspacePage: React.FC = () => {
+  const location = useLocation();
   const [role, setRole] = useState<'client' | 'freelancer'>('client');
 
   useEffect(() => {
+    const passedRole = location.state?.role;
     const savedRole = localStorage.getItem('SAM_ROLE');
-    if (savedRole === 'freelancer') {
+    if (passedRole === 'freelancer' || savedRole === 'freelancer') {
       setRole('freelancer');
+      localStorage.setItem('SAM_ROLE', 'freelancer');
+    } else {
+      setRole('client');
+      localStorage.setItem('SAM_ROLE', 'client');
     }
-  }, []);
+  }, [location.state]);
 
   return (
     <div className="h-screen bg-[#F8FAFC] font-sans flex flex-col overflow-hidden">

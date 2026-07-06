@@ -4,101 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import FooterDashboard from '../components/FooterDashboard';
 import Header from '../components/Header';
 import * as paths from '../routes/paths';
-
-const MOCK_JOBS = [
-  {
-    id: 1,
-    type: 'LẬP TRÌNH',
-    icon: (
-      <svg
-        className="w-4 h-4 text-[#0047FF]"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-        role="img"
-        aria-label="Code"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-        />
-      </svg>
-    ),
-    title: 'Xây dựng hệ thống SaaS cho quản lý nhân sự',
-    price: '15.000.000đ - 25.000.000đ',
-    tags: ['Next.js', 'Node.js', 'AWS'],
-  },
-  {
-    id: 2,
-    type: 'THIẾT KẾ',
-    icon: (
-      <svg
-        className="w-4 h-4 text-[#0047FF]"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-        role="img"
-        aria-label="Design"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-        />
-      </svg>
-    ),
-    title: 'Thiết kế UI/UX cho App Tài chính Fintech',
-    price: '10.000.000đ - 18.000.000đ',
-    tags: ['Figma', 'Mobile UI'],
-  },
-  {
-    id: 3,
-    type: 'VIẾT LÁCH',
-    icon: (
-      <svg
-        className="w-4 h-4 text-[#0047FF]"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-        role="img"
-        aria-label="Write"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
-      </svg>
-    ),
-    title: 'Viết nội dung SEO cho dự án Bất Động Sản',
-    price: '5.000.000đ - 8.000.000đ',
-    tags: ['Copywriting', 'SEO'],
-  },
-  {
-    id: 4,
-    type: 'VIDEO',
-    icon: (
-      <svg
-        className="w-4 h-4 text-[#0047FF]"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-        role="img"
-        aria-label="Video"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-        />
-      </svg>
-    ),
-    title: 'Dựng Video Marketing 2D Animation',
-    price: '20.000.000đ - 35.000.000đ',
-    tags: ['After Effects', '2D Motion'],
-  },
-];
+import { MOCK_JOBS } from './FreelancerJobsPage';
 
 const FreelancerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -167,7 +73,7 @@ const FreelancerPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {MOCK_JOBS.map((job) => (
+          {MOCK_JOBS.slice(0, 4).map((job) => (
             <div
               key={job.id}
               className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow flex flex-col h-full"
@@ -213,6 +119,7 @@ const FreelancerPage: React.FC = () => {
               </div>
               <button
                 type="button"
+                onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', job.id.toString()))}
                 className="w-full py-3 bg-[#00B2FF] hover:bg-[#009CE0] text-white text-sm font-bold rounded-xl transition-colors mt-auto cursor-pointer border-0"
               >
                 Xem chi tiết
@@ -251,6 +158,7 @@ const FreelancerPage: React.FC = () => {
 
             <button
               type="button"
+              onClick={() => navigate(paths.PATH_FREELANCER_JOBS)}
               className="bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:shadow-lg hover:-translate-y-0.5 text-white font-bold px-8 py-3.5 rounded-full transition-all flex items-center gap-2 cursor-pointer border-0"
             >
               Bắt đầu công việc

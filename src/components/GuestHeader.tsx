@@ -52,7 +52,8 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
       {/* Logo - Left */}
       <div className="flex-1 flex items-center">
         <Link
-          to={paths.PATH_CLIENT_DASHBOARD}
+          to={paths.PATH_HOME}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className="flex items-center gap-1 cursor-pointer group"
         >
           <div 

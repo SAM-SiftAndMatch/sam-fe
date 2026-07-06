@@ -21,6 +21,7 @@ import FreelancerPage from '../pages/FreelancerPage';
 import FreelancerPricingPage from '../pages/FreelancerPricingPage';
 
 import ApplyJobPage from '../pages/ApplyJobPage';
+import SuccessApplicationPage from '../pages/SuccessApplicationPage';
 import FindFreelancerPage from '../pages/FindFreelancerPage';
 import JobDetailPage from '../pages/JobDetailPage';
 import WorkspacePage from '../pages/WorkspacePage';
@@ -57,6 +58,7 @@ const AppRoutes = () => {
 
       <Route path={paths.PATH_JOB_DETAIL} element={<JobDetailPage />} />
       <Route path={paths.PATH_JOB_APPLY} element={<ApplyJobPage />} />
+      <Route path={paths.PATH_JOB_APPLY_SUCCESS} element={<SuccessApplicationPage />} />
       <Route path={paths.PATH_WORKSPACES} element={<WorkspacesPage />} />
       <Route path={paths.PATH_WORKSPACE} element={<WorkspacePage />} />
     </Routes>

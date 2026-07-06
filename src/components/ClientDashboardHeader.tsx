@@ -36,7 +36,8 @@ const ClientDashboardHeader: React.FC = () => {
 
   return (
     <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
-      <div className="flex items-center gap-10">
+      {/* Logo - Left */}
+      <div className="flex-1 flex items-center">
         <span
           onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
           className="flex items-center gap-1 cursor-pointer group"
@@ -48,8 +49,11 @@ const ClientDashboardHeader: React.FC = () => {
             SAM
           </div>
         </span>
-        <nav className="hidden md:flex items-center gap-2">
-          <button
+      </div>
+
+      {/* Navigation - Center */}
+      <nav className="hidden md:flex items-center justify-center gap-2 flex-1">
+        <button
             type="button"
             onClick={() => navigate(PATH_CLIENT_PROJECTS)}
             className={getNavClass(PATH_CLIENT_PROJECTS)}
@@ -58,7 +62,7 @@ const ClientDashboardHeader: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => navigate(PATH_WORKSPACES)}
+            onClick={() => navigate(PATH_WORKSPACES, { state: { role: 'client' } })}
             className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
           >
             Tin nhắn
@@ -71,8 +75,9 @@ const ClientDashboardHeader: React.FC = () => {
             Tìm Freelancer
           </button>
         </nav>
-      </div>
-      <div className="flex items-center gap-5">
+
+      {/* Actions - Right */}
+      <div className="flex-1 flex items-center justify-end gap-5">
         <button
           type="button"
           onClick={() => navigate(PATH_CLIENT_AI_BRIEF)}

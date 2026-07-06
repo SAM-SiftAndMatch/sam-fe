@@ -5,6 +5,7 @@ import {
   PATH_CLIENT_DASHBOARD,
   PATH_FREELANCER_JOBS,
   PATH_FREELANCER_APPLICATIONS,
+  PATH_FREELANCER,
   PATH_LOGIN,
   PATH_WORKSPACES,
 } from '../routes/paths';
@@ -39,9 +40,10 @@ const Header: React.FC = () => {
 
   return (
     <header className="w-full py-4 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50">
-      <div className="flex items-center gap-10">
+      {/* Logo - Left */}
+      <div className="flex-1 flex items-center">
         <span
-          onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
+          onClick={() => navigate(PATH_FREELANCER)}
           className="flex items-center gap-1 cursor-pointer group"
         >
           <div 
@@ -51,8 +53,11 @@ const Header: React.FC = () => {
             SAM
           </div>
         </span>
-        <nav className="hidden md:flex items-center gap-2">
-          <button
+      </div>
+
+      {/* Navigation - Center */}
+      <nav className="hidden md:flex items-center justify-center gap-2 flex-1">
+        <button
             type="button"
             onClick={() => navigate(PATH_FREELANCER_JOBS)}
             className={getNavClass(PATH_FREELANCER_JOBS, true)}
@@ -68,7 +73,7 @@ const Header: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => navigate(PATH_WORKSPACES)}
+            onClick={() => navigate(PATH_WORKSPACES, { state: { role: 'freelancer' } })}
             className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
           >
             Tin nhắn
@@ -80,14 +85,9 @@ const Header: React.FC = () => {
             Thu nhập
           </button>
         </nav>
-      </div>
-      <div className="flex items-center gap-5">
-        <button
-          type="button"
-          className="hidden md:block bg-gradient-to-r from-[#0AAAD7] to-[#1D4ED8] hover:opacity-90 text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-md transition-opacity cursor-pointer border-0"
-        >
-          Đăng tin tuyển dụng
-        </button>
+
+      {/* Actions - Right */}
+      <div className="flex-1 flex items-center justify-end gap-5">
         <button
           type="button"
           className="text-gray-500 hover:text-gray-800 cursor-pointer bg-transparent border-0 p-0"

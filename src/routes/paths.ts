@@ -23,6 +23,7 @@ export const PATH_FREELANCER_APPLICATIONS = '/freelancer/applications';
 
 export const PATH_JOB_DETAIL = '/jobs/:id';
 export const PATH_JOB_APPLY = '/jobs/:id/apply';
+export const PATH_JOB_APPLY_SUCCESS = '/jobs/:id/apply/success';
 
 export const PATH_WORKSPACES = '/workspaces';
 export const PATH_WORKSPACE = '/workspace/:projectId';

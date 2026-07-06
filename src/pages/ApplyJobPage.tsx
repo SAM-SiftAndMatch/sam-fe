@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import { MOCK_JOBS } from './FreelancerJobsPage';
-import { PATH_FREELANCER_APPLICATIONS } from '../routes/paths';
+import { PATH_JOB_APPLY_SUCCESS, PATH_FREELANCER_APPLICATIONS } from '../routes/paths';
 
 const ApplyJobPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,7 +35,7 @@ const ApplyJobPage: React.FC = () => {
       appliedAt: new Date().toISOString(),
     };
     localStorage.setItem('SAM_FREELANCER_APPLICATIONS', JSON.stringify([...saved, newApplication]));
-    navigate(PATH_FREELANCER_APPLICATIONS);
+    navigate(PATH_JOB_APPLY_SUCCESS.replace(':id', id || ''));
   };
 
   const handleSubmit = (e: React.FormEvent) => {

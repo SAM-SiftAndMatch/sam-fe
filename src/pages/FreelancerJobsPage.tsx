@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-import Footer from '../components/FooterDashboard';
+import Footer from '../components/Footer';
 import * as paths from '../routes/paths';
 
 // Lấy mock data phù hợp với developer & văn phòng
