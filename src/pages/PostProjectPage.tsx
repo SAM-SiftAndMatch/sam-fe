@@ -363,28 +363,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                         : 'border-gray-200 focus:border-[#1D4ED8] focus:ring-[#1D4ED8]'
                     }`}
                   />
-                  <div className="absolute bottom-4 right-4 flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => navigate(PATH_CLIENT_AI_BRIEF)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 text-blue-600 rounded-lg text-xs font-bold hover:shadow-sm transition-all group cursor-pointer"
-                    >
-                      <svg
-                        className="w-4 h-4 group-hover:animate-pulse"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M13 10V3L4 14h7v7l9-11h-7z"
-                        />
-                      </svg>
-                      Dùng SAM AI
-                    </button>
-                  </div>
+
                 </div>
                 {step1Errors.description && (
                   <p className="text-red-500 text-xs mt-1">Vui lòng nhập mô tả chi tiết dự án</p>
