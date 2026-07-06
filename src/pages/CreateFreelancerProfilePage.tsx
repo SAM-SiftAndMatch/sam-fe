@@ -33,7 +33,7 @@ const CreateFreelancerProfilePage: React.FC = () => {
           className="flex items-center gap-1 cursor-pointer group"
         >
           <div
-            className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300"
+            className="text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300"
             style={{ fontFamily: "'Quedora', sans-serif" }}
           >
             SAM

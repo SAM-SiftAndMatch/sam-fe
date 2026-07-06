@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   PATH_CLIENT_DASHBOARD,
-  PATH_FREELANCER,
+  PATH_FREELANCER_JOBS,
   PATH_LOGIN,
   PATH_WORKSPACES,
 } from '../routes/paths';
@@ -53,21 +53,10 @@ const Header: React.FC = () => {
         <nav className="hidden md:flex items-center gap-2">
           <button
             type="button"
-            onClick={() => navigate(PATH_FREELANCER)}
-            className={getNavClass(PATH_FREELANCER, true)}
+            onClick={() => navigate(PATH_FREELANCER_JOBS)}
+            className={getNavClass(PATH_FREELANCER_JOBS, true)}
           >
             Tìm việc
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-              role="img"
-              aria-label="Arrow down"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
           </button>
           <button
             type="button"

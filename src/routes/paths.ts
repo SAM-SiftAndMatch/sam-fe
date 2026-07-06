@@ -17,9 +17,11 @@ export const PATH_CLIENT_FIND_FREELANCER = '/client/freelancers';
 
 export const PATH_FREELANCER = '/freelancer';
 export const PATH_FREELANCER_PRICING = '/freelancer/pricing';
+export const PATH_FREELANCER_JOBS = '/freelancer/jobs';
+export const PATH_FREELANCER_CREATE_PROFILE = '/freelancer/profile/create';
 
 export const PATH_JOB_DETAIL = '/jobs/:id';
 export const PATH_JOB_APPLY = '/jobs/:id/apply';
+
 export const PATH_WORKSPACES = '/workspaces';
 export const PATH_WORKSPACE = '/workspace/:projectId';
-export const PATH_FREELANCER_CREATE_PROFILE = '/freelancer/profile/create';

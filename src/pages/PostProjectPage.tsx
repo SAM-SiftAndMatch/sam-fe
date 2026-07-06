@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
-import { PATH_CLIENT_AI_BRIEF, PATH_CLIENT_CONFIRM_PROJECT } from '../routes/paths';
+import { PATH_CLIENT_CONFIRM_PROJECT } from '../routes/paths';
 
 // === MOCK DATA ===
 const SKILLS_SUGGESTION = [
