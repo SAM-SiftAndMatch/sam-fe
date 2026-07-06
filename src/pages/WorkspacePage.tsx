@@ -14,14 +14,14 @@ const WorkspacePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="h-screen bg-[#F8FAFC] font-sans flex flex-col overflow-hidden">
       {/* 1. Kế thừa Header linh hoạt theo Role */}
       {role === 'client' ? <ClientDashboardHeader /> : <Header />}
 
       {/* 2. Main Workspace Layout */}
-      <main className="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6">
+      <main className="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden">
         {/* ================= CỘT TRÁI (LEFT SIDEBAR) ================= */}
-        <aside className="w-full lg:w-64 shrink-0 flex flex-col gap-6">
+        <aside className="w-full lg:w-64 shrink-0 flex flex-col gap-6 lg:h-full lg:overflow-y-auto lg:pr-2 hidden lg:flex">
           {/* Project Identity */}
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-[#1D4ED8] text-white flex items-center justify-center font-bold text-lg shadow-sm">
@@ -216,7 +216,7 @@ const WorkspacePage: React.FC = () => {
         </aside>
 
         {/* ================= CỘT GIỮA (CHAT AREA) ================= */}
-        <section className="flex-1 flex flex-col min-w-0 h-[800px] lg:h-auto border border-gray-100 bg-white/50 backdrop-blur-sm rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+        <section className="flex-1 flex flex-col min-w-0 h-full border border-gray-100 bg-white/50 backdrop-blur-sm rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
           {/* Chat Header */}
           <div className="bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-[32px] shadow-sm z-10">
             <div className="flex items-center gap-4">

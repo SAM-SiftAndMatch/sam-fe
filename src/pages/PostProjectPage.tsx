@@ -153,6 +153,11 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
   const goToStep = (step: number) => setCurrentStep(step);
 
+  // Cuộn lên đầu khi chuyển bước
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
+
   const [step1Errors, setStep1Errors] = useState({
     projectName: false,
     category: false,
@@ -202,7 +207,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 onClick={() => {
                   if (step.id <= highestStep) goToStep(step.id);
                 }}
-                className={`flex flex-col items-center gap-2 relative z-10 bg-[#F8FAFC] px-2 w-20 ${step.id <= highestStep ? 'cursor-pointer hover:-translate-y-0.5 transition-transform' : 'cursor-not-allowed'}`}
+                className={`flex flex-col items-center gap-2 relative z-10 bg-[#F8FAFC] px-1 md:px-2 w-14 md:w-20 text-center shrink-0 ${step.id <= highestStep ? 'cursor-pointer hover:-translate-y-0.5 transition-transform' : 'cursor-not-allowed'}`}
               >
                 {isCompleted ? (
                   <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow-md">
