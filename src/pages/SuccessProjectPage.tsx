@@ -60,7 +60,9 @@ const SuccessProjectPage: React.FC = () => {
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                 NGÀY ĐĂNG
               </span>
-              <span className="text-xs font-bold text-gray-900">24/10/2023</span>
+              <span className="text-xs font-bold text-gray-900">
+                {new Date().toLocaleDateString('vi-VN')}
+              </span>
             </div>
             <div className="bg-[#EEF2FF] rounded-xl p-3 flex flex-col items-start border border-[#DCE4FF]">
               <span className="text-[9px] font-bold text-[#1D4ED8] uppercase tracking-widest mb-1">
