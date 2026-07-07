@@ -34,8 +34,18 @@ const ApplyJobPage: React.FC = () => {
       coverLetter: plan,
       appliedAt: new Date().toISOString(),
     };
-    localStorage.setItem('SAM_FREELANCER_APPLICATIONS', JSON.stringify([...saved, newApplication]));
-    navigate(PATH_JOB_APPLY_SUCCESS.replace(':id', id || ''));
+
+    const idx = saved.findIndex((app: any) => app.jobId.toString() === job.id.toString());
+    if (idx >= 0) {
+      saved[idx] = { ...saved[idx], ...newApplication, id: saved[idx].id };
+    } else {
+      saved.push(newApplication);
+    }
+
+    localStorage.setItem('SAM_FREELANCER_APPLICATIONS', JSON.stringify(saved));
+    navigate(PATH_JOB_APPLY_SUCCESS.replace(':id', id || ''), {
+      state: { isDraft: status === 'draft' },
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
