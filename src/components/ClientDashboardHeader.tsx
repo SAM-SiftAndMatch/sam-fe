@@ -14,6 +14,7 @@ const ClientDashboardHeader: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -143,7 +144,73 @@ const ClientDashboardHeader: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Hamburger Menu Button (Mobile Only) */}
+        <button
+          type="button"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="md:hidden text-gray-500 hover:text-[#1D4ED8] transition-colors p-1"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            role="img"
+            aria-label="Menu"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-[100%] left-0 w-full bg-white border-b border-gray-100 shadow-lg flex flex-col p-4 gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              navigate(PATH_CLIENT_PROJECTS);
+            }}
+            className={getNavClass(PATH_CLIENT_PROJECTS)}
+          >
+            Dự án
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              navigate(PATH_WORKSPACES, { state: { role: 'client' } });
+            }}
+            className={getNavClass('/workspace')}
+          >
+            Tin nhắn
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              navigate(PATH_CLIENT_FIND_FREELANCER);
+            }}
+            className={getNavClass(PATH_CLIENT_FIND_FREELANCER)}
+          >
+            Tìm Freelancer
+          </button>
+          <hr className="border-gray-100 my-2" />
+          <button
+            type="button"
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              navigate(PATH_CLIENT_AI_BRIEF);
+            }}
+            className="w-full bg-gradient-to-r from-[#0047FF] to-[#00B2FF] hover:opacity-90 text-white text-sm font-bold px-6 py-3 rounded-full shadow-sm transition-opacity cursor-pointer border-0"
+          >
+            Đăng dự án
+          </button>
+        </div>
+      )}
     </header>
   );
 };
