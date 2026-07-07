@@ -11,6 +11,7 @@ import ClientLandingPage from '../pages/ClientLandingPage';
 import ClientPricingPage from '../pages/ClientPricingPage';
 
 import AIBriefPage from '../pages/AIBriefPage';
+import ClientPaymentPage from '../pages/ClientPaymentPage';
 import ClientProjectDetailPage from '../pages/ClientProjectDetailPage';
 import ClientProjectListPage from '../pages/ClientProjectListPage';
 import ConfirmProjectPage from '../pages/ConfirmProjectPage';
@@ -48,6 +49,7 @@ const AppRoutes = () => {
       <Route path={paths.PATH_CLIENT_SUCCESS_PROJECT} element={<SuccessProjectPage />} />
       <Route path={paths.PATH_CLIENT_PROJECTS} element={<ClientProjectListPage />} />
       <Route path={paths.PATH_CLIENT_PROJECT_DETAIL} element={<ClientProjectDetailPage />} />
+      <Route path={paths.PATH_CLIENT_PAYMENT} element={<ClientPaymentPage />} />
       <Route path={paths.PATH_CLIENT_FIND_FREELANCER} element={<FindFreelancerPage />} />
 
       <Route path={paths.PATH_FREELANCER} element={<FreelancerPage />} />

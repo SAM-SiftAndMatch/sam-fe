@@ -13,6 +13,7 @@ export const PATH_CLIENT_CONFIRM_PROJECT = '/client/projects/confirm';
 export const PATH_CLIENT_SUCCESS_PROJECT = '/client/projects/success';
 export const PATH_CLIENT_PROJECTS = '/client/projects';
 export const PATH_CLIENT_PROJECT_DETAIL = '/client/projects/:id';
+export const PATH_CLIENT_PAYMENT = '/client/payment/:projectId/:freelancerId';
 export const PATH_CLIENT_FIND_FREELANCER = '/client/freelancers';
 
 export const PATH_FREELANCER = '/freelancer';

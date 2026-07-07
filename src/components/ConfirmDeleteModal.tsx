@@ -7,6 +7,7 @@ type ConfirmDeleteModalProps = {
   title?: string;
   message?: string;
   confirmText?: string;
+  isDanger?: boolean;
 };
 
 const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
@@ -16,6 +17,7 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   title = 'Xác nhận xóa dự án',
   message = 'Bạn có chắc chắn muốn xóa dự án này? Hành động này không thể hoàn tác.',
   confirmText = 'Xác nhận',
+  isDanger = true,
 }) => {
   if (!isOpen) return null;
 
@@ -35,7 +37,9 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
           <button
             type="button"
             onClick={onConfirm}
-            className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors border-0 cursor-pointer shadow-sm"
+            className={`px-4 py-2 rounded-lg text-white font-medium transition-colors border-0 cursor-pointer shadow-sm ${
+              isDanger ? 'bg-red-600 hover:bg-red-700' : 'bg-[#1D4ED8] hover:bg-[#153bb5]'
+            }`}
           >
             {confirmText}
           </button>

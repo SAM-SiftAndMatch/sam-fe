@@ -1,24 +1,75 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Header from '../components/Header';
 
 const WorkspacePage: React.FC = () => {
+  const { projectId } = useParams<{ projectId: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const [role, setRole] = useState<'client' | 'freelancer'>('client');
+  const [project, setProject] = useState<any>(null);
+  const [otherUser, setOtherUser] = useState<any>({
+    name: 'Nguyễn Linh Chi',
+    avatar:
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80',
+  });
 
   useEffect(() => {
     const passedRole = location.state?.role;
+    const passedFreelancer = location.state?.freelancer;
+    const passedProject = location.state?.project;
     const savedRole = localStorage.getItem('SAM_ROLE');
-    if (passedRole === 'freelancer' || savedRole === 'freelancer') {
-      setRole('freelancer');
-      localStorage.setItem('SAM_ROLE', 'freelancer');
-    } else {
-      setRole('client');
-      localStorage.setItem('SAM_ROLE', 'client');
+    const currentRole =
+      passedRole === 'freelancer' || savedRole === 'freelancer' ? 'freelancer' : 'client';
+    setRole(currentRole);
+    localStorage.setItem('SAM_ROLE', currentRole);
+
+    const savedProjects = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
+    let foundProject = savedProjects.find((p: any) => p.id?.toString() === projectId?.toString());
+
+    if (!foundProject && passedProject) {
+      foundProject = passedProject;
     }
-  }, [location.state]);
+
+    if (foundProject) {
+      setProject(foundProject);
+      // Mock other user info based on role and assignment
+      if (currentRole === 'client' && (foundProject.assignedFreelancerId || passedFreelancer)) {
+        if (passedFreelancer) {
+          setOtherUser({
+            id: passedFreelancer.id,
+            name: passedFreelancer.name,
+            avatar: passedFreelancer.avatar || `https://i.pravatar.cc/150?u=${passedFreelancer.id}`,
+          });
+        } else {
+          const mockFreelancers: Record<string, any> = {
+            p1: {
+              name: 'Trần Văn A',
+              avatar:
+                'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=100&q=80',
+            },
+            p2: {
+              name: 'Nguyễn Thị B',
+              avatar:
+                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80',
+            },
+          };
+          setOtherUser(mockFreelancers[foundProject.assignedFreelancerId] || mockFreelancers.p1);
+        }
+      } else {
+        setOtherUser({
+          id: 'client1',
+          name: 'Khách hàng',
+          avatar:
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80',
+        });
+      }
+    } else {
+      setProject({ title: 'Project Alpha' });
+    }
+  }, [location.state, projectId]);
 
   return (
     <div className="h-screen bg-[#F8FAFC] font-sans flex flex-col overflow-hidden">
@@ -35,7 +86,9 @@ const WorkspacePage: React.FC = () => {
               PA
             </div>
             <div>
-              <h2 className="text-[15px] font-bold text-gray-900 leading-tight">Project Alpha</h2>
+              <h2 className="text-[15px] font-bold text-gray-900 leading-tight line-clamp-1">
+                {project?.title || 'Project Alpha'}
+              </h2>
               <span className="text-[10px] font-bold text-[#1D4ED8] tracking-widest uppercase">
                 Active Sprint
               </span>
@@ -156,25 +209,34 @@ const WorkspacePage: React.FC = () => {
             </button>
           </nav>
 
-          <div className="mt-4 pt-6 border-t border-gray-200 flex flex-col gap-2">
-            <button
-              type="button"
-              className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-[#00A3FF] hover:bg-[#0092E6] text-white shadow-md transition-all cursor-pointer border-0"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-                role="img"
-                aria-label="Hire"
+          {project?.status === 'open' && (
+            <div className="mt-4 pt-6 border-t border-gray-200 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(`/client/payment/${project.id}/${otherUser.id || 'freelancer1'}`)
+                }
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-[#00A3FF] hover:bg-[#0092E6] text-white shadow-md transition-all cursor-pointer border-0"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span className="font-bold text-sm">Thuê chuyên gia</span>
-            </button>
-          </div>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  role="img"
+                  aria-label="Hire"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+                <span className="font-bold text-sm">Giao việc ngay</span>
+              </button>
+            </div>
+          )}
 
           <nav className="mt-auto flex flex-col gap-1 pb-4">
             <button
@@ -229,17 +291,13 @@ const WorkspacePage: React.FC = () => {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80"
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={otherUser.avatar} alt="Avatar" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900 leading-none mb-1">
-                  Nguyễn Linh Chi
+                  {otherUser.name}
                 </h3>
                 <p className="text-[11px] font-bold text-[#1D4ED8] flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#1D4ED8] animate-pulse" />
@@ -512,26 +570,9 @@ const WorkspacePage: React.FC = () => {
               <span className="text-[10px] font-bold text-[#1D4ED8] uppercase tracking-widest">
                 Dự án hiện tại
               </span>
-              <div className="w-8 h-8 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  role="img"
-                  aria-label="Rocket"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.5 10.5L21 3m-7.5 7.5L8.25 15.75m5.25-5.25v6.75a1.5 1.5 0 01-2.483 1.13L8.25 15.75m5.25-5.25H6.75a1.5 1.5 0 01-1.13-2.483L10.5 8.25M13.5 10.5L8.25 15.75m0 0L3 21"
-                  />
-                </svg>
-              </div>
             </div>
             <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-4">
-              Phát triển Hệ thống Chatbot AI
+              {project?.title || 'Phát triển Hệ thống Chatbot AI'}
             </h3>
             <div className="flex items-center justify-between">
               <div className="flex items-center -space-x-2">
