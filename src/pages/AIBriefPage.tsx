@@ -1,6 +1,6 @@
 import type React from 'react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import * as paths from '../routes/paths';
 
@@ -47,29 +47,46 @@ type AIState = 'idle' | 'analyzing' | 'result';
 
 const AIBriefPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialQuery = location.state?.initialQuery;
+
   const [aiState, setAiState] = useState<AIState>('idle');
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = useState(initialQuery || '');
   const [loadingText, setLoadingText] = useState('Đang kết nối với SAM AI...');
+
+  // Tự động phân tích nếu có initialQuery từ trang ngoài truyền vào
+  useEffect(() => {
+    if (initialQuery) {
+      handleAnalyze(initialQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuery]);
 
   // Lưu danh sách các tag đã được chọn (lưu theo định dạng: "questionId-tag")
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const handleAnalyze = () => {
-    if (!keyword.trim()) {
+  const handleAnalyze = (query?: string) => {
+    const q = query || keyword;
+    if (!q.trim()) {
       alert('Vui lòng nhập từ khóa dự án!');
       return;
     }
+
     setAiState('analyzing');
-    setLoadingText(`SAM AI đang quét hàng ngàn mẫu dự án tương tự về "${keyword}"...`);
+    setLoadingText('Đang phân tích yêu cầu...');
 
-    // Simulate AI thinking process
+    // Giả lập AI xử lý
     setTimeout(() => {
-      setLoadingText('Đang phân tích và tự động sinh bảng câu hỏi tối ưu...');
-
-      setTimeout(() => {
-        setAiState('result');
-      }, 1500);
+      setLoadingText('Đang trích xuất từ khóa...');
     }, 1500);
+
+    setTimeout(() => {
+      setLoadingText('Đang tạo form đăng dự án...');
+    }, 3000);
+
+    setTimeout(() => {
+      setAiState('result');
+    }, 4500);
   };
 
   const toggleTag = (qId: number, tag: string) => {
@@ -152,7 +169,7 @@ const AIBriefPage: React.FC = () => {
                 />
                 <button
                   type="button"
-                  onClick={handleAnalyze}
+                  onClick={() => handleAnalyze()}
                   className="w-full md:w-auto bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-bold px-8 py-3.5 md:py-3 rounded-xl md:rounded-full transition-colors cursor-pointer border-0 shrink-0 shadow-sm"
                 >
                   Phân tích

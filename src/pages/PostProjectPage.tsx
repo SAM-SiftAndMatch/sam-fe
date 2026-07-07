@@ -17,6 +17,7 @@ const SKILLS_SUGGESTION = [
 ];
 
 type LocationState = {
+  projectId?: string;
   keyword?: string;
   selectedTags?: string[];
   projectName?: string;
@@ -32,6 +33,7 @@ const PostProjectPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const {
+    projectId,
     keyword = '',
     selectedTags: initialTags = [],
     projectName: initialProjectName = '',
@@ -1423,6 +1425,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 onClick={() =>
                   navigate(PATH_CLIENT_CONFIRM_PROJECT, {
                     state: {
+                      projectId,
                       projectName,
                       description,
                       category,

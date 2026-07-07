@@ -71,7 +71,7 @@ const ConfirmProjectPage: React.FC = () => {
               type="button"
               onClick={() => {
                 const newProject = {
-                  id: `new_${Date.now()}`,
+                  id: state.projectId || `new_${Date.now()}`,
                   title: state.projectName || 'Dự án mới chưa đặt tên',
                   status: 'open',
                   budget: state.budgetAmount
@@ -86,10 +86,22 @@ const ConfirmProjectPage: React.FC = () => {
                 };
 
                 const existing = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
-                localStorage.setItem(
-                  'SAM_USER_PROJECTS',
-                  JSON.stringify([newProject, ...existing])
-                );
+                if (state.projectId) {
+                  const idx = existing.findIndex((p: any) => p.id === state.projectId);
+                  if (idx >= 0) {
+                    existing[idx] = {
+                      ...existing[idx],
+                      ...newProject,
+                      createdAt: existing[idx].createdAt,
+                    };
+                  } else {
+                    existing.unshift(newProject);
+                  }
+                } else {
+                  existing.unshift(newProject);
+                }
+
+                localStorage.setItem('SAM_USER_PROJECTS', JSON.stringify(existing));
 
                 navigate(PATH_CLIENT_SUCCESS_PROJECT, { state: { newProjectId: newProject.id } });
               }}

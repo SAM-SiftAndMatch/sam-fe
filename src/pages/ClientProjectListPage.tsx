@@ -83,6 +83,13 @@ const ClientProjectListPage: React.FC = () => {
             Đã hoàn thành
           </span>
         );
+      case 'cancelled':
+        return (
+          <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-bold border border-red-100 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
+            Đã hủy
+          </span>
+        );
       default:
         return null;
     }
@@ -135,6 +142,7 @@ const ClientProjectListPage: React.FC = () => {
                 { id: 'open', label: 'Đang chờ' },
                 { id: 'in_progress', label: 'Đang thực hiện' },
                 { id: 'completed', label: 'Hoàn thành' },
+                { id: 'cancelled', label: 'Đã hủy' },
               ].map((f) => (
                 <button
                   key={f.id}

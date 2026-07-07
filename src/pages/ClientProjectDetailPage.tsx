@@ -2,8 +2,14 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
-import { PATH_CLIENT_PROJECTS } from '../routes/paths';
+import {
+  PATH_CLIENT_PAYMENT,
+  PATH_CLIENT_POST_PROJECT,
+  PATH_CLIENT_PROJECTS,
+  PATH_WORKSPACE,
+} from '../routes/paths';
 
 // === MOCK DATA ===
 const PROJECT_DETAIL = {
@@ -49,9 +55,59 @@ const PROPOSALS = [
 ];
 
 const ClientProjectDetailPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { id } = useParams();
   const [project, setProject] = useState<any>(PROJECT_DETAIL);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isHireModalOpen, setIsHireModalOpen] = useState(false);
+  const [selectedProposal, setSelectedProposal] = useState<any>(null);
+
+  const handleDelete = () => {
+    const saved = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
+    const updated = saved.map((p: any) => {
+      if (p.id === id) {
+        return { ...p, status: 'cancelled' };
+      }
+      return p;
+    });
+    localStorage.setItem('SAM_USER_PROJECTS', JSON.stringify(updated));
+    setIsDeleteModalOpen(false);
+    navigate(PATH_CLIENT_PROJECTS);
+  };
+
+  const handleEdit = () => {
+    const budgetValue = project.budget
+      ? Number.parseInt(project.budget.toString().replace(/\D/g, ''), 10) || 1000000
+      : 1000000;
+
+    const isFeatured = Array.isArray(project.upgrades)
+      ? project.upgrades.includes('featured')
+      : project.upgrades?.featured || false;
+
+    const isUrgent = Array.isArray(project.upgrades)
+      ? project.upgrades.includes('urgent')
+      : project.upgrades?.urgent || false;
+
+    const isWarranty = Array.isArray(project.upgrades)
+      ? project.upgrades.includes('warranty')
+      : project.upgrades?.warranty || false;
+
+    navigate(PATH_CLIENT_POST_PROJECT, {
+      state: {
+        projectId: project.id,
+        projectName: project.title,
+        category: project.category || '',
+        description: project.description,
+        selectedSkills: Array.isArray(project.skills) ? project.skills : [],
+        budgetAmount: budgetValue,
+        upgrades: {
+          featured: isFeatured,
+          urgent: isUrgent,
+          warranty: isWarranty,
+        },
+      },
+    });
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -76,6 +132,13 @@ const ClientProjectDetailPage: React.FC = () => {
             Đã hoàn thành
           </span>
         );
+      case 'cancelled':
+        return (
+          <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-bold border border-red-100 flex items-center gap-1.5 w-fit">
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
+            Đã hủy
+          </span>
+        );
       default:
         return null;
     }
@@ -83,7 +146,7 @@ const ClientProjectDetailPage: React.FC = () => {
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
-    const found = saved.find((p: any) => p.id === id);
+    const found = saved.find((p: any) => p.id?.toString() === id?.toString());
     if (found) {
       setProject({ ...PROJECT_DETAIL, ...found });
     } else if (id && !['1', '2', '3', '4'].includes(id)) {
@@ -161,83 +224,154 @@ const ClientProjectDetailPage: React.FC = () => {
             </div>
 
             {/* Danh sách đề xuất */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Đề xuất từ Freelancer ({PROPOSALS.length})
-                </h2>
-              </div>
+            {project.status === 'open' && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Đề xuất từ Freelancer ({PROPOSALS.length})
+                  </h2>
+                </div>
 
-              <div className="flex flex-col gap-4">
-                {PROPOSALS.map((proposal) => (
-                  <div
-                    key={proposal.id}
-                    className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] flex flex-col md:flex-row gap-6"
-                  >
-                    {/* Info Freelancer */}
-                    <div className="flex flex-col items-center text-center md:w-1/4">
-                      <div className="relative mb-3">
-                        <img
-                          src={proposal.avatar}
-                          alt="Avatar"
-                          className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
-                        />
-                        {proposal.isTopRated && (
-                          <div className="absolute -bottom-1 -right-1 bg-yellow-400 text-white p-1 rounded-full border-2 border-white">
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
+                <div className="flex flex-col gap-4">
+                  {PROPOSALS.map((proposal) => (
+                    <div
+                      key={proposal.id}
+                      className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] flex flex-col md:flex-row gap-6"
+                    >
+                      {/* Info Freelancer */}
+                      <div className="flex flex-col items-center text-center md:w-1/4">
+                        <div className="relative mb-3">
+                          <img
+                            src={proposal.avatar}
+                            alt="Avatar"
+                            className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+                          />
+                          {proposal.isTopRated && (
+                            <div className="absolute -bottom-1 -right-1 bg-yellow-400 text-white p-1 rounded-full border-2 border-white">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-gray-900 text-sm mb-1">
+                          {proposal.freelancerName}
+                        </h4>
+                        <div className="flex items-center gap-1 text-xs font-bold text-yellow-500">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          {proposal.rating}{' '}
+                          <span className="text-gray-400">({proposal.reviews})</span>
+                        </div>
+                      </div>
+
+                      {/* Proposal Details */}
+                      <div className="md:w-3/4 flex flex-col">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                              Giá đề xuất
+                            </span>
+                            <span className="text-lg font-bold text-[#1D4ED8]">
+                              {proposal.proposedPrice}
+                            </span>
                           </div>
-                        )}
-                      </div>
-                      <h4 className="font-bold text-gray-900 text-sm mb-1">
-                        {proposal.freelancerName}
-                      </h4>
-                      <div className="flex items-center gap-1 text-xs font-bold text-yellow-500">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        {proposal.rating}{' '}
-                        <span className="text-gray-400">({proposal.reviews})</span>
+                          <div className="flex flex-col text-right">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                              Thời gian giao
+                            </span>
+                            <span className="text-sm font-bold text-gray-900">
+                              {proposal.deliveryTime}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
+                          "{proposal.coverLetter}"
+                        </p>
+                        <div className="mt-auto flex gap-3">
+                          <button
+                            onClick={() => {
+                              setSelectedProposal(proposal);
+                              setIsHireModalOpen(true);
+                            }}
+                            className="flex-1 py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold transition-colors cursor-pointer text-sm border-0 shadow-md"
+                          >
+                            Giao việc ngay
+                          </button>
+                          <button
+                            onClick={() => {
+                              // Save workspace entry to localStorage
+                              const workspaces = JSON.parse(
+                                localStorage.getItem('SAM_WORKSPACES') || '[]'
+                              );
+                              const wsKey = `${project.id}_${proposal.id}`;
+                              const exists = workspaces.some((w: any) => w.id === wsKey);
+                              if (!exists) {
+                                workspaces.push({
+                                  id: wsKey,
+                                  projectId: project.id?.toString(),
+                                  projectName: project.title,
+                                  freelancerId: proposal.id,
+                                  freelancerName: proposal.freelancerName,
+                                  freelancerAvatar: proposal.avatar,
+                                  lastMessage: 'Cuộc trò chuyện mới được tạo',
+                                  lastMessageTime: 'Vừa xong',
+                                  unreadCount: 0,
+                                  status: 'chatting',
+                                  createdAt: new Date().toISOString(),
+                                });
+                                localStorage.setItem('SAM_WORKSPACES', JSON.stringify(workspaces));
+                              }
+                              navigate(`/workspace/${project.id}`, {
+                                state: { role: 'client', freelancer: proposal, project },
+                              });
+                            }}
+                            className="flex-1 py-2.5 rounded-full border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors cursor-pointer text-sm bg-white"
+                          >
+                            Nhắn tin
+                          </button>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Proposal Details */}
-                    <div className="md:w-3/4 flex flex-col">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                            Giá đề xuất
-                          </span>
-                          <span className="text-lg font-bold text-[#1D4ED8]">
-                            {proposal.proposedPrice}
-                          </span>
-                        </div>
-                        <div className="flex flex-col text-right">
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                            Thời gian giao
-                          </span>
-                          <span className="text-sm font-bold text-gray-900">
-                            {proposal.deliveryTime}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
-                        "{proposal.coverLetter}"
-                      </p>
-                      <div className="mt-auto flex gap-3">
-                        <button className="flex-1 py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold transition-colors cursor-pointer text-sm border-0 shadow-md">
-                          Giao việc ngay
-                        </button>
-                        <button className="flex-1 py-2.5 rounded-full border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors cursor-pointer text-sm bg-white">
-                          Nhắn tin
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Trạng thái Đang thực hiện */}
+            {project.status === 'in_progress' && (
+              <div className="bg-[#EEF2FF] rounded-[24px] p-8 border border-[#E0E7FF] flex flex-col items-center text-center mt-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                  <svg
+                    className="w-8 h-8 text-[#1D4ED8]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8m-5.226-2a2 2 0 00-1.774-1.5H8m-5.226 2A2 2 0 001 8v10a2 2 0 002 2h14a2 2 0 002-2V8z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Dự án đang được thực hiện</h3>
+                <p className="text-gray-600 text-sm mb-6 max-w-md">
+                  Freelancer đã được giao việc và đang trong quá trình thực hiện dự án. Mọi trao đổi
+                  và giao nhận file sẽ diễn ra tại Phòng làm việc.
+                </p>
+                <button
+                  onClick={() =>
+                    navigate(PATH_WORKSPACE.replace(':projectId', project.id.toString()))
+                  }
+                  className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold py-3 px-8 rounded-full shadow-lg hover:opacity-90 transition-all cursor-pointer border-0"
+                >
+                  Vào phòng làm việc (Workspace)
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Cột Sidebar */}
@@ -346,11 +480,67 @@ const ClientProjectDetailPage: React.FC = () => {
                 Liên hệ hỗ trợ
               </button>
             </div>
+
+            {/* Project Action Buttons */}
+            <div className="flex flex-col gap-3 mt-6">
+              {project.status === 'cancelled' ? (
+                <button
+                  type="button"
+                  onClick={handleEdit}
+                  className="w-full py-3 bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold text-sm rounded-full shadow-md hover:opacity-90 transition-opacity cursor-pointer border-0"
+                >
+                  Đăng lại dự án
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleEdit}
+                    className="w-full py-3 bg-white text-[#1D4ED8] font-bold text-sm border-2 border-[#1D4ED8] rounded-full hover:bg-[#EEF2FF] transition-colors cursor-pointer"
+                  >
+                    Điều chỉnh dự án
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="w-full py-3 bg-white text-red-500 font-bold text-sm border-2 border-red-500 rounded-full hover:bg-red-50 transition-colors cursor-pointer"
+                  >
+                    Xóa dự án
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </main>
 
       <Footer />
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onConfirm={handleDelete}
+        onCancel={() => setIsDeleteModalOpen(false)}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={isHireModalOpen}
+        isDanger={false}
+        title="Xác nhận giao việc"
+        message={`Bạn đang chuẩn bị giao việc cho Freelancer ${selectedProposal?.freelancerName}. Bạn sẽ được chuyển sang trang thanh toán cọc an toàn.`}
+        confirmText="Thanh toán cọc và giao việc"
+        onConfirm={() => {
+          setIsHireModalOpen(false);
+          if (selectedProposal) {
+            navigate(
+              PATH_CLIENT_PAYMENT.replace(':projectId', project.id.toString()).replace(
+                ':freelancerId',
+                selectedProposal.id
+              )
+            );
+          }
+        }}
+        onCancel={() => setIsHireModalOpen(false)}
+      />
     </div>
   );
 };

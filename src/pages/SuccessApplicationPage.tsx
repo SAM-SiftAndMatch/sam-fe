@@ -1,11 +1,13 @@
 import type React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import { PATH_FREELANCER_APPLICATIONS, PATH_FREELANCER_JOBS } from '../routes/paths';
 
 const SuccessApplicationPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isDraft = location.state?.isDraft || false;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
@@ -40,11 +42,12 @@ const SuccessApplicationPage: React.FC = () => {
           </div>
 
           <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] mb-3">
-            Gửi hồ sơ ứng tuyển thành công
+            {isDraft ? 'Lưu bản nháp thành công' : 'Gửi hồ sơ ứng tuyển thành công'}
           </h1>
           <p className="text-gray-500 text-sm leading-relaxed mb-10">
-            Hồ sơ của bạn đã được gửi đến khách hàng. Khách hàng sẽ xem xét và phản hồi trong thời
-            gian sớm nhất.
+            {isDraft
+              ? 'Hồ sơ ứng tuyển của bạn đã được lưu nháp. Bạn có thể tiếp tục chỉnh sửa và gửi đi bất cứ lúc nào.'
+              : 'Hồ sơ của bạn đã được gửi đến khách hàng. Khách hàng sẽ xem xét và phản hồi trong thời gian sớm nhất.'}
           </p>
 
           <div className="flex flex-col gap-3 w-full">
@@ -53,7 +56,7 @@ const SuccessApplicationPage: React.FC = () => {
               onClick={() => navigate(PATH_FREELANCER_APPLICATIONS)}
               className="w-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white font-bold py-3.5 px-6 rounded-2xl shadow-[0_4px_15px_rgba(10,170,215,0.25)] transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
             >
-              Xem trạng thái chờ phản hồi
+              {isDraft ? 'Xem danh sách bản nháp' : 'Xem trạng thái chờ phản hồi'}
             </button>
 
             <button

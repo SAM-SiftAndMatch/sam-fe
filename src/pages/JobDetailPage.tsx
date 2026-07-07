@@ -1,5 +1,7 @@
 import type React from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import * as paths from '../routes/paths';
@@ -10,6 +12,7 @@ const JobDetailPage: React.FC = () => {
   const navigate = useNavigate();
   // Use first job as fallback if not found
   const job = MOCK_JOBS.find((j) => j.id.toString() === id) || MOCK_JOBS[0];
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   const savedApplications = JSON.parse(localStorage.getItem('SAM_FREELANCER_APPLICATIONS') || '[]');
   const existingApplication = savedApplications.find(
@@ -17,33 +20,50 @@ const JobDetailPage: React.FC = () => {
   );
 
   const getButtonText = () => {
-    if (!existingApplication) return 'Kết Nối Công Việc';
+    if (!existingApplication || existingApplication.status === 'cancelled') return 'Ứng tuyển';
     switch (existingApplication.status) {
       case 'pending':
         return 'Đang chờ phản hồi';
       case 'draft':
-        return 'Tiếp tục ứng tuyển';
+        return 'Ứng tuyển';
       case 'approved':
         return 'Đã được duyệt';
       case 'rejected':
         return 'Đã từ chối';
       default:
-        return 'Kết Nối Công Việc';
+        return 'Ứng tuyển';
     }
   };
 
   const getButtonClass = () => {
-    const baseClass = 'font-bold px-10 py-4 rounded-full transition-shadow text-lg border-0 ';
-    if (!existingApplication || existingApplication.status === 'draft') {
+    const baseClass = 'font-bold px-6 py-3 rounded-full transition-shadow text-sm border-0 ';
+    if (!existingApplication || ['draft', 'cancelled'].includes(existingApplication.status)) {
       return `${baseClass}bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:shadow-lg text-white cursor-pointer`;
     }
     return `${baseClass}bg-gray-200 text-gray-500 cursor-not-allowed`;
   };
 
   const handleApplyClick = () => {
-    if (!existingApplication || existingApplication.status === 'draft') {
+    if (
+      !existingApplication ||
+      existingApplication.status === 'draft' ||
+      existingApplication.status === 'cancelled'
+    ) {
       navigate(paths.PATH_JOB_APPLY.replace(':id', job.id.toString()));
     }
+  };
+
+  const handleCancelApplication = () => {
+    const updated = savedApplications.map((app: any) => {
+      if (app.jobId.toString() === job.id.toString()) {
+        return { ...app, status: 'cancelled' };
+      }
+      return app;
+    });
+    localStorage.setItem('SAM_FREELANCER_APPLICATIONS', JSON.stringify(updated));
+    setIsCancelModalOpen(false);
+    // Reload the page to reflect changes
+    window.location.reload();
   };
 
   return (
@@ -98,9 +118,21 @@ const JobDetailPage: React.FC = () => {
                 ))}
               </ul>
 
-              <button type="button" onClick={handleApplyClick} className={getButtonClass()}>
-                {getButtonText()}
-              </button>
+              <div className="flex items-center gap-4 mt-10">
+                <button type="button" onClick={handleApplyClick} className={getButtonClass()}>
+                  {getButtonText()}
+                </button>
+                {existingApplication &&
+                  !['draft', 'cancelled'].includes(existingApplication.status) && (
+                    <button
+                      type="button"
+                      onClick={() => setIsCancelModalOpen(true)}
+                      className="px-6 py-3 rounded-full font-bold bg-white text-red-500 border-2 border-red-500 hover:bg-red-50 transition-colors cursor-pointer text-sm"
+                    >
+                      Ngưng ứng tuyển
+                    </button>
+                  )}
+              </div>
             </section>
 
             <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
@@ -569,6 +601,15 @@ const JobDetailPage: React.FC = () => {
       </main>
 
       <Footer />
+
+      <ConfirmDeleteModal
+        isOpen={isCancelModalOpen}
+        title="Xác nhận ngưng ứng tuyển"
+        message="Bạn có chắc chắn muốn hủy ứng tuyển dự án này không? Bạn vẫn có thể ứng tuyển lại sau này."
+        confirmText="Ngưng ứng tuyển"
+        onConfirm={handleCancelApplication}
+        onCancel={() => setIsCancelModalOpen(false)}
+      />
     </div>
   );
 };

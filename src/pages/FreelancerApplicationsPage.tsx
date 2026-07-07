@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import Header from '../components/Header';
 import * as paths from '../routes/paths';
 
-type ApplicationStatus = 'draft' | 'pending' | 'approved' | 'rejected';
+type ApplicationStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'cancelled';
 
 interface Application {
   id: number;
@@ -23,6 +23,7 @@ const TABS = [
   { id: 'draft', label: 'Nháp' },
   { id: 'approved', label: 'Đã duyệt' },
   { id: 'rejected', label: 'Từ chối' },
+  { id: 'cancelled', label: 'Đã hủy' },
 ];
 
 const FreelancerApplicationsPage: React.FC = () => {
@@ -88,8 +89,14 @@ const FreelancerApplicationsPage: React.FC = () => {
         );
       case 'draft':
         return (
-          <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-bold">
+          <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
             Bản nháp
+          </span>
+        );
+      case 'cancelled':
+        return (
+          <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">
+            Đã hủy
           </span>
         );
       default:
@@ -199,7 +206,7 @@ const FreelancerApplicationsPage: React.FC = () => {
                         }
                         className="flex-1 md:flex-none bg-blue-50 hover:bg-blue-100 text-[#1D4ED8] font-bold py-2.5 px-6 rounded-xl transition-colors border-0 cursor-pointer"
                       >
-                        Tiếp tục sửa
+                        Tiếp tục ứng tuyển
                       </button>
                     ) : (
                       <button
