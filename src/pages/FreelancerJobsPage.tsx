@@ -172,9 +172,9 @@ const FreelancerJobsPage: React.FC = () => {
       </section>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 py-10 grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 py-10 grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-8">
         {/* Sidebar Filters */}
-        <aside className="lg:col-span-1 space-y-6">
+        <aside className="space-y-6">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Danh mục</h3>
             <div className="space-y-3">
@@ -223,7 +223,7 @@ const FreelancerJobsPage: React.FC = () => {
         </aside>
 
         {/* Job List */}
-        <div className="lg:col-span-3">
+        <div>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
               Công việc nổi bật ({filteredJobs.length})

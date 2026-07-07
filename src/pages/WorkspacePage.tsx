@@ -563,7 +563,7 @@ const WorkspacePage: React.FC = () => {
         </section>
 
         {/* ================= CỘT PHẢI (RIGHT SIDEBAR) ================= */}
-        <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-4 lg:h-full lg:overflow-y-auto lg:pr-2 pb-10 lg:pb-0">
+        <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-4 lg:h-full lg:overflow-y-auto lg:pr-2 pb-10 lg:pb-0 lg:hidden xl:flex">
           {/* 1. Project Info Card */}
           <div className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
             <div className="flex justify-between items-start mb-3">

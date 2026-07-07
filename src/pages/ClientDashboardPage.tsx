@@ -225,9 +225,9 @@ const ClientDashboardPage: React.FC = () => {
         </section>
 
         {/* ================= BOTTOM GRID (Left & Right) ================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-8">
           {/* CỘT TRÁI (8 Cols) */}
-          <div className="lg:col-span-8 flex flex-col gap-10">
+          <div className="flex flex-col gap-10">
             {/* Các yêu cầu nháp */}
             <section>
               <div className="flex items-center justify-between mb-5">
@@ -414,7 +414,7 @@ const ClientDashboardPage: React.FC = () => {
           </div>
 
           {/* CỘT PHẢI (4 Cols) */}
-          <div className="lg:col-span-4 flex flex-col gap-6">
+          <div className="flex flex-col gap-6">
             {/* Thông báo */}
             <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
               <div className="flex items-center justify-between mb-6">

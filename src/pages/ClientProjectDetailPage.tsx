@@ -182,9 +182,9 @@ const ClientProjectDetailPage: React.FC = () => {
         </div>
 
         {/* Cột chính */}
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
           {/* Thông tin dự án */}
-          <div className="lg:w-2/3 flex flex-col gap-6">
+          <div className="flex flex-col gap-6">
             <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
               <div className="flex justify-between items-start mb-4">
                 {getStatusBadge(project.status)}
@@ -375,7 +375,7 @@ const ClientProjectDetailPage: React.FC = () => {
           </div>
 
           {/* Cột Sidebar */}
-          <div className="lg:w-1/3 flex flex-col gap-6">
+          <div className="flex flex-col gap-6">
             <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">
                 Gói nâng cấp đã mua

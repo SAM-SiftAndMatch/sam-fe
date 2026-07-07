@@ -87,9 +87,9 @@ const JobDetailPage: React.FC = () => {
           Quay lại
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-8">
           {/* ================= CỘT TRÁI ================= */}
-          <div className="lg:col-span-8 flex flex-col gap-8">
+          <div className="flex flex-col gap-8">
             <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-snug mb-4">
                 {job.title}
@@ -385,7 +385,7 @@ const JobDetailPage: React.FC = () => {
           </div>
 
           {/* ================= CỘT PHẢI ================= */}
-          <div className="lg:col-span-4 flex flex-col gap-6">
+          <div className="flex flex-col gap-6">
             <section className="bg-[#EEF2FF] rounded-3xl p-6 border border-[#E0E7FF]">
               <div className="flex justify-between items-center mb-6">
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">

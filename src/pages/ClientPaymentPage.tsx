@@ -162,9 +162,9 @@ const ClientPaymentPage: React.FC = () => {
           Quay lại dự án
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_400px] gap-8 mt-4">
           {/* Left Column - Invoice Details */}
-          <div className="lg:col-span-7 flex flex-col gap-6">
+          <div className="flex flex-col gap-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Thanh toán cọc & Giao việc</h1>
             <p className="text-gray-500 text-sm mb-6">
               Vui lòng kiểm tra lại thông tin giao dịch trước khi xác nhận. Số tiền của bạn sẽ được
@@ -237,7 +237,7 @@ const ClientPaymentPage: React.FC = () => {
           </div>
 
           {/* Right Column - Payment Method */}
-          <div className="lg:col-span-5">
+          <div>
             <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sticky top-24">
               <h2 className="text-lg font-bold text-gray-900 mb-6">Tóm tắt thanh toán</h2>
 
