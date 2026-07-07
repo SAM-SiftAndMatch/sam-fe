@@ -2,8 +2,9 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
-import { PATH_CLIENT_PROJECTS } from '../routes/paths';
+import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_PROJECTS } from '../routes/paths';
 
 // === MOCK DATA ===
 const PROJECT_DETAIL = {
@@ -52,6 +53,54 @@ const ClientProjectDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [project, setProject] = useState<any>(PROJECT_DETAIL);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleDelete = () => {
+    const saved = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
+    const updated = saved.map((p: any) => {
+      if (p.id === id) {
+        return { ...p, status: 'cancelled' };
+      }
+      return p;
+    });
+    localStorage.setItem('SAM_USER_PROJECTS', JSON.stringify(updated));
+    setIsDeleteModalOpen(false);
+    navigate(PATH_CLIENT_PROJECTS);
+  };
+
+  const handleEdit = () => {
+    const budgetValue = project.budget
+      ? Number.parseInt(project.budget.toString().replace(/\D/g, ''), 10) || 1000000
+      : 1000000;
+
+    const isFeatured = Array.isArray(project.upgrades)
+      ? project.upgrades.includes('featured')
+      : project.upgrades?.featured || false;
+
+    const isUrgent = Array.isArray(project.upgrades)
+      ? project.upgrades.includes('urgent')
+      : project.upgrades?.urgent || false;
+
+    const isWarranty = Array.isArray(project.upgrades)
+      ? project.upgrades.includes('warranty')
+      : project.upgrades?.warranty || false;
+
+    navigate(PATH_CLIENT_POST_PROJECT, {
+      state: {
+        projectId: project.id,
+        projectName: project.title,
+        category: project.category || '',
+        description: project.description,
+        selectedSkills: Array.isArray(project.skills) ? project.skills : [],
+        budgetAmount: budgetValue,
+        upgrades: {
+          featured: isFeatured,
+          urgent: isUrgent,
+          warranty: isWarranty,
+        },
+      },
+    });
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -74,6 +123,13 @@ const ClientProjectDetailPage: React.FC = () => {
           <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5 w-fit">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
             Đã hoàn thành
+          </span>
+        );
+      case 'cancelled':
+        return (
+          <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-bold border border-red-100 flex items-center gap-1.5 w-fit">
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
+            Đã hủy
           </span>
         );
       default:
@@ -346,11 +402,47 @@ const ClientProjectDetailPage: React.FC = () => {
                 Liên hệ hỗ trợ
               </button>
             </div>
+
+            {/* Project Action Buttons */}
+            <div className="flex flex-col gap-3 mt-6">
+              {project.status === 'cancelled' ? (
+                <button
+                  type="button"
+                  onClick={handleEdit}
+                  className="w-full py-3 bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold text-sm rounded-full shadow-md hover:opacity-90 transition-opacity cursor-pointer border-0"
+                >
+                  Đăng lại dự án
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleEdit}
+                    className="w-full py-3 bg-white text-[#1D4ED8] font-bold text-sm border-2 border-[#1D4ED8] rounded-full hover:bg-[#EEF2FF] transition-colors cursor-pointer"
+                  >
+                    Điều chỉnh dự án
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="w-full py-3 bg-white text-red-500 font-bold text-sm border-2 border-red-500 rounded-full hover:bg-red-50 transition-colors cursor-pointer"
+                  >
+                    Xóa dự án
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </main>
 
       <Footer />
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onConfirm={handleDelete}
+        onCancel={() => setIsDeleteModalOpen(false)}
+      />
     </div>
   );
 };

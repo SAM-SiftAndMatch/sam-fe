@@ -1,6 +1,7 @@
 import FooterDashboard from '@/components/FooterDashboard';
 import type React from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import GuestHeader from '../components/GuestHeader';
 import * as paths from '../routes/paths';
 
@@ -86,6 +87,18 @@ const TESTIMONIALS = [
 ];
 
 const ClientLandingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (query?: string) => {
+    const q = query || searchQuery;
+    if (q.trim()) {
+      navigate(paths.PATH_CLIENT_AI_BRIEF, { state: { initialQuery: q } });
+    } else {
+      navigate(paths.PATH_CLIENT_AI_BRIEF);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       {/* HEADER */}
@@ -148,9 +161,13 @@ const ClientLandingPage: React.FC = () => {
               aria-label="Tìm kiếm công việc"
               placeholder="Mô tả công việc bạn cần (ví dụ: 'Thiết kế logo hiện đại cho startup AI')"
               className="flex-1 bg-transparent border-0 focus:ring-0 outline-none text-sm px-3 text-gray-700 placeholder:text-gray-400"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
             <button
               type="button"
+              onClick={() => handleSearch()}
               className="bg-[#1D4ED8] hover:bg-[#153bb5] text-white text-sm font-bold px-8 py-3 rounded-full transition-colors cursor-pointer border-0 shrink-0"
             >
               Tìm kiếm
@@ -170,6 +187,7 @@ const ClientLandingPage: React.FC = () => {
               <button
                 key={tag}
                 type="button"
+                onClick={() => handleSearch(tag)}
                 className="bg-white border border-gray-200 text-gray-600 text-xs font-semibold px-4 py-2 rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 {tag}
