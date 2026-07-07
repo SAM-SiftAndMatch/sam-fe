@@ -138,37 +138,39 @@ const ClientLandingPage: React.FC = () => {
           </h2>
 
           {/* Search Bar */}
-          <div className="w-full max-w-2xl bg-white rounded-full p-2.5 flex items-center shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 relative z-10 mb-6">
-            <span className="pl-4 text-gray-400">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-                role="img"
-                aria-label="Search"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </span>
-            <input
-              type="text"
-              aria-label="Tìm kiếm công việc"
-              placeholder="Mô tả công việc bạn cần (ví dụ: 'Thiết kế logo hiện đại cho startup AI')"
-              className="flex-1 bg-transparent border-0 focus:ring-0 outline-none text-sm px-3 text-gray-700 placeholder:text-gray-400"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
+          <div className="w-full max-w-2xl bg-white rounded-[28px] sm:rounded-full p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 relative z-10 mb-6 gap-2 sm:gap-0">
+            <div className="flex items-center flex-1 min-w-0">
+              <span className="pl-4 text-gray-400">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  role="img"
+                  aria-label="Search"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </span>
+              <input
+                type="text"
+                aria-label="Tìm kiếm công việc"
+                placeholder="Mô tả công việc bạn cần (ví dụ: 'Thiết kế logo hiện đại cho startup AI')"
+                className="flex-1 bg-transparent border-0 focus:ring-0 outline-none text-sm px-3 text-gray-700 placeholder:text-gray-400 min-w-0"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
             <button
               type="button"
               onClick={() => handleSearch()}
-              className="bg-[#1D4ED8] hover:bg-[#153bb5] text-white text-sm font-bold px-8 py-3 rounded-full transition-colors cursor-pointer border-0 shrink-0"
+              className="bg-[#1D4ED8] hover:bg-[#153bb5] text-white text-sm font-bold px-6 sm:px-8 py-3 rounded-full transition-colors cursor-pointer border-0 shrink-0"
             >
               Tìm kiếm
             </button>
@@ -212,7 +214,7 @@ const ClientLandingPage: React.FC = () => {
           </div>
 
           {/* Stats Box */}
-          <div className="w-full max-w-3xl bg-white rounded-3xl border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)] p-8 md:p-10 flex items-center justify-around relative z-10 divide-x divide-gray-100">
+          <div className="w-full max-w-3xl bg-white rounded-3xl border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)] p-8 md:p-10 flex flex-col sm:flex-row items-center justify-around relative z-10 sm:divide-x divide-gray-100 gap-6 sm:gap-0">
             <div className="flex flex-col items-center flex-1">
               <span className="text-3xl font-black text-[#1D4ED8] mb-1">10,000+</span>
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
@@ -299,7 +301,7 @@ const ClientLandingPage: React.FC = () => {
               Tiết kiệm 80% thời gian tìm kiếm nhờ công nghệ AI hàng đầu
             </p>
 
-            <div className="flex flex-col md:flex-row items-start justify-between relative gap-10 md:gap-0">
+            <div className="flex flex-col md:flex-row items-center md:items-start justify-between relative gap-10 md:gap-0">
               {/* Dashed Line Background (Desktop only) */}
               <div className="hidden md:block absolute top-7 left-[10%] right-[10%] border-t-2 border-dashed border-gray-300 z-0" />
 
