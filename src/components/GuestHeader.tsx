@@ -14,6 +14,7 @@ interface GuestHeaderProps {
 
 const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
   const [activeId, setActiveId] = useState<string>('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!navItems) return;
@@ -124,6 +125,82 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
           Bắt đầu ngay
         </Link>
       </div>
+
+      {/* Hamburger Menu Button (Mobile Only) */}
+      <button
+        type="button"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="md:hidden ml-4 text-gray-500 hover:text-[#1D4ED8] transition-colors p-1"
+      >
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          role="img"
+          aria-label="Menu"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-[100%] left-0 w-full bg-white border-b border-gray-100 shadow-lg flex flex-col p-4 gap-2">
+          {navItems ? (
+            navItems.map((item) => {
+              const isActive = activeId === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    scrollToSection(item.id);
+                  }}
+                  className={`text-sm font-semibold px-4 py-3 rounded-xl text-left border-0 transition-colors ${
+                    isActive
+                      ? 'bg-[#EEF2FF] text-[#1D4ED8]'
+                      : 'text-gray-600 bg-transparent hover:bg-gray-50'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })
+          ) : (
+            <>
+              <button
+                type="button"
+                className="text-sm font-semibold text-gray-600 bg-transparent px-4 py-3 rounded-xl text-left border-0 transition-colors hover:bg-gray-50"
+              >
+                Khách hàng
+              </button>
+              <button
+                type="button"
+                className="text-sm font-semibold text-gray-600 bg-transparent px-4 py-3 rounded-xl text-left border-0 transition-colors hover:bg-gray-50"
+              >
+                Freelancer
+              </button>
+              <button
+                type="button"
+                className="text-sm font-semibold text-gray-600 bg-transparent px-4 py-3 rounded-xl text-left border-0 transition-colors hover:bg-gray-50"
+              >
+                Dịch vụ
+              </button>
+            </>
+          )}
+          <hr className="border-gray-100 my-2" />
+          <Link
+            to={paths.PATH_LOGIN}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="w-full text-center text-sm font-bold text-gray-700 bg-gray-50 hover:bg-gray-100 px-6 py-3 rounded-xl cursor-pointer transition-colors"
+          >
+            Đăng nhập
+          </Link>
+        </div>
+      )}
     </header>
   );
 };
