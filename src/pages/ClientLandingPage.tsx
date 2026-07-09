@@ -1,6 +1,6 @@
 import FooterDashboard from '@/components/FooterDashboard';
 import type React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import GuestHeader from '../components/GuestHeader';
 import * as paths from '../routes/paths';
@@ -89,14 +89,45 @@ const TESTIMONIALS = [
 const ClientLandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [placeholderText, setPlaceholderText] = useState('');
+
+  useEffect(() => {
+    const fullText = "Mô tả công việc bạn cần (ví dụ: 'Thiết kế logo hiện đại cho startup')";
+    let i = 0;
+    let isDeleting = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const type = () => {
+      if (!isDeleting) {
+        setPlaceholderText(fullText.slice(0, i + 1));
+        i++;
+        if (i === fullText.length) {
+          isDeleting = true;
+          timeoutId = setTimeout(type, 3000); // Wait before deleting
+        } else {
+          timeoutId = setTimeout(type, 50); // Typing speed
+        }
+      } else {
+        setPlaceholderText(fullText.slice(0, i - 1));
+        i--;
+        if (i === 0) {
+          isDeleting = false;
+          timeoutId = setTimeout(type, 500); // Wait before re-typing
+        } else {
+          timeoutId = setTimeout(type, 20); // Deleting speed
+        }
+      }
+    };
+    
+    timeoutId = setTimeout(type, 500);
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   const handleSearch = (query?: string) => {
     const q = query || searchQuery;
-    if (q.trim()) {
-      navigate(paths.PATH_CLIENT_AI_BRIEF, { state: { initialQuery: q } });
-    } else {
-      navigate(paths.PATH_CLIENT_AI_BRIEF);
-    }
+    if (!q.trim()) return; // Do nothing if empty
+
+    navigate(paths.PATH_LOGIN, { state: { initialQuery: q, returnTo: paths.PATH_CLIENT_AI_BRIEF } });
   };
 
   return (
@@ -138,7 +169,7 @@ const ClientLandingPage: React.FC = () => {
           </h2>
 
           {/* Search Bar */}
-          <div className="w-full max-w-2xl bg-white rounded-[28px] sm:rounded-full p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 relative z-10 mb-6 gap-2 sm:gap-0">
+          <div className="w-full max-w-4xl bg-white rounded-[28px] sm:rounded-full p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 relative z-10 mb-6 gap-2 sm:gap-0">
             <div className="flex items-center flex-1 min-w-0">
               <span className="pl-4 text-gray-400">
                 <svg
@@ -160,7 +191,7 @@ const ClientLandingPage: React.FC = () => {
               <input
                 type="text"
                 aria-label="Tìm kiếm công việc"
-                placeholder="Mô tả công việc bạn cần (ví dụ: 'Thiết kế logo hiện đại cho startup AI')"
+                placeholder={placeholderText}
                 className="flex-1 bg-transparent border-0 focus:ring-0 outline-none text-sm px-3 text-gray-700 placeholder:text-gray-400 min-w-0"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -172,7 +203,7 @@ const ClientLandingPage: React.FC = () => {
               onClick={() => handleSearch()}
               className="bg-[#1D4ED8] hover:bg-[#153bb5] text-white text-sm font-bold px-6 sm:px-8 py-3 rounded-full transition-colors cursor-pointer border-0 shrink-0"
             >
-              Tìm kiếm
+              Tạo mô tả
             </button>
           </div>
 

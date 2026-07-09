@@ -15,7 +15,7 @@ const FreelancerPage: React.FC = () => {
       <Header />
 
       <section className="w-full flex flex-col items-center text-center py-24 px-4 relative overflow-hidden bg-gradient-to-b from-[#F4F7FF] to-white">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#0047FF] opacity-5 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-[#0AAAD7]/20 to-[#1D4ED8]/10 blur-[100px] rounded-full pointer-events-none" />
 
         <h1 className="text-4xl md:text-[56px] font-black text-[#1A1B22] leading-tight mb-6 max-w-3xl z-10">
           Nơi kết nối công việc <br />
