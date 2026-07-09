@@ -64,7 +64,10 @@ const AppRoutes = () => {
       />
       <Route path={paths.PATH_FREELANCER_APPLICATIONS} element={<FreelancerApplicationsPage />} />
       <Route path={paths.PATH_FREELANCER_PROJECTS} element={<FreelancerProjectListPage />} />
-      <Route path={paths.PATH_FREELANCER_PROJECT_DETAIL} element={<FreelancerProjectDetailPage />} />
+      <Route
+        path={paths.PATH_FREELANCER_PROJECT_DETAIL}
+        element={<FreelancerProjectDetailPage />}
+      />
       <Route path={paths.PATH_FREELANCER_EARNINGS} element={<FreelancerEarningsPage />} />
 
       <Route path={paths.PATH_JOB_DETAIL} element={<JobDetailPage />} />

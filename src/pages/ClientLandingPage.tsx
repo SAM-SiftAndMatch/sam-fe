@@ -1,6 +1,6 @@
 import FooterDashboard from '@/components/FooterDashboard';
 import type React from 'react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import GuestHeader from '../components/GuestHeader';
 import * as paths from '../routes/paths';
@@ -118,7 +118,7 @@ const ClientLandingPage: React.FC = () => {
         }
       }
     };
-    
+
     timeoutId = setTimeout(type, 500);
     return () => clearTimeout(timeoutId);
   }, []);
@@ -127,7 +127,9 @@ const ClientLandingPage: React.FC = () => {
     const q = query || searchQuery;
     if (!q.trim()) return; // Do nothing if empty
 
-    navigate(paths.PATH_LOGIN, { state: { initialQuery: q, returnTo: paths.PATH_CLIENT_AI_BRIEF } });
+    navigate(paths.PATH_LOGIN, {
+      state: { initialQuery: q, returnTo: paths.PATH_CLIENT_AI_BRIEF },
+    });
   };
 
   return (

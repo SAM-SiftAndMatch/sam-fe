@@ -144,8 +144,7 @@ const FreelancerProjectListPage: React.FC = () => {
     }
   };
 
-  const formatCurrency = (val: number) =>
-    val.toLocaleString('vi-VN') + ' VND';
+  const formatCurrency = (val: number) => `${val.toLocaleString('vi-VN')} VND`;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
@@ -164,24 +163,48 @@ const FreelancerProjectListPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-[#1D4ED8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              <svg
+                className="w-6 h-6 text-[#1D4ED8]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                />
               </svg>
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Tổng dự án</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
+                Tổng dự án
+              </p>
               <p className="text-2xl font-black text-gray-900">{STATS.totalProjects}</p>
             </div>
           </div>
 
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] flex items-center gap-4">
             <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-6 h-6 text-emerald-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Thu nhập</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
+                Thu nhập
+              </p>
               <p className="text-2xl font-black text-gray-900">{STATS.totalEarnings}</p>
             </div>
           </div>
@@ -193,8 +216,12 @@ const FreelancerProjectListPage: React.FC = () => {
               </svg>
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Đánh giá</p>
-              <p className="text-2xl font-black text-gray-900">{STATS.avgRating} <span className="text-sm font-medium text-gray-400">/ 5.0</span></p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
+                Đánh giá
+              </p>
+              <p className="text-2xl font-black text-gray-900">
+                {STATS.avgRating} <span className="text-sm font-medium text-gray-400">/ 5.0</span>
+              </p>
             </div>
           </div>
         </div>
@@ -203,8 +230,18 @@ const FreelancerProjectListPage: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="relative w-full md:w-96">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="h-5 w-5 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </div>
             <input
@@ -230,7 +267,12 @@ const FreelancerProjectListPage: React.FC = () => {
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </div>
           </div>
@@ -258,16 +300,24 @@ const FreelancerProjectListPage: React.FC = () => {
 
               <div className="flex items-center justify-between md:justify-end gap-8 md:border-l md:border-gray-100 md:pl-8 pt-4 md:pt-0 border-t border-gray-50 md:border-t-0 w-full md:w-auto">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Giá trị</span>
-                  <span className="text-sm font-bold text-[#1D4ED8]">{formatCurrency(project.budget)}</span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                    Giá trị
+                  </span>
+                  <span className="text-sm font-bold text-[#1D4ED8]">
+                    {formatCurrency(project.budget)}
+                  </span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Deadline</span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                    Deadline
+                  </span>
                   <span className="text-sm font-bold text-gray-900">{project.deadline}</span>
                 </div>
                 {project.status === 'in_progress' && (
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Tiến độ</span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                      Tiến độ
+                    </span>
                     <span className="text-sm font-bold text-blue-600">{project.progress}%</span>
                   </div>
                 )}
@@ -278,8 +328,18 @@ const FreelancerProjectListPage: React.FC = () => {
           {filteredProjects.length === 0 && (
             <div className="py-20 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-dashed border-gray-200">
               <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-400">
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                  />
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Không tìm thấy dự án</h3>

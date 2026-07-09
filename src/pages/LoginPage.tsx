@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import * as paths from '../routes/paths';
 
 const LoginPage: React.FC = () => {
