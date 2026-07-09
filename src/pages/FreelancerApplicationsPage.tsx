@@ -126,21 +126,29 @@ const FreelancerApplicationsPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-bold transition-all border-0 cursor-pointer ${
-                  activeTab === tab.id
-                    ? 'bg-[#1D4ED8] text-white shadow-md'
-                    : 'bg-white text-gray-600 hover:bg-blue-50 hover:text-[#1D4ED8] border border-gray-200'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          {/* Tabs / Filter */}
+          <div className="relative w-full md:w-56 shrink-0">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value as any)}
+              className="w-full appearance-none bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-10 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
+            >
+              {TABS.map((tab) => (
+                <option key={tab.id} value={tab.id}>
+                  {tab.label}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
           </div>
         </div>
 

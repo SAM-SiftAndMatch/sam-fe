@@ -4,7 +4,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   PATH_FREELANCER,
   PATH_FREELANCER_APPLICATIONS,
+  PATH_FREELANCER_EARNINGS,
   PATH_FREELANCER_JOBS,
+  PATH_FREELANCER_PROJECTS,
   PATH_LOGIN,
   PATH_WORKSPACES,
 } from '../routes/paths';
@@ -78,10 +80,18 @@ const Header: React.FC = () => {
         >
           Tin nhắn
         </button>
-        <button type="button" className={getNavClass('/my-projects')}>
+        <button
+          type="button"
+          onClick={() => navigate(PATH_FREELANCER_PROJECTS)}
+          className={getNavClass(PATH_FREELANCER_PROJECTS)}
+        >
           Dự án của tôi
         </button>
-        <button type="button" className={getNavClass('/income')}>
+        <button
+          type="button"
+          onClick={() => navigate(PATH_FREELANCER_EARNINGS)}
+          className={getNavClass(PATH_FREELANCER_EARNINGS)}
+        >
           Thu nhập
         </button>
       </nav>
@@ -204,9 +214,9 @@ const Header: React.FC = () => {
             type="button"
             onClick={() => {
               setIsMobileMenuOpen(false);
-              // navigate(PATH_FREELANCER_MY_PROJECTS);
+              navigate(PATH_FREELANCER_PROJECTS);
             }}
-            className={getNavClass('/my-projects')}
+            className={getNavClass(PATH_FREELANCER_PROJECTS)}
           >
             Dự án của tôi
           </button>
@@ -214,9 +224,9 @@ const Header: React.FC = () => {
             type="button"
             onClick={() => {
               setIsMobileMenuOpen(false);
-              // navigate(PATH_FREELANCER_INCOME);
+              navigate(PATH_FREELANCER_EARNINGS);
             }}
-            className={getNavClass('/income')}
+            className={getNavClass(PATH_FREELANCER_EARNINGS)}
           >
             Thu nhập
           </button>

@@ -136,27 +136,34 @@ const ClientProjectListPage: React.FC = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex items-center gap-2 bg-white p-1.5 rounded-full border border-gray-200 shadow-sm overflow-x-auto w-full md:w-auto">
-              {[
-                { id: 'all', label: 'Tất cả' },
-                { id: 'open', label: 'Đang chờ' },
-                { id: 'in_progress', label: 'Đang thực hiện' },
-                { id: 'completed', label: 'Hoàn thành' },
-                { id: 'cancelled', label: 'Đã hủy' },
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setFilter(f.id as any)}
-                  className={`px-5 py-2 rounded-full text-sm font-bold transition-colors whitespace-nowrap cursor-pointer border-0 ${
-                    filter === f.id
-                      ? 'bg-[#1D4ED8] text-white shadow-md'
-                      : 'bg-transparent text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
+            <div className="relative w-full md:w-48 shrink-0">
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value as any)}
+                className="w-full appearance-none bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-10 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
+              >
+                {[
+                  { id: 'all', label: 'Tất cả trạng thái' },
+                  { id: 'open', label: 'Đang chờ' },
+                  { id: 'in_progress', label: 'Đang thực hiện' },
+                  { id: 'completed', label: 'Hoàn thành' },
+                  { id: 'cancelled', label: 'Đã hủy' },
+                ].map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </div>

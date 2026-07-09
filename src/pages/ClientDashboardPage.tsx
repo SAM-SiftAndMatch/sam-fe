@@ -1,4 +1,5 @@
 import type React from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import FooterDashboard from '../components/FooterDashboard';
@@ -103,6 +104,48 @@ const NOTIFICATIONS = [
 
 const ClientDashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [placeholderText, setPlaceholderText] = useState('');
+
+  useEffect(() => {
+    const fullText = "Mô tả công việc bạn cần (ví dụ: 'Thiết kế logo hiện đại cho startup')";
+    let i = 0;
+    let isDeleting = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const type = () => {
+      if (!isDeleting) {
+        setPlaceholderText(fullText.slice(0, i + 1));
+        i++;
+        if (i === fullText.length) {
+          isDeleting = true;
+          timeoutId = setTimeout(type, 3000); // Wait before deleting
+        } else {
+          timeoutId = setTimeout(type, 50); // Typing speed
+        }
+      } else {
+        setPlaceholderText(fullText.slice(0, i - 1));
+        i--;
+        if (i === 0) {
+          isDeleting = false;
+          timeoutId = setTimeout(type, 500); // Wait before re-typing
+        } else {
+          timeoutId = setTimeout(type, 20); // Deleting speed
+        }
+      }
+    };
+
+    timeoutId = setTimeout(type, 500);
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  const handleSearch = (query?: string) => {
+    const q = query || searchQuery;
+    if (!q.trim()) return; // Do nothing if empty
+
+    navigate(PATH_CLIENT_AI_BRIEF, { state: { initialQuery: q } });
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       {/* 1. Kế thừa Header riêng biệt */}
@@ -111,34 +154,78 @@ const ClientDashboardPage: React.FC = () => {
       {/* 2. Main Content */}
       <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-12 flex flex-col gap-10">
         {/* ================= HERO SECTION ================= */}
-        <section className="flex flex-col items-center text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
+        <section className="flex flex-col items-center text-center relative w-full">
+          {/* Background Blur */}
+          <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-[#0AAAD7]/20 to-[#1D4ED8]/10 blur-[100px] rounded-full pointer-events-none" />
+
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight relative z-10">
             Chào mừng trở lại,
             <br />
             Ngô Tiến Nhật
           </h1>
-          <p className="text-gray-500 text-sm md:text-base mb-8 max-w-lg leading-relaxed">
+          <p className="text-gray-500 text-sm md:text-base mb-8 max-w-lg leading-relaxed relative z-10">
             Bắt đầu dự án mới hoặc quản lý các công việc đang diễn ra một cách thông minh và hiệu
             quả hơn với SAM AI
           </p>
-          <button
-            type="button"
-            onClick={() => navigate(PATH_CLIENT_AI_BRIEF)}
-            className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white font-bold px-8 py-3.5 rounded-full shadow-[0_8px_20px_rgba(29,78,216,0.25)] transition-all flex items-center gap-2 cursor-pointer border-0"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-              role="img"
-              aria-label="Add"
+          {/* Search Bar */}
+          <div className="w-full max-w-4xl bg-white rounded-[28px] sm:rounded-full p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 relative z-10 mb-6 gap-2 sm:gap-0">
+            <div className="flex items-center flex-1 min-w-0">
+              <span className="pl-4 text-gray-400">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  role="img"
+                  aria-label="Search"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </span>
+              <input
+                type="text"
+                aria-label="Tìm kiếm công việc"
+                placeholder={placeholderText}
+                className="flex-1 bg-transparent border-0 focus:ring-0 outline-none text-sm px-3 text-gray-700 placeholder:text-gray-400 min-w-0"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => handleSearch()}
+              className="bg-[#1D4ED8] hover:bg-[#153bb5] text-white text-sm font-bold px-6 sm:px-8 py-3 rounded-full transition-colors cursor-pointer border-0 shrink-0"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Tạo yêu cầu công việc
-          </button>
+              Tạo mô tả
+            </button>
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap items-center justify-center gap-3 relative z-10 mb-8">
+            <span className="text-sm text-gray-500">Gợi ý:</span>
+            {[
+              'Phát triển Website',
+              'Nhập liệu',
+              'Trợ lý ảo',
+              'Soạn thảo văn bản',
+              'AI Engineer',
+            ].map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => handleSearch(tag)}
+                className="bg-white border border-gray-200 text-gray-600 text-xs font-semibold px-4 py-2 rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </section>
 
         {/* ================= STATS SECTION ================= */}

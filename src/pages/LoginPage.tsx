@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import * as paths from '../routes/paths';
 
 const LoginPage: React.FC = () => {
@@ -11,6 +11,8 @@ const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as { returnTo?: string; initialQuery?: string } | null;
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +28,11 @@ const LoginPage: React.FC = () => {
 
       // 2 Mock data: client@sam.com và freelancer@sam.com
       if (email === 'client@sam.com') {
-        navigate(paths.PATH_CLIENT_DASHBOARD);
+        if (state?.returnTo) {
+          navigate(state.returnTo, { state: { initialQuery: state.initialQuery } });
+        } else {
+          navigate(paths.PATH_CLIENT_DASHBOARD);
+        }
       } else if (email === 'freelancer@sam.com') {
         navigate(paths.PATH_FREELANCER);
       } else {
@@ -314,7 +320,13 @@ const LoginPage: React.FC = () => {
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => navigate(paths.PATH_CLIENT_DASHBOARD)}
+                onClick={() => {
+                  if (state?.returnTo) {
+                    navigate(state.returnTo, { state: { initialQuery: state.initialQuery } });
+                  } else {
+                    navigate(paths.PATH_CLIENT_DASHBOARD);
+                  }
+                }}
                 className="flex-1 text-[11px] font-bold py-2 rounded-lg border border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 Đăng nhập với tư cách Khách hàng
