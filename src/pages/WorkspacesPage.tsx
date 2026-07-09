@@ -20,6 +20,7 @@ const WorkspacesPage: React.FC = () => {
   const location = useLocation();
   const [role, setRole] = useState<'client' | 'freelancer'>('client');
   const [workspaces, setWorkspaces] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const passedRole = location.state?.role;
@@ -42,6 +43,15 @@ const WorkspacesPage: React.FC = () => {
 
   const getStatusInfo = (status: string) => STATUS_LABELS[status] || STATUS_LABELS.chatting;
 
+  const filteredWorkspaces = workspaces.filter((workspace) => {
+    const searchLower = searchQuery.toLowerCase();
+    const projectName = workspace.projectName || '';
+    const freelancerName = workspace.freelancerName || '';
+    return (
+      projectName.toLowerCase().includes(searchLower) ||
+      freelancerName.toLowerCase().includes(searchLower)
+    );
+  });
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
       {role === 'client' ? <ClientDashboardHeader /> : <Header />}
@@ -57,6 +67,32 @@ const WorkspacesPage: React.FC = () => {
               bạn.
             </p>
           </div>
+        </div>
+
+        {/* Search Input */}
+        <div className="mb-6 relative w-full md:w-96">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg
+              className="h-5 w-5 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Tìm theo tên dự án hoặc người nhắn..."
+            className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm"
+          />
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -83,8 +119,30 @@ const WorkspacesPage: React.FC = () => {
                 {role === 'client' ? 'freelancer' : 'khách hàng'}.
               </p>
             </div>
+          ) : filteredWorkspaces.length === 0 ? (
+            <div className="p-10 text-center">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                <svg
+                  className="w-8 h-8"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Không tìm thấy kết quả</h3>
+              <p className="text-gray-500 text-sm">
+                Không có cuộc trò chuyện nào phù hợp với từ khóa "{searchQuery}".
+              </p>
+            </div>
           ) : (
-            workspaces.map((workspace) => {
+            filteredWorkspaces.map((workspace) => {
               const statusInfo = getStatusInfo(workspace.status);
               return (
                 <div
