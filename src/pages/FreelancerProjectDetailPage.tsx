@@ -205,7 +205,7 @@ const FreelancerProjectDetailPage: React.FC = () => {
         return (
           <span className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5 w-fit">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-            Khách hàng đã duyệt
+            Đã duyệt
           </span>
         );
       }

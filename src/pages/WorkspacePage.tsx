@@ -16,6 +16,27 @@ const WorkspacePage: React.FC = () => {
       'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80',
   });
 
+  // Product Review States
+  const [productState, setProductState] = useState<'pending' | 'checking' | 'review' | 'approved' | 'revision'>('pending');
+  const [aiCheckProgress, setAiCheckProgress] = useState(0);
+  const [showRevisionInput, setShowRevisionInput] = useState(false);
+  const [revisionText, setRevisionText] = useState('');
+
+  const handleStartAiCheck = () => {
+    setProductState('checking');
+    setAiCheckProgress(0);
+    const interval = setInterval(() => {
+      setAiCheckProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => setProductState('review'), 500);
+          return 100;
+        }
+        return prev + Math.random() * 20;
+      });
+    }, 400);
+  };
+
   useEffect(() => {
     const passedRole = location.state?.role;
     const passedFreelancer = location.state?.freelancer;
@@ -564,211 +585,157 @@ const WorkspacePage: React.FC = () => {
 
         {/* ================= CỘT PHẢI (RIGHT SIDEBAR) ================= */}
         <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-4 lg:h-full lg:overflow-y-auto lg:pr-2 pb-10 lg:pb-0 lg:hidden xl:flex">
-          {/* 1. Project Info Card */}
-          <div className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-            <div className="flex justify-between items-start mb-3">
-              <span className="text-[10px] font-bold text-[#1D4ED8] uppercase tracking-widest">
-                Dự án hiện tại
-              </span>
-            </div>
-            <h3 className="text-[15px] font-bold text-gray-900 leading-snug mb-4">
-              {project?.title || 'Phát triển Hệ thống Chatbot AI'}
+          <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex flex-col h-full min-h-[400px]">
+            <h3 className="text-[17px] font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <svg className="w-5 h-5 text-[#1D4ED8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Sản phẩm bàn giao
             </h3>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center -space-x-2">
-                <img
-                  src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=50&q=80"
-                  alt="Team member"
-                  className="w-7 h-7 rounded-full border-2 border-white object-cover"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=50&q=80"
-                  alt="Team member"
-                  className="w-7 h-7 rounded-full border-2 border-white object-cover"
-                />
-                <div className="w-7 h-7 rounded-full border-2 border-white bg-[#1D4ED8] text-white text-[9px] font-bold flex items-center justify-center z-10">
-                  +2
-                </div>
-                <span className="text-xs font-semibold text-gray-500 ml-4">4 Thành viên</span>
-              </div>
-              <button
-                type="button"
-                className="text-xs font-bold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0 p-0"
-              >
-                Chi tiết
-              </button>
-            </div>
-          </div>
 
-          {/* 2. AI Deadline Card */}
-          <div className="rounded-[24px] bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] p-5 text-white shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl pointer-events-none" />
-            <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest block mb-3">
-              AI Nhắc Deadline
-            </span>
-            <div className="flex items-center gap-4 relative z-10">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shrink-0">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  role="img"
-                  aria-label="Clock"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
+            {/* File đính kèm */}
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex items-start gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-red-100 text-red-500 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               </div>
-              <p className="text-sm font-semibold leading-snug">
-                Mốc "Tích hợp Backend" kết thúc sau 2 ngày nữa.
-              </p>
-            </div>
-          </div>
-
-          {/* 3. Milestones Card */}
-          <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
-            <div className="flex justify-between items-end mb-4">
-              <h3 className="text-[17px] font-bold text-gray-900">Mốc thanh toán</h3>
-              <div className="text-right">
-                <div className="text-xl font-black text-[#1D4ED8] leading-none mb-1">65%</div>
-                <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                  Tiến độ tổng
-                </div>
+              <div className="flex flex-col flex-1">
+                <span className="text-sm font-bold text-gray-900 line-clamp-1">Final_SourceCode.zip</span>
+                <span className="text-xs text-gray-500 mt-0.5">24.5 MB • Gửi lúc 14:30 hôm nay</span>
               </div>
             </div>
 
-            {/* Progress Bar */}
-            <div className="w-full h-1.5 bg-gray-100 rounded-full mb-6 overflow-hidden">
-              <div className="h-full bg-[#00B2FF] rounded-full w-[65%]" />
-            </div>
+            {/* Trạng thái Pending Check */}
+            {productState === 'pending' && (
+              <div className="flex flex-col gap-3 mt-auto">
+                <p className="text-xs text-gray-500 text-center mb-2">Freelancer vừa gửi sản phẩm bàn giao. Hãy sử dụng AI để kiểm tra mã độc và đánh giá chất lượng trước khi duyệt.</p>
+                <button
+                  type="button"
+                  onClick={handleStartAiCheck}
+                  className="w-full py-3.5 bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition-all cursor-pointer border-0 text-sm flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                  AI Phân tích sản phẩm
+                </button>
+              </div>
+            )}
 
-            {/* List */}
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0">
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    role="img"
-                    aria-label="Done"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            {/* Trạng thái Checking */}
+            {productState === 'checking' && (
+              <div className="flex flex-col items-center justify-center py-6 mt-4">
+                <div className="w-16 h-16 relative flex items-center justify-center mb-4">
+                  <svg className="w-full h-full text-gray-200 absolute" viewBox="0 0 36 36">
+                    <path className="stroke-current" strokeWidth="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                   </svg>
+                  <svg className="w-full h-full text-[#1D4ED8] absolute animate-[spin_2s_linear_infinite]" viewBox="0 0 36 36" strokeDasharray={`${Math.min(100, Math.max(0, aiCheckProgress))}, 100`}>
+                    <path className="stroke-current" strokeWidth="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  </svg>
+                  <span className="text-xs font-bold text-[#1D4ED8] absolute">{Math.round(Math.min(100, aiCheckProgress))}%</span>
                 </div>
-                <div className="flex-1">
-                  <h4 className="text-xs font-bold text-gray-900">Thiết kế UI/UX</h4>
-                  <span className="text-[10px] text-gray-500">Hoàn thành • 12/10</span>
+                <h4 className="text-sm font-bold text-gray-900 mb-1">AI đang kiểm tra...</h4>
+                <div className="text-[10px] text-gray-500 flex flex-col items-center gap-1">
+                  <span className={aiCheckProgress > 20 ? 'text-[#1D4ED8]' : ''}>Kiểm tra tính an toàn & mã độc...</span>
+                  <span className={aiCheckProgress > 60 ? 'text-[#1D4ED8]' : ''}>Đối chiếu yêu cầu dự án...</span>
+                  <span className={aiCheckProgress > 90 ? 'text-[#1D4ED8]' : ''}>Đánh giá chất lượng code...</span>
                 </div>
-                <span className="text-xs font-bold text-gray-900">300.000VND</span>
               </div>
+            )}
 
-              <div className="flex items-center gap-3 bg-[#EEF2FF] p-3 -mx-3 rounded-xl border border-[#DCE4FF]">
-                <div className="w-5 h-5 rounded-full border-2 border-[#1D4ED8] flex items-center justify-center shrink-0">
-                  <div className="w-2 h-2 rounded-full bg-[#1D4ED8]" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-xs font-bold text-[#1D4ED8]">Tích hợp Backend</h4>
-                  <span className="text-[10px] text-[#1D4ED8]/70">
-                    Đang thực hiện • Dự kiến 18/10
-                  </span>
-                </div>
-                <span className="text-xs font-bold text-[#1D4ED8]">400.000VND</span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full border-2 border-gray-300 shrink-0" />
-                <div className="flex-1 opacity-50">
-                  <h4 className="text-xs font-bold text-gray-900">Kiểm thử & Launch</h4>
-                  <span className="text-[10px] text-gray-500">Sắp tới • 25/10</span>
-                </div>
-                <span className="text-xs font-bold text-gray-400">150.000VND</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 4. Tasks Card */}
-          <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex-1">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-[17px] font-bold text-gray-900">Công việc</h3>
-              <button
-                type="button"
-                className="text-[10px] font-bold bg-[#EEF2FF] text-[#1D4ED8] px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-[#E0E7FF] transition-colors cursor-pointer border-0"
-              >
-                <span>+</span> Thêm mới
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-4 mb-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded bg-[#1D4ED8] text-white flex items-center justify-center">
-                    <svg
-                      className="w-3 h-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                      role="img"
-                      aria-label="Checked"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
+            {/* Trạng thái Review */}
+            {productState === 'review' && (
+              <div className="flex flex-col gap-4 mt-auto">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex flex-col gap-2 mb-2">
+                  <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm mb-1">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    AI Đánh giá: Đạt yêu cầu
                   </div>
-                  <span className="text-xs font-bold text-gray-500 line-through">
-                    Xây dựng database schema
-                  </span>
+                  <ul className="text-xs text-emerald-700/80 space-y-1.5 list-disc pl-4">
+                    <li>Không phát hiện mã độc (0/54 engines detect).</li>
+                    <li>Source code đầy đủ các module yêu cầu.</li>
+                    <li>Chất lượng đầu ra khớp với JD mô tả.</li>
+                  </ul>
                 </div>
-                <span className="text-[9px] font-bold bg-green-500 text-white px-2 py-0.5 rounded uppercase tracking-wider">
-                  Xong
-                </span>
+                
+                {!showRevisionInput ? (
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowRevisionInput(true)}
+                      className="flex-1 py-3 bg-white border-2 border-amber-500 text-amber-600 font-bold rounded-xl hover:bg-amber-50 transition-colors cursor-pointer text-xs"
+                    >
+                      Yêu cầu sửa đổi
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProductState('approved')}
+                      className="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-md hover:bg-emerald-600 transition-colors cursor-pointer border-0 text-xs"
+                    >
+                      Xác nhận nhận hàng
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <textarea 
+                      className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-amber-500 resize-none h-24"
+                      placeholder="Nhập lý do cần chỉnh sửa..."
+                      value={revisionText}
+                      onChange={e => setRevisionText(e.target.value)}
+                    />
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowRevisionInput(false)}
+                        className="flex-1 py-2 bg-gray-100 text-gray-600 font-bold rounded-lg hover:bg-gray-200 transition-colors cursor-pointer border-0 text-xs"
+                      >
+                        Hủy
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProductState('revision')}
+                        disabled={!revisionText.trim()}
+                        className="flex-1 py-2 bg-amber-500 text-white font-bold rounded-lg shadow-md hover:bg-amber-600 transition-colors cursor-pointer border-0 text-xs disabled:opacity-50"
+                      >
+                        Gửi yêu cầu
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
+            )}
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded border-2 border-gray-300" />
-                  <span className="text-xs font-bold text-gray-900">Kết nối OpenAI API</span>
+            {/* Trạng thái Approved */}
+            {productState === 'approved' && (
+              <div className="flex flex-col items-center justify-center text-center mt-auto p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-3">
+                  <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 </div>
-                <span className="text-[9px] font-bold bg-[#1D4ED8] text-white px-2 py-0.5 rounded uppercase tracking-wider">
-                  Tiến hành
-                </span>
+                <h4 className="text-sm font-bold text-emerald-700 mb-1">Đã xác nhận thanh toán</h4>
+                <p className="text-xs text-emerald-600/80">Sản phẩm đã được nhận và thanh toán thành công cho Freelancer.</p>
               </div>
+            )}
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded border-2 border-gray-300" />
-                  <span className="text-xs font-bold text-gray-900 opacity-60">
-                    Xử lý Contextual Memory
-                  </span>
+            {/* Trạng thái Revision */}
+            {productState === 'revision' && (
+              <div className="flex flex-col items-center justify-center text-center mt-auto p-4 bg-amber-50 rounded-xl border border-amber-100">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-3">
+                  <svg className="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
                 </div>
-                <span className="text-[9px] font-bold bg-gray-100 text-gray-500 border border-gray-200 px-2 py-0.5 rounded uppercase tracking-wider">
-                  Chờ
-                </span>
+                <h4 className="text-sm font-bold text-amber-700 mb-1">Đã gửi yêu cầu chỉnh sửa</h4>
+                <p className="text-xs text-amber-600/80">Yêu cầu đã được gửi. Vui lòng chờ Freelancer phản hồi.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProductState('review');
+                    setShowRevisionInput(false);
+                    setRevisionText('');
+                  }}
+                  className="mt-4 text-xs text-amber-600 font-bold underline bg-transparent border-0 cursor-pointer"
+                >
+                  Hủy yêu cầu (Quay lại)
+                </button>
               </div>
-            </div>
-
-            <button
-              type="button"
-              className="w-full py-3 rounded-xl border border-dashed border-[#1D4ED8] bg-[#EEF4FF] hover:bg-[#E0E7FF] flex items-center justify-center gap-2 text-xs font-bold text-[#1D4ED8] transition-colors cursor-pointer mt-auto"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                role="img"
-                aria-label="AI Magic"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              AI Tự động tạo Task từ hội thoại
-            </button>
+            )}
           </div>
         </aside>
       </main>
