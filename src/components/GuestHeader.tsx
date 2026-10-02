@@ -2,6 +2,7 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as paths from '../routes/paths';
+import { useAuthStore } from '../stores/useAuthStore';
 
 export type NavItem = {
   label: string;
@@ -15,6 +16,10 @@ interface GuestHeaderProps {
 const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
   const [activeId, setActiveId] = useState<string>('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isAuthenticated, user } = useAuthStore();
+
+  const dashboardPath =
+    user?.role === 'FREELANCER' ? paths.PATH_FREELANCER : paths.PATH_CLIENT_DASHBOARD;
 
   useEffect(() => {
     if (!navItems) return;
@@ -25,7 +30,6 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
         const element = document.getElementById(item.id);
         if (element) {
           const rect = element.getBoundingClientRect();
-          // Adjust 150 based on header height + offset
           if (rect.top <= 150 && rect.bottom >= 150) {
             currentActive = item.id;
           }
@@ -37,7 +41,7 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Check on mount
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, [navItems, activeId]);
 
@@ -111,19 +115,30 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
       </nav>
 
       {/* Navigation Right */}
-      <div className="flex-1 flex items-center justify-end gap-6">
-        <Link
-          to={paths.PATH_LOGIN}
-          className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0 hidden md:block"
-        >
-          Đăng nhập
-        </Link>
-        <Link
-          to={paths.PATH_REGISTER}
-          className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-md transition-opacity cursor-pointer border-0"
-        >
-          Bắt đầu ngay
-        </Link>
+      <div className="flex-1 flex items-center justify-end gap-4 md:gap-6">
+        {isAuthenticated ? (
+          <Link
+            to={dashboardPath}
+            className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-md transition-opacity cursor-pointer border-0"
+          >
+            Bảng điều khiển
+          </Link>
+        ) : (
+          <>
+            <Link
+              to={paths.PATH_LOGIN}
+              className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] cursor-pointer bg-transparent border-0 p-0 hidden md:block"
+            >
+              Đăng nhập
+            </Link>
+            <Link
+              to={paths.PATH_REGISTER}
+              className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-md transition-opacity cursor-pointer border-0"
+            >
+              Bắt đầu ngay
+            </Link>
+          </>
+        )}
       </div>
 
       {/* Hamburger Menu Button (Mobile Only) */}
@@ -192,13 +207,23 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
             </>
           )}
           <hr className="border-gray-100 my-2" />
-          <Link
-            to={paths.PATH_LOGIN}
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="w-full text-center text-sm font-bold text-gray-700 bg-gray-50 hover:bg-gray-100 px-6 py-3 rounded-xl cursor-pointer transition-colors"
-          >
-            Đăng nhập
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              to={dashboardPath}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="w-full text-center text-sm font-bold text-white bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] px-6 py-3 rounded-xl cursor-pointer transition-opacity"
+            >
+              Bảng điều khiển
+            </Link>
+          ) : (
+            <Link
+              to={paths.PATH_LOGIN}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="w-full text-center text-sm font-bold text-gray-700 bg-gray-50 hover:bg-gray-100 px-6 py-3 rounded-xl cursor-pointer transition-colors"
+            >
+              Đăng nhập
+            </Link>
+          )}
         </div>
       )}
     </header>

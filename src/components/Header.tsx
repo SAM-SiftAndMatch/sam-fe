@@ -10,6 +10,7 @@ import {
   PATH_LOGIN,
   PATH_WORKSPACES,
 } from '../routes/paths';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -17,6 +18,14 @@ const Header: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const { user, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    setIsDropdownOpen(false);
+    await logout();
+    navigate(PATH_LOGIN);
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -29,7 +38,6 @@ const Header: React.FC = () => {
   }, []);
 
   const getNavClass = (path: string, hasIcon = false) => {
-    // If we only have /freelancer as root, we should exact match, but let's just use startsWith for now with a fallback
     const isActive = path === '/' ? location.pathname === path : location.pathname.startsWith(path);
     const baseClass = 'text-sm px-4 py-2 rounded-full cursor-pointer border-0 transition-colors';
     const activeClass = 'font-bold bg-[#EEF2FF] text-[#0047FF]';
@@ -76,7 +84,7 @@ const Header: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate(PATH_WORKSPACES, { state: { role: 'freelancer' } })}
-          className={getNavClass('/workspace')} // Matches /workspaces and /workspace/:id
+          className={getNavClass('/workspace')}
         >
           Tin nhắn
         </button>
@@ -122,7 +130,7 @@ const Header: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors"
+            className="h-9 px-3 rounded-full bg-gray-100 flex items-center gap-2 border border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors"
           >
             <svg
               className="w-5 h-5 text-gray-500"
@@ -139,16 +147,27 @@ const Header: React.FC = () => {
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
               />
             </svg>
+            {user && (
+              <span className="text-xs font-semibold text-gray-700 hidden sm:inline max-w-[120px] truncate">
+                {user.fullName || user.email}
+              </span>
+            )}
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-1 border border-gray-100">
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg py-2 border border-gray-100 z-50">
+              {user && (
+                <div className="px-4 py-2 border-b border-gray-100 mb-1">
+                  <p className="text-xs font-bold text-gray-800 truncate">{user.fullName}</p>
+                  <p className="text-[11px] text-gray-500 truncate">{user.email}</p>
+                  <span className="inline-block mt-1 text-[10px] font-semibold bg-cyan-50 text-cyan-700 px-2 py-0.5 rounded-full">
+                    {user.role}
+                  </span>
+                </div>
+              )}
               <button
                 type="button"
-                onClick={() => {
-                  localStorage.removeItem('SAM_ROLE');
-                  navigate(PATH_LOGIN);
-                }}
+                onClick={handleLogout}
                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold cursor-pointer border-0 bg-transparent transition-colors"
               >
                 Đăng xuất
@@ -180,6 +199,12 @@ const Header: React.FC = () => {
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-[100%] left-0 w-full bg-white border-b border-gray-100 shadow-lg flex flex-col p-4 gap-2">
+          {user && (
+            <div className="px-2 py-2 border-b border-gray-100 mb-1">
+              <p className="text-sm font-bold text-gray-800">{user.fullName}</p>
+              <p className="text-xs text-gray-500">{user.email}</p>
+            </div>
+          )}
           <button
             type="button"
             onClick={() => {
@@ -229,6 +254,14 @@ const Header: React.FC = () => {
             className={getNavClass(PATH_FREELANCER_EARNINGS)}
           >
             Thu nhập
+          </button>
+          <hr className="border-gray-100 my-1" />
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold cursor-pointer border-0 bg-transparent transition-colors rounded-lg"
+          >
+            Đăng xuất
           </button>
         </div>
       )}
