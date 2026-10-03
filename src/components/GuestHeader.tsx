@@ -92,24 +92,24 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
           })
         ) : (
           <>
-            <button
-              type="button"
+            <Link
+              to={paths.PATH_HOME}
               className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] hover:bg-gray-50 px-4 py-1.5 rounded-full cursor-pointer bg-transparent border-0 transition-colors"
             >
               Khách hàng
-            </button>
-            <button
-              type="button"
+            </Link>
+            <Link
+              to={paths.PATH_FREELANCER}
               className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] hover:bg-gray-50 px-4 py-1.5 rounded-full cursor-pointer bg-transparent border-0 transition-colors"
             >
               Freelancer
-            </button>
-            <button
-              type="button"
+            </Link>
+            <Link
+              to={paths.PATH_CLIENT_PRICING}
               className="text-sm font-semibold text-gray-600 hover:text-[#0047FF] hover:bg-gray-50 px-4 py-1.5 rounded-full cursor-pointer bg-transparent border-0 transition-colors"
             >
               Dịch vụ
-            </button>
+            </Link>
           </>
         )}
       </nav>
@@ -186,24 +186,27 @@ const GuestHeader: React.FC<GuestHeaderProps> = ({ navItems }) => {
             })
           ) : (
             <>
-              <button
-                type="button"
+              <Link
+                to={paths.PATH_HOME}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="text-sm font-semibold text-gray-600 bg-transparent px-4 py-3 rounded-xl text-left border-0 transition-colors hover:bg-gray-50"
               >
                 Khách hàng
-              </button>
-              <button
-                type="button"
+              </Link>
+              <Link
+                to={paths.PATH_FREELANCER}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="text-sm font-semibold text-gray-600 bg-transparent px-4 py-3 rounded-xl text-left border-0 transition-colors hover:bg-gray-50"
               >
                 Freelancer
-              </button>
-              <button
-                type="button"
+              </Link>
+              <Link
+                to={paths.PATH_CLIENT_PRICING}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="text-sm font-semibold text-gray-600 bg-transparent px-4 py-3 rounded-xl text-left border-0 transition-colors hover:bg-gray-50"
               >
                 Dịch vụ
-              </button>
+              </Link>
             </>
           )}
           <hr className="border-gray-100 my-2" />
