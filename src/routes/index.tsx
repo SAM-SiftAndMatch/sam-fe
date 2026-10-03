@@ -1,4 +1,7 @@
-import { Route, Routes } from 'react-router-dom';
+import type React from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import LoadingScreen from '../components/LoadingScreen';
+import { useAuthStore } from '../stores/useAuthStore';
 import * as paths from './paths';
 
 // Guards
@@ -39,6 +42,25 @@ import SuccessApplicationPage from '../pages/SuccessApplicationPage';
 import WorkspacePage from '../pages/WorkspacePage';
 import WorkspacesPage from '../pages/WorkspacesPage';
 
+const RootRoute: React.FC = () => {
+  const { isAuthenticated, isLoading, user } = useAuthStore();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (isAuthenticated) {
+    if (user?.role === 'FREELANCER') {
+      return <Navigate to={paths.PATH_FREELANCER} replace />;
+    }
+    if (user?.role === 'CLIENT') {
+      return <Navigate to={paths.PATH_CLIENT_DASHBOARD} replace />;
+    }
+  }
+
+  return <ClientLandingPage />;
+};
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -50,8 +72,8 @@ const AppRoutes = () => {
       </Route>
 
       {/* Public routes */}
-      <Route path={paths.PATH_HOME} element={<ClientLandingPage />} />
-      <Route path={paths.PATH_HOME_ALT} element={<ClientLandingPage />} />
+      <Route path={paths.PATH_HOME} element={<RootRoute />} />
+      <Route path={paths.PATH_HOME_ALT} element={<RootRoute />} />
       <Route path={paths.PATH_CLIENT_PRICING} element={<ClientPricingPage />} />
       <Route path={paths.PATH_FREELANCER} element={<FreelancerPage />} />
       <Route path={paths.PATH_FREELANCER_PRICING} element={<FreelancerPricingPage />} />
