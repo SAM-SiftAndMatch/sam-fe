@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import type React from 'react';
-import { useEffect, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useEffect, useRef, useState } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { NumericFormat } from 'react-number-format';
 import { useNavigate } from 'react-router-dom';
 import { profileApi } from '../api/profile';
 import {
@@ -11,7 +12,15 @@ import {
 } from '../features/profile/schemas/freelancer-profile-schema';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
-import { PREDEFINED_SKILLS, type SkillOption } from '../types/profile';
+import { FALLBACK_SKILLS, type SkillOption } from '../types/profile';
+
+interface DuplicateConflict {
+  index: number;
+  skillName: string;
+  existingYears: number;
+  newYears: number;
+  skillId?: number | null;
+}
 
 const CreateFreelancerProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,8 +29,17 @@ const CreateFreelancerProfilePage: React.FC = () => {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [selectedSkillId, setSelectedSkillId] = useState<number | ''>('');
+
+  // Skill autocomplete and selection state
+  const [availableSkills, setAvailableSkills] = useState<SkillOption[]>(FALLBACK_SKILLS);
+  const [skillSearch, setSkillSearch] = useState('');
+  const [selectedSkill, setSelectedSkill] = useState<{ id: number | null; name: string } | null>(
+    null
+  );
   const [skillExperience, setSkillExperience] = useState<number>(1);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [duplicateConflict, setDuplicateConflict] = useState<DuplicateConflict | null>(null);
+  const skillDropdownRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
@@ -41,10 +59,41 @@ const CreateFreelancerProfilePage: React.FC = () => {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, update } = useFieldArray({
     control,
     name: 'skills',
   });
+
+  // Fetch available skills from API on mount
+  useEffect(() => {
+    let isMounted = true;
+    profileApi
+      .getSkills()
+      .then((skills) => {
+        if (isMounted && skills && skills.length > 0) {
+          setAvailableSkills(skills);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not fetch skills from server, using fallback list:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Close skill dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (skillDropdownRef.current && !skillDropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Fetch current profile on mount and prefill form
   useEffect(() => {
@@ -70,7 +119,6 @@ const CreateFreelancerProfilePage: React.FC = () => {
           });
         }
       } catch (err: unknown) {
-        // If profile doesn't exist yet, it's not a blocking error (first-time creation)
         console.warn('Profile not created yet or fetch failed:', err);
       } finally {
         if (isMounted) {
@@ -85,25 +133,81 @@ const CreateFreelancerProfilePage: React.FC = () => {
     };
   }, [reset]);
 
-  const handleAddSkill = () => {
-    if (selectedSkillId === '') return;
-    const numSkillId = Number(selectedSkillId);
+  const trimmedSearch = skillSearch.trim();
 
-    // Prevent duplicate skill addition
-    const isAlreadyAdded = fields.some((f) => f.skillId === numSkillId);
-    if (isAlreadyAdded) {
-      alert('Kỹ năng này đã được thêm vào danh sách.');
+  // Filter skills based on search, excluding ones already in fields
+  const filteredSkills = availableSkills.filter((s) => {
+    const matches = s.name.toLowerCase().includes(trimmedSearch.toLowerCase());
+    const alreadyAdded = fields.some(
+      (f) => f.skillName.trim().toLowerCase() === s.name.toLowerCase()
+    );
+    return matches && !alreadyAdded;
+  });
+
+  const handleSelectExistingSkill = (skill: SkillOption) => {
+    setSelectedSkill({ id: skill.id, name: skill.name });
+    setSkillSearch(skill.name);
+    setIsDropdownOpen(false);
+  };
+
+  const handleAddSkill = () => {
+    const rawName = (selectedSkill ? selectedSkill.name : trimmedSearch).trim();
+    if (!rawName) return;
+
+    // Check duplicate in fields (case-insensitive)
+    const existingIndex = fields.findIndex(
+      (f) => f.skillName.trim().toLowerCase() === rawName.toLowerCase()
+    );
+
+    if (existingIndex !== -1) {
+      const existingItem = fields[existingIndex];
+      setDuplicateConflict({
+        index: existingIndex,
+        skillName: existingItem.skillName,
+        existingYears: existingItem.yearsOfExperience,
+        newYears: Math.max(0, skillExperience),
+        skillId: existingItem.skillId,
+      });
+      setIsDropdownOpen(false);
       return;
     }
 
-    const matchedSkill = PREDEFINED_SKILLS.find((s) => s.id === numSkillId);
+    // No duplicate found: look up in availableSkills or add custom
+    const matched = availableSkills.find((s) => s.name.toLowerCase() === rawName.toLowerCase());
+
+    const skillIdToAdd = selectedSkill?.id ?? (matched ? matched.id : null);
+    const skillNameToAdd = matched ? matched.name : rawName;
+
     append({
-      skillId: numSkillId,
-      skillName: matchedSkill ? matchedSkill.name : `Skill #${numSkillId}`,
+      skillId: skillIdToAdd,
+      skillName: skillNameToAdd,
       yearsOfExperience: Math.max(0, skillExperience),
     });
 
-    setSelectedSkillId('');
+    setSelectedSkill(null);
+    setSkillSearch('');
+    setSkillExperience(1);
+    setIsDropdownOpen(false);
+    setDuplicateConflict(null);
+  };
+
+  const handleCancelDuplicate = () => {
+    setDuplicateConflict(null);
+    setSelectedSkill(null);
+    setSkillSearch('');
+    setSkillExperience(1);
+  };
+
+  const handleOverrideDuplicate = () => {
+    if (!duplicateConflict) return;
+    update(duplicateConflict.index, {
+      skillId: duplicateConflict.skillId,
+      skillName: duplicateConflict.skillName,
+      yearsOfExperience: duplicateConflict.newYears,
+    });
+    setDuplicateConflict(null);
+    setSelectedSkill(null);
+    setSkillSearch('');
     setSkillExperience(1);
   };
 
@@ -122,7 +226,8 @@ const CreateFreelancerProfilePage: React.FC = () => {
         githubUrl: data.githubUrl?.trim() || null,
         portfolioUrl: data.portfolioUrl?.trim() || null,
         skills: data.skills.map((s) => ({
-          skillId: s.skillId,
+          skillId: s.skillId ?? null,
+          skillName: s.skillName.trim(),
           yearsOfExperience: Number(s.yearsOfExperience),
         })),
       });
@@ -272,31 +377,41 @@ const CreateFreelancerProfilePage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Hourly Rate */}
+                  {/* Hourly Rate (VNĐ / giờ) with live inline thousand separators */}
                   <div>
                     <label
                       htmlFor="hourlyRate"
                       className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
                     >
-                      Mức giá theo giờ ($/h)
+                      Mức giá theo giờ (VNĐ / giờ)
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 font-semibold text-sm">
-                        $
-                      </span>
-                      <input
-                        id="hourlyRate"
-                        type="number"
-                        step="0.5"
-                        min="0"
-                        {...register('hourlyRate', {
-                          valueAsNumber: true,
-                        })}
-                        placeholder="25.00"
-                        className="w-full pl-8 pr-12 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF] bg-gray-50/40 focus:bg-white transition"
+                      <Controller
+                        name="hourlyRate"
+                        control={control}
+                        render={({ field }) => (
+                          <NumericFormat
+                            id="hourlyRate"
+                            value={field.value ?? ''}
+                            onValueChange={(values) => {
+                              const floatVal = values.floatValue;
+                              field.onChange(floatVal !== undefined ? floatVal : null);
+                            }}
+                            thousandSeparator="."
+                            decimalSeparator=","
+                            decimalScale={0}
+                            allowNegative={false}
+                            placeholder="VD: 250.000"
+                            className={`w-full pl-4 pr-24 py-3 rounded-xl border text-sm focus:outline-none transition ${
+                              errors.hourlyRate
+                                ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 bg-red-50/20'
+                                : 'border-gray-200 focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF] bg-gray-50/40 focus:bg-white'
+                            }`}
+                          />
+                        )}
                       />
-                      <span className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-gray-400 text-xs font-medium">
-                        / giờ
+                      <span className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-gray-500 text-xs font-semibold">
+                        VNĐ / giờ
                       </span>
                     </div>
                     {errors.hourlyRate && (
@@ -407,38 +522,79 @@ const CreateFreelancerProfilePage: React.FC = () => {
                     <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700">
                       Kỹ năng & Số năm kinh nghiệm
                     </h3>
-                    <span className="text-[11px] text-amber-700 font-medium bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 w-fit">
-                      Đồng bộ ghi đè toàn bộ kỹ năng
+                    <span className="text-[11px] text-blue-700 font-medium bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 w-fit">
+                      Đồng bộ vào hồ sơ
                     </span>
                   </div>
 
                   {/* Add skill input row */}
                   <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-4">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                      <div className="sm:col-span-7">
+                      {/* Search / Custom Skill input */}
+                      <div className="sm:col-span-7 relative" ref={skillDropdownRef}>
                         <label
-                          htmlFor="skillSelect"
+                          htmlFor="skillSearchInput"
                           className="block text-xs font-semibold text-gray-600 mb-1"
                         >
-                          Chọn kỹ năng
+                          Chọn hoặc nhập kỹ năng
                         </label>
-                        <select
-                          id="skillSelect"
-                          value={selectedSkillId}
-                          onChange={(e) =>
-                            setSelectedSkillId(e.target.value === '' ? '' : Number(e.target.value))
-                          }
-                          className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-[#0047FF]"
-                        >
-                          <option value="">-- Chọn kỹ năng phù hợp --</option>
-                          {PREDEFINED_SKILLS.map((skill: SkillOption) => (
-                            <option key={skill.id} value={skill.id}>
-                              {skill.name} {skill.category ? `(${skill.category})` : ''}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="relative">
+                          <input
+                            id="skillSearchInput"
+                            type="text"
+                            value={skillSearch}
+                            onChange={(e) => {
+                              setSkillSearch(e.target.value);
+                              setSelectedSkill(null);
+                              setIsDropdownOpen(true);
+                              if (duplicateConflict) setDuplicateConflict(null);
+                            }}
+                            onFocus={() => {
+                              if (filteredSkills.length > 0) setIsDropdownOpen(true);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddSkill();
+                              }
+                            }}
+                            placeholder="Tìm hoặc gõ kỹ năng (VD: React, Docker...)"
+                            className="w-full pl-3.5 pr-8 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF] transition"
+                            autoComplete="off"
+                          />
+                          {skillSearch && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSkillSearch('');
+                                setSelectedSkill(null);
+                                if (duplicateConflict) setDuplicateConflict(null);
+                              }}
+                              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer border-0 bg-transparent text-xs"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Autocomplete Dropdown without status badges */}
+                        {isDropdownOpen && filteredSkills.length > 0 && (
+                          <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl max-h-56 overflow-y-auto z-30 py-1 divide-y divide-gray-100">
+                            {filteredSkills.map((skill) => (
+                              <button
+                                key={skill.id}
+                                type="button"
+                                onClick={() => handleSelectExistingSkill(skill)}
+                                className="w-full text-left px-3.5 py-2.5 text-sm text-gray-800 hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer border-0 bg-transparent font-medium"
+                              >
+                                {skill.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
+                      {/* Years of Experience input */}
                       <div className="sm:col-span-3">
                         <label
                           htmlFor="skillYears"
@@ -453,71 +609,124 @@ const CreateFreelancerProfilePage: React.FC = () => {
                           max="50"
                           value={skillExperience}
                           onChange={(e) => setSkillExperience(Math.max(0, Number(e.target.value)))}
-                          className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-[#0047FF]"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddSkill();
+                            }
+                          }}
+                          className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF]"
                         />
                       </div>
 
+                      {/* Add button */}
                       <div className="sm:col-span-2">
                         <button
                           type="button"
                           onClick={handleAddSkill}
-                          disabled={selectedSkillId === ''}
-                          className="w-full bg-[#1D4ED8] hover:bg-blue-700 disabled:opacity-40 text-white font-semibold text-xs py-2.5 rounded-xl transition-colors cursor-pointer border-0 shadow-sm"
+                          disabled={!trimmedSearch && !selectedSkill}
+                          className="w-full bg-[#1D4ED8] hover:bg-blue-700 disabled:opacity-40 text-white font-semibold text-xs py-2.5 rounded-xl transition-colors cursor-pointer border-0 shadow-sm flex items-center justify-center gap-1"
                         >
-                          + Thêm
+                          <span>+ Thêm</span>
                         </button>
                       </div>
                     </div>
+
+                    {/* Duplicate Conflict Interactive Banner */}
+                    {duplicateConflict && (
+                      <div className="mt-3 p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm text-amber-900 shadow-sm">
+                        <div className="flex items-start gap-2.5">
+                          <svg
+                            className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <div>
+                            <p className="font-semibold text-amber-800 text-xs sm:text-sm">
+                              Kỹ năng &ldquo;{duplicateConflict.skillName}&rdquo; đã có trong danh
+                              sách
+                            </p>
+                            <p className="text-xs text-amber-700 mt-0.5">
+                              Hiện tại: <strong>{duplicateConflict.existingYears} năm</strong>. Bạn
+                              có muốn ghi đè thành <strong>{duplicateConflict.newYears} năm</strong>{' '}
+                              không?
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                          <button
+                            type="button"
+                            onClick={handleCancelDuplicate}
+                            className="px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold transition-colors cursor-pointer"
+                          >
+                            Không thêm (Hủy)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleOverrideDuplicate}
+                            className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition-colors cursor-pointer shadow-sm border-0"
+                          >
+                            Ghi đè số năm
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Skills List */}
+                  {errors.skills && (
+                    <p className="mb-3 text-xs text-red-500 font-medium">{errors.skills.message}</p>
+                  )}
+
+                  {/* Skills List without status badges */}
                   {fields.length === 0 ? (
                     <div className="p-6 border border-dashed border-gray-200 rounded-2xl text-center text-gray-400 text-xs">
                       Chưa có kỹ năng nào được chọn. Hãy thêm ít nhất 1 kỹ năng chính để nhận dự án.
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {fields.map((field, index) => {
-                        const matchedSkill = PREDEFINED_SKILLS.find((s) => s.id === field.skillId);
-                        return (
-                          <div
-                            key={field.id}
-                            className="flex items-center justify-between p-3.5 bg-white border border-gray-200 rounded-xl shadow-xs hover:border-blue-300 transition-colors"
-                          >
-                            <div className="space-y-0.5">
-                              <span className="text-sm font-bold text-gray-800">
-                                {matchedSkill
-                                  ? matchedSkill.name
-                                  : field.skillName || `Skill #${field.skillId}`}
-                              </span>
-                              <div className="text-xs text-blue-600 font-medium">
-                                {field.yearsOfExperience} năm kinh nghiệm
-                              </div>
+                      {fields.map((field, index) => (
+                        <div
+                          key={field.id}
+                          className="flex items-center justify-between p-3.5 bg-white border border-gray-200 rounded-xl shadow-xs hover:border-blue-300 transition-colors"
+                        >
+                          <div className="space-y-0.5">
+                            <span className="text-sm font-bold text-gray-800">
+                              {field.skillName}
+                            </span>
+                            <div className="text-xs text-blue-600 font-medium">
+                              {field.yearsOfExperience} năm kinh nghiệm
                             </div>
-
-                            <button
-                              type="button"
-                              onClick={() => remove(index)}
-                              className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer border-0 bg-transparent"
-                              title="Xóa kỹ năng này"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                              </svg>
-                            </button>
                           </div>
-                        );
-                      })}
+
+                          <button
+                            type="button"
+                            onClick={() => remove(index)}
+                            className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer border-0 bg-transparent"
+                            title="Xóa kỹ năng này"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

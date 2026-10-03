@@ -1,5 +1,6 @@
 export interface FreelancerSkillRequest {
-  skillId: number;
+  skillId?: number | null;
+  skillName?: string | null;
   yearsOfExperience: number;
 }
 
@@ -34,18 +35,23 @@ export interface FreelancerProfileResponse {
 export interface SkillOption {
   id: number;
   name: string;
-  category?: string;
 }
 
-export const PREDEFINED_SKILLS: SkillOption[] = [
-  { id: 1, name: 'Java', category: 'Backend' },
-  { id: 2, name: 'Spring Boot', category: 'Backend' },
-  { id: 3, name: 'React', category: 'Frontend' },
-  { id: 4, name: 'TypeScript', category: 'Frontend / Language' },
-  { id: 5, name: 'Figma', category: 'Design / UI/UX' },
-  { id: 6, name: 'Node.js', category: 'Backend' },
-  { id: 7, name: 'PostgreSQL', category: 'Database' },
-  { id: 8, name: 'Docker', category: 'DevOps' },
-  { id: 9, name: 'Next.js', category: 'Frontend' },
-  { id: 10, name: 'Tailwind CSS', category: 'Frontend' },
+export const FALLBACK_SKILLS: SkillOption[] = [
+  { id: 1, name: 'Java' },
+  { id: 2, name: 'Spring Boot' },
+  { id: 3, name: 'React' },
+  { id: 4, name: 'TypeScript' },
+  { id: 5, name: 'Figma' },
+  { id: 6, name: 'Node.js' },
+  { id: 7, name: 'PostgreSQL' },
+  { id: 8, name: 'Docker' },
+  { id: 9, name: 'Next.js' },
+  { id: 10, name: 'Tailwind CSS' },
+  { id: 11, name: 'Python' },
+  { id: 12, name: 'Vue.js' },
+  { id: 13, name: 'Flutter' },
+  { id: 14, name: 'Golang' },
 ];
+
+export const PREDEFINED_SKILLS = FALLBACK_SKILLS;
