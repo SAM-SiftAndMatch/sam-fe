@@ -3,7 +3,7 @@ import type { ApiResponse } from '../types/api';
 import type { AuthResponse } from '../types/auth';
 import { tokenManager } from './token-manager';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE = `${import.meta.env.VITE_API_URL}/api/v1`;
 
 export const apiClient = axios.create({
   baseURL: API_BASE,
@@ -56,9 +56,9 @@ apiClient.interceptors.response.use(
     // Do not retry auth endpoints or already retried requests
     if (
       originalRequest._retry ||
-      originalRequest.url?.includes('/api/v1/auth/login') ||
-      originalRequest.url?.includes('/api/v1/auth/register') ||
-      originalRequest.url?.includes('/api/v1/auth/refresh')
+      originalRequest.url?.includes('/auth/login') ||
+      originalRequest.url?.includes('/auth/register') ||
+      originalRequest.url?.includes('/auth/refresh')
     ) {
       return Promise.reject(error);
     }
@@ -90,7 +90,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await apiClient.post<ApiResponse<AuthResponse>>('/api/v1/auth/refresh');
+        const { data } = await apiClient.post<ApiResponse<AuthResponse>>('/auth/refresh');
         const newToken = data.result?.accessToken;
         if (!newToken) {
           throw new Error('No access token returned from refresh');
