@@ -2,21 +2,18 @@ import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import GuestHeader from '../components/GuestHeader';
-import {
-  PATH_CLIENT_PRICING,
-  PATH_FREELANCER_PRICING,
-  PATH_LOGIN,
-  PATH_REGISTER,
-} from '../routes/paths';
+import { PATH_CLIENT_DASHBOARD, PATH_FREELANCER } from '../routes/paths';
 
 const RoleSelectionPage: React.FC = () => {
   const navigate = useNavigate();
-
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+      {/* Gọi Header Dành cho khách */}
       <GuestHeader />
 
+      {/* Nội dung chính căn giữa */}
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-16 md:py-24 flex flex-col items-center justify-center">
+        {/* Tiêu đề */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-[44px] font-bold text-gray-900 mb-4 tracking-tight">
             Bạn là ai?
@@ -26,6 +23,7 @@ const RoleSelectionPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Khung chọn vai trò */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl mb-12">
           {/* Card Khách Hàng */}
           <div className="bg-white rounded-[32px] p-8 md:p-10 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)] hover:shadow-xl transition-shadow flex flex-col items-center text-center group">
@@ -51,7 +49,8 @@ const RoleSelectionPage: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                navigate(PATH_REGISTER, { state: { accountType: 'CLIENT' } });
+                localStorage.setItem('SAM_ROLE', 'client');
+                navigate(PATH_CLIENT_DASHBOARD);
               }}
               className="w-full bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold py-3.5 rounded-xl transition-colors cursor-pointer border-0 mb-4 shadow-md"
             >
@@ -59,7 +58,6 @@ const RoleSelectionPage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate(PATH_CLIENT_PRICING)}
               className="text-sm font-bold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0 p-0 flex items-center gap-1"
             >
               Xem Gói Dịch Vụ
@@ -105,7 +103,8 @@ const RoleSelectionPage: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                navigate(PATH_REGISTER, { state: { accountType: 'FREELANCER' } });
+                localStorage.setItem('SAM_ROLE', 'freelancer');
+                navigate(PATH_FREELANCER);
               }}
               className="w-full bg-[#0AAAD7] hover:bg-[#0896BD] text-white font-bold py-3.5 rounded-xl transition-colors cursor-pointer border-0 mb-4 shadow-md"
             >
@@ -113,7 +112,6 @@ const RoleSelectionPage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate(PATH_FREELANCER_PRICING)}
               className="text-sm font-bold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0 p-0 flex items-center gap-1"
             >
               Xem Gói Dịch Vụ
@@ -141,7 +139,6 @@ const RoleSelectionPage: React.FC = () => {
           Bạn đã có tài khoản?{' '}
           <button
             type="button"
-            onClick={() => navigate(PATH_LOGIN)}
             className="text-[#1D4ED8] font-bold hover:underline cursor-pointer bg-transparent border-0 p-0"
           >
             Đăng nhập ngay
@@ -149,6 +146,7 @@ const RoleSelectionPage: React.FC = () => {
         </div>
       </main>
 
+      {/* Gọi Component Footer chung */}
       <Footer />
     </div>
   );
