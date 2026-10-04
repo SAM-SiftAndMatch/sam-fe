@@ -37,6 +37,24 @@ export interface SkillOption {
   name: string;
 }
 
+export interface ClientProfileRequest {
+  companyName: string;
+  industry?: string | null;
+  websiteUrl?: string | null;
+  description?: string | null;
+}
+
+export interface ClientProfileResponse {
+  id?: string | null;
+  userId: string;
+  fullName: string;
+  email: string;
+  companyName?: string | null;
+  industry?: string | null;
+  websiteUrl?: string | null;
+  description?: string | null;
+}
+
 export const FALLBACK_SKILLS: SkillOption[] = [
   { id: 1, name: 'Java' },
   { id: 2, name: 'Spring Boot' },

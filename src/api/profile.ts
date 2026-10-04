@@ -1,6 +1,8 @@
 import apiClient from '../lib/axios';
 import type { ApiResponse } from '../types/api';
 import type {
+  ClientProfileRequest,
+  ClientProfileResponse,
   FreelancerProfileRequest,
   FreelancerProfileResponse,
   SkillOption,
@@ -34,6 +36,25 @@ export const profileApi = {
       params: search ? { search } : undefined,
     });
     return res.data.result || [];
+  },
+
+  getClientProfile: async (): Promise<ClientProfileResponse> => {
+    const res = await apiClient.get<ApiResponse<ClientProfileResponse>>('/profiles/client/me');
+    if (!res.data.result) {
+      throw new Error(res.data.message || 'Failed to fetch client profile');
+    }
+    return res.data.result;
+  },
+
+  updateClientProfile: async (data: ClientProfileRequest): Promise<ClientProfileResponse> => {
+    const res = await apiClient.put<ApiResponse<ClientProfileResponse>>(
+      '/profiles/client/me',
+      data
+    );
+    if (!res.data.result) {
+      throw new Error(res.data.message || 'Failed to update client profile');
+    }
+    return res.data.result;
   },
 };
 

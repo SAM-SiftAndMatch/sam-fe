@@ -47,7 +47,7 @@ const RegisterPage: React.FC = () => {
       if (auth.role === 'FREELANCER') {
         navigate(paths.PATH_FREELANCER_CREATE_PROFILE);
       } else {
-        navigate(paths.PATH_CLIENT_DASHBOARD);
+        navigate(paths.PATH_CLIENT_PROFILE);
       }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
