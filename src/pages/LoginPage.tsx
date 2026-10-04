@@ -1,10 +1,10 @@
+import { type LoginFormData, loginSchema } from '@/features/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { type LoginFormData, loginSchema } from '../features/auth/schemas/login-schema';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 
