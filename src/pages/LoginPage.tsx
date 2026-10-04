@@ -1,46 +1,61 @@
+import { type LoginFormData, loginSchema } from '@/features/auth';
+import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
 import type React from 'react';
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import * as paths from '../routes/paths';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const LoginPage: React.FC = () => {
-  // States để làm Prototype tương tác luồng dữ liệu giả lập (Mock data)
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const reason = searchParams.get('reason');
+
+  const { login } = useAuthStore();
   const state = location.state as { returnTo?: string; initialQuery?: string } | null;
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      alert('Vui lòng nhập đầy đủ Email và Mật khẩu để test prototype!');
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-    setIsLoading(true);
-    // Giả lập luồng xử lý mất 1 giây trước khi đăng nhập thành công
-    setTimeout(() => {
-      setIsLoading(false);
-
-      // 2 Mock data: client@sam.com và freelancer@sam.com
-      if (email === 'client@sam.com') {
-        if (state?.returnTo) {
-          navigate(state.returnTo, { state: { initialQuery: state.initialQuery } });
-        } else {
-          navigate(paths.PATH_CLIENT_DASHBOARD);
-        }
-      } else if (email === 'freelancer@sam.com') {
+  const onSubmit = async (data: LoginFormData) => {
+    setServerError(null);
+    try {
+      const auth = await login(data);
+      if (state?.returnTo) {
+        navigate(state.returnTo, { state: { initialQuery: state.initialQuery } });
+      } else if (auth.role === 'FREELANCER') {
         navigate(paths.PATH_FREELANCER);
       } else {
-        alert(
-          `[Mock Auth] Đăng nhập thành công: ${email}\n\nGợi ý Prototype:\n- Dùng "client@sam.com" để vào Dashboard Khách Hàng.\n- Dùng "freelancer@sam.com" để vào trang Freelancer.`
-        );
+        navigate(paths.PATH_CLIENT_DASHBOARD);
       }
-    }, 1000);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const message =
+          err.response?.data?.message ||
+          'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.';
+        setServerError(message);
+      } else if (err instanceof Error) {
+        setServerError(err.message);
+      } else {
+        setServerError('Có lỗi xảy ra, vui lòng thử lại sau.');
+      }
+    }
   };
 
   return (
@@ -61,7 +76,6 @@ const LoginPage: React.FC = () => {
         Về trang chủ
       </Link>
 
-      {/* Đã sửa <div></div> thành thẻ tự đóng */}
       <div />
 
       {/* Main Login Card */}
@@ -77,7 +91,6 @@ const LoginPage: React.FC = () => {
           <p className="text-lg font-medium leading-relaxed opacity-90 max-w-xs">
             Kiến tạo tương lai cho việc kết nối khách hàng và freelancer
           </p>
-          {/* Đã sửa thẻ tự đóng */}
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-white/5 rounded-tl-full pointer-events-none" />
         </div>
 
@@ -90,88 +103,54 @@ const LoginPage: React.FC = () => {
             Đăng nhập vào không gian làm việc SAM của bạn để tiếp tục kết nối.
           </p>
 
-          {/* Social Logins - Tạm ẩn */}
-          {false && (
-            <>
-              {/* Social Logins */}
-              <div className="space-y-3 mb-6">
-                {/* Google */}
-                <button
-                  type="button"
-                  className="w-full border border-gray-200 hover:bg-gray-50 transition font-medium py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm text-gray-700 cursor-pointer"
-                >
-                  {/* Thêm role và aria-label cho SVG */}
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" role="img" aria-label="Google">
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.04c1.64 0 3.12.56 4.28 1.67l3.2-3.2C17.52 1.58 14.97 1 12 1 7.24 1 3.2 3.73 1.24 7.72l3.74 2.9C5.91 7.23 8.71 5.04 12 5.04z"
-                    />
-                    <path
-                      fill="#4285F4"
-                      d="M23.45 12.27c0-.82-.07-1.61-.21-2.38H12v4.51h6.42c-.28 1.47-1.11 2.71-2.36 3.55l3.66 2.84c2.14-1.97 3.38-4.88 3.38-8.52z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.04 14.82c-.24-.72-.38-1.49-.38-2.32s.14-1.6.38-2.32L1.3 7.28C.47 8.94 0 10.79 0 12.72s.47 3.78 1.3 5.44l3.74-2.94z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c3.24 0 5.97-1.08 7.96-2.91l-3.66-2.84c-1.01.68-2.31 1.09-4.3 1.09-3.29 0-6.09-2.19-7.08-5.58L1.18 15.7C3.15 19.7 7.21 23 12 23z"
-                    />
-                  </svg>
-                  Tiếp tục với Google
-                </button>
+          {/* Alert Banner for expired or compromised sessions */}
+          {reason === 'compromised' && (
+            <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>
+                Phát hiện token bất thường. Để bảo vệ an toàn, toàn bộ phiên đăng nhập đã được chấm
+                dứt. Vui lòng đăng nhập lại.
+              </span>
+            </div>
+          )}
 
-                {/* Apple & LinkedIn */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    className="border border-gray-200 hover:bg-gray-50 transition font-medium py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm text-gray-700 cursor-pointer"
-                  >
-                    <svg
-                      className="w-4 h-4 fill-current"
-                      viewBox="0 0 24 24"
-                      role="img"
-                      aria-label="Apple"
-                    >
-                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.2.67-2.92 1.49-.62.71-1.16 1.85-1.01 2.96 1.12.09 2.27-.58 2.94-1.39z" />
-                    </svg>
-                    Apple
-                  </button>
-                  <button
-                    type="button"
-                    className="border border-gray-200 hover:bg-gray-50 transition font-medium py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm text-gray-700 cursor-pointer"
-                  >
-                    <svg
-                      className="w-4 h-4 fill-[#0A66C2]"
-                      viewBox="0 0 24 24"
-                      role="img"
-                      aria-label="LinkedIn"
-                    >
-                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                    </svg>
-                    LinkedIn
-                  </button>
-                </div>
-              </div>
+          {reason === 'session_expired' && (
+            <div className="mb-4 p-3.5 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl flex items-center gap-2">
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.</span>
+            </div>
+          )}
 
-              {/* Divider */}
-              <div className="flex items-center my-5">
-                {/* Đã sửa thẻ tự đóng */}
-                <div className="flex-grow border-t border-gray-200" />
-                <span className="mx-4 text-xs font-bold text-gray-400 tracking-widest uppercase">
-                  HOẶC EMAIL
-                </span>
-                <div className="flex-grow border-t border-gray-200" />
-              </div>
-            </>
+          {/* Backend error message */}
+          {serverError && (
+            <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>{serverError}</span>
+            </div>
           )}
 
           {/* Form Fields */}
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Email Input */}
             <div>
-              {/* Thêm htmlFor="email" */}
               <label htmlFor="email" className="block text-xs font-semibold text-gray-600 mb-1.5">
                 Email công việc
               </label>
@@ -197,23 +176,24 @@ const LoginPage: React.FC = () => {
                 <input
                   id="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register('email')}
                   placeholder="ten@congty.com"
-                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
-                  required
+                  className={`w-full pl-12 pr-4 py-3 border rounded-xl text-sm focus:outline-none transition ${
+                    errors.email
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                      : 'border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                  }`}
                 />
               </div>
+              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
             </div>
 
             {/* Password Input */}
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                {/* Thêm htmlFor="password" */}
                 <label htmlFor="password" className="block text-xs font-semibold text-gray-600">
                   Mật khẩu
                 </label>
-                {/* Đổi a thành button để né useValidAnchor */}
                 <button
                   type="button"
                   className="text-xs font-semibold text-blue-600 hover:underline cursor-pointer bg-transparent border-0 p-0"
@@ -243,13 +223,14 @@ const LoginPage: React.FC = () => {
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register('password')}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
-                  required
+                  className={`w-full pl-12 pr-12 py-3 border rounded-xl text-sm focus:outline-none transition ${
+                    errors.password
+                      ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                      : 'border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                  }`}
                 />
-                {/* Toggle Password Visibility Icon */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -297,6 +278,9 @@ const LoginPage: React.FC = () => {
                   )}
                 </button>
               </div>
+              {errors.password && (
+                <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
+              )}
             </div>
 
             {/* Remember Me Checkbox */}
@@ -312,42 +296,43 @@ const LoginPage: React.FC = () => {
                 htmlFor="remember_me"
                 className="ml-2 text-xs font-semibold text-gray-500 cursor-pointer select-none"
               >
-                Duy trì đăng nhập trong 30 ngày
+                Duy trì đăng nhập
               </label>
             </div>
 
-            {/* Test Shortcut Buttons */}
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (state?.returnTo) {
-                    navigate(state.returnTo, { state: { initialQuery: state.initialQuery } });
-                  } else {
-                    navigate(paths.PATH_CLIENT_DASHBOARD);
-                  }
-                }}
-                className="flex-1 text-[11px] font-bold py-2 rounded-lg border border-gray-200 text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                Đăng nhập với tư cách Khách hàng
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate(paths.PATH_FREELANCER)}
-                className="flex-1 text-[11px] font-bold py-2 rounded-lg border border-cyan-200 text-cyan-700 bg-cyan-50 hover:bg-cyan-100 transition-colors cursor-pointer"
-              >
-                Đăng nhập với tư cách Freelancer
-              </button>
-            </div>
-
-            {/* Login Button with Pill Shape & Gradient matching design */}
+            {/* Login Button */}
             <div className="pt-4 flex justify-center">
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-8/12 bg-gradient-to-r from-[#1D4ED8] to-[#00A3FF] hover:opacity-95 text-white font-bold py-3.5 rounded-full transition shadow-lg text-center disabled:opacity-50 cursor-pointer"
+                disabled={isSubmitting}
+                className="w-8/12 bg-gradient-to-r from-[#1D4ED8] to-[#00A3FF] hover:opacity-95 text-white font-bold py-3.5 rounded-full transition shadow-lg text-center disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               >
-                {isLoading ? 'Đang xác thực...' : 'Đăng nhập'}
+                {isSubmitting ? (
+                  <>
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    <span>Đang xác thực...</span>
+                  </>
+                ) : (
+                  'Đăng nhập'
+                )}
               </button>
             </div>
           </form>

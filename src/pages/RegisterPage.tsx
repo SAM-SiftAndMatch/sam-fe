@@ -1,34 +1,66 @@
+import { type RegisterFormData, registerSchema } from '@/features/auth';
+import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
 import type React from 'react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import * as paths from '../routes/paths';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const RegisterPage: React.FC = () => {
-  const [accountType, setAccountType] = useState<'client' | 'freelancer'>('client');
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as { accountType?: 'CLIENT' | 'FREELANCER' } | null;
+  const { register: registerUser } = useAuthStore();
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!agreeTerms) {
-      alert('Bạn phải đồng ý với Điều khoản dịch vụ và Chính sách bảo mật!');
-      return;
-    }
-    if (!fullName || !email || !password) {
-      alert('Vui lòng điền đầy đủ thông tin!');
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      accountType: state?.accountType || 'CLIENT',
+      fullName: '',
+      email: '',
+      password: '',
+      agreeTerms: false,
+    },
+  });
 
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      alert(
-        `Đăng ký thành công tài khoản ${accountType === 'client' ? 'Khách Hàng' : 'Freelancer'}: ${fullName}`
-      );
-    }, 1000);
+  const selectedAccountType = watch('accountType');
+
+  const onSubmit = async (data: RegisterFormData) => {
+    setServerError(null);
+    try {
+      const auth = await registerUser({
+        email: data.email,
+        password: data.password,
+        fullName: data.fullName,
+        accountType: data.accountType,
+      });
+
+      if (auth.role === 'FREELANCER') {
+        navigate(paths.PATH_FREELANCER_CREATE_PROFILE);
+      } else {
+        navigate(paths.PATH_CLIENT_PROFILE);
+      }
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const message =
+          err.response?.data?.message ||
+          'Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.';
+        setServerError(message);
+      } else if (err instanceof Error) {
+        setServerError(err.message);
+      } else {
+        setServerError('Có lỗi xảy ra, vui lòng thử lại sau.');
+      }
+    }
   };
 
   return (
@@ -48,12 +80,12 @@ const RegisterPage: React.FC = () => {
         </svg>
         Về trang chủ
       </Link>
+
       {/* Main Card */}
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-[520px] p-8 md:p-10 border border-gray-100">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center items-center mb-4">
-            {/* Logo SAM (Gradient text mockup) */}
             <span
               className="text-[40px] font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF]"
               style={{ fontFamily: "'Quedora', sans-serif" }}
@@ -71,9 +103,9 @@ const RegisterPage: React.FC = () => {
         <div className="grid grid-cols-2 gap-4 mb-6">
           <button
             type="button"
-            onClick={() => setAccountType('client')}
+            onClick={() => setValue('accountType', 'CLIENT', { shouldValidate: true })}
             className={`py-4 px-2 flex flex-col items-center justify-center gap-2 border rounded-xl transition-all cursor-pointer ${
-              accountType === 'client'
+              selectedAccountType === 'CLIENT'
                 ? 'border-[#0047FF] bg-[#F5F8FF] text-[#0047FF]'
                 : 'border-gray-200 hover:bg-gray-50 text-gray-500'
             }`}
@@ -98,9 +130,9 @@ const RegisterPage: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setAccountType('freelancer')}
+            onClick={() => setValue('accountType', 'FREELANCER', { shouldValidate: true })}
             className={`py-4 px-2 flex flex-col items-center justify-center gap-2 border rounded-xl transition-all cursor-pointer ${
-              accountType === 'freelancer'
+              selectedAccountType === 'FREELANCER'
                 ? 'border-[#0047FF] bg-[#F5F8FF] text-[#0047FF]'
                 : 'border-gray-200 hover:bg-gray-50 text-gray-500'
             }`}
@@ -124,8 +156,22 @@ const RegisterPage: React.FC = () => {
           </button>
         </div>
 
+        {/* Server error message */}
+        {serverError && (
+          <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+            <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{serverError}</span>
+          </div>
+        )}
+
         {/* Form Fields */}
-        <form onSubmit={handleRegister} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Full Name Input */}
           <div>
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-600 mb-1.5">
@@ -152,13 +198,18 @@ const RegisterPage: React.FC = () => {
               <input
                 id="fullName"
                 type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                {...register('fullName')}
                 placeholder="Nguyễn Văn A"
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF] transition placeholder:text-gray-400"
-                required
+                className={`w-full pl-11 pr-4 py-3 border rounded-xl text-sm focus:outline-none transition placeholder:text-gray-400 ${
+                  errors.fullName
+                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF]'
+                }`}
               />
             </div>
+            {errors.fullName && (
+              <p className="mt-1 text-xs text-red-500">{errors.fullName.message}</p>
+            )}
           </div>
 
           {/* Email Input */}
@@ -187,13 +238,16 @@ const RegisterPage: React.FC = () => {
               <input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register('email')}
                 placeholder="email@vi-du.com"
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF] transition placeholder:text-gray-400"
-                required
+                className={`w-full pl-11 pr-4 py-3 border rounded-xl text-sm focus:outline-none transition placeholder:text-gray-400 ${
+                  errors.email
+                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF]'
+                }`}
               />
             </div>
+            {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
           </div>
 
           {/* Password Input */}
@@ -222,56 +276,86 @@ const RegisterPage: React.FC = () => {
               <input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register('password')}
                 placeholder="••••••••"
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF] transition placeholder:text-gray-400"
-                required
+                className={`w-full pl-11 pr-4 py-3 border rounded-xl text-sm focus:outline-none transition placeholder:text-gray-400 ${
+                  errors.password
+                    ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF]'
+                }`}
               />
             </div>
+            {errors.password && (
+              <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
+            )}
           </div>
 
-          {/* Terms Checkbox - Tách label và button cẩn thận để né lỗi a11y */}
-          <div className="flex items-start pt-2 pb-1">
-            <input
-              id="terms"
-              type="checkbox"
-              checked={agreeTerms}
-              onChange={(e) => setAgreeTerms(e.target.checked)}
-              className="mt-0.5 w-4 h-4 text-[#0047FF] border-gray-300 rounded focus:ring-[#0047FF] cursor-pointer"
-            />
-            <div className="ml-2 text-[13px] text-gray-600">
-              <label htmlFor="terms" className="cursor-pointer select-none">
-                Tôi đồng ý với{' '}
-              </label>
-              <button
-                type="button"
-                className="text-[#0047FF] hover:underline cursor-pointer bg-transparent border-0 p-0 font-medium"
-              >
-                Điều khoản Dịch vụ
-              </button>
-              <span> và </span>
-              <button
-                type="button"
-                className="text-[#0047FF] hover:underline cursor-pointer bg-transparent border-0 p-0 font-medium"
-              >
-                Chính sách Bảo mật
-              </button>
-              <label htmlFor="terms" className="cursor-pointer select-none">
-                {' '}
-                của SAM.
-              </label>
+          {/* Terms Checkbox */}
+          <div className="pt-2 pb-1">
+            <div className="flex items-start">
+              <input
+                id="terms"
+                type="checkbox"
+                {...register('agreeTerms')}
+                className="mt-0.5 w-4 h-4 text-[#0047FF] border-gray-300 rounded focus:ring-[#0047FF] cursor-pointer"
+              />
+              <div className="ml-2 text-[13px] text-gray-600">
+                <label htmlFor="terms" className="cursor-pointer select-none">
+                  Tôi đồng ý với{' '}
+                </label>
+                <button
+                  type="button"
+                  className="text-[#0047FF] hover:underline cursor-pointer bg-transparent border-0 p-0 font-medium"
+                >
+                  Điều khoản Dịch vụ
+                </button>
+                <span> và </span>
+                <button
+                  type="button"
+                  className="text-[#0047FF] hover:underline cursor-pointer bg-transparent border-0 p-0 font-medium"
+                >
+                  Chính sách Bảo mật
+                </button>
+                <label htmlFor="terms" className="cursor-pointer select-none">
+                  {' '}
+                  của SAM.
+                </label>
+              </div>
             </div>
+            {errors.agreeTerms && (
+              <p className="mt-1 text-xs text-red-500">{errors.agreeTerms.message}</p>
+            )}
           </div>
 
           {/* Submit Button */}
           <div className="pt-2">
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:opacity-95 text-white font-semibold py-3.5 rounded-full transition shadow-[0_8px_20px_rgba(0,178,255,0.3)] disabled:opacity-50 cursor-pointer"
+              disabled={isSubmitting}
+              className="w-full bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:opacity-95 text-white font-semibold py-3.5 rounded-full transition shadow-[0_8px_20px_rgba(0,178,255,0.3)] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
             >
-              {isLoading ? 'Đang xử lý...' : 'Tạo Tài Khoản'}
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  <span>Đang xử lý...</span>
+                </>
+              ) : (
+                'Tạo Tài Khoản'
+              )}
             </button>
           </div>
         </form>
