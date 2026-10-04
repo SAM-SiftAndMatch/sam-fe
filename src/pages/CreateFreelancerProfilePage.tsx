@@ -1,3 +1,4 @@
+import { type FreelancerProfileFormData, freelancerProfileSchema } from '@/features/profile';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import type React from 'react';
@@ -6,10 +7,6 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
 import { useNavigate } from 'react-router-dom';
 import { profileApi } from '../api/profile';
-import {
-  type FreelancerProfileFormData,
-  freelancerProfileSchema,
-} from '../features/profile/schemas/freelancer-profile-schema';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import { FALLBACK_SKILLS, type SkillOption } from '../types/profile';
