@@ -27,6 +27,12 @@ type LocationState = {
   budgetAmount?: number;
   upgrades?: { featured: boolean; urgent: boolean; warranty: boolean };
   restoreStep?: number;
+  /** Từ AIBriefPage: URL file SRS đã upload lên Cloudinary */
+  srsDocumentUrl?: string;
+  /** Từ AIBriefPage: nội dung SRS thô để hiển thị preview */
+  srsContent?: string;
+  /** Flag đánh dấu đến từ luồng AI Brief */
+  fromAiBrief?: boolean;
 };
 
 const PostProjectPage: React.FC = () => {
@@ -43,6 +49,7 @@ const PostProjectPage: React.FC = () => {
     budgetAmount: initialBudgetAmount = 1000000,
     upgrades: initialUpgrades = { featured: false, urgent: false, warranty: true },
     restoreStep = 1,
+    srsDocumentUrl: initialSrsDocumentUrl = '',
   } = (location.state as LocationState) || {};
   const [selectedTags] = useState<string[]>(initialTags);
 
@@ -1433,6 +1440,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                       upgrades,
                       selectedSkills,
                       selectedTags,
+                      srsDocumentUrl: initialSrsDocumentUrl,
                     },
                   })
                 }
