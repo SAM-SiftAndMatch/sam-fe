@@ -1,4 +1,5 @@
 import { type FreelancerProfileFormData, freelancerProfileSchema } from '@/features/profile';
+import { MyPackagesSection } from '@/features/subscription';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import type React from 'react';
@@ -789,6 +790,9 @@ const CreateFreelancerProfilePage: React.FC = () => {
               </div>
             </form>
           )}
+          <div className="mt-6">
+            <MyPackagesSection pricingPath={paths.PATH_FREELANCER_PRICING} />
+          </div>
         </div>
       </main>
     </div>

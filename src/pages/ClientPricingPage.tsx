@@ -1,8 +1,64 @@
+import { useMySubscriptions, usePurchasePackage } from '@/features/subscription';
+import { PACKAGE_AI_QA_ADVANCED_ID, PACKAGE_BUSINESS_ID } from '@/features/subscription';
 import type React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import GuestHeader from '../components/GuestHeader';
+import * as paths from '../routes/paths';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const ClientPricingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuthStore();
+  const { subscriptions, refetch } = useMySubscriptions();
+  const { purchase, purchasingId, error, successMessage } = usePurchasePackage();
+
+  const ownsPackage = (packageId: string) =>
+    subscriptions.some((s) => s.packageId === packageId && s.status === 'ACTIVE');
+
+  const handlePurchase = async (packageId: string) => {
+    if (!isAuthenticated) {
+      navigate(paths.PATH_LOGIN, { state: { returnTo: paths.PATH_CLIENT_PRICING } });
+      return;
+    }
+    if (user?.role !== 'CLIENT') {
+      navigate(paths.PATH_FREELANCER_PRICING);
+      return;
+    }
+    const result = await purchase(packageId);
+    if (result?.vnpayUrl) {
+      localStorage.setItem('SAM_PENDING_SUBSCRIPTION', result.id);
+      window.location.href = result.vnpayUrl;
+      return;
+    }
+    if (result) {
+      await refetch();
+    }
+  };
+
+  const packageButton = (packageId: string, label: string) => {
+    if (ownsPackage(packageId)) {
+      return (
+        <button
+          type="button"
+          disabled
+          className="w-full bg-white/60 text-[#1D4ED8] text-sm font-bold py-3.5 rounded-full shadow-lg cursor-default border-0 mt-auto"
+        >
+          Đang sử dụng
+        </button>
+      );
+    }
+    return (
+      <button
+        type="button"
+        onClick={() => void handlePurchase(packageId)}
+        disabled={purchasingId === packageId}
+        className="w-full bg-white text-[#1D4ED8] text-sm hover:bg-gray-50 font-bold py-3.5 rounded-full shadow-lg transition-colors cursor-pointer border-0 mt-auto disabled:opacity-60"
+      >
+        {purchasingId === packageId ? 'Đang xử lý...' : label}
+      </button>
+    );
+  };
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       {/* 1. Header dành cho khách (Tái sử dụng) */}
@@ -30,6 +86,17 @@ const ClientPricingPage: React.FC = () => {
             Lựa chọn giải pháp phù hợp với quy mô dự án của bạn
           </p>
         </div>
+
+        {error && (
+          <div className="w-full max-w-5xl mb-6 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
+            {error}
+          </div>
+        )}
+        {successMessage && (
+          <div className="w-full max-w-5xl mb-6 p-3.5 bg-green-50 border border-green-200 text-green-700 text-xs rounded-xl">
+            {successMessage}
+          </div>
+        )}
 
         {/* Pricing Grid (3 Cột) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 w-full max-w-5xl mb-24">
@@ -94,6 +161,7 @@ const ClientPricingPage: React.FC = () => {
 
             <button
               type="button"
+              onClick={() => navigate(paths.PATH_REGISTER)}
               className="w-full bg-white text-gray-800 text-sm font-bold py-3.5 rounded-full transition-colors cursor-pointer border border-gray-200 hover:bg-gray-50 mt-auto"
             >
               Bắt đầu miễn phí
@@ -109,7 +177,9 @@ const ClientPricingPage: React.FC = () => {
 
             <div className="mb-8">
               <h2 className="text-[22px] font-bold text-white mb-2">Business</h2>
-              <p className="text-white/80 text-xs">Dành cho doanh nghiệp cần tối ưu</p>
+              <p className="text-white/80 text-xs">
+                Nổi bật + Tuyển gấp không giới hạn, mọi dự án trong 30 ngày
+              </p>
             </div>
 
             <div className="flex items-end gap-1 mb-8">
@@ -132,7 +202,9 @@ const ClientPricingPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-[13px] text-white font-bold">AI Talent Matching ưu tiên</span>
+                <span className="text-[13px] text-white font-bold">
+                  Ghim Nổi bật không giới hạn
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
@@ -148,7 +220,9 @@ const ClientPricingPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-[13px] text-white font-bold">Phí dịch vụ chỉ 2%</span>
+                <span className="text-[13px] text-white font-bold">
+                  Tuyển gấp AI Headhunter không giới hạn
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
@@ -164,7 +238,27 @@ const ClientPricingPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-[13px] text-white font-bold">Quản lý dự án chuyên biệt</span>
+                <span className="text-[13px] text-white font-bold">
+                  Áp dụng mọi dự án trong 30 ngày
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                  <svg
+                    className="w-2.5 h-2.5 text-[#1D4ED8]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={4}
+                    role="img"
+                    aria-label="Check"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-[13px] text-white font-bold">
+                  Không cần mua lẻ từng dự án nữa
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
@@ -184,19 +278,16 @@ const ClientPricingPage: React.FC = () => {
               </li>
             </ul>
 
-            <button
-              type="button"
-              className="w-full bg-white text-[#1D4ED8] text-sm hover:bg-gray-50 font-bold py-3.5 rounded-full shadow-lg transition-colors cursor-pointer border-0 mt-auto"
-            >
-              Nâng cấp ngay
-            </button>
+            {packageButton(PACKAGE_BUSINESS_ID, 'Nâng cấp ngay')}
           </div>
 
           {/* Gói 3: Premium */}
           <div className="bg-gradient-to-br from-[#1D4ED8] to-[#0AAAD7] rounded-[32px] p-8 md:p-10 shadow-[0_4px_20px_rgba(29,78,216,0.15)] flex flex-col h-full mt-4 border border-blue-400/30">
             <div className="mb-8">
               <h2 className="text-[22px] font-bold text-white mb-2">Premium</h2>
-              <p className="text-white/80 text-xs">Dành cho khách cần bảo hiểm</p>
+              <p className="text-white/80 text-xs">
+                Bảo hành AI QA cho mọi dự án trong 30 ngày (bản tháng của gói lẻ 59k)
+              </p>
             </div>
 
             <div className="flex items-end gap-1 mb-8">
@@ -219,7 +310,7 @@ const ClientPricingPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-[13px] text-white font-bold">Bảo hiểm chất lượng</span>
+                <span className="text-[13px] text-white font-bold">Bảo hành chất lượng</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
@@ -235,7 +326,27 @@ const ClientPricingPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-[13px] text-white font-bold">Quét lỗi chuyên sâu</span>
+                <span className="text-[13px] text-white font-bold">
+                  AI quét lỗi + bảo mật khi bàn giao, mọi dự án
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                  <svg
+                    className="w-2.5 h-2.5 text-[#1D4ED8]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={4}
+                    role="img"
+                    aria-label="Check"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-[13px] text-white font-bold">
+                  Bản tháng của gói lẻ Trọng tài Code 59k
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
@@ -271,14 +382,14 @@ const ClientPricingPage: React.FC = () => {
               </li>
             </ul>
 
-            <button
-              type="button"
-              className="w-full bg-white text-[#1D4ED8] text-sm hover:bg-gray-50 font-bold py-3.5 rounded-full shadow-lg transition-colors cursor-pointer border-0 mt-auto"
-            >
-              Nâng cấp ngay
-            </button>
+            {packageButton(PACKAGE_AI_QA_ADVANCED_ID, 'Nâng cấp ngay')}
           </div>
         </div>
+
+        <p className="text-xs text-gray-500 mb-16 -mt-16 max-w-xl text-center">
+          Gói lẻ theo từng dự án (Ghim 59k · Tuyển gấp 99k · Trọng tài Code 59k) chỉ bán lúc đăng
+          việc, không bán tại trang này.
+        </p>
 
         {/* Section Stats (4 cột) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-4xl text-center pt-10 border-t border-gray-100">

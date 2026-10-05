@@ -352,11 +352,11 @@ const ClientDashboardPage: React.FC = () => {
               Premium
             </span>
             <h2 className="text-2xl font-bold text-white mb-3">
-              AI hỗ trợ tạo Brief chuyên nghiệp
+              Gói tháng: dùng thả ga, khỏi mua lẻ
             </h2>
             <p className="text-white/80 text-sm mb-8 leading-relaxed max-w-md">
-              Tiết kiệm 80% thời gian soạn thảo và tìm kiếm nhân tài phù hợp nhất thông qua hệ thống
-              phân tích ngữ nghĩa thông minh.
+              BUSINESS 249k/tháng: Ghim Nổi bật + Tuyển gấp không giới hạn mọi dự án. AI QA Nâng cao
+              299k/tháng: bảo hành code mọi dự án. Gói lẻ từng dự án chỉ bán lúc đăng việc.
             </p>
             <button
               type="button"

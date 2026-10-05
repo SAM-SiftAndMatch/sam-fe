@@ -11,4 +11,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // sockjs-client 1.x dùng biến `global` của Node — map sang globalThis của browser,
+  // nếu không app sập ngay khi load bundle (ReferenceError: global is not defined).
+  define: {
+    global: 'globalThis',
+  },
 });

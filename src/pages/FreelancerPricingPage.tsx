@@ -1,8 +1,41 @@
+import { useMySubscriptions, usePurchasePackage } from '@/features/subscription';
+import { PACKAGE_PRO_DEV_ID } from '@/features/subscription';
 import type React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import GuestHeader from '../components/GuestHeader';
+import * as paths from '../routes/paths';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const FreelancerPricingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuthStore();
+  const { subscriptions, refetch } = useMySubscriptions();
+  const { purchase, purchasingId, error, successMessage } = usePurchasePackage();
+
+  const ownsProDev = subscriptions.some(
+    (s) => s.packageId === PACKAGE_PRO_DEV_ID && s.status === 'ACTIVE'
+  );
+
+  const handlePurchase = async () => {
+    if (!isAuthenticated) {
+      navigate(paths.PATH_LOGIN, { state: { returnTo: paths.PATH_FREELANCER_PRICING } });
+      return;
+    }
+    if (user?.role !== 'FREELANCER') {
+      navigate(paths.PATH_CLIENT_PRICING);
+      return;
+    }
+    const result = await purchase(PACKAGE_PRO_DEV_ID);
+    if (result?.vnpayUrl) {
+      localStorage.setItem('SAM_PENDING_SUBSCRIPTION', result.id);
+      window.location.href = result.vnpayUrl;
+      return;
+    }
+    if (result) {
+      await refetch();
+    }
+  };
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       {/* 1. Kế thừa Header dành cho khách */}
@@ -10,6 +43,16 @@ const FreelancerPricingPage: React.FC = () => {
 
       {/* 2. Main Content */}
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-16 md:py-24 flex flex-col items-center justify-center">
+        {error && (
+          <div className="w-full max-w-3xl mb-6 p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
+            {error}
+          </div>
+        )}
+        {successMessage && (
+          <div className="w-full max-w-3xl mb-6 p-3.5 bg-green-50 border border-green-200 text-green-700 text-xs rounded-xl">
+            {successMessage}
+          </div>
+        )}
         {/* Tiêu đề & Badge */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-1.5 bg-white border border-[#E2E8F0] px-3 py-1.5 rounded-full mb-6 shadow-sm">
@@ -102,6 +145,7 @@ const FreelancerPricingPage: React.FC = () => {
 
             <button
               type="button"
+              onClick={() => navigate(paths.PATH_REGISTER)}
               className="w-full bg-white text-gray-800 font-bold py-3.5 rounded-xl transition-colors cursor-pointer border border-gray-200 hover:bg-gray-50 mt-auto"
             >
               Bắt đầu miễn phí
@@ -115,7 +159,9 @@ const FreelancerPricingPage: React.FC = () => {
 
             <div className="mb-8 relative z-10">
               <h2 className="text-2xl font-bold text-white mb-2">PRO DEV</h2>
-              <p className="text-white/80 text-xs">Gói cao cấp dành cho chuyên gia</p>
+              <p className="text-white/80 text-xs">
+                Nhận việc 1 chạm + lá chắn Scope Shield, hiệu lực 30 ngày
+              </p>
             </div>
 
             <div className="flex items-end gap-1 mb-8 relative z-10">
@@ -138,7 +184,9 @@ const FreelancerPricingPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-sm text-white font-bold">Nhận việc 1 chạm</span>
+                <span className="text-sm text-white font-bold">
+                  Nhận việc 1 chạm, không cần đấu thầu
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
@@ -192,12 +240,24 @@ const FreelancerPricingPage: React.FC = () => {
               </li>
             </ul>
 
-            <button
-              type="button"
-              className="w-full bg-white text-[#1D4ED8] hover:bg-gray-50 font-bold py-3.5 rounded-xl transition-colors cursor-pointer border-0 mt-auto shadow-lg relative z-10"
-            >
-              Nâng cấp ngay
-            </button>
+            {ownsProDev ? (
+              <button
+                type="button"
+                disabled
+                className="w-full bg-white/60 text-[#1D4ED8] font-bold py-3.5 rounded-xl cursor-default border-0 mt-auto shadow-lg relative z-10"
+              >
+                Đang sử dụng
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void handlePurchase()}
+                disabled={purchasingId === PACKAGE_PRO_DEV_ID}
+                className="w-full bg-white text-[#1D4ED8] hover:bg-gray-50 font-bold py-3.5 rounded-xl transition-colors cursor-pointer border-0 mt-auto shadow-lg relative z-10 disabled:opacity-60"
+              >
+                {purchasingId === PACKAGE_PRO_DEV_ID ? 'Đang xử lý...' : 'Nâng cấp ngay'}
+              </button>
+            )}
           </div>
         </div>
 
