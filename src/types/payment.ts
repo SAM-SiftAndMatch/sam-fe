@@ -4,6 +4,7 @@ export type PaymentStatus = 'PENDING' | 'HELD_IN_ESCROW' | 'RELEASED' | 'REFUNDE
 
 export interface CreateEscrowRequest {
   contractId: string;
+  returnUrl?: string;
 }
 
 export interface PaymentResponse {

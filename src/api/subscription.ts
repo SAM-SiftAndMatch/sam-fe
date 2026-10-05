@@ -12,6 +12,13 @@ export const subscriptionApi = {
     return requireApiResult(res.data, 'Failed to purchase package');
   },
 
+  confirmPayment: async (subscriptionId: string): Promise<UserSubscriptionResponse> => {
+    const res = await apiClient.post<ApiResponse<UserSubscriptionResponse>>(
+      `/subscriptions/${subscriptionId}/confirm-payment`
+    );
+    return requireApiResult(res.data, 'Failed to confirm subscription payment');
+  },
+
   mySubscriptions: async (): Promise<UserSubscriptionResponse[]> => {
     const res = await apiClient.get<ApiResponse<UserSubscriptionResponse[]>>('/subscriptions/me');
     return requireApiResult(res.data, 'Failed to fetch subscriptions');
