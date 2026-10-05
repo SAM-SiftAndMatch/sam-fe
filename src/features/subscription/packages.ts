@@ -1,0 +1,8 @@
+// ID gói dịch vụ seed sẵn từ BE (V4/V12) — định danh ổn định, không phải secret.
+// Dùng để gọi purchase mà không cần thêm API list-packages.
+export const PACKAGE_FEATURED_ID = 'f0000000-0000-0000-0000-000000000001';
+export const PACKAGE_URGENT_ID = 'f0000000-0000-0000-0000-000000000002';
+export const PACKAGE_AI_QA_SINGLE_ID = 'f0000000-0000-0000-0000-000000000003';
+export const PACKAGE_BUSINESS_ID = 'f0000000-0000-0000-0000-000000000005';
+export const PACKAGE_PRO_DEV_ID = 'f0000000-0000-0000-0000-000000000006';
+export const PACKAGE_AI_QA_ADVANCED_ID = 'f0000000-0000-0000-0000-000000000007';
