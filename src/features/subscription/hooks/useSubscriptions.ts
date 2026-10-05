@@ -52,7 +52,12 @@ export function usePurchasePackage() {
     setError(null);
     setSuccessMessage(null);
     try {
-      const result = await subscriptionApi.purchase({ packageId, projectId: projectId ?? null });
+      const returnUrl = `${window.location.origin}/client/payment/vnpay-return`;
+      const result = await subscriptionApi.purchase({
+        packageId,
+        projectId: projectId ?? null,
+        returnUrl,
+      });
       // Có vnpayUrl = phải sang VNPay thanh toán (page tự redirect), chưa kích hoạt nên không báo thành công.
       if (!result.vnpayUrl) {
         setSuccessMessage('Mua gói thành công! Gói đã được kích hoạt.');

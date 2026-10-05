@@ -3,6 +3,7 @@ export type SubscriptionStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
 export interface PurchaseSubscriptionRequest {
   packageId: string;
   projectId?: string | null;
+  returnUrl?: string;
 }
 
 export interface UserSubscriptionResponse {

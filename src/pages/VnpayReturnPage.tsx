@@ -1,5 +1,7 @@
 import type React from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { subscriptionApi } from '../api/subscription';
 import Footer from '../components/Footer';
 import GuestHeader from '../components/GuestHeader';
 import { PATH_CLIENT_PAYMENT, PATH_CLIENT_PROFILE } from '../routes/paths';
@@ -18,6 +20,24 @@ const VnpayReturnPage: React.FC = () => {
   const amountParam = searchParams.get('vnp_Amount');
   const success = responseCode === '00';
   const amountVnd = amountParam ? Number.parseInt(amountParam, 10) / 100 : null;
+
+  // Auto-confirm subscription if payment successful
+  useEffect(() => {
+    if (success) {
+      const subscriptionId = localStorage.getItem(PENDING_SUBSCRIPTION_KEY);
+      if (subscriptionId) {
+        subscriptionApi
+          .confirmPayment(subscriptionId)
+          .then(() => {
+            // Subscription activated successfully
+          })
+          .catch((e) => {
+            console.error('Failed to confirm subscription:', e);
+            // Still show success page even if confirm fails
+          });
+      }
+    }
+  }, [success]);
 
   const handleBack = () => {
     const contractId = localStorage.getItem(PENDING_CONTRACT_KEY);

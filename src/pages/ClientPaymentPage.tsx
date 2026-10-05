@@ -78,7 +78,8 @@ const ClientPaymentPage: React.FC = () => {
     setServerError(null);
     setSuccessMessage(null);
     try {
-      const created = await paymentApi.createEscrow({ contractId });
+      const returnUrl = `${window.location.origin}/client/payment/vnpay-return`;
+      const created = await paymentApi.createEscrow({ contractId, returnUrl });
       if (!created.vnpayUrl) {
         setServerError('Không tạo được link thanh toán VNPay');
         return;
