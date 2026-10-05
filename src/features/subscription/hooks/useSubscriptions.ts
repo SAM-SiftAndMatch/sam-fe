@@ -47,12 +47,12 @@ export function usePurchasePackage() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const purchase = useCallback(async (packageId: string) => {
+  const purchase = useCallback(async (packageId: string, projectId?: string | null) => {
     setPurchasingId(packageId);
     setError(null);
     setSuccessMessage(null);
     try {
-      const result = await subscriptionApi.purchase({ packageId });
+      const result = await subscriptionApi.purchase({ packageId, projectId: projectId ?? null });
       setSuccessMessage('Mua gói thành công! Gói đã được kích hoạt.');
       return result;
     } catch (e) {
