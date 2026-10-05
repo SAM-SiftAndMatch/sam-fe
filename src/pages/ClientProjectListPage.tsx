@@ -8,15 +8,9 @@ import Footer from '../components/Footer';
 import { PATH_CLIENT_PROJECT_DETAIL } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { JobResponse } from '../types/job';
+import { formatDate, formatMoney } from '../utils/format';
 
 type FilterKey = 'all' | 'OPEN' | 'NEGOTIATING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
-
-const formatMoney = (num: number) => new Intl.NumberFormat('vi-VN').format(num);
-
-const formatDate = (iso: string) => {
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('vi-VN');
-};
 
 const ClientProjectListPage: React.FC = () => {
   const navigate = useNavigate();

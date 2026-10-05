@@ -1,7 +1,7 @@
 import { Client } from '@stomp/stompjs';
 import { useEffect, useRef } from 'react';
 import SockJS from 'sockjs-client';
-import { useAuthStore } from '../../stores/useAuthStore';
+import { useAuthStore } from '../../../stores/useAuthStore';
 
 export interface PaymentNotification {
   type: string;

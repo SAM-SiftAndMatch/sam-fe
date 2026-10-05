@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
-import { subscriptionApi } from '../../api/subscription';
-import { useAuthStore } from '../../stores/useAuthStore';
-import type { UserSubscriptionResponse } from '../../types/subscription';
+import { subscriptionApi } from '../../../api/subscription';
+import { useAuthStore } from '../../../stores/useAuthStore';
+import type { UserSubscriptionResponse } from '../../../types/subscription';
 
 function toMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
