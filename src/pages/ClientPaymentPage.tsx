@@ -6,7 +6,11 @@ import Footer from '../components/Footer';
 import { PATH_CLIENT_PROJECT_DETAIL, PATH_WORKSPACE } from '../routes/paths';
 
 const ClientPaymentPage: React.FC = () => {
-  const { projectId, freelancerId } = useParams();
+  const { contractId } = useParams();
+  // TODO(Phase 2): load Payment/Contract thật bằng contractId qua paymentApi (commit 9).
+  // Tạm thời giữ luồng mock cũ: dùng contractId làm projectId để không vỡ các lookup bên dưới.
+  const projectId: string | undefined = contractId;
+  const freelancerId: string | undefined = undefined;
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [project, setProject] = useState<any>(null);

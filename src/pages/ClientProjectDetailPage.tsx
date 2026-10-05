@@ -531,12 +531,9 @@ const ClientProjectDetailPage: React.FC = () => {
         onConfirm={() => {
           setIsHireModalOpen(false);
           if (selectedProposal) {
-            navigate(
-              PATH_CLIENT_PAYMENT.replace(':projectId', project.id.toString()).replace(
-                ':freelancerId',
-                selectedProposal.id
-              )
-            );
+            // TODO(Phase 2): thay bằng contractId thật từ BE (accept invitation → contract).
+            // Tạm thời dùng project.id để giữ luồng mock điều hướng được.
+            navigate(PATH_CLIENT_PAYMENT.replace(':contractId', project.id.toString()));
           }
         }}
         onCancel={() => setIsHireModalOpen(false)}
