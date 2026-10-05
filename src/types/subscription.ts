@@ -12,4 +12,5 @@ export interface UserSubscriptionResponse {
   startDate: string;
   endDate?: string | null;
   targetProjectId?: string | null;
+  vnpayUrl?: string | null;
 }

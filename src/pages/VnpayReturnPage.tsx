@@ -2,13 +2,14 @@ import type React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Footer from '../components/Footer';
 import GuestHeader from '../components/GuestHeader';
-import { PATH_CLIENT_PAYMENT } from '../routes/paths';
+import { PATH_CLIENT_PAYMENT, PATH_CLIENT_PROFILE } from '../routes/paths';
 
 const PENDING_CONTRACT_KEY = 'SAM_PENDING_CONTRACT';
+const PENDING_SUBSCRIPTION_KEY = 'SAM_PENDING_SUBSCRIPTION';
 
 /**
- * Hứng redirect từ VNPay sau thanh toán. Chỉ HIỂN THỊ kết quả từ query,
- * không tự kết luận — trạng thái thật do IPN + WS cập nhật ở trang thanh toán.
+ * Hứng redirect từ VNPay sau thanh toán (ký quỹ Escrow hoặc mua gói).
+ * Chỉ HIỂN THỊ kết quả từ query, không tự kết luận — trạng thái thật do IPN + WS cập nhật.
  */
 const VnpayReturnPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,9 +21,13 @@ const VnpayReturnPage: React.FC = () => {
 
   const handleBack = () => {
     const contractId = localStorage.getItem(PENDING_CONTRACT_KEY);
+    const hasSubscription = localStorage.getItem(PENDING_SUBSCRIPTION_KEY);
     localStorage.removeItem(PENDING_CONTRACT_KEY);
+    localStorage.removeItem(PENDING_SUBSCRIPTION_KEY);
     if (contractId) {
       navigate(PATH_CLIENT_PAYMENT.replace(':contractId', contractId));
+    } else if (hasSubscription) {
+      navigate(PATH_CLIENT_PROFILE);
     } else {
       navigate(-1);
     }
@@ -42,7 +47,7 @@ const VnpayReturnPage: React.FC = () => {
           </h1>
           <p className="text-sm text-gray-500 mb-2">
             {success
-              ? 'VNPay đã ghi nhận giao dịch. Trạng thái ký quỹ sẽ tự cập nhật trong giây lát.'
+              ? 'VNPay đã ghi nhận giao dịch. Kích hoạt gói / vào ký quỹ khi IPN về, trạng thái tự cập nhật.'
               : `Mã phản hồi VNPay: ${responseCode || 'không xác định'}. Bạn có thể thử lại.`}
           </p>
           {amountVnd !== null && !Number.isNaN(amountVnd) && (

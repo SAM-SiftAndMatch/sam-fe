@@ -27,6 +27,11 @@ const FreelancerPricingPage: React.FC = () => {
       return;
     }
     const result = await purchase(PACKAGE_PRO_DEV_ID);
+    if (result?.vnpayUrl) {
+      localStorage.setItem('SAM_PENDING_SUBSCRIPTION', result.id);
+      window.location.href = result.vnpayUrl;
+      return;
+    }
     if (result) {
       await refetch();
     }
@@ -154,7 +159,9 @@ const FreelancerPricingPage: React.FC = () => {
 
             <div className="mb-8 relative z-10">
               <h2 className="text-2xl font-bold text-white mb-2">PRO DEV</h2>
-              <p className="text-white/80 text-xs">Gói cao cấp dành cho chuyên gia</p>
+              <p className="text-white/80 text-xs">
+                Nhận việc 1 chạm + lá chắn Scope Shield, hiệu lực 30 ngày
+              </p>
             </div>
 
             <div className="flex items-end gap-1 mb-8 relative z-10">
@@ -177,7 +184,9 @@ const FreelancerPricingPage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-sm text-white font-bold">Nhận việc 1 chạm</span>
+                <span className="text-sm text-white font-bold">
+                  Nhận việc 1 chạm, không cần đấu thầu
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center shrink-0 mt-0.5">

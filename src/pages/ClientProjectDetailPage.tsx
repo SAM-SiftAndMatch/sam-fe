@@ -1,10 +1,3 @@
-import {
-  PACKAGE_AI_QA_SINGLE_ID,
-  PACKAGE_FEATURED_ID,
-  PACKAGE_URGENT_ID,
-  useMySubscriptions,
-  usePurchasePackage,
-} from '@/features/subscription';
 import axios from 'axios';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
@@ -30,13 +23,6 @@ const ClientProjectDetailPage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [invitingId, setInvitingId] = useState<string | null>(null);
-  const { subscriptions, refetch: refetchSubs } = useMySubscriptions();
-  const {
-    purchase: purchasePackage,
-    purchasingId,
-    error: purchaseError,
-    successMessage: purchaseSuccess,
-  } = usePurchasePackage();
 
   const loadData = useCallback(async () => {
     if (!isAuthenticated || !id) return;
@@ -104,43 +90,6 @@ const ClientProjectDetailPage: React.FC = () => {
       }
     } finally {
       setInvitingId(null);
-    }
-  };
-
-  const SINGLE_USE_PACKAGES = [
-    {
-      id: PACKAGE_FEATURED_ID,
-      name: 'Ghim dự án',
-      price: '59.000đ',
-      desc: 'Ưu tiên hiển thị cho dự án này',
-    },
-    {
-      id: PACKAGE_URGENT_ID,
-      name: 'Tuyển gấp',
-      price: '99.000đ',
-      desc: 'AI tìm Top 5 Dev cho dự án này',
-    },
-    {
-      id: PACKAGE_AI_QA_SINGLE_ID,
-      name: 'Trọng tài Code',
-      price: '59.000đ',
-      desc: 'AI check code 1 lần cho dự án này',
-    },
-  ];
-
-  const ownsSingleUse = (packageId: string) =>
-    project !== null &&
-    subscriptions.some(
-      (s) => s.packageId === packageId && s.targetProjectId === project.id && s.status === 'ACTIVE'
-    );
-
-  const handleBuySingle = async (packageId: string) => {
-    if (!project) return;
-    setServerError(null);
-    const result = await purchasePackage(packageId, project.id);
-    if (result) {
-      setSuccessMessage('Mua gói lẻ thành công! Gói áp dụng cho dự án này.');
-      await refetchSubs();
     }
   };
 
@@ -519,60 +468,7 @@ const ClientProjectDetailPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Mua gói lẻ cho đúng dự án này */}
-                {project.status === 'OPEN' && (
-                  <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
-                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-1">
-                      Mua gói lẻ
-                    </h3>
-                    <p className="text-xs text-gray-500 mb-4">
-                      Áp dụng đúng cho dự án này, không giới hạn ngày.
-                    </p>
-                    {purchaseError && (
-                      <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
-                        {purchaseError}
-                      </div>
-                    )}
-                    {purchaseSuccess && (
-                      <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-xs rounded-xl">
-                        {purchaseSuccess}
-                      </div>
-                    )}
-                    <div className="flex flex-col gap-3">
-                      {SINGLE_USE_PACKAGES.map((pkg) => {
-                        const owned = ownsSingleUse(pkg.id);
-                        const buying = purchasingId === pkg.id;
-                        return (
-                          <div
-                            key={pkg.id}
-                            className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100"
-                          >
-                            <div>
-                              <div className="font-bold text-sm text-gray-900">
-                                {pkg.name} · {pkg.price}
-                              </div>
-                              <div className="text-xs text-gray-500">{pkg.desc}</div>
-                            </div>
-                            {owned ? (
-                              <span className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-100 shrink-0">
-                                Đã mua
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => void handleBuySingle(pkg.id)}
-                                disabled={buying}
-                                className="text-[11px] font-bold px-4 py-1.5 rounded-full bg-[#1D4ED8] text-white cursor-pointer border-0 shrink-0 disabled:opacity-60"
-                              >
-                                {buying ? '...' : 'Mua'}
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                {/* Gói lẻ (Ghim/Tuyển gấp/QA) chỉ bán lúc đăng việc — xem các gói đã mua ở Hồ sơ → Gói của tôi */}
 
                 <div className="bg-[#EEF2FF] rounded-[24px] p-6 border border-[#DCE4FF] text-center flex flex-col items-center">
                   <div className="w-12 h-12 bg-[#1D4ED8] rounded-full text-white flex items-center justify-center mb-4">

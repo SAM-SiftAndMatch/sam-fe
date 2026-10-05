@@ -53,7 +53,10 @@ export function usePurchasePackage() {
     setSuccessMessage(null);
     try {
       const result = await subscriptionApi.purchase({ packageId, projectId: projectId ?? null });
-      setSuccessMessage('Mua gói thành công! Gói đã được kích hoạt.');
+      // Có vnpayUrl = phải sang VNPay thanh toán (page tự redirect), chưa kích hoạt nên không báo thành công.
+      if (!result.vnpayUrl) {
+        setSuccessMessage('Mua gói thành công! Gói đã được kích hoạt.');
+      }
       return result;
     } catch (e) {
       setError(toMessage(e, 'Mua gói thất bại. Vui lòng thử lại.'));
