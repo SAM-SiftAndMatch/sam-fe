@@ -26,6 +26,7 @@ import ClientProjectListPage from '../pages/ClientProjectListPage';
 import ConfirmProjectPage from '../pages/ConfirmProjectPage';
 import PostProjectPage from '../pages/PostProjectPage';
 import SuccessProjectPage from '../pages/SuccessProjectPage';
+import VnpayReturnPage from '../pages/VnpayReturnPage';
 
 import FreelancerPage from '../pages/FreelancerPage';
 import FreelancerPricingPage from '../pages/FreelancerPricingPage';
@@ -90,6 +91,7 @@ const AppRoutes = () => {
         <Route path={paths.PATH_CLIENT_PROJECTS} element={<ClientProjectListPage />} />
         <Route path={paths.PATH_CLIENT_PROJECT_DETAIL} element={<ClientProjectDetailPage />} />
         <Route path={paths.PATH_CLIENT_PAYMENT} element={<ClientPaymentPage />} />
+        <Route path={paths.PATH_CLIENT_PAYMENT_RETURN} element={<VnpayReturnPage />} />
         <Route path={paths.PATH_CLIENT_FIND_FREELANCER} element={<FindFreelancerPage />} />
         <Route path={paths.PATH_CLIENT_PROFILE} element={<ClientProfilePage />} />
       </Route>
