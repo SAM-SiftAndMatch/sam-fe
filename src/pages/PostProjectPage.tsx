@@ -50,7 +50,6 @@ const PostProjectPage: React.FC = () => {
     upgrades: initialUpgrades = { featured: false, urgent: false, warranty: true },
     restoreStep = 1,
     srsDocumentUrl: initialSrsDocumentUrl = '',
-    fromAiBrief = false,
   } = (location.state as LocationState) || {};
   const [selectedTags] = useState<string[]>(initialTags);
 
