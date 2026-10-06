@@ -229,7 +229,7 @@ const ClientProjectListPage: React.FC = () => {
                       Hạn chót
                     </span>
                     <span className="text-sm font-bold text-[#1D4ED8]">
-                      {formatDate(project.deadline)}
+                      {project.deadline ? formatDate(project.deadline) : 'Chưa có'}
                     </span>
                   </div>
                   <span className="text-xs font-semibold text-gray-400 hidden md:block w-24 text-right">
