@@ -12,6 +12,15 @@ import { useAuthStore } from '../stores/useAuthStore';
 import type { JobResponse, RecommendationResponse } from '../types/job';
 import { formatDate, formatMoney } from '../utils/format';
 
+const normalizeSrsNewlines = (content: string | null | undefined): string => {
+  if (!content) return '';
+  return content
+    .replaceAll('\\\\n', '\n')
+    .replaceAll('\\n', '\n')
+    .replaceAll('\\r', '\n')
+    .replaceAll('\r\n', '\n');
+};
+
 const ClientProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -363,7 +372,7 @@ const ClientProjectDetailPage: React.FC = () => {
                             ),
                           }}
                         >
-                          {project.srsContent}
+                          {normalizeSrsNewlines(project.srsContent)}
                         </ReactMarkdown>
                       </div>
                     </div>
