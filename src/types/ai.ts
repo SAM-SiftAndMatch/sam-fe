@@ -13,6 +13,8 @@ export interface AiChatRequest {
   sessionId: string;
   userMessage: string;
   currentSrsContent?: string | null;
+  /** Toàn bộ lịch sử hội thoại risk-chat (role: "user"|"assistant", content) để AI nhớ ngữ cảnh */
+  chatHistory?: { role: string; content: string }[] | null;
 }
 
 // Khớp BE: AiChatResponse.java
@@ -25,6 +27,9 @@ export interface AiChatResponse {
   srsContent: string | null;
   currentSrsUrl: string | null;
   riskLevel: string | null;
+  // Exact values populated when status = COMPLETED
+  exactBudgetVnd: number | null;
+  durationMonths: number | null;
 }
 
 // Dạng tin nhắn hiển thị trong UI chat

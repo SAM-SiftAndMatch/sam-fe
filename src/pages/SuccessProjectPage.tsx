@@ -3,11 +3,24 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
 import { PATH_CLIENT_DASHBOARD, PATH_CLIENT_PROJECT_DETAIL } from '../routes/paths';
+import type { JobResponse } from '../types/job';
+
+type LocationState = {
+  newProjectId?: string;
+  jobData?: JobResponse;
+};
 
 const SuccessProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const newProjectId = location.state?.newProjectId || '1';
+  const state = (location.state as LocationState) || {};
+  const jobData = state.jobData;
+  const jobId = state.newProjectId || jobData?.id || '1';
+
+  // Format ngày tạo
+  const createdDate = jobData?.createdAt
+    ? new Date(jobData.createdAt).toLocaleDateString('vi-VN')
+    : new Date().toLocaleDateString('vi-VN');
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
@@ -48,21 +61,96 @@ const SuccessProjectPage: React.FC = () => {
             Freelancer sẽ sớm gửi đề xuất cho dự án của bạn
           </p>
 
+          {/* Tóm tắt dự án: Ngân sách + Thời gian + Kỹ năng */}
+          {jobData && (
+            <div className="w-full mb-4 space-y-3">
+              {/* Ngân sách & thời gian */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-[#EEF2FF] rounded-xl p-4 border border-[#DCE4FF] text-left">
+                  <span className="text-[9px] font-bold text-[#1D4ED8] uppercase tracking-widest mb-1 block">
+                    Ngân sách
+                  </span>
+                  <span className="text-lg font-black text-[#1D4ED8]">
+                    {new Intl.NumberFormat('vi-VN').format(Number(jobData.budgetMin))} đ
+                  </span>
+                </div>
+                <div className="bg-[#F8FAFC] rounded-xl p-4 border border-gray-100 text-left">
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">
+                    Thời gian thực hiện
+                  </span>
+                  <span className="text-lg font-black text-gray-900">
+                    {jobData.estimatedDurationMonths ?? '—'}{' '}
+                    <span className="text-xs font-bold text-gray-400">tháng</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Kỹ năng + năm kinh nghiệm */}
+              {jobData.skills && jobData.skills.length > 0 && (
+                <div className="bg-[#F8FAFC] rounded-xl p-4 border border-gray-100 text-left">
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">
+                    Kỹ năng yêu cầu
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {jobData.skills.map((skill) => (
+                      <span
+                        key={skill.id}
+                        className="inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1.5 text-xs font-semibold text-gray-700"
+                      >
+                        {skill.name}
+                        {skill.yearsOfExperience != null && (
+                          <span className="text-[10px] text-[#1D4ED8] font-bold">
+                            {skill.yearsOfExperience} năm
+                          </span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Link SRS */}
+              {jobData.srsDocumentUrl && (
+                <a
+                  href={jobData.srsDocumentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-[#1D4ED8] text-[#1D4ED8] font-bold text-xs hover:bg-[#EEF2FF] transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.293.707l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Xem tài liệu SRS đính kèm
+                </a>
+              )}
+            </div>
+          )}
+
           {/* Info Grid */}
           <div className="grid grid-cols-3 gap-3 w-full mb-8">
             <div className="bg-[#F8FAFC] rounded-xl p-3 flex flex-col items-start border border-gray-100">
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                 MÃ DỰ ÁN
               </span>
-              <span className="text-xs font-bold text-[#1D4ED8]">ID_SAM2024</span>
+              <span className="text-xs font-bold text-[#1D4ED8]">
+                {jobData?.id ? `#${jobData.id.slice(0, 8)}` : `ID_SAM${new Date().getFullYear()}`}
+              </span>
             </div>
             <div className="bg-[#F8FAFC] rounded-xl p-3 flex flex-col items-start border border-gray-100">
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                 NGÀY ĐĂNG
               </span>
-              <span className="text-xs font-bold text-gray-900">
-                {new Date().toLocaleDateString('vi-VN')}
-              </span>
+              <span className="text-xs font-bold text-gray-900">{createdDate}</span>
             </div>
             <div className="bg-[#EEF2FF] rounded-xl p-3 flex flex-col items-start border border-[#DCE4FF]">
               <span className="text-[9px] font-bold text-[#1D4ED8] uppercase tracking-widest mb-1">
@@ -70,7 +158,7 @@ const SuccessProjectPage: React.FC = () => {
               </span>
               <span className="text-xs font-bold text-[#1D4ED8] flex items-center gap-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#1D4ED8] animate-pulse" />
-                Đang chờ đề xuất
+                {jobData?.status === 'OPEN' ? 'Đang tuyển' : 'Đang chờ đề xuất'}
               </span>
             </div>
           </div>
@@ -79,7 +167,7 @@ const SuccessProjectPage: React.FC = () => {
           <div className="flex w-full gap-3">
             <button
               type="button"
-              onClick={() => navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', newProjectId))}
+              onClick={() => navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', jobId))}
               className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white font-bold transition-opacity cursor-pointer text-sm border-0 shadow-md"
             >
               <svg

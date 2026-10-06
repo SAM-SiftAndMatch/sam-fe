@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
@@ -250,9 +251,22 @@ const ClientProjectDetailPage: React.FC = () => {
                     <span>
                       Ngân sách:{' '}
                       <span className="text-[#1D4ED8]">
-                        {formatMoney(project.budgetMin)} – {formatMoney(project.budgetMax)}
+                        {project.budgetMin === project.budgetMax
+                          ? formatMoney(project.budgetMin)
+                          : `${formatMoney(project.budgetMin)} – ${formatMoney(project.budgetMax)}`}
                       </span>
                     </span>
+                    {project.estimatedDurationMonths != null && (
+                      <>
+                        <span>•</span>
+                        <span>
+                          Thời gian thực hiện:{' '}
+                          <span className="text-gray-900">
+                            {project.estimatedDurationMonths} tháng
+                          </span>
+                        </span>
+                      </>
+                    )}
                   </div>
 
                   <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-3">
@@ -269,12 +283,91 @@ const ClientProjectDetailPage: React.FC = () => {
                     {project.skills.map((skill) => (
                       <span
                         key={skill.id}
-                        className="px-4 py-2 bg-gray-50 text-gray-700 rounded-full text-xs font-bold border border-gray-200"
+                        className="px-4 py-2 bg-gray-50 text-gray-700 rounded-full text-xs font-bold border border-gray-200 flex items-center gap-1.5"
                       >
                         {skill.name}
+                        {skill.yearsOfExperience != null && (
+                          <span className="text-[10px] text-[#1D4ED8] font-black">
+                            {skill.yearsOfExperience} năm
+                          </span>
+                        )}
                       </span>
                     ))}
                   </div>
+
+                  {/* Tài liệu SRS */}
+                  {project.srsContent && (
+                    <div className="mt-6 border-t border-gray-100 pt-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest">
+                          Tài liệu SRS
+                        </h3>
+                        {project.srsDocumentUrl && (
+                          <a
+                            href={project.srsDocumentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-bold text-[#1D4ED8] hover:underline ml-auto flex items-center gap-1"
+                          >
+                            <svg
+                              className="w-3.5 h-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                              />
+                            </svg>
+                            Mở file gốc
+                          </a>
+                        )}
+                      </div>
+                      <div className="prose prose-sm max-w-none bg-[#F8FAFC] border border-gray-100 rounded-2xl p-6 text-gray-700">
+                        <ReactMarkdown
+                          components={{
+                            h1: ({ children }) => (
+                              <h1 className="text-lg font-bold text-gray-900 mt-4 mb-2 first:mt-0">
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="text-base font-bold text-gray-800 mt-3 mb-2">
+                                {children}
+                              </h2>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="text-sm font-semibold text-gray-700 mt-2 mb-1.5">
+                                {children}
+                              </h3>
+                            ),
+                            p: ({ children }) => (
+                              <p className="text-xs leading-5 text-gray-700 mb-2">{children}</p>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="list-disc list-inside text-xs text-gray-700 space-y-1 mb-2 ml-2">
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="list-decimal list-inside text-xs text-gray-700 space-y-1 mb-2 ml-2">
+                                {children}
+                              </ol>
+                            ),
+                            li: ({ children }) => <li className="text-xs leading-5">{children}</li>,
+                            strong: ({ children }) => (
+                              <strong className="font-bold text-gray-900">{children}</strong>
+                            ),
+                          }}
+                        >
+                          {project.srsContent}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Danh sách ứng viên AI đề xuất */}
