@@ -1,9 +1,16 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { profileApi } from '../api/profile';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import FooterDashboard from '../components/FooterDashboard';
-import { PATH_CLIENT_AI_BRIEF, PATH_CLIENT_PRICING, PATH_CLIENT_PROJECTS } from '../routes/paths';
+import {
+  PATH_CLIENT_AI_BRIEF,
+  PATH_CLIENT_PRICING,
+  PATH_CLIENT_PROFILE,
+  PATH_CLIENT_PROJECTS,
+} from '../routes/paths';
+import type { ClientProfileResponse } from '../types/profile';
 
 // === MOCK DATA ===
 const STATS = [
@@ -106,6 +113,8 @@ const ClientDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [placeholderText, setPlaceholderText] = useState('');
+  const [clientProfile, setClientProfile] = useState<ClientProfileResponse | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   useEffect(() => {
     const fullText = "Mô tả công việc bạn cần (ví dụ: 'Thiết kế logo hiện đại cho startup')";
@@ -139,6 +148,31 @@ const ClientDashboardPage: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoadingProfile(true);
+    profileApi
+      .getClientProfile()
+      .then((data) => {
+        if (isMounted) {
+          setClientProfile(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not fetch client profile on dashboard:', err);
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingProfile(false);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const hasCompanyProfile = Boolean(clientProfile?.companyName?.trim());
+
   const handleSearch = (query?: string) => {
     const q = query || searchQuery;
     if (!q.trim()) return; // Do nothing if empty
@@ -153,6 +187,41 @@ const ClientDashboardPage: React.FC = () => {
 
       {/* 2. Main Content */}
       <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-12 flex flex-col gap-10">
+        {/* Profile incomplete warning (mirror freelancer landing) */}
+        {!isLoadingProfile && !hasCompanyProfile && (
+          <section className="bg-amber-50/90 border border-amber-200 rounded-[28px] p-6 md:p-8 text-center shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">
+              Hồ sơ công ty của bạn chưa hoàn thiện
+            </h3>
+            <p className="text-xs text-gray-600 mb-5 max-w-md mx-auto">
+              Hãy cập nhật tên công ty, lĩnh vực và thông tin liên hệ để tạo uy tín với Freelancer
+              trước khi đăng dự án tuyển dụng.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate(PATH_CLIENT_PROFILE)}
+              className="bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:shadow-md text-white font-bold text-xs px-7 py-3 rounded-full transition-all cursor-pointer border-0 inline-flex items-center gap-2"
+            >
+              Hoàn thiện hồ sơ công ty ngay &rarr;
+            </button>
+          </section>
+        )}
+
         {/* ================= HERO SECTION ================= */}
         <section className="flex flex-col items-center text-center relative w-full">
           {/* Background Blur */}
@@ -283,11 +352,11 @@ const ClientDashboardPage: React.FC = () => {
               Premium
             </span>
             <h2 className="text-2xl font-bold text-white mb-3">
-              AI hỗ trợ tạo Brief chuyên nghiệp
+              Gói tháng: dùng thả ga, khỏi mua lẻ
             </h2>
             <p className="text-white/80 text-sm mb-8 leading-relaxed max-w-md">
-              Tiết kiệm 80% thời gian soạn thảo và tìm kiếm nhân tài phù hợp nhất thông qua hệ thống
-              phân tích ngữ nghĩa thông minh.
+              BUSINESS 249k/tháng: Ghim Nổi bật + Tuyển gấp không giới hạn mọi dự án. AI QA Nâng cao
+              299k/tháng: bảo hành code mọi dự án. Gói lẻ từng dự án chỉ bán lúc đăng việc.
             </p>
             <button
               type="button"

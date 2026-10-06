@@ -1,144 +1,123 @@
+import { usePaymentNotifications } from '@/features/payment';
+import axios from 'axios';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { paymentApi } from '../api/payment';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
-import { PATH_CLIENT_PROJECT_DETAIL, PATH_WORKSPACE } from '../routes/paths';
+import { PATH_CLIENT_PROJECTS } from '../routes/paths';
+import { useAuthStore } from '../stores/useAuthStore';
+import type { PaymentResponse } from '../types/payment';
+
+const PENDING_CONTRACT_KEY = 'SAM_PENDING_CONTRACT';
+
+const STATUS_LABEL: Record<string, { text: string; className: string }> = {
+  PENDING: { text: 'Chờ thanh toán', className: 'bg-gray-100 text-gray-600' },
+  HELD_IN_ESCROW: { text: 'Đang ký quỹ', className: 'bg-amber-50 text-amber-700' },
+  RELEASED: { text: 'Đã giải ngân', className: 'bg-green-50 text-green-700' },
+  REFUNDED: { text: 'Đã hoàn tiền', className: 'bg-red-50 text-red-700' },
+};
+
+const formatCurrency = (num: number) => `${new Intl.NumberFormat('vi-VN').format(num)} VND`;
+
+const formatDateTime = (iso: string | null | undefined) => {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleString('vi-VN');
+};
 
 const ClientPaymentPage: React.FC = () => {
-  const { projectId, freelancerId } = useParams();
+  const { contractId } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+  const [payments, setPayments] = useState<PaymentResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [project, setProject] = useState<any>(null);
-  const [freelancer, setFreelancer] = useState<any>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const loadPayments = useCallback(async () => {
+    if (!contractId) return;
+    setIsLoading(true);
+    setServerError(null);
+    try {
+      setPayments(await paymentApi.getByContract(contractId));
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        const data = e.response?.data as { message?: string } | undefined;
+        setServerError(data?.message || 'Không tải được giao dịch ký quỹ');
+      } else {
+        setServerError('Không tải được giao dịch ký quỹ');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [contractId]);
 
   useEffect(() => {
-    // Fetch project
-    const savedProjects = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
-    const currentProject = savedProjects.find(
-      (p: any) => p.id?.toString() === projectId?.toString()
-    );
+    void loadPayments();
+  }, [loadPayments]);
 
-    // Default fallback project if not found (for previewing purpose)
-    const activeProject = currentProject || {
-      id: projectId || '1',
-      title: 'Phát triển module thanh toán VNPay cho Website Next.js',
-      budget: '5.000.000 VND',
-    };
-    setProject(activeProject);
+  // IPN/release đẩy WS → refetch ngay, không polling.
+  usePaymentNotifications(contractId, (n) => {
+    if (n.type === 'PAYMENT_ESCROW_HELD') {
+      setSuccessMessage('Tiền ký quỹ đã vào Escrow.');
+    } else if (n.type === 'PAYMENT_RELEASED') {
+      setSuccessMessage('Tiền ký quỹ đã được giải ngân.');
+    }
+    void loadPayments();
+  });
 
-    // MOCK Freelancer lookup (Normally we'd fetch this from Applications)
-    const mockFreelancers: Record<string, any> = {
-      p1: {
-        name: 'Trần Văn A',
-        price: '4.500.000 VND',
-        avatar:
-          'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=100&q=80',
-        rating: 4.9,
-      },
-      p2: {
-        name: 'Nguyễn Thị B',
-        price: '5.000.000 VND',
-        avatar:
-          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80',
-        rating: 4.7,
-      },
-    };
+  const unfinished = payments.find((p) => p.status === 'PENDING' || p.status === 'HELD_IN_ESCROW');
+  const heldPayment = payments.find((p) => p.status === 'HELD_IN_ESCROW');
 
-    setFreelancer(mockFreelancers[freelancerId || 'p1'] || mockFreelancers.p1);
-  }, [projectId, freelancerId]);
-
-  const handlePaymentAndAssign = () => {
+  const handleCreateEscrow = async () => {
+    if (!contractId || !isAuthenticated) return;
     setIsProcessing(true);
-
-    setTimeout(() => {
-      // 1. Update Project Status to in_progress
-      const savedProjects = JSON.parse(localStorage.getItem('SAM_USER_PROJECTS') || '[]');
-      let isFound = false;
-      const updatedProjects = savedProjects.map((p: any) => {
-        if (p.id?.toString() === projectId?.toString()) {
-          isFound = true;
-          return {
-            ...p,
-            status: 'in_progress',
-            assignedFreelancerId: freelancerId,
-            agreedPrice: freelancer.price,
-            assignedAt: new Date().toISOString(),
-          };
-        }
-        return p;
-      });
-
-      if (!isFound && project) {
-        updatedProjects.push({
-          ...project,
-          status: 'in_progress',
-          assignedFreelancerId: freelancerId,
-          agreedPrice: freelancer.price,
-          assignedAt: new Date().toISOString(),
-        });
+    setServerError(null);
+    setSuccessMessage(null);
+    try {
+      const returnUrl = `${window.location.origin}/client/payment/vnpay-return`;
+      const created = await paymentApi.createEscrow({ contractId, returnUrl });
+      if (!created.vnpayUrl) {
+        setServerError('Không tạo được link thanh toán VNPay');
+        return;
       }
-
-      localStorage.setItem('SAM_USER_PROJECTS', JSON.stringify(updatedProjects));
-
-      // 2. Update Applications
-      const savedApps = JSON.parse(localStorage.getItem('SAM_FREELANCER_APPLICATIONS') || '[]');
-      const updatedApps = savedApps.map((app: any) => {
-        if (app.jobId.toString() === projectId?.toString()) {
-          // If this is the chosen freelancer (mocking logic by id, normally we'd match freelancerId properly)
-          return { ...app, status: 'rejected' }; // Simulating all others rejected
-        }
-        return app;
-      });
-      // In a real app we'd also mark the exact application as 'approved'.
-      localStorage.setItem('SAM_FREELANCER_APPLICATIONS', JSON.stringify(updatedApps));
-
-      // 3. Update or create workspace entry
-      const workspaces = JSON.parse(localStorage.getItem('SAM_WORKSPACES') || '[]');
-      const wsKey = `${projectId}_${freelancerId}`;
-      let wsFound = false;
-      const updatedWorkspaces = workspaces.map((w: any) => {
-        if (w.projectId?.toString() === projectId?.toString() && w.freelancerId === freelancerId) {
-          wsFound = true;
-          return {
-            ...w,
-            status: 'in_progress',
-            lastMessage: 'Dự án đã được giao, bắt đầu làm việc nhé!',
-            lastMessageTime: 'Vừa xong',
-            unreadCount: 1,
-          };
-        }
-        return w;
-      });
-      if (!wsFound) {
-        updatedWorkspaces.push({
-          id: wsKey,
-          projectId: projectId?.toString(),
-          projectName: project?.title || 'Dự án',
-          freelancerId: freelancerId,
-          freelancerName: freelancer.name,
-          freelancerAvatar: freelancer.avatar,
-          lastMessage: 'Dự án đã được giao, bắt đầu làm việc nhé!',
-          lastMessageTime: 'Vừa xong',
-          unreadCount: 1,
-          status: 'in_progress',
-          createdAt: new Date().toISOString(),
-        });
+      localStorage.setItem(PENDING_CONTRACT_KEY, contractId);
+      window.location.href = created.vnpayUrl;
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        const data = e.response?.data as { message?: string } | undefined;
+        setServerError(data?.message || 'Tạo ký quỹ thất bại');
+      } else {
+        setServerError('Tạo ký quỹ thất bại');
       }
-      localStorage.setItem('SAM_WORKSPACES', JSON.stringify(updatedWorkspaces));
-
-      // 3. Navigate to workspace
-      navigate(PATH_WORKSPACE.replace(':projectId', projectId || '1'));
-    }, 2000);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  if (!project || !freelancer) return <div className="min-h-screen bg-[#F8FAFC]" />;
-
-  const basePriceNum = Number.parseInt(freelancer.price.replace(/\D/g, '')) || 0;
-  const platformFeeNum = basePriceNum * 0.08;
-  const totalPriceNum = basePriceNum + platformFeeNum;
-
-  const formatCurrency = (num: number) => `${new Intl.NumberFormat('vi-VN').format(num)} VND`;
+  const handleRelease = async () => {
+    if (!heldPayment) return;
+    setIsProcessing(true);
+    setServerError(null);
+    setSuccessMessage(null);
+    try {
+      await paymentApi.release(heldPayment.paymentId);
+      setSuccessMessage('Giải ngân thành công.');
+      await loadPayments();
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        const data = e.response?.data as { message?: string } | undefined;
+        setServerError(data?.message || 'Giải ngân thất bại');
+      } else {
+        setServerError('Giải ngân thất bại');
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
@@ -147,7 +126,7 @@ const ClientPaymentPage: React.FC = () => {
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6">
         <button
           type="button"
-          onClick={() => navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', projectId || '1'))}
+          onClick={() => navigate(PATH_CLIENT_PROJECTS)}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-medium transition-colors cursor-pointer bg-transparent border-0 w-fit"
         >
           <svg
@@ -163,7 +142,7 @@ const ClientPaymentPage: React.FC = () => {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_400px] gap-8 mt-4">
-          {/* Left Column - Invoice Details */}
+          {/* Left Column - Escrow Details */}
           <div className="flex flex-col gap-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Thanh toán cọc & Giao việc</h1>
             <p className="text-gray-500 text-sm mb-6">
@@ -172,44 +151,70 @@ const ClientPaymentPage: React.FC = () => {
               việc.
             </p>
 
-            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-              <h2 className="text-lg font-bold text-gray-900 mb-6">Chi tiết dự án</h2>
-
-              <div className="flex flex-col gap-4">
-                <div className="flex justify-between items-start pb-4 border-b border-gray-100">
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Dự án</div>
-                    <div className="font-bold text-gray-900">{project.title}</div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Freelancer thực hiện</div>
-                    <div className="flex items-center gap-3 mt-2">
-                      <img
-                        src={freelancer.avatar}
-                        alt="avatar"
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <div>
-                        <div className="font-bold text-gray-900 text-sm">{freelancer.name}</div>
-                        <div className="flex items-center gap-1 text-xs text-yellow-500 font-bold">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                          {freelancer.rating}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center pt-2">
-                  <div className="text-sm font-bold text-gray-900">Chi phí thỏa thuận</div>
-                  <div className="text-lg font-black text-[#1D4ED8]">{freelancer.price}</div>
-                </div>
+            {serverError && (
+              <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
+                {serverError}
               </div>
+            )}
+            {successMessage && (
+              <div className="p-3.5 bg-green-50 border border-green-200 text-green-700 text-xs rounded-xl">
+                {successMessage}
+              </div>
+            )}
+
+            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-gray-900">Lịch sử ký quỹ (mỗi đợt 50%)</h2>
+                <button
+                  type="button"
+                  onClick={() => void loadPayments()}
+                  disabled={isLoading}
+                  className="text-xs font-bold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0 disabled:opacity-60"
+                >
+                  Tải lại
+                </button>
+              </div>
+
+              {isLoading ? (
+                <p className="text-sm text-gray-500">Đang tải giao dịch...</p>
+              ) : !contractId ? (
+                <p className="text-sm text-gray-500">Thiếu mã hợp đồng trong đường dẫn.</p>
+              ) : payments.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  Chưa có đợt ký quỹ nào. Mỗi đợt cọc 50% giá trị hợp đồng đã ký.
+                </p>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {payments.map((p) => {
+                    const badge = STATUS_LABEL[p.status] || STATUS_LABEL.PENDING;
+                    return (
+                      <div
+                        key={p.paymentId}
+                        className="flex justify-between items-start pb-4 border-b border-gray-100 last:border-0"
+                      >
+                        <div>
+                          <div className="text-sm text-gray-500 mb-1">
+                            Đợt{' '}
+                            {p.installment === 'DEPOSIT' ? '1 (đặt cọc)' : '2 (thanh toán cuối)'}
+                          </div>
+                          <div className="font-bold text-gray-900">
+                            {formatCurrency(p.amount)} {p.currency}
+                          </div>
+                          <div className="text-xs text-gray-400 mt-1">
+                            Giữ quỹ: {formatDateTime(p.escrowHeldAt)} · Giải ngân:{' '}
+                            {formatDateTime(p.releasedAt)}
+                          </div>
+                        </div>
+                        <span
+                          className={`text-[11px] font-bold px-3 py-1 rounded-full ${badge.className}`}
+                        >
+                          {badge.text}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="bg-[#EEF2FF] rounded-2xl p-5 border border-[#E0E7FF] flex gap-4 mt-2">
@@ -236,62 +241,41 @@ const ClientPaymentPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column - Payment Method */}
+          {/* Right Column - Actions */}
           <div>
             <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sticky top-24">
-              <h2 className="text-lg font-bold text-gray-900 mb-6">Tóm tắt thanh toán</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-6">Thao tác ký quỹ</h2>
 
-              <div className="flex flex-col gap-4 mb-8">
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Giá trị dự án</span>
-                  <span className="font-bold text-gray-900">{freelancer.price}</span>
+              {unfinished?.status === 'HELD_IN_ESCROW' ? (
+                <button
+                  type="button"
+                  onClick={() => void handleRelease()}
+                  disabled={isProcessing}
+                  className="w-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold py-4 rounded-2xl shadow-[0_4px_20px_rgba(29,78,216,0.3)] hover:opacity-90 transition-all flex justify-center items-center gap-2 cursor-pointer border-0 disabled:opacity-70"
+                >
+                  {isProcessing
+                    ? 'Đang xử lý...'
+                    : `Giải ngân ${formatCurrency(unfinished.amount)}`}
+                </button>
+              ) : unfinished?.status === 'PENDING' ? (
+                <div className="text-sm text-gray-600 leading-relaxed">
+                  Đã tạo đơn ký quỹ {formatCurrency(unfinished.amount)}, đang chờ thanh toán VNPay.
+                  Sau khi thanh toán xong, trạng thái tự cập nhật tại đây.
                 </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Phí nền tảng (8%)</span>
-                  <span className="font-bold text-gray-900">{formatCurrency(platformFeeNum)}</span>
-                </div>
-                <div className="h-px bg-gray-100 my-2" />
-                <div className="flex justify-between items-end">
-                  <span className="text-sm font-bold text-gray-900">Tổng cộng (Cần cọc)</span>
-                  <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7]">
-                    {formatCurrency(totalPriceNum)}
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handlePaymentAndAssign}
-                disabled={isProcessing}
-                className="w-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold py-4 rounded-2xl shadow-[0_4px_20px_rgba(29,78,216,0.3)] hover:opacity-90 transition-all flex justify-center items-center gap-2 cursor-pointer border-0 disabled:opacity-70"
-              >
-                {isProcessing ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Đang xử lý thanh toán...
-                  </>
-                ) : (
-                  'Thanh toán & Giao việc ngay'
-                )}
-              </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void handleCreateEscrow()}
+                  disabled={isProcessing || !contractId}
+                  className="w-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold py-4 rounded-2xl shadow-[0_4px_20px_rgba(29,78,216,0.3)] hover:opacity-90 transition-all flex justify-center items-center gap-2 cursor-pointer border-0 disabled:opacity-70"
+                >
+                  {isProcessing
+                    ? 'Đang xử lý...'
+                    : payments.length === 0
+                      ? 'Tạo ký quỹ 50% & Thanh toán VNPay'
+                      : 'Tạo ký quỹ đợt tiếp theo'}
+                </button>
+              )}
 
               <div className="mt-6 flex items-center justify-center gap-2">
                 <svg
