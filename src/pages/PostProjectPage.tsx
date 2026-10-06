@@ -31,6 +31,10 @@ type LocationState = {
   srsDocumentUrl?: string;
   /** Từ AIBriefPage: nội dung SRS thô để hiển thị preview */
   srsContent?: string;
+  /** Từ AIBriefPage: Ngân sách chính xác (VND) */
+  exactBudgetVnd?: number;
+  /** Từ AIBriefPage: Thời gian hoàn thành (tháng) */
+  durationMonths?: number;
   /** Flag đánh dấu đến từ luồng AI Brief */
   fromAiBrief?: boolean;
 };

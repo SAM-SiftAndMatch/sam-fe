@@ -4,6 +4,8 @@ export type JobStatus = 'OPEN' | 'NEGOTIATING' | 'IN_PROGRESS' | 'COMPLETED' | '
 export interface JobSkill {
   id: number;
   name: string;
+  /** Số năm kinh nghiệm yêu cầu (BE trả từ JobSkill.requiredYearsOfExperience) */
+  yearsOfExperience: number | null;
 }
 
 export interface JobResponse {
@@ -15,8 +17,11 @@ export interface JobResponse {
   budgetMin: number;
   budgetMax: number;
   status: JobStatus;
-  deadline: string;
+  estimatedDurationMonths: number | null;
+  deadline: string | null;
   srsDocumentUrl: string;
+  /** Nội dung SRS Markdown (render đẹp trong app) */
+  srsContent: string | null;
   riskLevel?: string | null;
   isFeatured: boolean;
   isUrgentHiring: boolean;
@@ -31,8 +36,10 @@ export interface JobCreateRequest {
   description: string;
   budgetMin: number;
   budgetMax: number;
-  deadline: string;
+  estimatedDurationMonths: number;
   srsDocumentUrl: string;
+  /** Nội dung SRS Markdown (tùy chọn) */
+  srsContent?: string;
   isFeatured?: boolean;
   isUrgentHiring?: boolean;
   requiresAiQa?: boolean;

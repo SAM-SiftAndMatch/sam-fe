@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 import aiApi from '../api/ai';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
-import { PATH_CLIENT_POST_PROJECT } from '../routes/paths';
+import { PATH_CLIENT_CONFIRM_PROJECT, PATH_CLIENT_POST_PROJECT } from '../routes/paths';
 import type { AiChatResponse, AiQuestion, ChatMessage } from '../types/ai';
 
 // === Tạo session ID duy nhất cho mỗi phiên làm việc ===
@@ -64,7 +64,8 @@ const BaseQuestionCard: React.FC<BaseQuestionCardProps> = ({
         </div>
       )}
 
-      {question.allowCustomInput &&
+      {/* TEXT hoặc không có options -> LUÔN hiện ô nhập (không phụ thuộc allowCustomInput) */}
+      {(question.type === 'TEXT' || !question.options || question.options.length === 0) &&
         (question.type === 'TEXT' ? (
           <textarea
             value={customInput}
@@ -207,8 +208,9 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
               </div>
             )}
 
-            {/* Custom input (TEXT type hoặc bấm Khác) */}
-            {((q.type === 'TEXT' && q.allowCustomInput) || ans.showCustom) && (
+            {/* Custom input: type TEXT hoặc không có options thì LUÔN hiện ô nhập
+                (AI hay quên set allowCustomInput=true nên không được phụ thuộc nó) */}
+            {(q.type === 'TEXT' || !hasOpts || ans.showCustom) && (
               <div className="flex gap-2 items-start">
                 <textarea
                   value={ans.customInput}
@@ -622,6 +624,8 @@ const AIBriefPage: React.FC = () => {
   const [isBaSending, setIsBaSending] = useState(false);
   const [latestSrsContent, setLatestSrsContent] = useState<string | null>(null);
   const [latestSrsUrl, setLatestSrsUrl] = useState<string | null>(null);
+  const [exactBudgetVnd, setExactBudgetVnd] = useState<number | null>(null);
+  const [durationMonths, setDurationMonths] = useState<number | null>(null);
 
   // --- Phase 3: Risk Chat ---
   const [riskMessages, setRiskMessages] = useState<ChatMessage[]>([]);
@@ -766,6 +770,12 @@ const AIBriefPage: React.FC = () => {
       if (response.currentSrsUrl) {
         setLatestSrsUrl(response.currentSrsUrl);
       }
+      if (response.exactBudgetVnd) {
+        setExactBudgetVnd(response.exactBudgetVnd);
+      }
+      if (response.durationMonths) {
+        setDurationMonths(response.durationMonths);
+      }
     }
   }, []);
 
@@ -841,6 +851,8 @@ const AIBriefPage: React.FC = () => {
 
       if (response.srsContent) setLatestSrsContent(response.srsContent);
       if (response.currentSrsUrl) setLatestSrsUrl(response.currentSrsUrl);
+      if (response.exactBudgetVnd) setExactBudgetVnd(response.exactBudgetVnd);
+      if (response.durationMonths) setDurationMonths(response.durationMonths);
       if (response.status === 'FINALIZED') setPageState('completed');
     } catch (err) {
       console.error('Risk init error:', err);
@@ -874,6 +886,11 @@ const AIBriefPage: React.FC = () => {
           sessionId: sessionId.current,
           userMessage: msg,
           currentSrsContent: latestSrsContent ?? '',
+          // Gửi kèm toàn bộ lịch sử chat để AI nhớ đã đề xuất Option 1/2 với con số gì
+          chatHistory: riskMessages.map((m) => ({
+            role: m.role === 'user' ? 'user' : 'assistant',
+            content: m.content,
+          })),
         });
 
         const aiMsg: ChatMessage = {
@@ -887,6 +904,8 @@ const AIBriefPage: React.FC = () => {
 
         if (response.srsContent) setLatestSrsContent(response.srsContent);
         if (response.currentSrsUrl) setLatestSrsUrl(response.currentSrsUrl);
+        if (response.exactBudgetVnd) setExactBudgetVnd(response.exactBudgetVnd);
+        if (response.durationMonths) setDurationMonths(response.durationMonths);
 
         // Risk prompt returns FINALIZED after the client accepts the final SRS.
         if (response.status === 'FINALIZED') {
@@ -899,7 +918,10 @@ const AIBriefPage: React.FC = () => {
         setIsRiskSending(false);
       }
     },
-    [riskInput, isRiskSending, latestSrsContent]
+    // QUAN TRỌNG: phải có riskMessages trong deps, nếu không callback bị stale
+    // closure, chatHistory gửi lên AI sẽ rỗng/thiếu tin AI đã đề xuất option
+    // => AI không nhớ con số mình từng đề nghị => trả về "giữ nguyên" sai lầm.
+    [riskInput, isRiskSending, latestSrsContent, riskMessages]
   );
 
   // =========================================
@@ -920,14 +942,16 @@ const AIBriefPage: React.FC = () => {
   }, [handleStartRiskChat, latestSrsContent]);
 
   const handleComplete = useCallback(() => {
-    navigate(PATH_CLIENT_POST_PROJECT, {
+    navigate(PATH_CLIENT_CONFIRM_PROJECT, {
       state: {
         srsDocumentUrl: latestSrsUrl ?? '',
         srsContent: latestSrsContent ?? '',
+        exactBudgetVnd: exactBudgetVnd,
+        durationMonths: durationMonths,
         fromAiBrief: true,
       },
     });
-  }, [navigate, latestSrsUrl, latestSrsContent]);
+  }, [navigate, latestSrsUrl, latestSrsContent, exactBudgetVnd, durationMonths]);
 
   const handleSkip = useCallback(() => {
     navigate(PATH_CLIENT_POST_PROJECT);
