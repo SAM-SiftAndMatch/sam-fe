@@ -1,16 +1,17 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import * as paths from '../../routes/paths';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { PrimaryButton, SecondaryButton } from './LandingButtons';
 
-interface NavItem {
+export interface NavItem {
   label: string;
-  id: string;
+  id?: string;
+  path?: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
+const DEFAULT_LANDING_ITEMS: NavItem[] = [
   { label: 'Tổng quan', id: 'hero' },
   { label: 'Quy trình', id: 'process' },
   { label: 'Tính năng', id: 'features' },
@@ -19,11 +20,27 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Đánh giá', id: 'testimonials' },
 ];
 
-export const LandingNavbar: React.FC = () => {
+const DEFAULT_PAGE_LINKS: NavItem[] = [
+  { label: 'Khách hàng', path: paths.PATH_HOME },
+  { label: 'Freelancer', path: paths.PATH_FREELANCER },
+  { label: 'Bảng giá', path: paths.PATH_CLIENT_PRICING },
+];
+
+interface LandingNavbarProps {
+  navItems?: NavItem[];
+}
+
+export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isAuthenticated, user } = useAuthStore();
+
+  const isHome = location.pathname === paths.PATH_HOME || location.pathname === paths.PATH_HOME_ALT;
+
+  // Resolve items to render
+  const resolvedItems = navItems || (isHome ? DEFAULT_LANDING_ITEMS : DEFAULT_PAGE_LINKS);
 
   const dashboardPath =
     user?.role === 'FREELANCER' ? paths.PATH_FREELANCER : paths.PATH_CLIENT_DASHBOARD;
@@ -33,15 +50,17 @@ export const LandingNavbar: React.FC = () => {
       const scrollY = window.scrollY;
       setIsScrolled(scrollY > 24);
 
-      // Section spy
-      for (let i = NAV_ITEMS.length - 1; i >= 0; i--) {
-        const item = NAV_ITEMS[i];
-        const el = document.getElementById(item.id);
-        if (el) {
-          const top = el.offsetTop - 120;
-          if (scrollY >= top) {
-            setActiveSection(item.id);
-            break;
+      // Section spy only for items with id
+      for (let i = resolvedItems.length - 1; i >= 0; i--) {
+        const item = resolvedItems[i];
+        if (item.id) {
+          const el = document.getElementById(item.id);
+          if (el) {
+            const top = el.offsetTop - 120;
+            if (scrollY >= top) {
+              setActiveSection(item.id);
+              break;
+            }
           }
         }
       }
@@ -50,7 +69,7 @@ export const LandingNavbar: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [resolvedItems]);
 
   const scrollTo = (id: string) => {
     setMobileMenuOpen(false);
@@ -103,13 +122,30 @@ export const LandingNavbar: React.FC = () => {
 
         {/* Links - Center */}
         <nav className="hidden md:flex items-center gap-1">
-          {NAV_ITEMS.map((item) => {
+          {resolvedItems.map((item) => {
+            if (item.path) {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.label}
+                  to={item.path}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer border-0 ${
+                    isActive
+                      ? 'text-[#1D4ED8] bg-[#1D4ED8]/[0.08]'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            }
+
             const isActive = activeSection === item.id;
             return (
               <button
-                key={item.id}
+                key={item.label}
                 type="button"
-                onClick={() => scrollTo(item.id)}
+                onClick={() => item.id && scrollTo(item.id)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer border-0 ${
                   isActive
                     ? 'text-[#1D4ED8] bg-[#1D4ED8]/[0.08]'
@@ -180,16 +216,31 @@ export const LandingNavbar: React.FC = () => {
         {/* Mobile Dropdown Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-[calc(100%+8px)] left-0 right-0 w-full bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-[14px] p-4 shadow-xl flex flex-col gap-2 z-50">
-            {NAV_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => scrollTo(item.id)}
-                className="w-full text-left px-3 py-2 text-sm font-medium text-slate-700 hover:text-[#1D4ED8] hover:bg-slate-50 rounded-[6px]"
-              >
-                {item.label}
-              </button>
-            ))}
+            {resolvedItems.map((item) => {
+              if (item.path) {
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-left px-3 py-2 text-sm font-medium text-slate-700 hover:text-[#1D4ED8] hover:bg-slate-50 rounded-[6px]"
+                  >
+                    {item.label}
+                  </Link>
+                );
+              }
+
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => item.id && scrollTo(item.id)}
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-700 hover:text-[#1D4ED8] hover:bg-slate-50 rounded-[6px]"
+                >
+                  {item.label}
+                </button>
+              );
+            })}
             <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
               {isAuthenticated ? (
                 <PrimaryButton to={dashboardPath} size="sm" className="w-full">
