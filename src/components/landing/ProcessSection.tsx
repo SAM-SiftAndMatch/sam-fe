@@ -8,25 +8,6 @@ export const ProcessSection: React.FC = () => {
       id="process"
       className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative"
     >
-      {/* Global SVG Definitions for Electric Stream */}
-      <svg className="absolute w-0 h-0 pointer-events-none" aria-hidden="true">
-        <defs>
-          <filter id="electric-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-          <linearGradient id="electric-cyan-stream" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#00E5FF" />
-            <stop offset="35%" stopColor="#2563EB" />
-            <stop offset="70%" stopColor="#60A5FA" />
-            <stop offset="100%" stopColor="#00E5FF" />
-          </linearGradient>
-        </defs>
-      </svg>
-
       <ScrollReveal className="text-left mb-16">
         <div className="flex items-center gap-2 mb-3">
           <MonoTag variant="primary">QUY TRÌNH {'//'} 03 BƯỚC THÔNG MINH</MonoTag>
@@ -40,52 +21,32 @@ export const ProcessSection: React.FC = () => {
         </p>
       </ScrollReveal>
 
-      {/* 3-Step Flow Container with Connected Electric Flow */}
+      {/* 3-Step Flow Container with Sequential Step Highlights */}
       <div className="relative">
         {/* 3 Steps Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-8 relative z-10">
           {/* STEP 1: AI PM */}
           <ScrollReveal delayMs={0} className="relative">
-            <div className="group relative h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between card-electric-glow-1">
-              {/* Electric Border Loop on Card 1 */}
-              <svg
-                className="absolute -inset-[1px] w-[calc(100%+2px)] h-[calc(100%+2px)] pointer-events-none rounded-[13px] overflow-visible z-20"
+            <div className="group relative h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:-translate-y-[2px] transition-all duration-300 flex flex-col justify-between overflow-hidden animate-step-card-1">
+              {/* Top Radiant Accent Beam */}
+              <div
+                className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#00E5FF] to-transparent pointer-events-none animate-step-top-1"
                 aria-hidden="true"
-              >
-                {/* Blueprint circuit track */}
-                <rect
-                  x="1"
-                  y="1"
-                  width="calc(100% - 2px)"
-                  height="calc(100% - 2px)"
-                  rx="12"
-                  fill="none"
-                  stroke="#2563EB"
-                  strokeOpacity="0.12"
-                  strokeWidth="1.5"
-                  strokeDasharray="4 4"
-                />
-                {/* Active Electric Stream */}
-                <rect
-                  x="1"
-                  y="1"
-                  width="calc(100% - 2px)"
-                  height="calc(100% - 2px)"
-                  rx="12"
-                  fill="none"
-                  stroke="url(#electric-cyan-stream)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  pathLength="100"
-                  strokeDasharray="24 76"
-                  filter="url(#electric-glow)"
-                  className="animate-electric-card-1"
-                />
-              </svg>
+              />
 
               <div>
                 <div className="flex items-center justify-between gap-2 mb-4">
-                  <MonoTag variant="muted">STEP 01 {'//'} AI PM</MonoTag>
+                  <div className="flex items-center gap-2">
+                    <MonoTag variant="muted">STEP 01 {'//'} AI PM</MonoTag>
+                    {/* Active Pulse Beacon Badge */}
+                    <span
+                      className="inline-flex items-center gap-1 font-mono text-[9px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/80 animate-step-beacon-1 pointer-events-none"
+                      aria-hidden="true"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping inline-block" />
+                      ACTIVE
+                    </span>
+                  </div>
                   <span className="font-mono text-xs text-slate-400">01 / 03</span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">Tạo yêu cầu (AI PM)</h3>
@@ -121,75 +82,81 @@ export const ProcessSection: React.FC = () => {
 
             {/* Desktop Horizontal Bridge connecting Card 1 to Card 2 */}
             <div
-              className="hidden lg:flex absolute -right-8 top-1/2 -translate-y-1/2 w-8 h-6 items-center justify-center z-30 pointer-events-none"
+              className="hidden lg:flex absolute -right-8 top-1/2 -translate-y-1/2 w-8 h-8 items-center justify-center z-30 pointer-events-none"
               aria-hidden="true"
             >
               {/* Circuit wire track */}
-              <div className="w-full h-[2px] bg-blue-200/60 relative">
+              <div className="w-full h-[3px] rounded-full bg-slate-200/80 animate-step-bridge-track-1-h relative overflow-visible">
                 {/* Traveling electric bolt */}
-                <div className="absolute top-1/2 -translate-y-1/2 left-0 w-3 h-[4px] rounded-full bg-gradient-to-r from-[#2563EB] to-[#00E5FF] shadow-[0_0_10px_#00E5FF,0_0_5px_#2563EB] animate-bridge-1-h" />
+                <div className="absolute top-1/2 -translate-y-1/2 left-0 w-3.5 h-[5px] rounded-full bg-gradient-to-r from-[#2563EB] to-[#00E5FF] shadow-[0_0_12px_#00E5FF,0_0_6px_#2563EB] animate-step-bridge-pulse-1-h pointer-events-none" />
+              </div>
+              {/* Center connector node with chevron arrow */}
+              <div className="absolute top-1/2 left-1/2 w-5 h-5 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-xs animate-step-bridge-node-1 transition-all">
+                <svg
+                  className="w-2.5 h-2.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
               </div>
               {/* Left terminal pin */}
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#1D4ED8] border-2 border-white shadow-xs" />
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-slate-300 border-2 border-white shadow-xs" />
               {/* Right terminal pin */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 rounded-full bg-[#1D4ED8] border-2 border-white shadow-xs" />
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 rounded-full bg-slate-300 border-2 border-white shadow-xs" />
             </div>
 
             {/* Mobile Vertical Bridge connecting Card 1 to Card 2 */}
             <div
-              className="lg:hidden flex absolute -bottom-8 left-1/2 -translate-x-1/2 w-6 h-8 items-center justify-center z-30 pointer-events-none"
+              className="lg:hidden flex absolute -bottom-8 left-1/2 -translate-x-1/2 w-8 h-8 items-center justify-center z-30 pointer-events-none"
               aria-hidden="true"
             >
-              <div className="h-full w-[2px] bg-blue-200/60 relative">
-                <div className="absolute left-1/2 -translate-x-1/2 top-0 h-3 w-[4px] rounded-full bg-gradient-to-b from-[#2563EB] to-[#00E5FF] shadow-[0_0_10px_#00E5FF] animate-bridge-1-v" />
+              <div className="h-full w-[3px] rounded-full bg-slate-200/80 animate-step-bridge-track-1-v relative overflow-visible">
+                <div className="absolute left-1/2 -translate-x-1/2 top-0 h-3.5 w-[5px] rounded-full bg-gradient-to-b from-[#2563EB] to-[#00E5FF] shadow-[0_0_12px_#00E5FF,0_0_6px_#2563EB] animate-step-bridge-pulse-1-v pointer-events-none" />
               </div>
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#1D4ED8] border-2 border-white shadow-xs" />
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 rounded-full bg-[#1D4ED8] border-2 border-white shadow-xs" />
+              {/* Center connector node with down arrow */}
+              <div className="absolute top-1/2 left-1/2 w-5 h-5 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-xs animate-step-bridge-node-1 transition-all">
+                <svg
+                  className="w-2.5 h-2.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-slate-300 border-2 border-white shadow-xs" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 rounded-full bg-slate-300 border-2 border-white shadow-xs" />
             </div>
           </ScrollReveal>
 
           {/* STEP 2: AI MATCHING */}
           <ScrollReveal delayMs={100} className="relative">
-            <div className="group relative h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between card-electric-glow-2">
-              {/* Electric Border Loop on Card 2 */}
-              <svg
-                className="absolute -inset-[1px] w-[calc(100%+2px)] h-[calc(100%+2px)] pointer-events-none rounded-[13px] overflow-visible z-20"
+            <div className="group relative h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:-translate-y-[2px] transition-all duration-300 flex flex-col justify-between overflow-hidden animate-step-card-2">
+              {/* Top Radiant Accent Beam */}
+              <div
+                className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#00E5FF] to-transparent pointer-events-none animate-step-top-2"
                 aria-hidden="true"
-              >
-                {/* Blueprint circuit track */}
-                <rect
-                  x="1"
-                  y="1"
-                  width="calc(100% - 2px)"
-                  height="calc(100% - 2px)"
-                  rx="12"
-                  fill="none"
-                  stroke="#2563EB"
-                  strokeOpacity="0.12"
-                  strokeWidth="1.5"
-                  strokeDasharray="4 4"
-                />
-                {/* Active Electric Stream */}
-                <rect
-                  x="1"
-                  y="1"
-                  width="calc(100% - 2px)"
-                  height="calc(100% - 2px)"
-                  rx="12"
-                  fill="none"
-                  stroke="url(#electric-cyan-stream)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  pathLength="100"
-                  strokeDasharray="24 76"
-                  filter="url(#electric-glow)"
-                  className="animate-electric-card-2"
-                />
-              </svg>
+              />
 
               <div>
                 <div className="flex items-center justify-between gap-2 mb-4">
-                  <MonoTag variant="muted">STEP 02 {'//'} AI MATCHING</MonoTag>
+                  <div className="flex items-center gap-2">
+                    <MonoTag variant="muted">STEP 02 {'//'} AI MATCHING</MonoTag>
+                    {/* Active Pulse Beacon Badge */}
+                    <span
+                      className="inline-flex items-center gap-1 font-mono text-[9px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/80 animate-step-beacon-2 pointer-events-none"
+                      aria-hidden="true"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping inline-block" />
+                      ACTIVE
+                    </span>
+                  </div>
                   <span className="font-mono text-xs text-slate-400">02 / 03</span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">AI phân tích & Ghép đôi</h3>
@@ -239,75 +206,81 @@ export const ProcessSection: React.FC = () => {
 
             {/* Desktop Horizontal Bridge connecting Card 2 to Card 3 */}
             <div
-              className="hidden lg:flex absolute -right-8 top-1/2 -translate-y-1/2 w-8 h-6 items-center justify-center z-30 pointer-events-none"
+              className="hidden lg:flex absolute -right-8 top-1/2 -translate-y-1/2 w-8 h-8 items-center justify-center z-30 pointer-events-none"
               aria-hidden="true"
             >
               {/* Circuit wire track */}
-              <div className="w-full h-[2px] bg-blue-200/60 relative">
+              <div className="w-full h-[3px] rounded-full bg-slate-200/80 animate-step-bridge-track-2-h relative overflow-visible">
                 {/* Traveling electric bolt */}
-                <div className="absolute top-1/2 -translate-y-1/2 left-0 w-3 h-[4px] rounded-full bg-gradient-to-r from-[#2563EB] to-[#00E5FF] shadow-[0_0_10px_#00E5FF,0_0_5px_#2563EB] animate-bridge-2-h" />
+                <div className="absolute top-1/2 -translate-y-1/2 left-0 w-3.5 h-[5px] rounded-full bg-gradient-to-r from-[#2563EB] to-[#00E5FF] shadow-[0_0_12px_#00E5FF,0_0_6px_#2563EB] animate-step-bridge-pulse-2-h pointer-events-none" />
+              </div>
+              {/* Center connector node with chevron arrow */}
+              <div className="absolute top-1/2 left-1/2 w-5 h-5 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-xs animate-step-bridge-node-2 transition-all">
+                <svg
+                  className="w-2.5 h-2.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
               </div>
               {/* Left terminal pin */}
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#1D4ED8] border-2 border-white shadow-xs" />
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-slate-300 border-2 border-white shadow-xs" />
               {/* Right terminal pin */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 rounded-full bg-[#1D4ED8] border-2 border-white shadow-xs" />
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 rounded-full bg-slate-300 border-2 border-white shadow-xs" />
             </div>
 
             {/* Mobile Vertical Bridge connecting Card 2 to Card 3 */}
             <div
-              className="lg:hidden flex absolute -bottom-8 left-1/2 -translate-x-1/2 w-6 h-8 items-center justify-center z-30 pointer-events-none"
+              className="lg:hidden flex absolute -bottom-8 left-1/2 -translate-x-1/2 w-8 h-8 items-center justify-center z-30 pointer-events-none"
               aria-hidden="true"
             >
-              <div className="h-full w-[2px] bg-blue-200/60 relative">
-                <div className="absolute left-1/2 -translate-x-1/2 top-0 h-3 w-[4px] rounded-full bg-gradient-to-b from-[#2563EB] to-[#00E5FF] shadow-[0_0_10px_#00E5FF] animate-bridge-2-v" />
+              <div className="h-full w-[3px] rounded-full bg-slate-200/80 animate-step-bridge-track-2-v relative overflow-visible">
+                <div className="absolute left-1/2 -translate-x-1/2 top-0 h-3.5 w-[5px] rounded-full bg-gradient-to-b from-[#2563EB] to-[#00E5FF] shadow-[0_0_12px_#00E5FF,0_0_6px_#2563EB] animate-step-bridge-pulse-2-v pointer-events-none" />
               </div>
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[#1D4ED8] border-2 border-white shadow-xs" />
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 rounded-full bg-[#1D4ED8] border-2 border-white shadow-xs" />
+              {/* Center connector node with down arrow */}
+              <div className="absolute top-1/2 left-1/2 w-5 h-5 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-xs animate-step-bridge-node-2 transition-all">
+                <svg
+                  className="w-2.5 h-2.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-slate-300 border-2 border-white shadow-xs" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 rounded-full bg-slate-300 border-2 border-white shadow-xs" />
             </div>
           </ScrollReveal>
 
           {/* STEP 3: AI QC */}
           <ScrollReveal delayMs={200} className="relative">
-            <div className="group relative h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between card-electric-glow-3">
-              {/* Electric Border Loop on Card 3 */}
-              <svg
-                className="absolute -inset-[1px] w-[calc(100%+2px)] h-[calc(100%+2px)] pointer-events-none rounded-[13px] overflow-visible z-20"
+            <div className="group relative h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:-translate-y-[2px] transition-all duration-300 flex flex-col justify-between overflow-hidden animate-step-card-3">
+              {/* Top Radiant Accent Beam */}
+              <div
+                className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#00E5FF] to-transparent pointer-events-none animate-step-top-3"
                 aria-hidden="true"
-              >
-                {/* Blueprint circuit track */}
-                <rect
-                  x="1"
-                  y="1"
-                  width="calc(100% - 2px)"
-                  height="calc(100% - 2px)"
-                  rx="12"
-                  fill="none"
-                  stroke="#2563EB"
-                  strokeOpacity="0.12"
-                  strokeWidth="1.5"
-                  strokeDasharray="4 4"
-                />
-                {/* Active Electric Stream */}
-                <rect
-                  x="1"
-                  y="1"
-                  width="calc(100% - 2px)"
-                  height="calc(100% - 2px)"
-                  rx="12"
-                  fill="none"
-                  stroke="url(#electric-cyan-stream)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  pathLength="100"
-                  strokeDasharray="24 76"
-                  filter="url(#electric-glow)"
-                  className="animate-electric-card-3"
-                />
-              </svg>
+              />
 
               <div>
                 <div className="flex items-center justify-between gap-2 mb-4">
-                  <MonoTag variant="muted">STEP 03 {'//'} AI QC</MonoTag>
+                  <div className="flex items-center gap-2">
+                    <MonoTag variant="muted">STEP 03 {'//'} AI QC</MonoTag>
+                    {/* Active Pulse Beacon Badge */}
+                    <span
+                      className="inline-flex items-center gap-1 font-mono text-[9px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/80 animate-step-beacon-3 pointer-events-none"
+                      aria-hidden="true"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping inline-block" />
+                      ACTIVE
+                    </span>
+                  </div>
                   <span className="font-mono text-xs text-slate-400">03 / 03</span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">

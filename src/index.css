@@ -91,232 +91,476 @@ body {
 }
 
 /* =========================================================================
-   ELECTRIC STREAM FLOW ANIMATIONS (Process Section)
+   SEQUENTIAL PIPELINE STEP HIGHLIGHTS (Process Section)
+   Card 1 flashes on -> Bridge 1 lights up & bridges across -> Card 2 flashes on
+   -> Bridge 2 lights up & bridges across -> Card 3 flashes on -> Loop
    ========================================================================= */
 
-@keyframes electricCard1 {
+@keyframes stepCardHighlight1 {
   0% {
-    opacity: 1;
-    stroke-dashoffset: 100;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.7), 0 14px 36px -4px rgba(37, 99, 235, 0.3), 0 0 24px
+      rgba(0, 229, 255, 0.35);
+    transform: translateY(-4px);
   }
-  24% {
-    opacity: 1;
-    stroke-dashoffset: 0;
+  3%,
+  18% {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.7), 0 14px 36px -4px rgba(37, 99, 235, 0.3), 0 0 24px
+      rgba(0, 229, 255, 0.35);
+    transform: translateY(-4px);
+  }
+  25% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transform: translateY(0);
   }
   26%,
   100% {
-    opacity: 0;
-    stroke-dashoffset: 0;
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transform: translateY(0);
   }
 }
 
-@keyframes electricBridge1H {
+@keyframes stepCardHighlight2 {
   0%,
-  23% {
-    opacity: 0;
-    transform: translateX(0);
+  34% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transform: translateY(0);
   }
-  24% {
-    opacity: 1;
-    transform: translateX(0);
+  36% {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.7), 0 14px 36px -4px rgba(37, 99, 235, 0.3), 0 0 24px
+      rgba(0, 229, 255, 0.35);
+    transform: translateY(-4px);
   }
-  33% {
-    opacity: 1;
-    transform: translateX(24px);
+  39%,
+  54% {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.7), 0 14px 36px -4px rgba(37, 99, 235, 0.3), 0 0 24px
+      rgba(0, 229, 255, 0.35);
+    transform: translateY(-4px);
   }
-  34%,
+  61% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transform: translateY(0);
+  }
+  62%,
   100% {
-    opacity: 0;
-    transform: translateX(24px);
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transform: translateY(0);
   }
 }
 
-@keyframes electricCard2 {
+@keyframes stepCardHighlight3 {
   0%,
-  31% {
-    opacity: 0;
-    stroke-dashoffset: 100;
+  70% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transform: translateY(0);
   }
-  32% {
-    opacity: 1;
-    stroke-dashoffset: 100;
+  72% {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.7), 0 14px 36px -4px rgba(37, 99, 235, 0.3), 0 0 24px
+      rgba(0, 229, 255, 0.35);
+    transform: translateY(-4px);
   }
-  56% {
-    opacity: 1;
-    stroke-dashoffset: 0;
-  }
-  58%,
-  100% {
-    opacity: 0;
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes electricBridge2H {
-  0%,
-  55% {
-    opacity: 0;
-    transform: translateX(0);
-  }
-  56% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  65% {
-    opacity: 1;
-    transform: translateX(24px);
-  }
-  66%,
-  100% {
-    opacity: 0;
-    transform: translateX(24px);
-  }
-}
-
-@keyframes electricCard3 {
-  0%,
-  63% {
-    opacity: 0;
-    stroke-dashoffset: 100;
-  }
-  64% {
-    opacity: 1;
-    stroke-dashoffset: 100;
-  }
+  75%,
   88% {
-    opacity: 1;
-    stroke-dashoffset: 0;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.7), 0 14px 36px -4px rgba(37, 99, 235, 0.3), 0 0 24px
+      rgba(0, 229, 255, 0.35);
+    transform: translateY(-4px);
   }
-  90%,
+  94% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transform: translateY(0);
+  }
+  95%,
   100% {
-    opacity: 0;
-    stroke-dashoffset: 0;
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transform: translateY(0);
   }
 }
 
-@keyframes electricBridge1V {
+/* TOP RADIANT BEAM KEYFRAMES */
+@keyframes stepTopBeam1 {
   0%,
-  23% {
-    opacity: 0;
-    transform: translateY(0);
-  }
-  24% {
+  20% {
     opacity: 1;
-    transform: translateY(0);
+    transform: scaleX(1);
   }
-  33% {
-    opacity: 1;
-    transform: translateY(18px);
-  }
-  34%,
+  25%,
   100% {
     opacity: 0;
-    transform: translateY(18px);
+    transform: scaleX(0.7);
   }
 }
 
-@keyframes electricBridge2V {
+@keyframes stepTopBeam2 {
   0%,
+  35% {
+    opacity: 0;
+    transform: scaleX(0.7);
+  }
+  37%,
   55% {
-    opacity: 0;
-    transform: translateY(0);
-  }
-  56% {
     opacity: 1;
-    transform: translateY(0);
+    transform: scaleX(1);
   }
-  65% {
-    opacity: 1;
-    transform: translateY(18px);
-  }
-  66%,
+  61%,
   100% {
     opacity: 0;
-    transform: translateY(18px);
+    transform: scaleX(0.7);
   }
 }
 
-@keyframes electricGlowCard1 {
+@keyframes stepTopBeam3 {
   0%,
-  25% {
-    box-shadow: 0 0 24px rgba(0, 163, 255, 0.2), 0 1px 3px rgba(0, 0, 0, 0.03);
-    border-color: rgba(37, 99, 235, 0.7);
+  71% {
+    opacity: 0;
+    transform: scaleX(0.7);
   }
-  27%,
+  73%,
+  89% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  94%,
   100% {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-    border-color: rgba(226, 232, 240, 0.9);
+    opacity: 0;
+    transform: scaleX(0.7);
   }
 }
 
-@keyframes electricGlowCard2 {
+/* ACTIVE BEACON BADGE KEYFRAMES */
+@keyframes stepBeacon1 {
   0%,
-  31% {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-    border-color: rgba(226, 232, 240, 0.9);
+  20% {
+    opacity: 1;
+    transform: scale(1);
   }
-  32%,
+  25%,
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes stepBeacon2 {
+  0%,
+  35% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  37%,
+  55% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  61%,
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes stepBeacon3 {
+  0%,
+  71% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  73%,
+  89% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  94%,
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* HORIZONTAL BRIDGE 1 (DESKTOP) */
+@keyframes stepBridgeTrack1H {
+  0%,
+  21% {
+    background-color: rgba(226, 232, 240, 0.8);
+    box-shadow: none;
+  }
+  23%,
+  38% {
+    background-color: #2563eb;
+    box-shadow: 0 0 14px #00e5ff, 0 0 6px #2563eb;
+  }
+  40%,
+  100% {
+    background-color: rgba(226, 232, 240, 0.8);
+    box-shadow: none;
+  }
+}
+
+@keyframes stepBridgePulse1H {
+  0%,
+  21% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  23% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  37% {
+    opacity: 1;
+    transform: translateX(20px);
+  }
+  39%,
+  100% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+/* HORIZONTAL BRIDGE 2 (DESKTOP) */
+@keyframes stepBridgeTrack2H {
+  0%,
   57% {
-    box-shadow: 0 0 24px rgba(0, 163, 255, 0.2), 0 1px 3px rgba(0, 0, 0, 0.03);
-    border-color: rgba(37, 99, 235, 0.7);
+    background-color: rgba(226, 232, 240, 0.8);
+    box-shadow: none;
   }
   59%,
+  74% {
+    background-color: #2563eb;
+    box-shadow: 0 0 14px #00e5ff, 0 0 6px #2563eb;
+  }
+  76%,
   100% {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-    border-color: rgba(226, 232, 240, 0.9);
+    background-color: rgba(226, 232, 240, 0.8);
+    box-shadow: none;
   }
 }
 
-@keyframes electricGlowCard3 {
+@keyframes stepBridgePulse2H {
   0%,
-  63% {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-    border-color: rgba(226, 232, 240, 0.9);
+  57% {
+    opacity: 0;
+    transform: translateX(0);
   }
-  64%,
-  89% {
-    box-shadow: 0 0 24px rgba(0, 163, 255, 0.2), 0 1px 3px rgba(0, 0, 0, 0.03);
-    border-color: rgba(37, 99, 235, 0.7);
+  59% {
+    opacity: 1;
+    transform: translateX(0);
   }
-  91%,
+  73% {
+    opacity: 1;
+    transform: translateX(20px);
+  }
+  75%,
   100% {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-    border-color: rgba(226, 232, 240, 0.9);
+    opacity: 0;
+    transform: translateX(20px);
   }
 }
 
-.animate-electric-card-1 {
-  animation: electricCard1 5.5s linear infinite;
-}
-.animate-electric-card-2 {
-  animation: electricCard2 5.5s linear infinite;
-}
-.animate-electric-card-3 {
-  animation: electricCard3 5.5s linear infinite;
-}
-
-.animate-bridge-1-h {
-  animation: electricBridge1H 5.5s linear infinite;
-}
-.animate-bridge-2-h {
-  animation: electricBridge2H 5.5s linear infinite;
-}
-
-.animate-bridge-1-v {
-  animation: electricBridge1V 5.5s linear infinite;
-}
-.animate-bridge-2-v {
-  animation: electricBridge2V 5.5s linear infinite;
+/* VERTICAL BRIDGE 1 (MOBILE) */
+@keyframes stepBridgeTrack1V {
+  0%,
+  21% {
+    background-color: rgba(226, 232, 240, 0.8);
+    box-shadow: none;
+  }
+  23%,
+  38% {
+    background-color: #2563eb;
+    box-shadow: 0 0 14px #00e5ff, 0 0 6px #2563eb;
+  }
+  40%,
+  100% {
+    background-color: rgba(226, 232, 240, 0.8);
+    box-shadow: none;
+  }
 }
 
-.card-electric-glow-1 {
-  animation: electricGlowCard1 5.5s ease-in-out infinite;
+@keyframes stepBridgePulse1V {
+  0%,
+  21% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  23% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  37% {
+    opacity: 1;
+    transform: translateY(20px);
+  }
+  39%,
+  100% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 }
-.card-electric-glow-2 {
-  animation: electricGlowCard2 5.5s ease-in-out infinite;
+
+/* VERTICAL BRIDGE 2 (MOBILE) */
+@keyframes stepBridgeTrack2V {
+  0%,
+  57% {
+    background-color: rgba(226, 232, 240, 0.8);
+    box-shadow: none;
+  }
+  59%,
+  74% {
+    background-color: #2563eb;
+    box-shadow: 0 0 14px #00e5ff, 0 0 6px #2563eb;
+  }
+  76%,
+  100% {
+    background-color: rgba(226, 232, 240, 0.8);
+    box-shadow: none;
+  }
 }
-.card-electric-glow-3 {
-  animation: electricGlowCard3 5.5s ease-in-out infinite;
+
+@keyframes stepBridgePulse2V {
+  0%,
+  57% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  59% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  73% {
+    opacity: 1;
+    transform: translateY(20px);
+  }
+  75%,
+  100% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/* BRIDGE CONNECTOR NODES (MIDDLE CHEVRONS) */
+@keyframes stepBridgeNode1 {
+  0%,
+  21% {
+    border-color: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  24%,
+  37% {
+    border-color: #2563eb;
+    color: #2563eb;
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.7);
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  40%,
+  100% {
+    border-color: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes stepBridgeNode2 {
+  0%,
+  57% {
+    border-color: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  60%,
+  73% {
+    border-color: #2563eb;
+    color: #2563eb;
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.7);
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  76%,
+  100% {
+    border-color: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* ANIMATION UTILITY CLASSES */
+.animate-step-card-1 {
+  animation: stepCardHighlight1 6s ease-in-out infinite;
+}
+.animate-step-card-2 {
+  animation: stepCardHighlight2 6s ease-in-out infinite;
+}
+.animate-step-card-3 {
+  animation: stepCardHighlight3 6s ease-in-out infinite;
+}
+
+.animate-step-top-1 {
+  animation: stepTopBeam1 6s ease-in-out infinite;
+}
+.animate-step-top-2 {
+  animation: stepTopBeam2 6s ease-in-out infinite;
+}
+.animate-step-top-3 {
+  animation: stepTopBeam3 6s ease-in-out infinite;
+}
+
+.animate-step-beacon-1 {
+  animation: stepBeacon1 6s ease-in-out infinite;
+}
+.animate-step-beacon-2 {
+  animation: stepBeacon2 6s ease-in-out infinite;
+}
+.animate-step-beacon-3 {
+  animation: stepBeacon3 6s ease-in-out infinite;
+}
+
+.animate-step-bridge-track-1-h {
+  animation: stepBridgeTrack1H 6s ease-in-out infinite;
+}
+.animate-step-bridge-pulse-1-h {
+  animation: stepBridgePulse1H 6s ease-in-out infinite;
+}
+.animate-step-bridge-node-1 {
+  animation: stepBridgeNode1 6s ease-in-out infinite;
+}
+
+.animate-step-bridge-track-2-h {
+  animation: stepBridgeTrack2H 6s ease-in-out infinite;
+}
+.animate-step-bridge-pulse-2-h {
+  animation: stepBridgePulse2H 6s ease-in-out infinite;
+}
+.animate-step-bridge-node-2 {
+  animation: stepBridgeNode2 6s ease-in-out infinite;
+}
+
+.animate-step-bridge-track-1-v {
+  animation: stepBridgeTrack1V 6s ease-in-out infinite;
+}
+.animate-step-bridge-pulse-1-v {
+  animation: stepBridgePulse1V 6s ease-in-out infinite;
+}
+
+.animate-step-bridge-track-2-v {
+  animation: stepBridgeTrack2V 6s ease-in-out infinite;
+}
+.animate-step-bridge-pulse-2-v {
+  animation: stepBridgePulse2V 6s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
