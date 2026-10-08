@@ -10,7 +10,14 @@ import { useAuthStore } from '../stores/useAuthStore';
 import type { JobResponse } from '../types/job';
 import { formatDate, formatMoney } from '../utils/format';
 
-type FilterKey = 'all' | 'OPEN' | 'NEGOTIATING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+type FilterKey =
+  | 'all'
+  | 'OPEN'
+  | 'NEGOTIATING'
+  | 'AWAITING_PAYMENT'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED';
 
 const ClientProjectListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -63,11 +70,17 @@ const ClientProjectListPage: React.FC = () => {
     }
   };
 
-  const filteredProjects = jobs.filter((p) => {
-    const matchFilter = filter === 'all' || p.status === filter;
-    const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchFilter && matchSearch;
-  });
+  const filteredProjects = jobs
+    .filter((p) => {
+      const matchFilter = filter === 'all' || p.status === filter;
+      const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchFilter && matchSearch;
+    })
+    .sort((a, b) => {
+      if (a.status === 'CANCELLED' && b.status !== 'CANCELLED') return 1;
+      if (a.status !== 'CANCELLED' && b.status === 'CANCELLED') return -1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -83,6 +96,13 @@ const ClientProjectListPage: React.FC = () => {
           <span className="px-3 py-1 bg-yellow-50 text-yellow-600 rounded-full text-xs font-bold border border-yellow-100 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
             Đang thương lượng
+          </span>
+        );
+      case 'AWAITING_PAYMENT':
+        return (
+          <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+            Chờ nạp tiền
           </span>
         );
       case 'IN_PROGRESS':
@@ -162,6 +182,7 @@ const ClientProjectListPage: React.FC = () => {
                   { id: 'all', label: 'Tất cả trạng thái' },
                   { id: 'OPEN', label: 'Đang chờ' },
                   { id: 'NEGOTIATING', label: 'Đang thương lượng' },
+                  { id: 'AWAITING_PAYMENT', label: 'Chờ nạp tiền' },
                   { id: 'IN_PROGRESS', label: 'Đang thực hiện' },
                   { id: 'COMPLETED', label: 'Hoàn thành' },
                   { id: 'CANCELLED', label: 'Đã hủy' },
@@ -199,7 +220,9 @@ const ClientProjectListPage: React.FC = () => {
               <div
                 key={project.id}
                 onClick={() => navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', project.id))}
-                className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all cursor-pointer group flex flex-col md:flex-row md:items-center justify-between gap-6"
+                className={`bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all cursor-pointer group flex flex-col md:flex-row md:items-center justify-between gap-6 ${
+                  project.status === 'CANCELLED' ? 'opacity-60 grayscale-[0.5]' : ''
+                }`}
               >
                 {/* Cột trái: Tên & Trạng thái */}
                 <div className="flex-1 flex flex-col items-start gap-3">
@@ -221,7 +244,9 @@ const ClientProjectListPage: React.FC = () => {
                       Ngân sách
                     </span>
                     <span className="text-sm font-bold text-gray-900">
-                      {formatMoney(project.budgetMin)} – {formatMoney(project.budgetMax)}
+                      {project.budgetMin === project.budgetMax || !project.budgetMax
+                        ? formatMoney(project.budgetMin)
+                        : `${formatMoney(project.budgetMin)} – ${formatMoney(project.budgetMax)}`}
                     </span>
                   </div>
                   <div className="flex flex-col">

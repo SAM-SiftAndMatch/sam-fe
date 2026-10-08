@@ -1,126 +1,189 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jobApi } from '../api/job';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import * as paths from '../routes/paths';
+import type { JobResponse } from '../types/job';
 
-// Lấy mock data phù hợp với developer & văn phòng
-export const MOCK_JOBS = [
-  {
-    id: 1,
-    type: 'KỸ SƯ PHẦN MỀM',
-    title: 'Phát triển module thanh toán VNPay cho Website Next.js',
-    price: '5.000.000đ - 10.000.000đ',
-    tags: ['Next.js', 'Node.js', 'VNPay API'],
-    postedAt: '2 giờ trước',
-    description:
-      'Chúng tôi đang cần tích hợp cổng thanh toán VNPay vào hệ thống website thương mại điện tử viết bằng Next.js và Node.js. Website hiện đã hoàn thiện UI và giỏ hàng, chỉ cần xử lý quy trình thanh toán, webhook và xác thực giao dịch.',
-    scope: [
-      'Nghiên cứu tài liệu API của VNPay.',
-      'Tạo URL thanh toán và xử lý redirect từ phía client.',
-      'Viết API Node.js để nhận Webhook (IPN) từ VNPay và cập nhật trạng thái đơn hàng.',
-      'Kiểm thử trên môi trường Sandbox của VNPay.',
-    ],
-    projectType: 'Dự án ngắn hạn',
-    experience: 'Middle (2+ năm)',
-    duration: '1 - 2 tuần',
-    languages: 'Tiếng Việt',
-  },
-  {
-    id: 2,
-    type: 'HÀNH CHÍNH VĂN PHÒNG',
-    title: 'Dịch thuật bộ hợp đồng thương mại Việt - Anh (50 trang)',
-    price: '3.500.000đ',
-    tags: ['Dịch thuật', 'Tiếng Anh', 'Word'],
-    postedAt: '4 giờ trước',
-    description:
-      'Dự án cần dịch thuật một bộ hợp đồng kinh tế và các phụ lục từ tiếng Việt sang tiếng Anh. Yêu cầu dịch thuật chính xác các thuật ngữ pháp lý và thương mại quốc tế, văn phong chuẩn doanh nghiệp.',
-    scope: [
-      'Dịch 50 trang tài liệu A4 (khoảng 15,000 từ).',
-      'Đảm bảo format Word giữ nguyên so với bản gốc.',
-      'Chỉnh sửa (revise) 1-2 lần theo phản hồi của luật sư công ty.',
-    ],
-    projectType: 'Dự án ngắn hạn',
-    experience: 'Chuyên gia (3+ năm)',
-    duration: '10 ngày',
-    languages: 'Tiếng Việt, Tiếng Anh',
-  },
-  {
-    id: 3,
-    type: 'KỸ SƯ PHẦN MỀM',
-    title: 'Viết script Python tự động crawl dữ liệu chứng khoán',
-    price: '2.000.000đ',
-    tags: ['Python', 'Data Crawling', 'BeautifulSoup'],
-    postedAt: '1 ngày trước',
-    description:
-      'Cần viết một công cụ bằng Python (dùng BeautifulSoup hoặc Selenium) để tự động crawl dữ liệu giá cả, khối lượng giao dịch từ 3 trang web tài chính lớn của Việt Nam và xuất ra file CSV mỗi ngày.',
-    scope: [
-      'Viết script thu thập dữ liệu theo các mã cổ phiếu được chỉ định.',
-      'Xử lý CAPTCHA hoặc block IP (nếu có) bằng proxy.',
-      'Lên lịch tự động chạy script vào 15:30 mỗi ngày (Cron job).',
-      'Định dạng đầu ra là file CSV chuẩn.',
-    ],
-    projectType: 'Dự án ngắn hạn',
-    experience: 'Junior (1+ năm)',
-    duration: 'Dưới 1 tuần',
-    languages: 'Tiếng Việt',
-  },
-  {
-    id: 4,
-    type: 'HÀNH CHÍNH VĂN PHÒNG',
-    title: 'Nhập liệu 5000 hóa đơn VAT vào hệ thống Excel kế toán',
-    price: '1.500.000đ - 2.500.000đ',
-    tags: ['Excel', 'Nhập liệu', 'Kế toán'],
-    postedAt: '1 ngày trước',
-    description:
-      'Chúng tôi có một kho hình ảnh chụp 5000 tờ hóa đơn VAT (bản cứng). Cần tìm một bạn Freelancer cẩn thận để nhập thông tin (Mã số thuế, tên công ty, số tiền, ngày tháng) vào file Excel theo biểu mẫu cung cấp sẵn.',
-    scope: [
-      'Đọc thông tin từ file ảnh/PDF.',
-      'Nhập liệu chính xác 100% vào các cột Excel quy định.',
-      'Kiểm tra lại (double-check) để tránh sai sót chữ số.',
-    ],
-    projectType: 'Dự án ngắn hạn',
-    experience: 'Chưa có kinh nghiệm',
-    duration: '2 - 3 tuần',
-    languages: 'Tiếng Việt',
-  },
-  {
-    id: 5,
-    type: 'KỸ SƯ PHẦN MỀM',
-    title: 'Bảo trì hệ thống Backend Microservices (Golang/Docker)',
-    price: '30.000.000đ - 50.000.000đ',
-    tags: ['Golang', 'Docker', 'K8s'],
-    postedAt: '2 ngày trước',
-    description:
-      'Hệ thống Backend của chúng tôi đang chạy trên kiến trúc Microservices viết bằng Golang và deploy trên Kubernetes. Cần tìm một Senior Backend Engineer để tối ưu hóa performance, fix một số memory leak và thiết lập CI/CD pipeline chuẩn.',
-    scope: [
-      'Review lại toàn bộ code base của 4 core services.',
-      'Tối ưu hóa query Database (PostgreSQL) và caching (Redis).',
-      'Viết lại Dockerfile để giảm dung lượng image.',
-      'Hỗ trợ thiết lập monitor bằng Prometheus/Grafana.',
-    ],
-    projectType: 'Dự án dài hạn',
-    experience: 'Senior (5+ năm)',
-    duration: '3 - 6 tháng',
-    languages: 'Tiếng Việt, Tiếng Anh',
-  },
-];
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
-const CATEGORIES = ['Tất cả', 'Kỹ sư phần mềm', 'Hành chính văn phòng', 'Dịch thuật', 'Nhập liệu'];
+function formatBudget(min?: number | null, max?: number | null): string {
+  if (!min && !max) return 'Thỏa thuận';
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0,
+    }).format(n);
+  if (min && max) {
+    if (min === max) return fmt(min);
+    return `${fmt(min)} - ${fmt(max)}`;
+  }
+  if (min) return `Từ ${fmt(min)}`;
+  return `Đến ${fmt(max!)}`;
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins} phút trước`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} giờ trước`;
+  const days = Math.floor(hrs / 24);
+  return `${days} ngày trước`;
+}
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+const JobCardSkeleton: React.FC = () => (
+  <div className="bg-white rounded-2xl p-6 border border-gray-100 animate-pulse">
+    <div className="flex gap-4">
+      <div className="flex-1 space-y-3">
+        <div className="h-4 bg-gray-200 rounded w-1/4" />
+        <div className="h-6 bg-gray-200 rounded w-3/4" />
+        <div className="flex gap-2">
+          <div className="h-6 bg-gray-200 rounded-full w-16" />
+          <div className="h-6 bg-gray-200 rounded-full w-20" />
+          <div className="h-6 bg-gray-200 rounded-full w-14" />
+        </div>
+      </div>
+      <div className="w-40 space-y-3">
+        <div className="h-4 bg-gray-200 rounded" />
+        <div className="h-10 bg-gray-200 rounded-full" />
+      </div>
+    </div>
+  </div>
+);
+
+interface JobCardProps {
+  job: JobResponse;
+  onApply: (jobId: string) => void;
+  onDetail: (jobId: string) => void;
+}
+
+const JobCard: React.FC<JobCardProps> = ({ job, onApply, onDetail }) => (
+  <article
+    onClick={() => onDetail(job.id)}
+    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-blue-400 hover:shadow-[0_8px_30px_rgba(59,130,246,0.08)] transition-all group cursor-pointer flex flex-col md:flex-row md:items-start gap-4"
+    aria-label={`Job: ${job.title}`}
+  >
+    <div className="flex-1 min-w-0">
+      {/* Badge row */}
+      <div className="flex flex-wrap items-center gap-2 mb-2">
+        {job.isUrgentHiring && (
+          <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-md uppercase tracking-wide">
+            Tuyển gấp
+          </span>
+        )}
+        {job.isFeatured && (
+          <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
+            Nổi bật
+          </span>
+        )}
+        <span className="text-sm text-gray-400 font-medium">Đăng {timeAgo(job.createdAt)}</span>
+      </div>
+
+      {/* Title */}
+      <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-700 transition-colors line-clamp-2">
+        {job.title}
+      </h3>
+
+      {/* Description preview */}
+      <p className="text-gray-500 text-sm mb-4 line-clamp-2">{job.description}</p>
+
+      {/* Skills */}
+      {job.skills && job.skills.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {job.skills.slice(0, 5).map((skill) => (
+            <span
+              key={skill.id}
+              className="text-xs text-gray-600 bg-gray-100 hover:bg-blue-50 hover:text-blue-700 px-3 py-1 rounded-full transition-colors"
+            >
+              {skill.name}
+            </span>
+          ))}
+          {job.skills.length > 5 && (
+            <span className="text-xs text-gray-400 px-3 py-1 rounded-full bg-gray-50">
+              +{job.skills.length - 5}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+
+    {/* Right panel */}
+    <div className="md:w-48 shrink-0 flex flex-col md:items-end justify-between gap-4 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
+      <div className="text-left md:text-right">
+        <p className="text-xs text-gray-400 mb-1 uppercase tracking-wide">Ngân sách</p>
+        <p className="font-bold text-gray-900 text-sm leading-snug">
+          {formatBudget(job.budgetMin, job.budgetMax)}
+        </p>
+        {job.estimatedDurationMonths && (
+          <p className="text-xs text-gray-400 mt-1">~{job.estimatedDurationMonths} tháng</p>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onApply(job.id);
+        }}
+        className="w-full md:w-auto bg-gradient-to-r from-blue-700 to-sky-400 hover:shadow-[0_4px_15px_rgba(0,178,255,0.35)] text-white font-semibold py-2 px-6 rounded-full transition-all cursor-pointer border-0 text-sm whitespace-nowrap"
+      >
+        Ứng tuyển
+      </button>
+    </div>
+  </article>
+);
+
+// ─── Main Page ───────────────────────────────────────────────────────────────
 
 const FreelancerJobsPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState('Tất cả');
+  const [sortBy, setSortBy] = useState<'newest' | 'budget_desc' | 'budget_asc'>('newest');
 
-  // Lọc danh sách job
-  const filteredJobs = MOCK_JOBS.filter((job) => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      activeCategory === 'Tất cả' || job.type.toLowerCase() === activeCategory.toLowerCase();
-    return matchesSearch && matchesCategory;
+  const {
+    data: jobs = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['open-jobs'],
+    queryFn: () => jobApi.getAllOpenJobs(),
+    staleTime: 60_000, // 1 min cache
   });
+
+  // Filter + sort
+  const filteredJobs = useMemo(() => {
+    let result = jobs.filter((job) => {
+      const q = searchTerm.toLowerCase();
+      return (
+        job.title.toLowerCase().includes(q) ||
+        job.description.toLowerCase().includes(q) ||
+        job.skills?.some((s) => s.name.toLowerCase().includes(q))
+      );
+    });
+
+    if (sortBy === 'budget_desc') {
+      result = [...result].sort(
+        (a, b) => (b.budgetMax ?? b.budgetMin ?? 0) - (a.budgetMax ?? a.budgetMin ?? 0)
+      );
+    } else if (sortBy === 'budget_asc') {
+      result = [...result].sort((a, b) => (a.budgetMin ?? 0) - (b.budgetMin ?? 0));
+    }
+    // 'newest' giữ nguyên thứ tự API trả về (đã sort createdAt DESC)
+
+    return result;
+  }, [jobs, searchTerm, sortBy]);
+
+  const handleDetail = (jobId: string) => navigate(paths.PATH_JOB_DETAIL.replace(':id', jobId));
+  const handleApply = (jobId: string) => navigate(paths.PATH_JOB_APPLY.replace(':id', jobId));
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
@@ -128,27 +191,30 @@ const FreelancerJobsPage: React.FC = () => {
 
       {/* Hero Search Section */}
       <section className="bg-gradient-to-br from-blue-50 via-white to-gray-50 py-16 px-4 md:px-8 relative overflow-hidden border-b border-gray-100">
-        {/* Background Accents */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#00B2FF]/10 to-transparent rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#1D4ED8]/10 to-transparent rounded-full pointer-events-none translate-y-1/3 -translate-x-1/4" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-blue-400/10 to-transparent rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-blue-800/10 to-transparent rounded-full pointer-events-none translate-y-1/3 -translate-x-1/4" />
 
         <div className="max-w-6xl mx-auto text-center relative z-10">
-          <h1 className="text-3xl md:text-5xl font-black text-[#1E293B] mb-6">
-            Tìm kiếm dự án phù hợp với{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7]">
+          <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-4">
+            Tìm dự án phù hợp với{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-sky-400">
               kỹ năng
             </span>{' '}
             của bạn
           </h1>
+          <p className="text-gray-500 mb-8 text-base md:text-lg">
+            {isLoading ? 'Đang tải...' : `${jobs.length} dự án đang mở — mới nhất trước`}
+          </p>
 
           <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center gap-3 bg-white p-2 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-gray-100">
             <div className="flex-1 w-full relative flex items-center">
               <svg
-                className="w-6 h-6 text-gray-400 absolute left-4"
+                className="w-5 h-5 text-gray-400 absolute left-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={2}
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -157,164 +223,111 @@ const FreelancerJobsPage: React.FC = () => {
                 />
               </svg>
               <input
+                id="job-search-input"
                 type="text"
                 placeholder="Tìm tên dự án, kỹ năng, công nghệ..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-transparent border-none text-gray-800 placeholder:text-gray-400 text-lg pl-12 pr-4 py-3 focus:outline-none focus:ring-0"
+                className="w-full bg-transparent border-none text-gray-800 placeholder:text-gray-400 text-base pl-12 pr-4 py-3 focus:outline-none focus:ring-0"
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-4 text-gray-400 hover:text-gray-600 bg-transparent border-0 cursor-pointer p-0"
+                  aria-label="Clear search"
+                >
+                  ✕
+                </button>
+              )}
             </div>
-            <button className="w-full sm:w-auto bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:shadow-[0_8px_25px_rgba(0,178,255,0.3)] text-white font-bold py-3 px-8 rounded-xl transition-all cursor-pointer border-0">
+            <button
+              type="button"
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-700 to-sky-400 hover:shadow-[0_8px_25px_rgba(0,178,255,0.3)] text-white font-bold py-3 px-8 rounded-xl transition-all cursor-pointer border-0"
+            >
               Tìm việc
             </button>
           </div>
         </div>
       </section>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 py-10 grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-8">
-        {/* Sidebar Filters */}
-        <aside className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Danh mục</h3>
-            <div className="space-y-3">
-              {CATEGORIES.map((category) => (
-                <button
-                  type="button"
-                  key={category}
-                  className="flex items-center gap-3 cursor-pointer group w-full text-left"
-                  onClick={() => setActiveCategory(category)}
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${activeCategory === category ? 'border-[#3B82F6] bg-[#3B82F6]' : 'border-gray-300 group-hover:border-[#3B82F6]'}`}
-                  >
-                    {activeCategory === category && (
-                      <div className="w-2 h-2 rounded-full bg-white" />
-                    )}
-                  </div>
-                  <span
-                    className={`text-sm font-medium ${activeCategory === category ? 'text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}
-                  >
-                    {category}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* Main Content */}
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 py-10">
+        {/* Toolbar */}
+        <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
+          <h2 className="text-2xl font-bold text-gray-900">
+            {isLoading
+              ? 'Đang tải dự án...'
+              : `${filteredJobs.length} dự án${searchTerm ? ` cho "${searchTerm}"` : ' mở'}`}
+          </h2>
+          <select
+            id="job-sort-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+            className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 outline-none cursor-pointer"
+          >
+            <option value="newest">Mới nhất trước</option>
+            <option value="budget_desc">Ngân sách: Cao → Thấp</option>
+            <option value="budget_asc">Ngân sách: Thấp → Cao</option>
+          </select>
+        </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Ngân sách</h3>
-            <div className="space-y-3">
-              {['Tất cả', 'Dưới 5.000.000đ', '5.000.000đ - 20.000.000đ', 'Trên 20.000.000đ'].map(
-                (budget) => (
-                  <label key={budget} className="flex items-center gap-3 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      className="w-5 h-5 rounded border-gray-300 text-[#3B82F6] focus:ring-[#3B82F6]"
-                    />
-                    <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900">
-                      {budget}
-                    </span>
-                  </label>
-                )
-              )}
-            </div>
+        {/* States */}
+        {isError && (
+          <div className="text-center py-20 bg-white rounded-2xl border border-red-100">
+            <div className="text-5xl mb-4">⚠️</div>
+            <p className="text-gray-700 font-semibold mb-2">Không thể tải danh sách dự án</p>
+            <p className="text-gray-400 text-sm mb-6">
+              {error instanceof Error ? error.message : 'Lỗi không xác định'}
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors border-0 cursor-pointer"
+            >
+              Thử lại
+            </button>
           </div>
-        </aside>
+        )}
 
-        {/* Job List */}
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Công việc nổi bật ({filteredJobs.length})
-            </h2>
-            <select className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-[#3B82F6] focus:border-[#3B82F6] block px-3 py-2 outline-none cursor-pointer">
-              <option>Mới nhất</option>
-              <option>Ngân sách: Cao đến Thấp</option>
-              <option>Ngân sách: Thấp đến Cao</option>
-            </select>
-          </div>
-
+        {isLoading && (
           <div className="space-y-4">
-            {filteredJobs.length > 0 ? (
-              filteredJobs.map((job) => (
-                <div
-                  key={job.id}
-                  onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', job.id.toString()))}
-                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-[#3B82F6] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all group cursor-pointer flex flex-col md:flex-row md:items-start gap-4"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-bold text-[#3B82F6] bg-blue-50 px-2 py-1 rounded-md">
-                        {job.type}
-                      </span>
-                      <span className="text-sm text-gray-400 font-medium">• {job.postedAt}</span>
-                    </div>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <JobCardSkeleton key={`skeleton-${i}`} />
+            ))}
+          </div>
+        )}
 
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#1D4ED8] transition-colors">
-                      {job.title}
-                    </h3>
-
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {job.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="md:w-48 shrink-0 flex flex-col md:items-end justify-between md:h-full gap-4 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-4">
-                    <div className="text-left md:text-right">
-                      <p className="text-sm text-gray-500 mb-1">Ngân sách</p>
-                      <p className="font-bold text-gray-900">{job.price}</p>
-                    </div>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(paths.PATH_JOB_APPLY.replace(':id', job.id.toString()));
-                      }}
-                      className="w-full md:w-auto bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:shadow-[0_4px_15px_rgba(0,178,255,0.3)] text-white font-semibold py-2 px-6 rounded-full transition-all cursor-pointer border-0"
-                    >
-                      Ứng tuyển
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
-                <p className="text-gray-500 text-lg">Không tìm thấy công việc nào phù hợp.</p>
-              </div>
+        {!isLoading && !isError && filteredJobs.length === 0 && (
+          <div className="text-center py-24 bg-white rounded-2xl border border-gray-100">
+            <div className="text-6xl mb-4">🔍</div>
+            <p className="text-gray-700 font-bold text-lg mb-2">
+              {searchTerm ? `Không tìm thấy kết quả cho "${searchTerm}"` : 'Chưa có dự án nào'}
+            </p>
+            <p className="text-gray-400 text-sm">
+              {searchTerm
+                ? 'Thử từ khóa khác hoặc xóa bộ lọc'
+                : 'Quay lại sau nhé, các dự án mới sẽ sớm được đăng!'}
+            </p>
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="mt-4 text-blue-600 font-semibold hover:underline bg-transparent border-0 cursor-pointer"
+              >
+                Xóa bộ lọc
+              </button>
             )}
           </div>
+        )}
 
-          {/* Pagination */}
-          {filteredJobs.length > 0 && (
-            <div className="flex justify-center mt-10">
-              <nav className="flex items-center gap-2">
-                <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 cursor-pointer">
-                  &lt;
-                </button>
-                <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#3B82F6] text-white font-bold cursor-pointer">
-                  1
-                </button>
-                <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                  2
-                </button>
-                <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer">
-                  ...
-                </button>
-                <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 cursor-pointer">
-                  &gt;
-                </button>
-              </nav>
-            </div>
-          )}
-        </div>
+        {!isLoading && !isError && filteredJobs.length > 0 && (
+          <div className="space-y-4">
+            {filteredJobs.map((job) => (
+              <JobCard key={job.id} job={job} onDetail={handleDetail} onApply={handleApply} />
+            ))}
+          </div>
+        )}
       </main>
 
       <Footer />

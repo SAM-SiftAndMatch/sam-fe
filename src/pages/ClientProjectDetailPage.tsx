@@ -4,12 +4,16 @@ import { useCallback, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
 import { jobApi } from '../api/job';
+import { proposalApi } from '../api/proposal';
+import { storageApi } from '../api/storage';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
+import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_PROJECTS, PATH_WORKSPACE } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { JobResponse, RecommendationResponse } from '../types/job';
+import type { ProposalResponse } from '../types/proposal';
 import { formatDate, formatMoney } from '../utils/format';
 
 const normalizeSrsNewlines = (content: string | null | undefined): string => {
@@ -27,12 +31,27 @@ const ClientProjectDetailPage: React.FC = () => {
   const { isAuthenticated } = useAuthStore();
   const [project, setProject] = useState<JobResponse | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendationResponse[]>([]);
+  const [proposals, setProposals] = useState<ProposalResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [invitingId, setInvitingId] = useState<string | null>(null);
+  const [proposalInvitingId, setProposalInvitingId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownloadProposal = async (proposal: ProposalResponse) => {
+    if (!proposal.attachmentUrl) return;
+    setDownloadingId(proposal.id);
+    try {
+      await storageApi.download(proposal.attachmentUrl, proposal.attachmentName);
+    } catch {
+      setServerError('Tải file thất bại, thử lại.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const loadData = useCallback(async () => {
     if (!isAuthenticated || !id) return;
@@ -45,6 +64,12 @@ const ClientProjectDetailPage: React.FC = () => {
         setRecommendations(await jobApi.getRecommendations(id));
       } else {
         setRecommendations([]);
+      }
+      // Hồ sơ phổ thông: client xem được ở mọi trạng thái (trừ khi chưa có ai nộp)
+      try {
+        setProposals(await proposalApi.getByJob(id));
+      } catch {
+        setProposals([]);
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
@@ -61,6 +86,20 @@ const ClientProjectDetailPage: React.FC = () => {
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  // Realtime: dev vừa Claim / chấp nhận / nộp hồ sơ -> tự reload mà không cần F5
+  useInviteNotifications((n) => {
+    if (
+      n.jobId === id &&
+      (n.type === 'DEV_CLAIM' ||
+        n.type === 'CHAT_OPENED' ||
+        n.type === 'PROPOSAL_RECEIVED' ||
+        n.type === 'PROPOSAL_ACCEPTED' ||
+        n.type === 'PROPOSAL_REJECTED')
+    ) {
+      void loadData();
+    }
+  });
 
   const handleCancel = async () => {
     if (!id) return;
@@ -103,6 +142,62 @@ const ClientProjectDetailPage: React.FC = () => {
     }
   };
 
+  const handleAcceptClaim = async (recId: string) => {
+    if (!id) return;
+    setServerError(null);
+    try {
+      const res = await jobApi.acceptFreelancerClaim(id, recId);
+      setSuccessMessage('Đã mở phòng Chat với Freelancer!');
+      await loadData();
+      if (res?.roomId) {
+        navigate(PATH_WORKSPACE.replace(':projectId', res.roomId));
+      }
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        const data = e.response?.data as { message?: string } | undefined;
+        setServerError(data?.message || 'Chấp nhận yêu cầu thất bại');
+      } else {
+        setServerError('Chấp nhận yêu cầu thất bại');
+      }
+    }
+  };
+
+  const handleInviteProposal = async (proposalId: string) => {
+    setProposalInvitingId(proposalId);
+    setServerError(null);
+    setSuccessMessage(null);
+    try {
+      await proposalApi.invite(proposalId);
+      setSuccessMessage('Đã gửi lời mời hợp tác. Freelancer đồng ý là mở phòng Chat.');
+      await loadData();
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        const data = e.response?.data as { message?: string } | undefined;
+        setServerError(data?.message || 'Gửi lời mời thất bại');
+      } else {
+        setServerError('Gửi lời mời thất bại');
+      }
+    } finally {
+      setProposalInvitingId(null);
+    }
+  };
+
+  const handleRejectProposal = async (proposalId: string) => {
+    setServerError(null);
+    try {
+      await proposalApi.reject(proposalId);
+      setSuccessMessage('Đã từ chối hồ sơ.');
+      await loadData();
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        const data = e.response?.data as { message?: string } | undefined;
+        setServerError(data?.message || 'Từ chối thất bại');
+      } else {
+        setServerError('Từ chối thất bại');
+      }
+    }
+  };
+
   const handleEdit = () => {
     if (!project) return;
     navigate(PATH_CLIENT_POST_PROJECT, {
@@ -138,6 +233,13 @@ const ClientProjectDetailPage: React.FC = () => {
             Đang thương lượng
           </span>
         );
+      case 'AWAITING_PAYMENT':
+        return (
+          <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200 flex items-center gap-1.5 w-fit">
+            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+            Chờ nạp tiền khởi động
+          </span>
+        );
       case 'IN_PROGRESS':
         return (
           <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-xs font-bold border border-orange-100 flex items-center gap-1.5 w-fit">
@@ -166,16 +268,53 @@ const ClientProjectDetailPage: React.FC = () => {
 
   const getRecStatusBadge = (status: string) => {
     switch (status) {
-      case 'PENDING':
+      case 'AUTO_MATCHED':
         return (
           <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 w-fit">
             AI đề xuất
           </span>
         );
-      case 'INVITED':
+      case 'CLIENT_REQUESTED':
         return (
           <span className="px-3 py-1 bg-yellow-50 text-yellow-600 rounded-full text-xs font-bold border border-yellow-100 w-fit">
             Đang chờ phản hồi
+          </span>
+        );
+      case 'DEV_REQUESTED':
+        return (
+          <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-bold border border-purple-100 w-fit">
+            Dev yêu cầu Chat
+          </span>
+        );
+      case 'ACCEPTED':
+        return (
+          <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-100 w-fit">
+            Đã nhận việc
+          </span>
+        );
+      case 'REJECTED':
+        return (
+          <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold border border-gray-200 w-fit">
+            Đã từ chối
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getProposalStatusBadge = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return (
+          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 w-fit">
+            Chờ duyệt
+          </span>
+        );
+      case 'INVITED':
+        return (
+          <span className="px-3 py-1 bg-yellow-50 text-yellow-600 rounded-full text-xs font-bold border border-yellow-100 w-fit">
+            Đã mời — chờ dev đồng ý
           </span>
         );
       case 'ACCEPTED':
@@ -425,7 +564,7 @@ const ClientProjectDetailPage: React.FC = () => {
                               &ldquo;{rec.aiComment}&rdquo;
                             </p>
                             <div className="mt-auto flex gap-3">
-                              {rec.status === 'PENDING' && (
+                              {rec.status === 'AUTO_MATCHED' && (
                                 <button
                                   onClick={() => void handleInvite(rec.id)}
                                   disabled={invitingId === rec.id}
@@ -434,13 +573,21 @@ const ClientProjectDetailPage: React.FC = () => {
                                   {invitingId === rec.id ? 'Đang mời...' : 'Mời làm việc'}
                                 </button>
                               )}
-                              {rec.status === 'INVITED' && (
+                              {rec.status === 'CLIENT_REQUESTED' && (
                                 <button
                                   type="button"
                                   disabled
                                   className="flex-1 py-2.5 rounded-full bg-gray-100 text-gray-500 font-bold text-sm border-0 cursor-default"
                                 >
                                   Đang chờ phản hồi
+                                </button>
+                              )}
+                              {rec.status === 'DEV_REQUESTED' && (
+                                <button
+                                  onClick={() => void handleAcceptClaim(rec.id)}
+                                  className="flex-1 py-2.5 rounded-full bg-green-600 hover:bg-green-700 text-white font-bold transition-colors cursor-pointer text-sm border-0 shadow-md"
+                                >
+                                  Đồng ý (Mở Chat)
                                 </button>
                               )}
                             </div>
@@ -456,6 +603,101 @@ const ClientProjectDetailPage: React.FC = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Hồ sơ ứng tuyển phổ thông (proposal + PDF + thư chào) */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Hồ sơ ứng tuyển ({proposals.length})
+                    </h2>
+                  </div>
+
+                  <div className="flex flex-col gap-4">
+                    {proposals.map((p) => (
+                      <div
+                        key={p.id}
+                        className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] flex flex-col md:flex-row gap-6"
+                      >
+                        <div className="flex flex-col items-center text-center md:w-1/4">
+                          <div className="w-16 h-16 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-black text-xl mb-3">
+                            {p.freelancerName.charAt(0)}
+                          </div>
+                          <h4 className="font-bold text-gray-900 text-sm mb-1">
+                            {p.freelancerName}
+                          </h4>
+                          <p className="text-xs text-gray-500 mb-2">{p.headline}</p>
+                          <div className="text-xs font-bold text-[#1D4ED8]">
+                            Đề xuất: {formatMoney(Number(p.proposedBudget))} đ
+                          </div>
+                          {p.estimatedDurationDays != null && (
+                            <div className="text-[11px] text-gray-400 mt-1">
+                              ~{p.estimatedDurationDays} ngày
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="md:w-3/4 flex flex-col">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex flex-col gap-1">
+                              {getProposalStatusBadge(p.status)}
+                            </div>
+                            {p.attachmentUrl && (
+                              <button
+                                type="button"
+                                onClick={() => void handleDownloadProposal(p)}
+                                disabled={downloadingId === p.id}
+                                className="text-xs font-bold text-[#1D4ED8] hover:underline items-center gap-1 shrink-0 bg-transparent border-0 cursor-pointer disabled:opacity-60 flex"
+                              >
+                                📎{' '}
+                                {downloadingId === p.id
+                                  ? 'Đang tải...'
+                                  : p.attachmentName || 'Tải file proposal'}
+                              </button>
+                            )}
+                          </div>
+                          {p.coverLetter && (
+                            <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4 whitespace-pre-wrap">
+                              &ldquo;{p.coverLetter}&rdquo;
+                            </p>
+                          )}
+                          <div className="mt-auto flex gap-3">
+                            {p.status === 'PENDING' && (
+                              <>
+                                <button
+                                  onClick={() => void handleInviteProposal(p.id)}
+                                  disabled={proposalInvitingId === p.id}
+                                  className="flex-1 py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold transition-colors cursor-pointer text-sm border-0 shadow-md disabled:opacity-60"
+                                >
+                                  {proposalInvitingId === p.id ? 'Đang mời...' : 'Mời hợp tác'}
+                                </button>
+                                <button
+                                  onClick={() => void handleRejectProposal(p.id)}
+                                  className="px-6 py-2.5 rounded-full bg-white border-2 border-gray-300 text-gray-500 font-bold text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                                >
+                                  Từ chối
+                                </button>
+                              </>
+                            )}
+                            {p.status === 'INVITED' && (
+                              <button
+                                type="button"
+                                disabled
+                                className="flex-1 py-2.5 rounded-full bg-gray-100 text-gray-500 font-bold text-sm border-0 cursor-default"
+                              >
+                                Đang chờ dev đồng ý
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {proposals.length === 0 && (
+                      <p className="text-sm text-gray-500">
+                        Chưa có freelancer nào nộp hồ sơ cho dự án này.
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                 {/* Trạng thái Đang thực hiện */}
                 {project.status === 'IN_PROGRESS' && (
@@ -609,13 +851,6 @@ const ClientProjectDetailPage: React.FC = () => {
                     </button>
                   ) : (
                     <>
-                      <button
-                        type="button"
-                        onClick={handleEdit}
-                        className="w-full py-3 bg-white text-[#1D4ED8] font-bold text-sm border-2 border-[#1D4ED8] rounded-full hover:bg-[#EEF2FF] transition-colors cursor-pointer"
-                      >
-                        Điều chỉnh dự án
-                      </button>
                       {project.status === 'OPEN' && (
                         <button
                           type="button"

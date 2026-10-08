@@ -35,6 +35,8 @@ type LocationState = {
   exactBudgetVnd?: number;
   /** Từ AIBriefPage: Thời gian hoàn thành (tháng) */
   durationMonths?: number;
+  /** Hạn chót nộp bài (ISO string) */
+  deadline?: string;
   /** Flag đánh dấu đến từ luồng AI Brief */
   fromAiBrief?: boolean;
 };
@@ -132,6 +134,10 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
   const [aiSuggestedPrice, setAiSuggestedPrice] = useState(initialBudgetAmount);
   const [isInsightExpanded, setIsInsightExpanded] = useState(false);
   const [duration, setDuration] = useState('fast'); // 'fast', 'normal', 'slow'
+  const defaultDeadline = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+  const [deadline, setDeadline] = useState(defaultDeadline);
 
   // Kích hoạt AI Pricing khi vào bước 2
   useEffect(() => {
@@ -488,7 +494,41 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 </div>
               </div>
 
-              <div className="flex justify-end pt-4 border-t border-gray-100">
+              {/* Hạn chót nhận ứng tuyển */}
+              <div className="border-t border-gray-100 pt-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <svg
+                    className="w-4 h-4 text-[#1D4ED8]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <label htmlFor="project-deadline" className="text-sm font-bold text-gray-900">
+                    Hạn chót nhận ứng tuyển
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500 mb-3 ml-6">
+                  Sau ngày này, dự án sẽ tự động ngưng nhận hồ sơ. Tối đa 30 ngày kể từ hôm nay.
+                </p>
+                <input
+                  type="date"
+                  id="project-deadline"
+                  value={deadline}
+                  min={new Date().toISOString().split('T')[0]}
+                  max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  className="ml-6 w-full md:w-64 px-4 py-2.5 bg-[#F8FAFC] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all"
+                />
+              </div>
+
+              <div className="flex justify-end pt-4 border-t border-gray-100 mt-6">
                 <button
                   type="submit"
                   className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border-0"
@@ -789,6 +829,25 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                         Dài hạn
                       </span>
                     </button>
+                  </div>
+                  <div className="mt-6 border-t border-gray-100 pt-6">
+                    <label
+                      htmlFor="project-deadline"
+                      className="block text-sm font-bold text-gray-900 mb-2"
+                    >
+                      Hạn chót ứng tuyển (Tối đa 1 tháng)
+                    </label>
+                    <input
+                      id="project-deadline"
+                      type="date"
+                      value={deadline}
+                      min={new Date().toISOString().split('T')[0]}
+                      max={
+                        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                      }
+                      onChange={(e) => setDeadline(e.target.value)}
+                      className="w-full md:w-1/3 px-4 py-3 bg-[#F8FAFC] border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all"
+                    />
                   </div>
                 </div>
 
@@ -1445,6 +1504,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                       selectedSkills,
                       selectedTags,
                       srsDocumentUrl: initialSrsDocumentUrl,
+                      deadline: deadline ? new Date(deadline).toISOString() : undefined,
                     },
                   })
                 }
