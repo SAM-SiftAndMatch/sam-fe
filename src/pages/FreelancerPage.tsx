@@ -1,13 +1,14 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jobApi } from '../api/job';
 import { profileApi } from '../api/profile';
 import FooterDashboard from '../components/FooterDashboard';
 import Header from '../components/Header';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { FreelancerProfileResponse } from '../types/profile';
-import { MOCK_JOBS } from './FreelancerJobsPage';
 
 const FreelancerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +17,12 @@ const FreelancerPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('Tất cả');
   const [profile, setProfile] = useState<FreelancerProfileResponse | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+
+  const { data: openJobs = [] } = useQuery({
+    queryKey: ['open-jobs'],
+    queryFn: () => jobApi.getAllOpenJobs(),
+    staleTime: 60_000,
+  });
 
   // If a Client lands here, redirect to Client dashboard
   useEffect(() => {
@@ -313,7 +320,7 @@ const FreelancerPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {MOCK_JOBS.slice(0, 4).map((job) => (
+          {openJobs.slice(0, 4).map((job) => (
             <div
               key={job.id}
               className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow flex flex-col h-full"
@@ -337,7 +344,7 @@ const FreelancerPage: React.FC = () => {
                   </svg>
                 </div>
                 <span className="text-[11px] font-bold text-gray-500 tracking-wider">
-                  {job.type}
+                  {job.status === 'OPEN' ? '🟢 ĐANG MỞ' : job.status}
                 </span>
               </div>
               <h3 className="text-[17px] font-bold text-gray-900 leading-snug mb-3 flex-grow">
@@ -359,21 +366,29 @@ const FreelancerPage: React.FC = () => {
                     d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
                   />
                 </svg>
-                <span className="text-sm font-bold text-[#1D4ED8]">{job.price}</span>
+                <span className="text-sm font-bold text-[#1D4ED8]">
+                  {job.budgetMin
+                    ? new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND',
+                        maximumFractionDigits: 0,
+                      }).format(job.budgetMin)
+                    : 'Thỏa thuận'}
+                </span>
               </div>
               <div className="flex flex-wrap gap-2 mb-6">
-                {job.tags.map((tag) => (
+                {job.skills?.slice(0, 4).map((skill) => (
                   <span
-                    key={tag}
+                    key={skill.id}
                     className="text-[11px] font-medium text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md"
                   >
-                    {tag}
+                    {skill.name}
                   </span>
                 ))}
               </div>
               <button
                 type="button"
-                onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', job.id.toString()))}
+                onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', job.id))}
                 className="w-full py-3 bg-[#00B2FF] hover:bg-[#009CE0] text-white text-sm font-bold rounded-xl transition-colors mt-auto cursor-pointer border-0"
               >
                 Xem chi tiết

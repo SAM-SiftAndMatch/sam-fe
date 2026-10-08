@@ -33,3 +33,4 @@ export const PATH_JOB_APPLY_SUCCESS = '/jobs/:id/apply/success';
 
 export const PATH_WORKSPACES = '/workspaces';
 export const PATH_WORKSPACE = '/workspace/:projectId';
+export const PATH_WORKSPACE_CONTRACT = '/workspace/:projectId/contract';

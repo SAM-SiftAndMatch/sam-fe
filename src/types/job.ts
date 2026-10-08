@@ -1,5 +1,11 @@
 // Khớp BE: JobResponse.java (chú ý dùng `id`, KHÔNG phải `jobId` như ví dụ spec cũ).
-export type JobStatus = 'OPEN' | 'NEGOTIATING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+export type JobStatus =
+  | 'OPEN'
+  | 'NEGOTIATING'
+  | 'AWAITING_PAYMENT'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED';
 
 export interface JobSkill {
   id: number;
@@ -37,6 +43,7 @@ export interface JobCreateRequest {
   budgetMin: number;
   budgetMax: number;
   estimatedDurationMonths: number;
+  deadline?: string;
   srsDocumentUrl: string;
   /** Nội dung SRS Markdown (tùy chọn) */
   srsContent?: string;
@@ -46,7 +53,12 @@ export interface JobCreateRequest {
 }
 
 // Khớp BE: AiRecommendationResponse.java + SkillExperienceDto.java
-export type RecommendationStatus = 'PENDING' | 'INVITED' | 'ACCEPTED' | 'REJECTED';
+export type RecommendationStatus =
+  | 'AUTO_MATCHED'
+  | 'CLIENT_REQUESTED'
+  | 'DEV_REQUESTED'
+  | 'ACCEPTED'
+  | 'REJECTED';
 
 export interface RecommendationSkill {
   skillName: string;

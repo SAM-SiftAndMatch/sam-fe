@@ -1,7 +1,9 @@
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import {
+  PATH_CLIENT_PROJECT_DETAIL,
   PATH_FREELANCER,
   PATH_FREELANCER_APPLICATIONS,
   PATH_FREELANCER_CREATE_PROFILE,
@@ -10,8 +12,10 @@ import {
   PATH_FREELANCER_PRICING,
   PATH_FREELANCER_PROJECTS,
   PATH_HOME,
+  PATH_JOB_DETAIL,
   PATH_LOGIN,
   PATH_REGISTER,
+  PATH_WORKSPACE,
   PATH_WORKSPACES,
 } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -21,9 +25,26 @@ const Header: React.FC = () => {
   const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNotiOpen, setIsNotiOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notiRef = useRef<HTMLDivElement>(null);
 
   const { user, isAuthenticated, logout } = useAuthStore();
+  const { notifications, unreadCount, clear } = useInviteNotifications();
+
+  const handleNotiClick = (jobId?: string | null, roomId?: string | null, type?: string) => {
+    setIsNotiOpen(false);
+    if (roomId) {
+      navigate(PATH_WORKSPACE.replace(':projectId', roomId));
+      return;
+    }
+    if (!jobId) return;
+    if (user?.role === 'CLIENT' && type !== '1_TOUCH_INVITE') {
+      navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', jobId));
+      return;
+    }
+    navigate(PATH_JOB_DETAIL.replace(':id', jobId));
+  };
 
   const handleLogout = async () => {
     setIsDropdownOpen(false);
@@ -35,6 +56,9 @@ const Header: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
+      }
+      if (notiRef.current && !notiRef.current.contains(event.target as Node)) {
+        setIsNotiOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -140,26 +164,83 @@ const Header: React.FC = () => {
       <div className="flex-1 flex items-center justify-end gap-4 md:gap-5">
         {isAuthenticated ? (
           <>
-            <button
-              type="button"
-              className="text-gray-500 hover:text-gray-800 cursor-pointer bg-transparent border-0 p-0"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                role="img"
-                aria-label="Notification"
+            <div className="relative" ref={notiRef}>
+              <button
+                type="button"
+                onClick={() => setIsNotiOpen(!isNotiOpen)}
+                className="relative text-gray-500 hover:text-gray-800 cursor-pointer bg-transparent border-0 p-0"
+                aria-label="Notifications"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  role="img"
+                  aria-label="Notification"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {isNotiOpen && (
+                <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white rounded-xl shadow-lg py-2 border border-gray-100 z-50">
+                  <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+                    <p className="text-xs font-bold text-gray-800">Thông báo</p>
+                    {notifications.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={clear}
+                        className="text-[11px] font-semibold text-gray-400 hover:text-gray-600 bg-transparent border-0 cursor-pointer"
+                      >
+                        Xóa hết
+                      </button>
+                    )}
+                  </div>
+                  {notifications.length === 0 ? (
+                    <p className="px-4 py-6 text-xs text-gray-400 text-center">
+                      Chưa có thông báo nào. Lời mời làm việc và hồ sơ mới sẽ hiện ở đây.
+                    </p>
+                  ) : (
+                    notifications.map((n, idx) => (
+                      <button
+                        key={`${n.jobId}-${n.timestamp}-${idx}`}
+                        type="button"
+                        onClick={() => handleNotiClick(n.jobId, n.roomId, n.type)}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-50 border-0 bg-transparent cursor-pointer transition-colors border-b border-gray-50 last:border-0"
+                      >
+                        <p className="text-xs font-bold text-gray-800 mb-0.5">
+                          {n.type === '1_TOUCH_INVITE' && '🔥 Lời mời tuyển gấp'}
+                          {n.type === 'DEV_CLAIM' && '🙋 Dev muốn chat'}
+                          {n.type === 'CHAT_OPENED' && '💬 Đã mở phòng chat'}
+                          {n.type === 'PROPOSAL_RECEIVED' && '📨 Hồ sơ ứng tuyển mới'}
+                          {n.type === 'PROPOSAL_INVITE' && '🤝 Client mời hợp tác'}
+                          {n.type === 'PROPOSAL_ACCEPTED' && '✅ Dev đã đồng ý hợp tác'}
+                          {n.type === 'PROPOSAL_REJECTED' && '🚫 Hồ sơ bị từ chối'}
+                        </p>
+                        <p className="text-xs text-gray-600 line-clamp-2">
+                          {n.jobTitle || n.message || 'Có cập nhật mới cho dự án'}
+                        </p>
+                        {n.actorName && (
+                          <p className="text-[11px] text-gray-400 mt-0.5">Từ: {n.actorName}</p>
+                        )}
+                        <p className="text-[11px] font-semibold text-blue-600 mt-1">Bấm để xem →</p>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
             <div className="relative" ref={dropdownRef}>
               <button
                 type="button"

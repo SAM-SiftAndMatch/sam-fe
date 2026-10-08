@@ -32,6 +32,7 @@ type LocationState = {
   exactBudgetVnd?: number;
   durationMonths?: number;
   fromAiBrief?: boolean;
+  deadline?: string;
 };
 
 const ConfirmProjectPage: React.FC = () => {
@@ -48,6 +49,10 @@ const ConfirmProjectPage: React.FC = () => {
   const [upgrades, setUpgrades] = useState(
     state.upgrades || { featured: false, urgent: false, warranty: false }
   );
+  const defaultDeadline = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
+  const [deadline, setDeadline] = useState(state.deadline || defaultDeadline);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,6 +102,7 @@ const ConfirmProjectPage: React.FC = () => {
         estimatedDurationMonths: durationMonths,
         srsDocumentUrl: state.srsDocumentUrl || '',
         srsContent: state.srsContent || '',
+        deadline: deadline ? new Date(deadline).toISOString() : undefined,
         isFeatured: upgrades.featured,
         isUrgentHiring: upgrades.urgent,
         requiresAiQa: upgrades.warranty,
@@ -280,6 +286,27 @@ const ConfirmProjectPage: React.FC = () => {
                     className="w-full mt-3 p-4 bg-[#F8FAFC] border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
                   />
                 )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="project-deadline"
+                  className="block text-sm font-bold text-gray-900 mb-2"
+                >
+                  Hạn chót nhận ứng tuyển
+                </label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Sau ngày này, dự án sẽ tự động ngưng nhận hồ sơ. Tối đa 30 ngày kể từ hôm nay.
+                </p>
+                <input
+                  type="date"
+                  id="project-deadline"
+                  value={deadline}
+                  min={new Date().toISOString().split('T')[0]}
+                  max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  className="w-full sm:w-1/2 p-4 bg-[#F8FAFC] border border-gray-200 rounded-xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all"
+                />
               </div>
             </div>
           )}
