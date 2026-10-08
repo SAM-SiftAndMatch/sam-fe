@@ -168,12 +168,21 @@ export const ProcessSection: React.FC = () => {
           const isActive = activeIndex === index;
           const isOtherActive = isAnyActive && !isActive;
 
-          // Dynamically compute card width classes for desktop
+          // Ambient sequential pulse class when this node is NOT active
+          const ambientNodeClass = !isActive
+            ? index === 0
+              ? 'animate-ambient-node-1'
+              : index === 1
+                ? 'animate-ambient-node-2'
+                : 'animate-ambient-node-3'
+            : '';
+
+          // Dynamically compute card width classes for desktop (soft, low-glare shadow)
           const cardWidthClasses = isActive
-            ? 'lg:max-w-none lg:w-[480px] bg-white border-[#1D4ED8] shadow-[0_14px_40px_rgba(29,78,216,0.12)] -translate-y-1 z-20'
+            ? 'lg:max-w-none lg:w-[480px] bg-white border-[#1D4ED8] shadow-[0_12px_36px_rgba(29,78,216,0.10)] -translate-y-1 z-20'
             : isOtherActive
-              ? 'lg:max-w-none lg:w-[200px] bg-white/95 border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.02)] opacity-75 hover:opacity-100 scale-[0.98] z-10'
-              : 'lg:max-w-none lg:w-[220px] bg-white border-slate-200/90 hover:border-slate-300 shadow-[0_1px_3px_rgba(0,0,0,0.02)] z-10';
+              ? `lg:max-w-none lg:w-[200px] bg-white/95 border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.02)] opacity-75 hover:opacity-100 scale-[0.98] z-10 ${ambientNodeClass}`
+              : `lg:max-w-none lg:w-[220px] bg-white border-slate-200/90 hover:border-slate-300 shadow-[0_1px_3px_rgba(0,0,0,0.02)] z-10 ${ambientNodeClass}`;
 
           return (
             <Fragment key={step.id}>
@@ -254,7 +263,7 @@ export const ProcessSection: React.FC = () => {
                 </div>
               </div>
 
-              {/* Connecting Straight Line (NO ARROWS, long, prominent line) */}
+              {/* Connecting Straight Line (NO ARROWS, long line with ambient traveling pulse) */}
               {index < WORKFLOW_STEPS.length - 1 && (
                 <>
                   {/* Desktop Long Straight Horizontal Line */}
@@ -262,9 +271,24 @@ export const ProcessSection: React.FC = () => {
                     className="hidden lg:flex items-center flex-1 min-w-[48px] self-start mt-[44px] px-3 pointer-events-none"
                     aria-hidden="true"
                   >
-                    <div className="w-full h-[2.5px] bg-slate-300 relative rounded-full overflow-hidden shadow-2xs">
+                    <div
+                      className={`w-full h-[2.5px] bg-slate-300 relative rounded-full overflow-hidden shadow-2xs ${
+                        index === 0
+                          ? 'animate-ambient-track-glow-1'
+                          : 'animate-ambient-track-glow-2'
+                      }`}
+                    >
+                      {/* Ambient traveling pulse beam */}
                       <div
-                        className={`absolute inset-0 bg-[#1D4ED8] transition-opacity duration-300 ${
+                        className={`absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-[#2563EB] to-transparent ${
+                          index === 0
+                            ? 'animate-ambient-line-sweep-1-h'
+                            : 'animate-ambient-line-sweep-2-h'
+                        }`}
+                      />
+                      {/* Subtle active tint when connected to active card */}
+                      <div
+                        className={`absolute inset-0 bg-[#1D4ED8]/30 transition-opacity duration-300 ${
                           activeIndex === index || activeIndex === index + 1
                             ? 'opacity-100'
                             : 'opacity-0'
@@ -278,7 +302,15 @@ export const ProcessSection: React.FC = () => {
                     className="lg:hidden flex items-center justify-center h-8 w-full py-1 text-slate-300 pointer-events-none"
                     aria-hidden="true"
                   >
-                    <div className="h-full w-[2.5px] bg-slate-300 rounded-full" />
+                    <div className="h-full w-[2.5px] bg-slate-300 rounded-full relative overflow-hidden">
+                      <div
+                        className={`absolute inset-0 w-full h-full bg-gradient-to-b from-transparent via-[#2563EB] to-transparent ${
+                          index === 0
+                            ? 'animate-ambient-line-sweep-1-v'
+                            : 'animate-ambient-line-sweep-2-v'
+                        }`}
+                      />
+                    </div>
                   </div>
                 </>
               )}

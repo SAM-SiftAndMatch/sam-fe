@@ -91,20 +91,226 @@ body {
 }
 
 /* =========================================================================
-   WORKFLOW PIPELINE ANIMATIONS (Process Section)
+   WORKFLOW PIPELINE AMBIENT SEQUENCE (Process Section)
+   Step 1 flashes -> Line 1-2 sweeps -> Step 2 flashes -> Line 2-3 sweeps -> Step 3 flashes -> Loop
+   Soft, eye-friendly, low-glare glow.
    ========================================================================= */
 
-@keyframes workflowFlow {
-  0% {
+@keyframes ambientStepPulse1 {
+  0%,
+  3% {
+    border-color: rgba(37, 99, 235, 0.55);
+    box-shadow: 0 0 16px rgba(37, 99, 235, 0.14), 0 2px 6px rgba(0, 0, 0, 0.03);
+    transform: translateY(-2px);
+  }
+  16% {
+    border-color: rgba(37, 99, 235, 0.35);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(-1px);
+  }
+  24%,
+  100% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(0);
+  }
+}
+
+@keyframes ambientStepPulse2 {
+  0%,
+  33% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(0);
+  }
+  35%,
+  38% {
+    border-color: rgba(37, 99, 235, 0.55);
+    box-shadow: 0 0 16px rgba(37, 99, 235, 0.14), 0 2px 6px rgba(0, 0, 0, 0.03);
+    transform: translateY(-2px);
+  }
+  50% {
+    border-color: rgba(37, 99, 235, 0.35);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(-1px);
+  }
+  58%,
+  100% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(0);
+  }
+}
+
+@keyframes ambientStepPulse3 {
+  0%,
+  69% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(0);
+  }
+  71%,
+  74% {
+    border-color: rgba(37, 99, 235, 0.55);
+    box-shadow: 0 0 16px rgba(37, 99, 235, 0.14), 0 2px 6px rgba(0, 0, 0, 0.03);
+    transform: translateY(-2px);
+  }
+  86% {
+    border-color: rgba(37, 99, 235, 0.35);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(-1px);
+  }
+  94%,
+  100% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(0);
+  }
+}
+
+@keyframes ambientLineSweep1H {
+  0%,
+  18% {
+    opacity: 0;
     transform: translateX(-100%);
   }
+  19% {
+    opacity: 0.95;
+    transform: translateX(-100%);
+  }
+  35% {
+    opacity: 0.95;
+    transform: translateX(100%);
+  }
+  37%,
   100% {
+    opacity: 0;
     transform: translateX(100%);
   }
 }
 
-.animate-workflow-flow {
-  animation: workflowFlow 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+@keyframes ambientLineSweep2H {
+  0%,
+  54% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  55% {
+    opacity: 0.95;
+    transform: translateX(-100%);
+  }
+  71% {
+    opacity: 0.95;
+    transform: translateX(100%);
+  }
+  73%,
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ambientLineSweep1V {
+  0%,
+  18% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  19% {
+    opacity: 0.95;
+    transform: translateY(-100%);
+  }
+  35% {
+    opacity: 0.95;
+    transform: translateY(100%);
+  }
+  37%,
+  100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes ambientLineSweep2V {
+  0%,
+  54% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  55% {
+    opacity: 0.95;
+    transform: translateY(-100%);
+  }
+  71% {
+    opacity: 0.95;
+    transform: translateY(100%);
+  }
+  73%,
+  100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes ambientTrackGlow1 {
+  0%,
+  18% {
+    background-color: rgba(203, 213, 225, 0.9);
+  }
+  22%,
+  33% {
+    background-color: rgba(96, 165, 250, 0.7);
+  }
+  37%,
+  100% {
+    background-color: rgba(203, 213, 225, 0.9);
+  }
+}
+
+@keyframes ambientTrackGlow2 {
+  0%,
+  54% {
+    background-color: rgba(203, 213, 225, 0.9);
+  }
+  58%,
+  69% {
+    background-color: rgba(96, 165, 250, 0.7);
+  }
+  73%,
+  100% {
+    background-color: rgba(203, 213, 225, 0.9);
+  }
+}
+
+.animate-ambient-node-1 {
+  animation: ambientStepPulse1 6s ease-in-out infinite;
+}
+.animate-ambient-node-2 {
+  animation: ambientStepPulse2 6s ease-in-out infinite;
+}
+.animate-ambient-node-3 {
+  animation: ambientStepPulse3 6s ease-in-out infinite;
+}
+
+.animate-ambient-line-sweep-1-h {
+  animation: ambientLineSweep1H 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.animate-ambient-line-sweep-2-h {
+  animation: ambientLineSweep2H 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-ambient-line-sweep-1-v {
+  animation: ambientLineSweep1V 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.animate-ambient-line-sweep-2-v {
+  animation: ambientLineSweep2V 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-ambient-track-glow-1 {
+  animation: ambientTrackGlow1 6s ease-in-out infinite;
+}
+.animate-ambient-track-glow-2 {
+  animation: ambientTrackGlow2 6s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
