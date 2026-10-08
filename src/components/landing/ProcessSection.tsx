@@ -92,7 +92,7 @@ const WORKFLOW_STEPS: WorkflowStep[] = [
     id: 'ai-qc',
     stepNumber: '03',
     shortTag: 'AI QC',
-    title: 'Kiểm định chất lượng (AI QC)',
+    title: 'Kiểm định chất lượng',
     subtitle: 'Rà soát mã nguồn & Bản quyền',
     description:
       'Rà soát mã nguồn tự động, phát hiện lỗi cú pháp, kiểm tra bảo mật và bản quyền trước khi giải ngân thanh toán.',
