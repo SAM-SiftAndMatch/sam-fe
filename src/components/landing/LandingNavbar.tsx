@@ -103,15 +103,15 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
             className="flex items-center gap-2 group cursor-pointer focus-visible:outline-2 focus-visible:outline-[#1D4ED8] rounded-[6px]"
           >
             <span
-              className={`font-black tracking-tight text-[#1D4ED8] transition-all duration-200 ${
-                isScrolled ? 'text-xl' : 'text-2xl'
+              className={`font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300 leading-none select-none ${
+                isScrolled ? 'text-2xl sm:text-[28px]' : 'text-3xl sm:text-[38px]'
               }`}
-              style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
+              style={{ fontFamily: "'Quedora', sans-serif" }}
             >
               SAM
             </span>
             <span
-              className={`hidden sm:inline-block font-mono text-[10px] text-slate-500 font-medium tracking-widest uppercase border-l border-slate-300 pl-2 transition-opacity duration-200 ${
+              className={`hidden sm:inline-block font-mono text-[10px] text-slate-500 font-medium tracking-widest uppercase border-l border-slate-300 pl-2 self-center transition-opacity duration-200 ${
                 isScrolled ? 'opacity-80' : 'opacity-100'
               }`}
             >

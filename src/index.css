@@ -90,6 +90,235 @@ body {
   transform: translateY(0);
 }
 
+/* =========================================================================
+   ELECTRIC STREAM FLOW ANIMATIONS (Process Section)
+   ========================================================================= */
+
+@keyframes electricCard1 {
+  0% {
+    opacity: 1;
+    stroke-dashoffset: 100;
+  }
+  24% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+  26%,
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes electricBridge1H {
+  0%,
+  23% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  24% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  33% {
+    opacity: 1;
+    transform: translateX(24px);
+  }
+  34%,
+  100% {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes electricCard2 {
+  0%,
+  31% {
+    opacity: 0;
+    stroke-dashoffset: 100;
+  }
+  32% {
+    opacity: 1;
+    stroke-dashoffset: 100;
+  }
+  56% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+  58%,
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes electricBridge2H {
+  0%,
+  55% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  56% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  65% {
+    opacity: 1;
+    transform: translateX(24px);
+  }
+  66%,
+  100% {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes electricCard3 {
+  0%,
+  63% {
+    opacity: 0;
+    stroke-dashoffset: 100;
+  }
+  64% {
+    opacity: 1;
+    stroke-dashoffset: 100;
+  }
+  88% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+  90%,
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes electricBridge1V {
+  0%,
+  23% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  24% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  33% {
+    opacity: 1;
+    transform: translateY(18px);
+  }
+  34%,
+  100% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes electricBridge2V {
+  0%,
+  55% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  56% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(18px);
+  }
+  66%,
+  100% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes electricGlowCard1 {
+  0%,
+  25% {
+    box-shadow: 0 0 24px rgba(0, 163, 255, 0.2), 0 1px 3px rgba(0, 0, 0, 0.03);
+    border-color: rgba(37, 99, 235, 0.7);
+  }
+  27%,
+  100% {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    border-color: rgba(226, 232, 240, 0.9);
+  }
+}
+
+@keyframes electricGlowCard2 {
+  0%,
+  31% {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    border-color: rgba(226, 232, 240, 0.9);
+  }
+  32%,
+  57% {
+    box-shadow: 0 0 24px rgba(0, 163, 255, 0.2), 0 1px 3px rgba(0, 0, 0, 0.03);
+    border-color: rgba(37, 99, 235, 0.7);
+  }
+  59%,
+  100% {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    border-color: rgba(226, 232, 240, 0.9);
+  }
+}
+
+@keyframes electricGlowCard3 {
+  0%,
+  63% {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    border-color: rgba(226, 232, 240, 0.9);
+  }
+  64%,
+  89% {
+    box-shadow: 0 0 24px rgba(0, 163, 255, 0.2), 0 1px 3px rgba(0, 0, 0, 0.03);
+    border-color: rgba(37, 99, 235, 0.7);
+  }
+  91%,
+  100% {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    border-color: rgba(226, 232, 240, 0.9);
+  }
+}
+
+.animate-electric-card-1 {
+  animation: electricCard1 5.5s linear infinite;
+}
+.animate-electric-card-2 {
+  animation: electricCard2 5.5s linear infinite;
+}
+.animate-electric-card-3 {
+  animation: electricCard3 5.5s linear infinite;
+}
+
+.animate-bridge-1-h {
+  animation: electricBridge1H 5.5s linear infinite;
+}
+.animate-bridge-2-h {
+  animation: electricBridge2H 5.5s linear infinite;
+}
+
+.animate-bridge-1-v {
+  animation: electricBridge1V 5.5s linear infinite;
+}
+.animate-bridge-2-v {
+  animation: electricBridge2V 5.5s linear infinite;
+}
+
+.card-electric-glow-1 {
+  animation: electricGlowCard1 5.5s ease-in-out infinite;
+}
+.card-electric-glow-2 {
+  animation: electricGlowCard2 5.5s ease-in-out infinite;
+}
+.card-electric-glow-3 {
+  animation: electricGlowCard3 5.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

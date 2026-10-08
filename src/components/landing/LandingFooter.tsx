@@ -12,10 +12,15 @@ export const LandingFooter: React.FC = () => {
             <Link
               to={paths.PATH_HOME}
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="flex items-center gap-2 mb-3"
+              className="flex items-center gap-2 mb-3 group"
             >
-              <span className="text-2xl font-black tracking-tight text-[#1D4ED8]">SAM</span>
-              <span className="font-mono text-[10px] text-slate-400 uppercase tracking-wider">
+              <span
+                className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300 leading-none"
+                style={{ fontFamily: "'Quedora', sans-serif" }}
+              >
+                SAM
+              </span>
+              <span className="font-mono text-[10px] text-slate-400 uppercase tracking-wider self-center">
                 SIFT & MATCH
               </span>
             </Link>

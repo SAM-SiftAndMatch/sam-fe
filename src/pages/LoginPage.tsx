@@ -162,7 +162,7 @@ const LoginPage: React.FC = () => {
           <div className="mb-6">
             <div className="md:hidden mb-4 flex items-center justify-between">
               <span
-                className="text-2xl font-black tracking-tight text-[#1D4ED8]"
+                className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] leading-none"
                 style={{ fontFamily: "'Quedora', sans-serif" }}
               >
                 SAM
