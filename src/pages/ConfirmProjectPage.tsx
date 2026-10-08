@@ -143,13 +143,13 @@ const ConfirmProjectPage: React.FC = () => {
           {isFromAi && (
             <div className="space-y-6 mb-8">
               {/* Thông tin chốt từ AI */}
-              <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-600 rounded-2xl p-6 text-white shadow-lg">
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 text-white shadow-xs">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-200 mb-1">
-                      Hợp đồng AI đã chốt
+                    <h4 className="text-[10px] font-mono font-bold uppercase tracking-widest text-blue-400 mb-1">
+                      {'//'} HỢP ĐỒNG AI ĐÃ CHỐT
                     </h4>
-                    <p className="text-sm text-blue-100">
+                    <p className="text-xs text-slate-400">
                       Dữ liệu chính xác từ tài liệu SRS sau đàm phán
                     </p>
                   </div>
@@ -357,7 +357,7 @@ const ConfirmProjectPage: React.FC = () => {
                   : navigate(PATH_CLIENT_POST_PROJECT, { state: { ...state, restoreStep: 4 } })
               }
               disabled={isSubmitting}
-              className="flex items-center justify-center gap-2 w-1/3 py-4 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 w-1/3 h-[44px] rounded-lg border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Quay lại
             </button>
@@ -365,7 +365,7 @@ const ConfirmProjectPage: React.FC = () => {
               type="button"
               onClick={handleConfirm}
               disabled={isSubmitting}
-              className="flex items-center justify-center gap-2 flex-1 py-4 rounded-xl bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold hover:opacity-90 shadow-[0_8px_20px_rgba(29,78,216,0.3)] transition-all cursor-pointer text-sm border-0 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="group relative flex items-center justify-center gap-2 flex-1 h-[44px] rounded-lg bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-medium text-sm border-t border-t-blue-400/30 shadow-xs btn-sweep active:scale-[0.97] transition-all cursor-pointer border-0 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>

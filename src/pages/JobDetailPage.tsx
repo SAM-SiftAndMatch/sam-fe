@@ -36,11 +36,11 @@ const JobDetailPage: React.FC = () => {
   };
 
   const getButtonClass = () => {
-    const baseClass = 'font-bold px-6 py-3 rounded-full transition-shadow text-sm border-0 ';
+    const baseClass = 'font-medium px-6 h-[44px] rounded-lg transition-all text-sm border-0 ';
     if (!existingApplication || ['draft', 'cancelled'].includes(existingApplication.status)) {
-      return `${baseClass}bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:shadow-lg text-white cursor-pointer`;
+      return `${baseClass}bg-[#1D4ED8] hover:bg-[#1e40af] text-white cursor-pointer btn-sweep border-t border-t-blue-400/30 active:scale-[0.97] shadow-xs`;
     }
-    return `${baseClass}bg-gray-200 text-gray-500 cursor-not-allowed`;
+    return `${baseClass}bg-slate-100 text-slate-400 cursor-not-allowed`;
   };
 
   const handleApplyClick = () => {
@@ -90,8 +90,8 @@ const JobDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-8">
           {/* ================= CỘT TRÁI ================= */}
           <div className="flex flex-col gap-8">
-            <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-snug mb-4">
+            <section className="bg-white rounded-xl p-8 border border-slate-200/90 shadow-xs">
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 leading-snug mb-4 tracking-tight">
                 {job.title}
               </h1>
 
@@ -99,26 +99,26 @@ const JobDetailPage: React.FC = () => {
                 {job.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs font-semibold text-[#1D4ED8] bg-[#EEF2FF] px-3 py-1.5 rounded-full"
+                    className="text-xs font-mono font-medium text-[#1D4ED8] bg-blue-50/70 border border-blue-100 px-2.5 py-1 rounded-md"
                   >
                     {tag}
                   </span>
                 ))}
               </div>
 
-              <h2 className="text-lg font-bold text-gray-900 mb-3">Mô tả dự án</h2>
-              <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              <h2 className="text-base font-bold text-slate-900 mb-2">Mô tả dự án</h2>
+              <p className="text-slate-600 text-sm leading-relaxed mb-6">
                 {job.description || 'Đang cập nhật mô tả...'}
               </p>
 
-              <h2 className="text-lg font-bold text-gray-900 mb-3">Phạm vi công việc:</h2>
-              <ul className="list-disc pl-5 text-gray-600 text-sm leading-relaxed mb-10 space-y-2">
+              <h2 className="text-base font-bold text-slate-900 mb-2">Phạm vi công việc:</h2>
+              <ul className="list-disc pl-5 text-slate-600 text-sm leading-relaxed mb-8 space-y-2">
                 {(job.scope || []).map((item: string, index: number) => (
                   <li key={index}>{item}</li>
                 ))}
               </ul>
 
-              <div className="flex items-center gap-4 mt-10">
+              <div className="flex items-center gap-3 pt-2">
                 <button type="button" onClick={handleApplyClick} className={getButtonClass()}>
                   {getButtonText()}
                 </button>
@@ -127,7 +127,7 @@ const JobDetailPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setIsCancelModalOpen(true)}
-                      className="px-6 py-3 rounded-full font-bold bg-white text-red-500 border-2 border-red-500 hover:bg-red-50 transition-colors cursor-pointer text-sm"
+                      className="px-5 h-[44px] rounded-lg font-medium bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer text-sm"
                     >
                       Ngưng ứng tuyển
                     </button>
@@ -135,9 +135,9 @@ const JobDetailPage: React.FC = () => {
               </div>
             </section>
 
-            <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-              <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <span className="w-8 h-1 bg-[#1D4ED8] rounded-full" />
+            <section className="bg-white rounded-xl p-8 border border-slate-200/90 shadow-xs">
+              <h2 className="text-base font-bold text-slate-900 mb-6 flex items-center gap-2.5">
+                <span className="w-1.5 h-4 bg-[#1D4ED8] rounded-xs" />
                 Yêu cầu chi tiết
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -237,29 +237,29 @@ const JobDetailPage: React.FC = () => {
               </div>
             </section>
 
-            <section className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+            <section className="bg-white rounded-xl p-8 border border-slate-200/90 shadow-xs">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-gray-900">Các công việc tương tự</h2>
+                <h2 className="text-base font-bold text-slate-900">Các công việc tương tự</h2>
                 <button
                   type="button"
-                  className="text-sm font-bold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0"
+                  className="text-xs font-mono font-medium text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0"
                 >
-                  Xem tất cả →
+                  XEM TẤT CẢ →
                 </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border border-gray-100 rounded-2xl p-5 hover:shadow-lg transition-shadow bg-white flex flex-col">
+                <div className="border border-slate-200/90 rounded-lg p-5 hover:border-[#1D4ED8]/60 transition-colors bg-white flex flex-col">
                   <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-bold text-white bg-[#0047FF] px-2.5 py-1 rounded">
+                    <span className="text-[10px] font-mono font-bold text-white bg-[#1D4ED8] px-2 py-0.5 rounded">
                       MỚI ĐĂNG
                     </span>
                     <button
                       type="button"
-                      className="text-gray-400 hover:text-gray-600 bg-transparent border-0 cursor-pointer"
+                      className="text-slate-400 hover:text-slate-600 bg-transparent border-0 cursor-pointer"
                     >
                       <svg
-                        className="w-5 h-5"
+                        className="w-4 h-4"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -275,39 +275,39 @@ const JobDetailPage: React.FC = () => {
                       </svg>
                     </button>
                   </div>
-                  <h3 className="text-base font-bold text-gray-900 leading-snug mb-3">
+                  <h3 className="text-sm font-bold text-slate-900 leading-snug mb-2">
                     Kỹ sư Computer Vision cho Hệ thống An ninh
                   </h3>
-                  <div className="flex gap-2 mb-6">
-                    <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  <div className="flex gap-2 mb-4">
+                    <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                       OpenCV
                     </span>
-                    <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                       C++
                     </span>
                   </div>
-                  <div className="mt-auto flex items-center justify-between">
-                    <span className="text-base font-bold text-[#1D4ED8]">₫35,000,000</span>
+                  <div className="mt-auto flex items-center justify-between pt-2 border-t border-slate-100">
+                    <span className="text-sm font-bold font-mono text-[#1D4ED8]">₫35,000,000</span>
                     <button
                       type="button"
-                      className="text-xs font-bold text-[#1D4ED8] bg-[#EEF2FF] px-4 py-2 rounded-lg cursor-pointer border-0 hover:bg-[#E0E7FF] transition-colors"
+                      className="text-xs font-medium text-[#1D4ED8] bg-blue-50 px-3 py-1.5 rounded-md cursor-pointer border border-blue-100 hover:bg-blue-100/60 transition-colors"
                     >
                       Chi tiết
                     </button>
                   </div>
                 </div>
 
-                <div className="border border-gray-100 rounded-2xl p-5 hover:shadow-lg transition-shadow bg-white flex flex-col">
+                <div className="border border-slate-200/90 rounded-lg p-5 hover:border-[#1D4ED8]/60 transition-colors bg-white flex flex-col">
                   <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-bold text-white bg-[#0047FF] px-2.5 py-1 rounded">
+                    <span className="text-[10px] font-mono font-bold text-white bg-[#1D4ED8] px-2 py-0.5 rounded">
                       MỚI ĐĂNG
                     </span>
                     <button
                       type="button"
-                      className="text-gray-400 hover:text-gray-600 bg-transparent border-0 cursor-pointer"
+                      className="text-slate-400 hover:text-slate-600 bg-transparent border-0 cursor-pointer"
                     >
                       <svg
-                        className="w-5 h-5"
+                        className="w-4 h-4"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -323,22 +323,22 @@ const JobDetailPage: React.FC = () => {
                       </svg>
                     </button>
                   </div>
-                  <h3 className="text-base font-bold text-gray-900 leading-snug mb-3">
+                  <h3 className="text-sm font-bold text-slate-900 leading-snug mb-2">
                     Chuyên gia AI tạo hình & Stable Diffusion
                   </h3>
-                  <div className="flex gap-2 mb-6">
-                    <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  <div className="flex gap-2 mb-4">
+                    <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                       Stable Diffusion
                     </span>
-                    <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                       Midjourney
                     </span>
                   </div>
-                  <div className="mt-auto flex items-center justify-between">
-                    <span className="text-base font-bold text-[#1D4ED8]">₫30,000,000</span>
+                  <div className="mt-auto flex items-center justify-between pt-2 border-t border-slate-100">
+                    <span className="text-sm font-bold font-mono text-[#1D4ED8]">₫30,000,000</span>
                     <button
                       type="button"
-                      className="text-xs font-bold text-[#1D4ED8] bg-[#EEF2FF] px-4 py-2 rounded-lg cursor-pointer border-0 hover:bg-[#E0E7FF] transition-colors"
+                      className="text-xs font-medium text-[#1D4ED8] bg-blue-50 px-3 py-1.5 rounded-md cursor-pointer border border-blue-100 hover:bg-blue-100/60 transition-colors"
                     >
                       Chi tiết
                     </button>
@@ -347,36 +347,39 @@ const JobDetailPage: React.FC = () => {
               </div>
             </section>
 
-            <div className="w-full rounded-3xl bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+            <div className="w-full rounded-xl bg-slate-900 border border-slate-800 p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
               <div className="md:w-1/2">
-                <h3 className="text-xl font-bold mb-2">Thông tin về SAM</h3>
-                <p className="text-xs text-white/80 leading-relaxed">
+                <span className="font-mono text-[10px] text-blue-400 uppercase tracking-widest block mb-1">
+                  {'//'} HỆ SINH THÁI
+                </span>
+                <h3 className="text-lg font-bold mb-1.5 tracking-tight">Thông tin về SAM</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
                   Hệ sinh thái AI Matching hàng đầu Đông Nam Á, kết nối tài năng công nghệ với những
                   dự án tương lai.
                 </p>
               </div>
-              <div className="md:w-1/2 flex justify-between w-full">
+              <div className="md:w-1/2 flex justify-between w-full font-mono">
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl font-black">4.8</span>
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-white/70">
+                  <span className="text-xl font-bold text-white">4.8</span>
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">
                     Sao đánh giá
                   </span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl font-black">#1</span>
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-white/70">
+                  <span className="text-xl font-bold text-white">#1</span>
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">
                     Nền tảng
                   </span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl font-black">2M+</span>
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-white/70">
+                  <span className="text-xl font-bold text-white">2M+</span>
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">
                     Truy cập
                   </span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-2xl font-black">$15M</span>
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-white/70">
+                  <span className="text-xl font-bold text-white">$15M</span>
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">
                     Đã chi trả
                   </span>
                 </div>
@@ -386,25 +389,26 @@ const JobDetailPage: React.FC = () => {
 
           {/* ================= CỘT PHẢI ================= */}
           <div className="flex flex-col gap-6">
-            <section className="bg-[#EEF2FF] rounded-3xl p-6 border border-[#E0E7FF]">
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                  Thông dự án
+            <section className="bg-white rounded-xl p-6 border border-slate-200/90 shadow-xs">
+              <div className="flex justify-between items-center mb-5">
+                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">
+                  THÔNG TIN DỰ ÁN
                 </span>
-              </div>
-
-              <div className="flex justify-between items-center mb-6">
-                <span className="bg-[#1D4ED8] text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase">
+                <span className="bg-blue-50 text-[#1D4ED8] border border-blue-100 text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
                   Đang mở
                 </span>
-                <span className="text-xs font-semibold text-gray-500">MÃ: MAI-2045</span>
               </div>
 
-              <div className="flex flex-col gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm text-[#1D4ED8]">
+              <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                <span className="text-xs font-mono text-slate-500">MÃ DỰ ÁN:</span>
+                <span className="text-xs font-mono font-bold text-slate-900">MAI-2045</span>
+              </div>
+
+              <div className="flex flex-col gap-5">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 text-[#1D4ED8]">
                     <svg
-                      className="w-5 h-5"
+                      className="w-4 h-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -420,17 +424,17 @@ const JobDetailPage: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-0.5">
                       Ngân sách
                     </div>
-                    <div className="text-xl font-black text-[#1D4ED8]">{job.price}</div>
+                    <div className="text-lg font-bold font-mono text-[#1D4ED8]">{job.price}</div>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm text-gray-500">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-lg bg-slate-50 border border-slate-200/70 flex items-center justify-center shrink-0 text-slate-600">
                     <svg
-                      className="w-5 h-5"
+                      className="w-4 h-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -446,17 +450,19 @@ const JobDetailPage: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-0.5">
                       Thanh toán
                     </div>
-                    <div className="text-sm font-bold text-gray-900">Theo cột mốc (Milestones)</div>
+                    <div className="text-xs font-semibold text-slate-900">
+                      Theo cột mốc (Milestones)
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm text-gray-500">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-lg bg-slate-50 border border-slate-200/70 flex items-center justify-center shrink-0 text-slate-600">
                     <svg
-                      className="w-5 h-5"
+                      className="w-4 h-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -472,50 +478,42 @@ const JobDetailPage: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                    <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-0.5">
                       Hình thức làm việc
                     </div>
-                    <div className="text-sm font-bold text-gray-900">Làm việc từ xa (Remote)</div>
+                    <div className="text-xs font-semibold text-slate-900">
+                      Làm việc từ xa (Remote)
+                    </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            <section className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-6">
-                Thông tin khách hàng
+            <section className="bg-white rounded-xl p-6 border border-slate-200/90 shadow-xs">
+              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block mb-4">
+                THÔNG TIN KHÁCH HÀNG
               </span>
 
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs font-bold">
-                    LOGO
-                  </div>
+              <div className="flex items-center gap-3.5 mb-5">
+                <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center text-slate-400 text-xs font-mono font-bold">
+                  TF
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-gray-900 leading-tight">
+                  <h3 className="text-sm font-bold text-slate-900 leading-tight">
                     TechFlow Solutions
                   </h3>
-                  <div className="flex items-center gap-1 mt-1">
-                    <svg
-                      className="w-3.5 h-3.5 text-[#00B2FF]"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                      role="img"
-                      aria-label="Star"
-                    >
-                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                    </svg>
-                    <span className="text-xs font-bold text-gray-900">4.9</span>
-                    <span className="text-[11px] text-gray-400">(42)</span>
+                  <div className="flex items-center gap-1 mt-1 font-mono text-xs">
+                    <span className="text-amber-500">★</span>
+                    <span className="font-bold text-slate-900">4.9</span>
+                    <span className="text-slate-400 text-[11px]">(42)</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 mb-6 border-t border-gray-100 pt-5">
-                <div className="flex items-center gap-3 text-gray-600 text-xs">
+              <div className="flex flex-col gap-2.5 mb-6 border-t border-slate-100 pt-4 text-xs text-slate-600">
+                <div className="flex items-center gap-2">
                   <svg
-                    className="w-4 h-4 shrink-0"
+                    className="w-3.5 h-3.5 text-slate-400 shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -536,9 +534,9 @@ const JobDetailPage: React.FC = () => {
                   </svg>
                   <span>Hồ Chí Minh, Việt Nam</span>
                 </div>
-                <div className="flex items-center gap-3 text-gray-600 text-xs">
+                <div className="flex items-center gap-2">
                   <svg
-                    className="w-4 h-4 shrink-0"
+                    className="w-3.5 h-3.5 text-slate-400 shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -554,9 +552,9 @@ const JobDetailPage: React.FC = () => {
                   </svg>
                   <span>Đã tham gia vào 15/05/2023</span>
                 </div>
-                <div className="flex items-center gap-3 text-gray-600 text-xs">
+                <div className="flex items-center gap-2">
                   <svg
-                    className="w-4 h-4 shrink-0"
+                    className="w-3.5 h-3.5 text-slate-400 shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -576,7 +574,7 @@ const JobDetailPage: React.FC = () => {
 
               <button
                 type="button"
-                className="w-full bg-[#0AAAD7] hover:bg-[#0896BD] text-white text-sm font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer border-0"
+                className="w-full h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer btn-sweep border-t border-t-blue-400/30 active:scale-[0.97]"
               >
                 <svg
                   className="w-4 h-4"

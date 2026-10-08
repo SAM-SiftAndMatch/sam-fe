@@ -491,24 +491,12 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
               <div className="flex justify-end pt-4 border-t border-gray-100">
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border-0"
+                  className="group relative h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] text-white text-sm font-medium px-6 rounded-lg border-t border-t-blue-400/30 shadow-xs btn-sweep active:scale-[0.97] transition-all flex items-center gap-2 cursor-pointer border-0"
                 >
-                  Tiếp tục đến bước 2
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                    role="img"
-                    aria-label="Arrow Right"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"
-                    />
-                  </svg>
+                  <span>Tiếp tục đến bước 2</span>
+                  <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                    →
+                  </span>
                 </button>
               </div>
             </form>
@@ -519,8 +507,8 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
         {currentStep === 2 && (
           <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 animate-[fadeIn_0.3s_ease-out]">
             {aiPricingState === 'analyzing' ? (
-              <div className="bg-white rounded-[32px] p-12 shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 flex flex-col items-center justify-center text-center min-h-[400px]">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#1D4ED8] to-[#3B82F6] text-white flex items-center justify-center shadow-lg mb-8 animate-pulse">
+              <div className="bg-white rounded-xl p-12 shadow-xs border border-slate-200/90 flex flex-col items-center justify-center text-center min-h-[400px]">
+                <div className="w-16 h-16 rounded-xl bg-blue-50 border border-blue-100 text-[#1D4ED8] flex items-center justify-center mb-6">
                   <svg
                     className="w-10 h-10"
                     fill="none"
@@ -666,7 +654,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 </div>
 
                 {/* Banner Định giá AI */}
-                <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col gap-4">
+                <div className="bg-white rounded-xl p-6 border border-slate-200/90 shadow-xs flex flex-col gap-4">
                   <div
                     className="flex items-center justify-between cursor-pointer group"
                     onClick={() => setIsInsightExpanded(!isInsightExpanded)}
@@ -819,24 +807,12 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-8 py-3.5 rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border-0"
+                    className="group relative h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] text-white text-sm font-medium px-6 rounded-lg border-t border-t-blue-400/30 shadow-xs btn-sweep active:scale-[0.97] transition-all flex items-center gap-2 cursor-pointer border-0"
                   >
-                    Tiếp tục đến bước 3
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                      role="img"
-                      aria-label="Arrow Right"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M14 5l7 7m0 0l-7 7m7-7H3"
-                      />
-                    </svg>
+                    <span>Tiếp tục đến bước 3</span>
+                    <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                      →
+                    </span>
                   </button>
                 </div>
               </>
@@ -1011,11 +987,11 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
             </button>
 
             {/* Bottom Bar */}
-            <div className="bg-white rounded-[32px] p-6 border border-gray-100 flex flex-col md:flex-row items-center justify-between shadow-sm mt-4 gap-6 md:gap-0">
+            <div className="bg-white rounded-xl p-6 border border-slate-200/90 flex flex-col md:flex-row items-center justify-between shadow-xs mt-4 gap-6 md:gap-0">
               <button
                 type="button"
                 onClick={prevStep}
-                className="w-full md:w-auto text-sm font-bold text-gray-900 border border-gray-200 px-8 py-3.5 rounded-full hover:bg-gray-50 transition-colors cursor-pointer order-2 md:order-1"
+                className="w-full md:w-auto text-sm font-medium text-slate-700 border border-slate-200 px-6 h-[44px] rounded-lg hover:bg-slate-50 transition-colors cursor-pointer order-2 md:order-1"
               >
                 Quay lại
               </button>
@@ -1035,24 +1011,12 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="w-full md:w-auto bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white text-sm font-bold px-8 py-3.5 rounded-full shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
+                  className="group relative w-full md:w-auto h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] text-white text-sm font-medium px-6 rounded-lg border-t border-t-blue-400/30 shadow-xs btn-sweep active:scale-[0.97] transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
                 >
-                  Tiếp tục đến bước 4
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                    role="img"
-                    aria-label="Arrow Right"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"
-                    />
-                  </svg>
+                  <span>Tiếp tục đến bước 4</span>
+                  <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                    →
+                  </span>
                 </button>
               </div>
             </div>
@@ -1448,9 +1412,12 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     },
                   })
                 }
-                className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-bold px-10 py-4 rounded-full shadow-[0_4px_20px_rgba(37,99,235,0.4)] transition-all flex items-center gap-2 cursor-pointer border-0"
+                className="group relative h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] text-white text-sm font-medium px-8 rounded-lg border-t border-t-blue-400/30 shadow-xs btn-sweep active:scale-[0.97] transition-all flex items-center gap-2 cursor-pointer border-0"
               >
-                Đăng dự án ngay
+                <span>Đăng dự án ngay</span>
+                <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                  →
+                </span>
               </button>
             </div>
           </div>

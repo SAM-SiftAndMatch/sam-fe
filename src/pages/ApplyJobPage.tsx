@@ -54,12 +54,12 @@ const ApplyJobPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#EEF4FF] to-[#F8FAFC] font-sans flex flex-col">
+    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <Header />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8 md:py-12">
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-[#E2E8F0]">
+          <div className="bg-white rounded-xl p-6 md:p-8 shadow-xs border border-slate-200/90">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">{job.title}</h1>
@@ -327,101 +327,58 @@ const ApplyJobPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-3xl bg-gradient-to-br from-[#1D4ED8] to-[#0AAAD7] p-8 md:p-10 text-white flex flex-col items-center text-center shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl pointer-events-none" />
-
-            <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase mb-4 flex items-center gap-1.5 border border-white/30 shadow-sm">
-              <svg
-                className="w-3 h-3 text-yellow-300"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                role="img"
-                aria-label="Star"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              Dịch vụ ưu tiên
+          <div className="rounded-xl bg-slate-900 border border-slate-800 p-8 md:p-10 text-white flex flex-col items-center text-center shadow-xs relative overflow-hidden">
+            <span className="font-mono text-[10px] text-blue-400 uppercase tracking-widest mb-3 block">
+              {'//'} DỊCH VỤ ƯU TIÊN
             </span>
 
-            <h2 className="text-2xl font-bold mb-1">Nâng tầm hồ sơ của bạn</h2>
-            <div className="text-xs font-semibold text-white/80 uppercase tracking-widest mb-1">
+            <h2 className="text-xl md:text-2xl font-bold mb-1 tracking-tight">
+              Nâng tầm hồ sơ của bạn
+            </h2>
+            <div className="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">
               Giá chỉ từ
             </div>
-            <div className="text-[40px] font-black mb-6">49.000đ</div>
+            <div className="text-3xl font-bold font-mono text-white mb-6">49.000đ</div>
 
-            <div className="flex flex-col md:flex-row items-center gap-4 mb-8 w-full max-w-md">
-              <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 flex items-center justify-center gap-2 border border-white/20">
-                <div className="w-5 h-5 rounded-full bg-white text-[#1D4ED8] flex items-center justify-center">
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    role="img"
-                    aria-label="Check"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span className="text-xs font-bold">Gắn huy hiệu "Nổi bật"</span>
+            <div className="flex flex-col md:flex-row items-center gap-3 mb-6 w-full max-w-md">
+              <div className="flex-1 bg-slate-800/80 rounded-lg px-4 py-3 flex items-center justify-center gap-2 border border-slate-700/60">
+                <span className="text-blue-400 font-bold text-xs">✓</span>
+                <span className="text-xs font-semibold text-slate-200">Gắn huy hiệu "Nổi bật"</span>
               </div>
-              <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 flex items-center justify-center gap-2 border border-white/20">
-                <div className="w-5 h-5 rounded-full bg-white text-[#1D4ED8] flex items-center justify-center">
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    role="img"
-                    aria-label="Check"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span className="text-xs font-bold">Đẩy top danh sách ứng viên</span>
+              <div className="flex-1 bg-slate-800/80 rounded-lg px-4 py-3 flex items-center justify-center gap-2 border border-slate-700/60">
+                <span className="text-blue-400 font-bold text-xs">✓</span>
+                <span className="text-xs font-semibold text-slate-200">
+                  Đẩy top danh sách ứng viên
+                </span>
               </div>
             </div>
 
-            <p className="text-sm font-medium text-white/90 mb-8 max-w-md">
+            <p className="text-xs text-slate-400 mb-6 max-w-md">
               Được đề xuất lên đầu danh sách và nhận phản hồi sớm hơn gấp 3 lần.
             </p>
 
             <button
               type="button"
-              className="bg-white text-[#1D4ED8] hover:bg-gray-50 font-bold px-12 py-3.5 rounded-full shadow-lg transition-colors cursor-pointer border-0"
+              className="bg-white hover:bg-slate-100 text-[#1D4ED8] font-medium text-xs px-8 h-[40px] rounded-lg transition-colors cursor-pointer border-0 active:scale-[0.97]"
             >
               Nâng cấp ngay
             </button>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mt-2">
+          <div className="flex flex-col sm:flex-row gap-3 mt-2">
             <button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:opacity-95 text-white font-bold py-4 rounded-full transition-shadow shadow-md flex items-center justify-center gap-2 cursor-pointer border-0"
+              className="group relative flex-1 h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-medium text-sm rounded-lg border-t border-t-blue-400/30 transition-all active:scale-[0.97] shadow-xs flex items-center justify-center gap-2 cursor-pointer border-0 btn-sweep"
             >
-              Gửi hồ sơ ứng tuyển
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                role="img"
-                aria-label="Send"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                />
-              </svg>
+              <span>Gửi hồ sơ ứng tuyển</span>
+              <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                →
+              </span>
             </button>
             <button
               type="button"
               onClick={() => handleSave('draft')}
-              className="sm:w-40 bg-white hover:bg-gray-50 text-gray-700 font-bold py-4 rounded-full transition-colors border border-[#E2E8F0] shadow-sm cursor-pointer"
+              className="sm:w-40 h-[44px] bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm rounded-lg transition-colors border border-slate-200 shadow-xs cursor-pointer"
             >
               Lưu nháp
             </button>
