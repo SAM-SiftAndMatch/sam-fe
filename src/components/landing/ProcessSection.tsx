@@ -147,179 +147,130 @@ export const ProcessSection: React.FC = () => {
       </ScrollReveal>
 
       {/* Sub-label guideline */}
-      <div className="flex items-center justify-between text-xs text-slate-400 font-mono mb-4 px-1">
+      <div className="flex items-center justify-between text-xs text-slate-400 font-mono mb-6 px-1">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#1D4ED8] animate-pulse" />
           <span className="font-semibold text-slate-700 uppercase tracking-wider text-[11px]">
-            End-to-End Pipeline
+            Workflow Pipeline
           </span>
         </div>
         <span className="hidden sm:inline-block text-[11px] text-slate-500">
-          Di chuột vào từng bước để mở rộng chi tiết
+          Di chuột vào từng bước để xem chi tiết
         </span>
       </div>
 
-      {/* Workflow Interactive Track Container */}
+      {/* Workflow Interactive Morphing Cards Track */}
       <div
         onMouseLeave={() => setHoveredStep(null)}
-        className="w-full relative flex flex-col lg:flex-row items-stretch gap-3 lg:gap-4 transition-all"
+        className="w-full relative flex flex-col lg:flex-row items-start gap-3 lg:gap-0 transition-all"
       >
         {WORKFLOW_STEPS.map((step, index) => {
           const isActive = activeIndex === index;
           const flexStyle = {
-            flex: isActive ? '2.4 1 0%' : isAnyActive ? '0.85 1 0%' : '1 1 0%',
+            flex: isActive ? '2.3 1 0%' : isAnyActive ? '0.85 1 0%' : '1 1 0%',
           };
 
           return (
             <Fragment key={step.id}>
-              {/* Step Card Container */}
+              {/* Morphing Step Card (Title morphs directly into Card) */}
               <div
                 style={flexStyle}
                 onMouseEnter={() => setHoveredStep(index)}
                 onClick={() => setPinnedStep(pinnedStep === index ? null : index)}
-                className={`group relative flex flex-col transition-[flex,transform,opacity] duration-300 ease-out cursor-pointer ${
+                className={`group relative flex flex-col rounded-[14px] border transition-all duration-300 ease-out cursor-pointer ${
                   isActive
-                    ? 'z-20'
+                    ? 'p-5 sm:p-6 bg-white border-[#1D4ED8] shadow-[0_14px_40px_rgba(29,78,216,0.12)] -translate-y-1 z-20'
                     : isAnyActive
-                      ? 'z-10 opacity-75 hover:opacity-100 scale-[0.99]'
-                      : 'z-10 opacity-100'
+                      ? 'p-4 sm:p-5 bg-white/90 border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.02)] opacity-75 hover:opacity-100 scale-[0.98] z-10'
+                      : 'p-4 sm:p-5 bg-white border-slate-200/90 hover:border-slate-300 shadow-[0_1px_3px_rgba(0,0,0,0.02)] z-10'
                 }`}
               >
-                {/* Title Box Header (The interactive node) */}
-                <div
-                  className={`w-full p-4 sm:p-5 rounded-[12px] border transition-all duration-300 flex items-center justify-between gap-3 relative select-none ${
-                    isActive
-                      ? 'bg-gradient-to-r from-blue-50/90 to-cyan-50/50 border-[#1D4ED8] shadow-[0_4px_24px_rgba(29,78,216,0.12)]'
-                      : 'bg-white border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/70 shadow-[0_1px_3px_rgba(0,0,0,0.02)]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {/* Step Number Tag */}
-                    <span
-                      className={`font-mono text-[10px] tracking-wider uppercase font-bold px-2 py-1 rounded-[5px] shrink-0 transition-colors ${
-                        isActive
-                          ? 'bg-[#1D4ED8] text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-800'
-                      }`}
-                    >
-                      STEP {step.stepNumber}
-                    </span>
-
-                    {/* Step Title & Subtitle */}
-                    <div className="flex flex-col min-w-0">
-                      <h3
-                        className={`font-bold transition-all truncate ${
-                          isActive
-                            ? 'text-sm sm:text-base text-[#1D4ED8]'
-                            : 'text-xs sm:text-sm text-slate-800'
-                        }`}
-                      >
-                        {step.title}
-                      </h3>
-                      <span className="font-mono text-[10px] text-slate-400 truncate mt-0.5">
-                        {step.subtitle}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Dropdown Chevron Indicator */}
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${
+                {/* Header: STEP on top center, Title below center */}
+                <div className="flex flex-col items-center text-center select-none">
+                  {/* STEP Badge ở trên đầu chính giữa */}
+                  <span
+                    className={`font-mono text-[10.5px] tracking-widest uppercase font-bold px-2.5 py-1 rounded-[5px] transition-colors mb-2.5 ${
                       isActive
-                        ? 'bg-[#1D4ED8]/10 text-[#1D4ED8] rotate-180'
-                        : 'bg-slate-100 text-slate-400 group-hover:text-slate-700 rotate-0'
+                        ? 'bg-[#1D4ED8] text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-800'
                     }`}
                   >
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                      aria-hidden="true"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+                    STEP {step.stepNumber}
+                  </span>
+
+                  {/* Title ở dưới chính giữa */}
+                  <h3
+                    className={`font-bold transition-all ${
+                      isActive
+                        ? 'text-base sm:text-lg text-[#1D4ED8]'
+                        : 'text-sm sm:text-base text-slate-800 group-hover:text-slate-900'
+                    }`}
+                  >
+                    {step.title}
+                  </h3>
+
+                  {/* Subtitle khi ở trạng thái compact */}
+                  {!isActive && (
+                    <span className="font-mono text-[10px] text-slate-400 mt-1 transition-opacity">
+                      {step.subtitle}
+                    </span>
+                  )}
                 </div>
 
-                {/* Dropdown Content Card (Xổ xuống khi hover) */}
+                {/* Morphing Detail Body: unfolds inside the card on hover */}
                 <div
                   className={`overflow-hidden transition-all duration-300 ease-out ${
                     isActive
-                      ? 'max-h-[500px] opacity-100 mt-3 pointer-events-auto'
+                      ? 'max-h-[500px] opacity-100 mt-5 pointer-events-auto'
                       : 'max-h-0 opacity-0 mt-0 pointer-events-none'
                   }`}
                 >
-                  <div className="bg-white rounded-[12px] p-5 sm:p-6 border border-slate-200/90 shadow-[0_12px_36px_rgba(15,23,42,0.06)] flex flex-col justify-between">
+                  <div className="border-t border-slate-100 pt-4 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className="font-mono text-[10px] font-semibold text-[#1D4ED8] bg-[#1D4ED8]/10 px-2 py-0.5 rounded-[4px]">
+                      <div className="flex items-center justify-between gap-2 mb-2.5">
+                        <span className="font-mono text-[9.5px] font-semibold text-[#1D4ED8] bg-[#1D4ED8]/10 px-2 py-0.5 rounded-[4px]">
                           {step.shortTag} SPECIFICATION
                         </span>
                         <span className="font-mono text-xs text-slate-400">
                           {step.stepNumber} / 03
                         </span>
                       </div>
-                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-5">
+                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4 text-left">
                         {step.description}
                       </p>
                     </div>
 
                     {/* Abstract Mini UI Snippet */}
-                    {step.snippet}
+                    <div className="text-left">{step.snippet}</div>
                   </div>
                 </div>
               </div>
 
-              {/* Connector Bridge between Steps (Line & Arrow) */}
+              {/* Connecting straight line (NO ARROWS, purely straight line) */}
               {index < WORKFLOW_STEPS.length - 1 && (
                 <>
-                  {/* Desktop Horizontal Connector */}
+                  {/* Desktop Straight Horizontal Line */}
                   <div
-                    className="hidden lg:flex items-center justify-center w-6 xl:w-8 h-[58px] shrink-0 relative self-start pointer-events-none"
+                    className="hidden lg:flex items-center justify-center w-8 lg:w-12 shrink-0 self-start mt-[44px] pointer-events-none px-1"
                     aria-hidden="true"
                   >
                     <div className="w-full h-[2px] bg-slate-200 relative overflow-hidden rounded-full">
                       <div
-                        className={`absolute inset-0 bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] transition-opacity duration-300 ${
-                          activeIndex === index ? 'opacity-100' : 'opacity-20'
+                        className={`absolute inset-0 bg-[#1D4ED8] transition-opacity duration-300 ${
+                          activeIndex === index || activeIndex === index + 1
+                            ? 'opacity-100'
+                            : 'opacity-0'
                         }`}
                       />
                     </div>
-                    <div
-                      className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border flex items-center justify-center shadow-2xs transition-colors ${
-                        activeIndex === index
-                          ? 'border-[#1D4ED8] text-[#1D4ED8]'
-                          : 'border-slate-200 text-slate-400'
-                      }`}
-                    >
-                      <svg
-                        className="w-2.5 h-2.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
                   </div>
 
-                  {/* Mobile Vertical Connector */}
+                  {/* Mobile Straight Vertical Line */}
                   <div
-                    className="lg:hidden flex items-center justify-center h-4 w-full py-1 text-slate-300"
+                    className="lg:hidden flex items-center justify-center h-6 w-full py-1 text-slate-300 pointer-events-none"
                     aria-hidden="true"
                   >
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7-7-7" />
-                    </svg>
+                    <div className="h-full w-[2px] bg-slate-300 rounded-full" />
                   </div>
                 </>
               )}
