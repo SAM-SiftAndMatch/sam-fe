@@ -1,102 +1,52 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { proposalApi } from '../api/proposal';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import * as paths from '../routes/paths';
-
-type ApplicationStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'cancelled';
-
-interface Application {
-  id: number;
-  jobId: number;
-  jobTitle: string;
-  price: string;
-  status: ApplicationStatus;
-  coverLetter: string;
-  appliedAt: string;
-}
+import type { ProposalResponse, ProposalStatus } from '../types/proposal';
 
 const TABS = [
   { id: 'all', label: 'Tất cả' },
-  { id: 'pending', label: 'Đang chờ' },
-  { id: 'draft', label: 'Nháp' },
-  { id: 'approved', label: 'Đã duyệt' },
-  { id: 'rejected', label: 'Từ chối' },
-  { id: 'cancelled', label: 'Đã hủy' },
+  { id: 'PENDING', label: 'Đang chờ' },
+  { id: 'INVITED', label: 'Được mời' },
+  { id: 'ACCEPTED', label: 'Đã nhận việc' },
+  { id: 'REJECTED', label: 'Từ chối' },
 ];
 
 const FreelancerApplicationsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('all');
-  const [applications, setApplications] = useState<Application[]>([]);
 
-  useEffect(() => {
-    // Load from LocalStorage
-    const saved = JSON.parse(localStorage.getItem('SAM_FREELANCER_APPLICATIONS') || '[]');
-    // Cung cấp 1 vài dữ liệu mock để UI đỡ trống nếu localStorage rỗng
-    if (saved.length === 0) {
-      const mockData: Application[] = [
-        {
-          id: 9991,
-          jobId: 2,
-          jobTitle: 'Dịch thuật bộ hợp đồng thương mại Việt - Anh (50 trang)',
-          price: '3.500.000đ',
-          status: 'pending',
-          coverLetter: 'Tôi đã có kinh nghiệm dịch thuật...',
-          appliedAt: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: 9992,
-          jobId: 5,
-          jobTitle: 'Bảo trì hệ thống Backend Microservices (Golang/Docker)',
-          price: '30.000.000đ - 50.000.000đ',
-          status: 'rejected',
-          coverLetter: 'Tôi là Senior Backend...',
-          appliedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-        },
-      ];
-      setApplications(mockData);
-      localStorage.setItem('SAM_FREELANCER_APPLICATIONS', JSON.stringify(mockData));
-    } else {
-      // Sort newest first
-      setApplications(
-        saved.sort(
-          (a: Application, b: Application) =>
-            new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime()
-        )
-      );
-    }
-  }, []);
+  const { data: applications = [], isLoading } = useQuery({
+    queryKey: ['my-proposals'],
+    queryFn: () => proposalApi.getMine(),
+  });
 
   const filteredApps = applications.filter(
     (app) => activeTab === 'all' || app.status === activeTab
   );
 
-  const getStatusBadge = (status: ApplicationStatus) => {
+  const getStatusBadge = (status: ProposalStatus) => {
     switch (status) {
-      case 'approved':
+      case 'ACCEPTED':
         return (
           <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
-            Đã duyệt
+            Đã nhận việc
           </span>
         );
-      case 'rejected':
+      case 'REJECTED':
         return (
           <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">
             Từ chối
           </span>
         );
-      case 'draft':
+      case 'INVITED':
         return (
-          <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
-            Bản nháp
-          </span>
-        );
-      case 'cancelled':
-        return (
-          <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">
-            Đã hủy
+          <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
+            Được mời hợp tác
           </span>
         );
       default:
@@ -108,10 +58,15 @@ const FreelancerApplicationsPage: React.FC = () => {
     }
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return '—';
     const date = new Date(dateStr);
-    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return Number.isNaN(date.getTime())
+      ? '—'
+      : date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
+
+  const formatMoney = (n: number) => `${new Intl.NumberFormat('vi-VN').format(n)}đ`;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
@@ -130,7 +85,7 @@ const FreelancerApplicationsPage: React.FC = () => {
           <div className="relative w-full md:w-56 shrink-0">
             <select
               value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value as any)}
+              onChange={(e) => setActiveTab(e.target.value)}
               className="w-full appearance-none bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-10 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
             >
               {TABS.map((tab) => (
@@ -153,7 +108,9 @@ const FreelancerApplicationsPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-6">
-          {filteredApps.length === 0 ? (
+          {isLoading ? (
+            <p className="text-sm text-gray-500 text-center py-10">Đang tải hồ sơ...</p>
+          ) : filteredApps.length === 0 ? (
             <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm">
               <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
@@ -180,7 +137,7 @@ const FreelancerApplicationsPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            filteredApps.map((app) => (
+            filteredApps.map((app: ProposalResponse) => (
               <div
                 key={app.id}
                 className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow group"
@@ -191,41 +148,28 @@ const FreelancerApplicationsPage: React.FC = () => {
                     <div className="flex items-center gap-3 mb-3">
                       {getStatusBadge(app.status)}
                       <span className="text-xs font-semibold text-gray-400">
-                        Nộp ngày {formatDate(app.appliedAt)}
+                        Nộp ngày {formatDate(app.createdAt)}
                       </span>
                     </div>
                     <h2
-                      onClick={() =>
-                        navigate(paths.PATH_JOB_DETAIL.replace(':id', app.jobId.toString()))
-                      }
+                      onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', app.jobId))}
                       className="text-xl font-bold text-gray-900 mb-2 cursor-pointer hover:text-[#1D4ED8] transition-colors"
                     >
                       {app.jobTitle}
                     </h2>
-                    <div className="text-sm font-bold text-[#1D4ED8]">Ngân sách: {app.price}</div>
+                    <div className="text-sm font-bold text-[#1D4ED8]">
+                      Đề xuất: {formatMoney(Number(app.proposedBudget))}
+                    </div>
                   </div>
 
                   {/* Cột phải */}
                   <div className="flex items-center gap-3 w-full md:w-auto">
-                    {app.status === 'draft' ? (
-                      <button
-                        onClick={() =>
-                          navigate(paths.PATH_JOB_APPLY.replace(':id', app.jobId.toString()))
-                        }
-                        className="flex-1 md:flex-none bg-blue-50 hover:bg-blue-100 text-[#1D4ED8] font-bold py-2.5 px-6 rounded-xl transition-colors border-0 cursor-pointer"
-                      >
-                        Tiếp tục ứng tuyển
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() =>
-                          navigate(paths.PATH_JOB_DETAIL.replace(':id', app.jobId.toString()))
-                        }
-                        className="flex-1 md:flex-none bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold py-2.5 px-6 rounded-xl transition-colors border border-gray-200 cursor-pointer"
-                      >
-                        Xem dự án
-                      </button>
-                    )}
+                    <button
+                      onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', app.jobId))}
+                      className="flex-1 md:flex-none bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold py-2.5 px-6 rounded-xl transition-colors border border-gray-200 cursor-pointer"
+                    >
+                      {app.status === 'INVITED' ? 'Xem lời mời' : 'Xem dự án'}
+                    </button>
                   </div>
                 </div>
               </div>

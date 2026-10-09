@@ -27,7 +27,6 @@ body {
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
 }
-
 /* Button light sweep animation */
 .btn-sweep {
   position: relative;
@@ -311,6 +310,22 @@ body {
 }
 .animate-ambient-track-glow-2 {
   animation: ambientTrackGlow2 6s ease-in-out infinite;
+}
+
+/* Hiệu ứng mượt cho banner/panel xuất hiện (AI thẩm định, xác nhận...) */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-rise {
+  animation: rise-in 0.35s ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {

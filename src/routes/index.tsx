@@ -32,6 +32,7 @@ import FreelancerPage from '../pages/FreelancerPage';
 import FreelancerPricingPage from '../pages/FreelancerPricingPage';
 
 import ApplyJobPage from '../pages/ApplyJobPage';
+import ContractPage from '../pages/ContractPage';
 import CreateFreelancerProfilePage from '../pages/CreateFreelancerProfilePage';
 import FindFreelancerPage from '../pages/FindFreelancerPage';
 import FreelancerApplicationsPage from '../pages/FreelancerApplicationsPage';
@@ -118,6 +119,7 @@ const AppRoutes = () => {
       <Route element={<AuthGuard />}>
         <Route path={paths.PATH_WORKSPACES} element={<WorkspacesPage />} />
         <Route path={paths.PATH_WORKSPACE} element={<WorkspacePage />} />
+        <Route path={paths.PATH_WORKSPACE_CONTRACT} element={<ContractPage />} />
       </Route>
     </Routes>
   );

@@ -1,6 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jobApi } from '../api/job';
 import { profileApi } from '../api/profile';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
 import { MonoTag, PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
@@ -10,7 +12,22 @@ import ScrollReveal from '../components/landing/ScrollReveal';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { FreelancerProfileResponse } from '../types/profile';
-import { MOCK_JOBS } from './FreelancerJobsPage';
+
+const formatBudget = (min?: number | null, max?: number | null): string => {
+  if (!min && !max) return 'Thỏa thuận';
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0,
+    }).format(n);
+  if (min && max) {
+    if (min === max) return fmt(min);
+    return `${fmt(min)} - ${fmt(max)}`;
+  }
+  if (min) return `Từ ${fmt(min)}`;
+  return `Đến ${fmt(max!)}`;
+};
 
 const FreelancerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +36,12 @@ const FreelancerPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('Tất cả');
   const [profile, setProfile] = useState<FreelancerProfileResponse | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+
+  const { data: openJobs = [] } = useQuery({
+    queryKey: ['open-jobs'],
+    queryFn: () => jobApi.getAllOpenJobs(),
+    staleTime: 60_000,
+  });
 
   // If a Client lands here, redirect to Client dashboard
   useEffect(() => {
@@ -270,44 +293,54 @@ const FreelancerPage: React.FC = () => {
         </ScrollReveal>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {MOCK_JOBS.slice(0, 4).map((job, idx) => (
-            <ScrollReveal key={job.id} delayMs={idx * 60} className="h-full">
-              <div className="group h-full bg-white rounded-[12px] p-6 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-4">
-                    <MonoTag variant="primary">{job.type}</MonoTag>
-                    <span className="font-mono text-[10px] text-slate-400">AI MATCHED</span>
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900 leading-snug mb-3">
-                    {job.title}
-                  </h3>
-                  <div className="flex items-center gap-1.5 mb-4 font-mono">
-                    <span className="text-xs text-slate-400">NGÂN SÁCH:</span>
-                    <span className="text-sm font-bold text-[#1D4ED8]">{job.price}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mb-6">
-                    {job.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-[10px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded-[4px]"
-                      >
-                        {tag}
+          {openJobs.length === 0 ? (
+            <div className="col-span-full py-12 text-center text-slate-400 font-mono text-xs">
+              Hiện chưa có dự án nào đang mở tuyển.
+            </div>
+          ) : (
+            openJobs.slice(0, 4).map((job, idx) => (
+              <ScrollReveal key={job.id} delayMs={idx * 60} className="h-full">
+                <div className="group h-full bg-white rounded-[12px] p-6 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-4">
+                      <MonoTag variant="primary">
+                        {job.status === 'OPEN' ? '🟢 ĐANG MỞ' : job.status}
+                      </MonoTag>
+                      <span className="font-mono text-[10px] text-slate-400">AI MATCHED</span>
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900 leading-snug mb-3 line-clamp-2">
+                      {job.title}
+                    </h3>
+                    <div className="flex items-center gap-1.5 mb-4 font-mono">
+                      <span className="text-xs text-slate-400">NGÂN SÁCH:</span>
+                      <span className="text-sm font-bold text-[#1D4ED8]">
+                        {formatBudget(job.budgetMin, job.budgetMax)}
                       </span>
-                    ))}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mb-6">
+                      {job.skills?.slice(0, 4).map((skill) => (
+                        <span
+                          key={skill.id}
+                          className="text-[10px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded-[4px]"
+                        >
+                          {skill.name}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                <SecondaryButton
-                  onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', job.id.toString()))}
-                  size="sm"
-                  withArrow
-                  className="w-full mt-auto"
-                >
-                  Xem chi tiết
-                </SecondaryButton>
-              </div>
-            </ScrollReveal>
-          ))}
+                  <SecondaryButton
+                    onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', job.id))}
+                    size="sm"
+                    withArrow
+                    className="w-full mt-auto"
+                  >
+                    Xem chi tiết
+                  </SecondaryButton>
+                </div>
+              </ScrollReveal>
+            ))
+          )}
         </div>
       </section>
 
