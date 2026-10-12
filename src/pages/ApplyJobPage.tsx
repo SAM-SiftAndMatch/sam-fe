@@ -156,7 +156,7 @@ const ApplyJobPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#EEF4FF] to-[#F8FAFC] font-sans flex flex-col">
+    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <Header />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8 md:py-12">
@@ -164,25 +164,28 @@ const ApplyJobPage: React.FC = () => {
           {serverError && (
             <div
               ref={errorRef}
-              className="p-4 bg-red-50 border border-red-200 text-red-600 text-sm font-medium rounded-2xl text-center"
+              className="p-4 bg-red-50 border border-red-200 text-red-600 text-sm font-medium rounded-xl text-center"
             >
               {serverError}
             </div>
           )}
           {job.status !== 'OPEN' && (
-            <div className="p-4 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium rounded-2xl text-center">
+            <div className="p-4 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium rounded-xl text-center font-mono">
               Dự án đã đóng tuyển, không nhận hồ sơ mới.
             </div>
           )}
 
-          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-[#E2E8F0]">
+          <div className="bg-white rounded-xl p-6 md:p-8 shadow-xs border border-slate-200/90">
+            <span className="font-mono text-[10px] text-blue-600 uppercase tracking-widest block mb-2">
+              {'//'} DỰ ÁN ỨNG TUYỂN
+            </span>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{job.title}</h1>
-            <p className="text-sm font-bold text-[#1D4ED8]">
+            <p className="text-sm font-mono font-bold text-[#1D4ED8]">
               Ngân sách: {formatBudget(job.budgetMin, job.budgetMax)}
             </p>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-[#E2E8F0]">
+          <div className="bg-white rounded-xl p-6 md:p-8 shadow-xs border border-slate-200/90">
             <h3 className="text-sm font-bold text-gray-900 mb-1">CV / File proposal</h3>
             <p className="text-xs text-gray-500 leading-relaxed mb-4">
               Đính kèm CV hoặc file proposal (PDF/DOC/DOCX, tối đa 10MB) để client xem cùng lời chào
@@ -190,7 +193,7 @@ const ApplyJobPage: React.FC = () => {
             </p>
             <label
               htmlFor="proposal-file"
-              className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl border-2 border-dashed border-[#C7D7FE] bg-[#F8FAFC] text-sm font-bold text-[#1D4ED8] cursor-pointer hover:bg-blue-50 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-4 rounded-xl border-2 border-dashed border-[#C7D7FE] bg-[#F8FAFC] text-sm font-bold text-[#1D4ED8] cursor-pointer hover:bg-blue-50 transition-colors"
             >
               {isUploading
                 ? 'Đang tải file lên...'
@@ -212,7 +215,7 @@ const ApplyJobPage: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-[#E2E8F0]">
+          <div className="bg-white rounded-xl p-6 md:p-8 shadow-xs border border-slate-200/90">
             <label htmlFor="greeting" className="block text-sm font-bold text-gray-900 mb-2">
               Lời chào / thư giới thiệu
             </label>
@@ -222,22 +225,26 @@ const ApplyJobPage: React.FC = () => {
               value={greeting}
               onChange={(e) => setGreeting(e.target.value)}
               placeholder="Chào anh/chị, em là... Em có kinh nghiệm... Rất mong được hợp tác!"
-              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl p-4 text-sm text-gray-700 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-colors resize-none placeholder:text-gray-400"
+              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4 text-sm text-gray-700 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-colors resize-none placeholder:text-gray-400"
             />
           </div>
 
           {serverError && (
-            <div className="p-4 bg-red-50 border border-red-200 text-red-600 text-sm font-medium rounded-2xl text-center">
+            <div className="p-4 bg-red-50 border border-red-200 text-red-600 text-sm font-medium rounded-xl text-center">
               {serverError}
             </div>
           )}
-          <div className="flex flex-col sm:flex-row gap-4 mt-2">
+
+          <div className="flex flex-col sm:flex-row gap-3 mt-2">
             <button
               type="submit"
               disabled={isSubmitting || isUploading || job.status !== 'OPEN'}
-              className="flex-1 bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:opacity-95 text-white font-bold py-4 rounded-full transition-shadow shadow-md flex items-center justify-center gap-2 cursor-pointer border-0 disabled:opacity-60"
+              className="group relative flex-1 h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-medium text-sm rounded-lg border-t border-t-blue-400/30 transition-all active:scale-[0.97] shadow-xs flex items-center justify-center gap-2 cursor-pointer border-0 disabled:opacity-60 disabled:cursor-not-allowed btn-sweep"
             >
-              {isSubmitting ? 'Đang gửi hồ sơ...' : 'Gửi hồ sơ ứng tuyển'}
+              <span>{isSubmitting ? 'Đang gửi hồ sơ...' : 'Gửi hồ sơ ứng tuyển'}</span>
+              <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                →
+              </span>
             </button>
           </div>
         </form>
