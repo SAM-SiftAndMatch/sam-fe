@@ -1,9 +1,8 @@
 import type React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
-import { MonoTag } from '../components/landing/LandingButtons';
 import { PATH_FREELANCER_APPLICATIONS, PATH_FREELANCER_JOBS } from '../routes/paths';
 
 const SuccessApplicationPage: React.FC = () => {
@@ -14,16 +13,10 @@ const SuccessApplicationPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col relative overflow-hidden">
       <InteractiveBackground />
-      <Header />
+      <AppHeader />
 
       <main className="flex-1 flex items-center justify-center py-16 px-4 z-10">
         <div className="bg-white rounded-xl p-8 sm:p-10 shadow-xs border border-slate-200/90 w-full max-w-lg flex flex-col items-center text-center">
-          <div className="mb-4">
-            <MonoTag variant="primary">
-              APPLICATION {'//'} {isDraft ? 'DRAFT_SAVED' : 'SUBMITTED'}
-            </MonoTag>
-          </div>
-
           {/* Main Icon Container */}
           <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mb-5">
             <svg

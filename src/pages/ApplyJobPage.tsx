@@ -5,8 +5,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import { proposalApi } from '../api/proposal';
 import { storageApi } from '../api/storage';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
 import { extractApiResponse } from '../lib/api-error';
 import { PATH_JOB_APPLY_SUCCESS } from '../routes/paths';
 
@@ -58,7 +58,7 @@ const ApplyJobPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-        <Header />
+        <AppHeader />
         <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-10">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 rounded w-1/4" />
@@ -73,7 +73,7 @@ const ApplyJobPage: React.FC = () => {
   if (isError || !job) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-        <Header />
+        <AppHeader />
         <main className="flex-1 flex items-center justify-center py-20">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Không tìm thấy dự án</h2>
@@ -157,7 +157,7 @@ const ApplyJobPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <Header />
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8 md:py-12">
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">

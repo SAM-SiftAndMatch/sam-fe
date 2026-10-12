@@ -3,9 +3,8 @@ import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { chatApi } from '../api/chat';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
 import { useAuthStore } from '../stores/useAuthStore';
 
 const WorkspacesPage: React.FC = () => {
@@ -40,7 +39,7 @@ const WorkspacesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
-      {role === 'client' ? <ClientDashboardHeader /> : <Header />}
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8 flex items-center justify-between">
@@ -137,7 +136,7 @@ const WorkspacesPage: React.FC = () => {
               <div
                 key={room.id}
                 onClick={() => navigate(`/workspace/${room.id}`)}
-                className="flex items-start gap-4 p-5 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
+                className="workspace-list-item flex items-start gap-4 p-5 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
               >
                 <div className="relative">
                   <div className="w-12 h-12 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-black text-lg border border-gray-200">

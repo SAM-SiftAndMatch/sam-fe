@@ -1,8 +1,8 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
 import { PATH_FREELANCER_PROJECTS } from '../routes/paths';
 
 // === MOCK DATA ===
@@ -137,8 +137,8 @@ const FreelancerProjectDetailPage: React.FC = () => {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
-        <Header />
+      <div className="freelancer-route min-h-screen bg-[#F8FAFC] flex flex-col">
+        <AppHeader />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-gray-500">Không tìm thấy dự án.</p>
         </div>
@@ -258,8 +258,8 @@ const FreelancerProjectDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <Header />
+    <div className="freelancer-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6">
         {/* Back Button */}

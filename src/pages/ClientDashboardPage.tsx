@@ -2,8 +2,10 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { profileApi } from '../api/profile';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import FooterDashboard from '../components/FooterDashboard';
+import InteractiveBackground from '../components/landing/InteractiveBackground';
+import { PrimaryButton } from '../components/landing/LandingButtons';
 import {
   PATH_CLIENT_AI_BRIEF,
   PATH_CLIENT_PRICING,
@@ -53,8 +55,18 @@ const STATS = [
 ];
 
 const DRAFTS = [
-  { id: 1, title: 'Thiết kế UI/UX App Fintech', update: 'Cập nhật 2 giờ trước', progress: 65 },
-  { id: 2, title: 'Viết Content Marketing Blog', update: 'Cập nhật 1 ngày trước', progress: 30 },
+  {
+    id: 1,
+    title: 'Thiết kế UI/UX App Fintech',
+    update: 'Cập nhật 2 giờ trước',
+    progress: 65,
+  },
+  {
+    id: 2,
+    title: 'Viết Content Marketing Blog',
+    update: 'Cập nhật 1 ngày trước',
+    progress: 30,
+  },
 ];
 
 const HISTORY = [
@@ -181,15 +193,14 @@ const ClientDashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      {/* 1. Kế thừa Header riêng biệt */}
-      <ClientDashboardHeader />
+    <div className="client-route relative flex min-h-screen flex-col bg-[#F8FAFC] font-sans selection:bg-[#1D4ED8]/10 selection:text-[#1D4ED8]">
+      <InteractiveBackground />
+      <AppHeader />
 
-      {/* 2. Main Content */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-12 flex flex-col gap-10">
+      <main className="client-dashboard-page relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
         {/* Profile incomplete warning (mirror freelancer landing) */}
         {!isLoadingProfile && !hasCompanyProfile && (
-          <section className="bg-amber-50/90 border border-amber-200 rounded-[28px] p-6 md:p-8 text-center shadow-sm">
+          <section className="border border-amber-200/80 bg-amber-50/90 p-6 text-center shadow-[0_1px_3px_rgba(0,0,0,0.03)] md:p-8 rounded-[12px]">
             <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3">
               <svg
                 className="w-6 h-6"
@@ -212,34 +223,27 @@ const ClientDashboardPage: React.FC = () => {
               Hãy cập nhật tên công ty, lĩnh vực và thông tin liên hệ để tạo uy tín với Freelancer
               trước khi đăng dự án tuyển dụng.
             </p>
-            <button
-              type="button"
-              onClick={() => navigate(PATH_CLIENT_PROFILE)}
-              className="bg-gradient-to-r from-[#1D4ED8] to-[#00B2FF] hover:shadow-md text-white font-bold text-xs px-7 py-3 rounded-full transition-all cursor-pointer border-0 inline-flex items-center gap-2"
-            >
-              Hoàn thiện hồ sơ công ty ngay &rarr;
-            </button>
+            <PrimaryButton onClick={() => navigate(PATH_CLIENT_PROFILE)} size="sm" className="mt-1">
+              Hoàn thiện hồ sơ công ty
+            </PrimaryButton>
           </section>
         )}
 
-        {/* ================= HERO SECTION ================= */}
-        <section className="flex flex-col items-center text-center relative w-full">
-          {/* Background Blur */}
-          <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-[#0AAAD7]/20 to-[#1D4ED8]/10 blur-[100px] rounded-full pointer-events-none" />
+        <section className="relative flex w-full flex-col items-center overflow-hidden py-6 text-center md:py-10">
+          <div className="pointer-events-none absolute left-1/2 top-0 h-80 w-[58rem] -translate-x-1/2 rounded-full bg-[#1D4ED8]/[0.06] blur-3xl" />
 
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight relative z-10">
+          <h1 className="relative z-10 mb-4 text-3xl font-bold tracking-tight text-slate-900 md:text-5xl">
             Chào mừng trở lại,
             <br />
-            Ngô Tiến Nhật
+            <span className="text-[#1D4ED8]">Ngô Tiến Nhật</span>
           </h1>
-          <p className="text-gray-500 text-sm md:text-base mb-8 max-w-lg leading-relaxed relative z-10">
+          <p className="relative z-10 mb-8 max-w-xl text-sm leading-relaxed text-slate-600 md:text-base">
             Bắt đầu dự án mới hoặc quản lý các công việc đang diễn ra một cách thông minh và hiệu
             quả hơn với SAM AI
           </p>
-          {/* Search Bar */}
-          <div className="w-full max-w-4xl bg-white rounded-[28px] sm:rounded-full p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 relative z-10 mb-6 gap-2 sm:gap-0">
+          <div className="relative z-10 mb-5 flex w-full max-w-3xl flex-col items-stretch gap-2 rounded-[12px] border border-slate-200/90 bg-white p-2 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:flex-row sm:items-center sm:gap-0">
             <div className="flex items-center flex-1 min-w-0">
-              <span className="pl-4 text-gray-400">
+              <span className="pl-4 text-slate-400">
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -260,24 +264,21 @@ const ClientDashboardPage: React.FC = () => {
                 type="text"
                 aria-label="Tìm kiếm công việc"
                 placeholder={placeholderText}
-                className="flex-1 bg-transparent border-0 focus:ring-0 outline-none text-sm px-3 text-gray-700 placeholder:text-gray-400 min-w-0"
+                className="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:ring-0"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
             </div>
-            <button
-              type="button"
-              onClick={() => handleSearch()}
-              className="bg-[#1D4ED8] hover:bg-[#153bb5] text-white text-sm font-bold px-6 sm:px-8 py-3 rounded-full transition-colors cursor-pointer border-0 shrink-0"
-            >
+            <PrimaryButton onClick={() => handleSearch()} className="shrink-0" withArrow={false}>
               Tạo mô tả
-            </button>
+            </PrimaryButton>
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap items-center justify-center gap-3 relative z-10 mb-8">
-            <span className="text-sm text-gray-500">Gợi ý:</span>
+          <div className="relative z-10 mb-4 flex flex-wrap items-center justify-center gap-2">
+            <span className="mr-1 font-mono text-[10px] font-medium uppercase tracking-wider text-slate-400">
+              Gợi ý nhanh
+            </span>
             {[
               'Phát triển Website',
               'Nhập liệu',
@@ -289,9 +290,9 @@ const ClientDashboardPage: React.FC = () => {
                 key={tag}
                 type="button"
                 onClick={() => handleSearch(tag)}
-                className="bg-white border border-gray-200 text-gray-600 text-xs font-semibold px-4 py-2 rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
+                className="client-dashboard-suggestion rounded-[6px] border border-slate-200 bg-white px-3 py-1.5 font-mono text-xs text-slate-700 transition-colors active:scale-[0.97]"
               >
-                {tag}
+                + {tag}
               </button>
             ))}
           </div>
@@ -302,7 +303,7 @@ const ClientDashboardPage: React.FC = () => {
           {STATS.map((stat) => (
             <div
               key={stat.id}
-              className="bg-white rounded-[24px] p-5 md:p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col relative overflow-hidden"
+              className="dashboard-surface-card dashboard-stat-card bg-white rounded-[24px] p-5 md:p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col relative overflow-hidden"
             >
               <div className="flex justify-between items-start mb-4">
                 <div
@@ -335,7 +336,7 @@ const ClientDashboardPage: React.FC = () => {
         </section>
 
         {/* ================= VIP BANNER ================= */}
-        <section className="w-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] rounded-[32px] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0_8px_30px_rgba(29,78,216,0.2)] relative overflow-hidden">
+        <section className="dashboard-primary-panel w-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] rounded-[32px] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0_8px_30px_rgba(29,78,216,0.2)] relative overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-white opacity-5 rounded-full blur-3xl pointer-events-none" />
 
           <div className="flex flex-col items-start relative z-10 w-full md:w-2/3">
@@ -387,7 +388,9 @@ const ClientDashboardPage: React.FC = () => {
             {/* Các yêu cầu nháp */}
             <section>
               <div className="flex items-center justify-between mb-5">
-                <h3 className="text-xl font-bold text-gray-900">Các yêu cầu nháp</h3>
+                <h3 className="dashboard-section-title text-xl font-bold text-gray-900">
+                  Các yêu cầu nháp
+                </h3>
                 <button
                   type="button"
                   onClick={() => navigate(PATH_CLIENT_PROJECTS)}
@@ -400,7 +403,7 @@ const ClientDashboardPage: React.FC = () => {
                 {DRAFTS.map((draft) => (
                   <div
                     key={draft.id}
-                    className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col"
+                    className="dashboard-surface-card bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col"
                   >
                     <div className="flex justify-between items-start mb-4">
                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
@@ -458,7 +461,9 @@ const ClientDashboardPage: React.FC = () => {
             {/* Lịch sử công việc */}
             <section>
               <div className="flex items-center justify-between mb-5">
-                <h3 className="text-xl font-bold text-gray-900">Lịch sử công việc</h3>
+                <h3 className="dashboard-section-title text-xl font-bold text-gray-900">
+                  Lịch sử công việc
+                </h3>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -513,7 +518,7 @@ const ClientDashboardPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-3xl border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col overflow-hidden">
+              <div className="dashboard-surface-card bg-white rounded-3xl border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col overflow-hidden">
                 {HISTORY.map((item, index) => (
                   <div
                     key={item.id}
@@ -572,9 +577,11 @@ const ClientDashboardPage: React.FC = () => {
           {/* CỘT PHẢI (4 Cols) */}
           <div className="flex flex-col gap-6">
             {/* Thông báo */}
-            <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
+            <div className="dashboard-surface-card bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-gray-900">Thông báo</h3>
+                <h3 className="dashboard-section-title text-lg font-bold text-gray-900">
+                  Thông báo
+                </h3>
                 <span className="w-5 h-5 bg-red-600 text-white rounded-full flex items-center justify-center text-[10px] font-bold">
                   3
                 </span>
@@ -622,7 +629,7 @@ const ClientDashboardPage: React.FC = () => {
             </div>
 
             {/* Support Banner */}
-            <div className="bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] rounded-3xl p-6 text-white relative overflow-hidden flex flex-col items-start shadow-md">
+            <div className="dashboard-primary-panel bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] rounded-3xl p-6 text-white relative overflow-hidden flex flex-col items-start shadow-md">
               <div className="absolute -bottom-6 -right-6 opacity-30 pointer-events-none">
                 <svg
                   className="w-32 h-32"

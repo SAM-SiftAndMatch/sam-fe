@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import * as paths from '../../routes/paths';
 import { useAuthStore } from '../../stores/useAuthStore';
+import ThemeToggle from '../ThemeToggle';
 import { PrimaryButton, SecondaryButton } from './LandingButtons';
 
 export interface NavItem {
@@ -91,8 +92,8 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
       <div
         className={`w-full transition-all duration-300 ease-out flex items-center justify-between pointer-events-auto relative ${
           isScrolled
-            ? 'max-w-[980px] h-[52px] translate-y-2 px-4 sm:px-6 rounded-full bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-[0_8px_30px_rgba(15,23,42,0.06)] mx-4'
-            : 'max-w-[1200px] h-16 translate-y-0 px-4 sm:px-6 lg:px-8 rounded-none bg-transparent border-b border-transparent shadow-none mx-auto'
+            ? 'max-w-[1160px] h-[56px] translate-y-2 px-5 sm:px-7 rounded-full bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-[0_8px_30px_rgba(15,23,42,0.06)] mx-4'
+            : 'max-w-[1440px] h-16 translate-y-0 px-4 sm:px-6 lg:px-8 rounded-none bg-transparent border-b border-transparent shadow-none mx-auto'
         }`}
       >
         {/* Logo - Left */}
@@ -121,7 +122,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
         </div>
 
         {/* Links - Center */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className={`hidden items-center md:flex ${isScrolled ? 'gap-2' : 'gap-1'}`}>
           {resolvedItems.map((item) => {
             if (item.path) {
               const isActive = location.pathname === item.path;
@@ -159,7 +160,8 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
         </nav>
 
         {/* Actions - Right */}
-        <div className="hidden sm:flex items-center gap-2">
+        <div className={`hidden items-center sm:flex ${isScrolled ? 'gap-3' : 'gap-2'}`}>
+          <ThemeToggle />
           {isAuthenticated ? (
             <PrimaryButton to={dashboardPath} size={isScrolled ? 'sm' : 'default'}>
               Bảng điều khiển
@@ -183,6 +185,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
 
         {/* Mobile Hamburger Button */}
         <div className="sm:hidden flex items-center gap-1.5">
+          <ThemeToggle />
           {!isAuthenticated && (
             <Link
               to={paths.PATH_LOGIN}

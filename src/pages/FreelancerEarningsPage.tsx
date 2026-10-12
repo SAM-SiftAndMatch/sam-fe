@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useState } from 'react';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
 
 // === MOCK DATA ===
 const EARNINGS_STATS = {
@@ -145,8 +145,8 @@ const FreelancerEarningsPage: React.FC = () => {
   const isPositiveGrowth = Number(growthPercent) >= 0;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <Header />
+    <div className="freelancer-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-8">
         {/* Page Header */}

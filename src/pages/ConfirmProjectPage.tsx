@@ -2,7 +2,7 @@ import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import jobApi from '../api/job';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_SUCCESS_PROJECT } from '../routes/paths';
 
@@ -124,8 +124,8 @@ const ConfirmProjectPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <ClientDashboardHeader />
+    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+      <AppHeader />
 
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-gray-100 w-full max-w-2xl flex flex-col">

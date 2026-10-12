@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
-import { MonoTag } from '../components/landing/LandingButtons';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 
@@ -101,7 +100,6 @@ const RegisterPage: React.FC = () => {
             >
               SAM
             </span>
-            <MonoTag variant="primary">REGISTER</MonoTag>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-1.5 tracking-tight">
             Khám phá tương lai công việc

@@ -1,5 +1,5 @@
 import type React from 'react';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 
 // === MOCK DATA ===
@@ -60,8 +60,8 @@ const FREELANCERS = [
 
 const FindFreelancerPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
-      <ClientDashboardHeader />
+    <div className="client-route min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-10">
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">

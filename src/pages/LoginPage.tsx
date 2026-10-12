@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
-import { MonoTag } from '../components/landing/LandingButtons';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 
@@ -97,7 +96,6 @@ const LoginPage: React.FC = () => {
               >
                 SAM
               </span>
-              <MonoTag variant="muted">SECURE {'//'} AUTH</MonoTag>
             </div>
 
             <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
@@ -167,7 +165,6 @@ const LoginPage: React.FC = () => {
               >
                 SAM
               </span>
-              <MonoTag variant="primary">AUTH</MonoTag>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">
               Chào mừng quay trở lại

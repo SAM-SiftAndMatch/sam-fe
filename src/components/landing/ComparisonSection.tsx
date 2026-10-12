@@ -1,5 +1,4 @@
 import type React from 'react';
-import { MonoTag } from './LandingButtons';
 import { ScrollReveal } from './ScrollReveal';
 
 interface ComparisonRow {
@@ -45,12 +44,9 @@ export const ComparisonSection: React.FC = () => {
   return (
     <section
       id="comparison"
-      className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative"
+      className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative"
     >
       <ScrollReveal className="text-left mb-14">
-        <div className="flex items-center gap-2 mb-3">
-          <MonoTag variant="primary">ĐỐI CHIẾU THỊ TRƯỜNG {'//'} BENCHMARK</MonoTag>
-        </div>
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 mb-4">
           So với chợ freelance truyền thống
         </h2>
@@ -78,7 +74,6 @@ export const ComparisonSection: React.FC = () => {
                 <span className="font-mono text-[11px] text-[#1D4ED8] uppercase tracking-wider font-semibold">
                   NỀN TẢNG THẾ HỆ MỚI
                 </span>
-                <MonoTag variant="primary">AI-POWERED</MonoTag>
               </div>
               <h3 className="text-lg font-bold text-[#1D4ED8]">SAM (Sift And Match)</h3>
               <p className="text-xs text-slate-600 mt-1">
