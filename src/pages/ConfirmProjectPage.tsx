@@ -124,7 +124,7 @@ const ConfirmProjectPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
       <main className="flex-1 flex items-center justify-center py-12 px-4">

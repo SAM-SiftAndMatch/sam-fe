@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import GuestHeader from '../components/GuestHeader';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
-import { MonoTag } from '../components/landing/LandingButtons';
 import {
   PATH_CLIENT_PRICING,
   PATH_FREELANCER_PRICING,
@@ -23,9 +22,6 @@ const RoleSelectionPage: React.FC = () => {
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-12 md:py-20 flex flex-col items-center justify-center z-10">
         <div className="text-center mb-12">
-          <div className="flex justify-center mb-3">
-            <MonoTag variant="primary">ONBOARDING {'//'} CHỌN VAI TRÒ</MonoTag>
-          </div>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3 tracking-tight">
             Bạn là ai?
           </h1>
@@ -53,7 +49,6 @@ const RoleSelectionPage: React.FC = () => {
                   />
                 </svg>
               </div>
-              <MonoTag variant="muted">ROLE: CLIENT</MonoTag>
             </div>
 
             <h2 className="text-xl font-bold text-slate-900 mb-2">Tôi là Khách hàng</h2>
@@ -117,7 +112,6 @@ const RoleSelectionPage: React.FC = () => {
                   />
                 </svg>
               </div>
-              <MonoTag variant="muted">ROLE: FREELANCER</MonoTag>
             </div>
 
             <h2 className="text-xl font-bold text-slate-900 mb-2">Tôi là Freelancer</h2>

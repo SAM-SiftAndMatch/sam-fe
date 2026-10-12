@@ -978,7 +978,7 @@ const AIBriefPage: React.FC = () => {
   // Render
   // =========================================
   return (
-    <div className="min-h-screen bg-[#F1F5F9] font-sans flex flex-col">
+    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-6 flex flex-col">

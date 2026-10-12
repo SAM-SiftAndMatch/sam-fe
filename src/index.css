@@ -30,7 +30,6 @@ body {
 
 /* Shared Freelancer workspace surface. Individual pages keep their content, but speak one UI language. */
 .freelancer-route > main {
-  max-width: 1440px !important;
   padding-left: 1.25rem;
   padding-right: 1.25rem;
 }
@@ -49,8 +48,138 @@ body {
   border-radius: 8px;
 }
 
+/* Client routes share the homepage's wide, light and precise product language. */
+.client-route > main {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.client-route main [class*="shadow-[0_2px_15px"],
+.client-route main [class*="shadow-[0_1px_3px"],
+.client-route main [class~="shadow-sm"] {
+  border-color: rgb(226 232 240 / 0.9) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.03) !important;
+}
+
+.client-route main input:not([type="radio"]):not([type="checkbox"]),
+.client-route main textarea,
+.client-route main select {
+  border-radius: 8px;
+}
+
+/* Normalize the older Client screens to the landing/product card and control treatment. */
+.client-route main [class~="rounded-2xl"],
+.client-route main [class~="rounded-3xl"],
+.client-route main [class*="rounded-[24px]"],
+.client-route main [class*="rounded-[28px]"],
+.client-route main [class*="rounded-[32px]"] {
+  border-radius: 12px !important;
+}
+
+.client-route main [class~="bg-white"] {
+  border-color: rgb(226 232 240 / 0.9);
+}
+
+.client-route main input:not([type="radio"]):not([type="checkbox"]),
+.client-route main textarea,
+.client-route main select {
+  border-color: rgb(203 213 225) !important;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
+}
+
+.client-route main input:not([type="radio"]):not([type="checkbox"]):focus,
+.client-route main textarea:focus,
+.client-route main select:focus {
+  border-color: #1d4ed8 !important;
+  box-shadow: 0 0 0 3px rgb(29 78 216 / 0.1) !important;
+}
+
+.client-route main button {
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow
+    180ms ease, transform 180ms ease;
+}
+
+.client-route main button[class~="bg-gradient-to-r"],
+.client-route main button[class~="bg-[#1D4ED8]"],
+.client-route main button[class~="bg-blue-600"],
+.client-route main a[class~="bg-[#1D4ED8]"] {
+  border-radius: 8px !important;
+  background: #1d4ed8 !important;
+  box-shadow: 0 4px 14px rgb(29 78 216 / 0.16);
+}
+
+.client-route main button[class~="bg-gradient-to-r"]:hover,
+.client-route main button[class~="bg-[#1D4ED8]"]:hover,
+.client-route main button[class~="bg-blue-600"]:hover,
+.client-route main a[class~="bg-[#1D4ED8]"]:hover {
+  background: #153bb5 !important;
+  transform: translateY(-1px);
+}
+
+/* Secondary quick suggestions retain the white landing-page treatment. */
+.client-route main .client-dashboard-suggestion {
+  border-color: #e2e8f0 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  color: #475569 !important;
+}
+
+.client-route main .client-dashboard-suggestion:hover {
+  border-color: #1d4ed8 !important;
+  background: rgb(29 78 216 / 0.06) !important;
+  color: #1d4ed8 !important;
+  transform: none !important;
+}
+
+/* Dashboard sections use the same quiet hierarchy and compact panels as the landing page. */
+.client-dashboard-page .dashboard-surface-card {
+  border-color: rgb(226 232 240 / 0.9) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.03) !important;
+}
+
+.client-dashboard-page .dashboard-section-title {
+  color: #0f172a !important;
+  font-size: 1rem;
+  letter-spacing: -0.015em;
+}
+
+.client-dashboard-page .dashboard-stat-card [class*="uppercase"] {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.client-dashboard-page .dashboard-stat-card [class*="font-black"] {
+  color: #0f172a;
+  font-size: 1.75rem;
+  letter-spacing: -0.04em;
+}
+
+.client-dashboard-page .dashboard-primary-panel {
+  border: 1px solid rgb(29 78 216 / 0.5);
+  border-radius: 12px !important;
+  background: linear-gradient(120deg, #1d4ed8 0%, #0a78d7 100%) !important;
+  box-shadow: 0 8px 28px rgb(29 78 216 / 0.16) !important;
+}
+
+.client-dashboard-page .dashboard-primary-panel > div > span:first-child {
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
 @media (min-width: 768px) {
   .freelancer-route > main {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .client-route > main {
     padding-left: 2rem;
     padding-right: 2rem;
   }

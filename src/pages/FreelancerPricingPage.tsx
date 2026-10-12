@@ -7,7 +7,7 @@ import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
-import { MonoTag, PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
+import { PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
 import LandingFooter from '../components/landing/LandingFooter';
 import LandingNavbar from '../components/landing/LandingNavbar';
 import ScrollReveal from '../components/landing/ScrollReveal';
@@ -68,9 +68,6 @@ const FreelancerPricingPage: React.FC = () => {
 
         {/* Header */}
         <ScrollReveal className="text-center mb-14 max-w-2xl flex flex-col items-center">
-          <div className="mb-3">
-            <MonoTag variant="primary">FREELANCER SAAS {'//'} PRO TIERS</MonoTag>
-          </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4">
             Nâng tầm sự nghiệp Freelance với AI
           </h1>
@@ -86,8 +83,7 @@ const FreelancerPricingPage: React.FC = () => {
           <ScrollReveal delayMs={0} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="muted">PLAN 01 {'//'} BASIC</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-slate-400">MIỄN PHÍ</span>
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900 mb-1">Basic</h2>
@@ -135,8 +131,7 @@ const FreelancerPricingPage: React.FC = () => {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="primary">PLAN 02 {'//'} PRO DEV</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-[#1D4ED8] font-bold">KHUYÊN DÙNG</span>
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900 mb-1">PRO DEV</h2>
@@ -196,9 +191,6 @@ const FreelancerPricingPage: React.FC = () => {
         <ScrollReveal className="w-full max-w-4xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white rounded-[12px] p-6 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col items-start">
-              <div className="mb-3">
-                <MonoTag variant="primary">EFFICIENCY {'//'} SPEED</MonoTag>
-              </div>
               <h3 className="text-base font-bold text-slate-900 mb-2">Tăng tốc thu nhập</h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 Hệ thống AI giúp bạn tối ưu hóa thời gian tìm kiếm, tự động ghép với các dự án vừa
@@ -207,9 +199,6 @@ const FreelancerPricingPage: React.FC = () => {
             </div>
 
             <div className="bg-white rounded-[12px] p-6 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col items-start">
-              <div className="mb-3">
-                <MonoTag variant="muted">LEGAL {'//'} ESCROW</MonoTag>
-              </div>
               <h3 className="text-base font-bold text-slate-900 mb-2">
                 An tâm pháp lý & thanh toán
               </h3>

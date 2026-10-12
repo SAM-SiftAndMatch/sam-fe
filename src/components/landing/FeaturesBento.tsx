@@ -1,6 +1,5 @@
 import type React from 'react';
 import { AnimatedNumber } from './AnimatedNumber';
-import { MonoTag } from './LandingButtons';
 import { ScrollReveal } from './ScrollReveal';
 
 export const FeaturesBento: React.FC = () => {
@@ -10,9 +9,6 @@ export const FeaturesBento: React.FC = () => {
       className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative"
     >
       <ScrollReveal className="text-left mb-14">
-        <div className="flex items-center gap-2 mb-3">
-          <MonoTag variant="primary">TÍNH NĂNG VƯỢT TRỘI {'//'} BENTO GRID</MonoTag>
-        </div>
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 mb-4">
           Công nghệ lõi bảo vệ chất lượng dự án
         </h2>
@@ -29,8 +25,7 @@ export const FeaturesBento: React.FC = () => {
           <ScrollReveal delayMs={0} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="primary">AI QC {'//'} STATIC ANALYSIS</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-slate-400">CORE SENTINEL</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
@@ -88,8 +83,7 @@ export const FeaturesBento: React.FC = () => {
           <ScrollReveal delayMs={100} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="muted">ALGORITHM {'//'} MATCHING</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-slate-400">99% PRECISION</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
@@ -138,8 +132,7 @@ export const FeaturesBento: React.FC = () => {
           <ScrollReveal delayMs={150} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="muted">COPYRIGHT {'//'} PLAGIARISM</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-slate-400">VERIFIED ORIGINAL</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
@@ -184,8 +177,7 @@ export const FeaturesBento: React.FC = () => {
           <ScrollReveal delayMs={200} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="muted">SCOPE SHIELD {'//'} DEFENSE</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-slate-400">ANTI-CREEP</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
@@ -220,8 +212,7 @@ export const FeaturesBento: React.FC = () => {
           <ScrollReveal delayMs={250} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="muted">ESCROW {'//'} MILESTONE</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-slate-400">100% AN TOÀN</span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">
@@ -257,8 +248,7 @@ export const FeaturesBento: React.FC = () => {
           <ScrollReveal delayMs={300} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="muted">AI BRIEF {'//'} ASSISTANT</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-slate-400">CHỈ 30 GIÂY</span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">

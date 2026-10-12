@@ -2,7 +2,7 @@ import type React from 'react';
 
 const FooterDashboard: React.FC = () => {
   return (
-    <footer className="w-full bg-white border-t border-gray-100 pt-16 pb-8 px-4 md:px-8">
+    <footer className="relative z-10 w-full bg-white border-t border-gray-100 pt-16 pb-8 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Phần nội dung chính chia cột */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">

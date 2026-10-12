@@ -6,7 +6,7 @@ import { jobApi } from '../api/job';
 import { profileApi } from '../api/profile';
 import AppHeader from '../components/AppHeader';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
-import { MonoTag, PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
+import { PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
 import LandingFooter from '../components/landing/LandingFooter';
 import LandingNavbar from '../components/landing/LandingNavbar';
 import ScrollReveal from '../components/landing/ScrollReveal';
@@ -101,7 +101,6 @@ const FreelancerPage: React.FC = () => {
         {isAuthenticated && user?.role === 'FREELANCER' ? (
           <div className="w-full space-y-6">
             <div className="space-y-3 mb-6">
-              <MonoTag variant="primary">KHÔNG GIAN LÀM VIỆC {'//'} FREELANCER</MonoTag>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
                 Chào mừng trở lại,{' '}
                 <span className="text-[#1D4ED8]">{user.fullName || 'Freelancer'}</span>
@@ -133,7 +132,6 @@ const FreelancerPage: React.FC = () => {
                         <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                           {profile.fullName || user.fullName}
                         </h2>
-                        <MonoTag variant="success">ĐÃ XÁC THỰC</MonoTag>
                       </div>
                       <p className="text-sm font-semibold text-[#1D4ED8]">
                         {profile.headline || 'Chưa cập nhật tiêu đề nghề nghiệp'}
@@ -217,9 +215,6 @@ const FreelancerPage: React.FC = () => {
             ) : (
               /* Profile not completed banner */
               <div className="bg-white rounded-[12px] p-6 sm:p-8 text-center max-w-xl border border-amber-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
-                <div className="mb-3">
-                  <MonoTag variant="muted">HỒ SƠ CHƯA HOÀN THIỆN</MonoTag>
-                </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">
                   Cập nhật hồ sơ để nhận đề xuất AI
                 </h3>
@@ -236,9 +231,6 @@ const FreelancerPage: React.FC = () => {
         ) : (
           /* GUEST HERO */
           <div className="w-full">
-            <div className="mb-4">
-              <MonoTag variant="primary">NỀN TẢNG FREELANCE AI {'//'} CƠ HỘI NGHỀ NGHIỆP</MonoTag>
-            </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-slate-900 leading-[1.18] tracking-tight mb-5 max-w-3xl">
               Nơi kết nối công việc <br />
               <span className="text-[#1D4ED8]">mơ ước</span> của bạn
@@ -250,7 +242,9 @@ const FreelancerPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
               <PrimaryButton
                 onClick={() =>
-                  navigate(paths.PATH_REGISTER, { state: { accountType: 'FREELANCER' } })
+                  navigate(paths.PATH_REGISTER, {
+                    state: { accountType: 'FREELANCER' },
+                  })
                 }
               >
                 Đăng ký Freelancer ngay
@@ -267,9 +261,6 @@ const FreelancerPage: React.FC = () => {
       <section className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
         <ScrollReveal className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
           <div>
-            <div className="mb-2">
-              <MonoTag variant="muted">THỊ TRƯỜNG VIỆC LÀM {'//'} REALTIME JOBS</MonoTag>
-            </div>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 mb-2">
               Công việc hiện có
             </h2>
@@ -303,10 +294,7 @@ const FreelancerPage: React.FC = () => {
               <ScrollReveal key={job.id} delayMs={idx * 60} className="h-full">
                 <div className="group h-full bg-white rounded-[12px] p-6 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between gap-2 mb-4">
-                      <MonoTag variant="primary">
-                        {job.status === 'OPEN' ? '🟢 ĐANG MỞ' : job.status}
-                      </MonoTag>
+                    <div className="flex items-center justify-end gap-2 mb-4">
                       <span className="font-mono text-[10px] text-slate-400">AI MATCHED</span>
                     </div>
                     <h3 className="text-base font-bold text-slate-900 leading-snug mb-3 line-clamp-2">
@@ -350,9 +338,6 @@ const FreelancerPage: React.FC = () => {
         <ScrollReveal>
           <div className="bg-white rounded-[12px] p-8 sm:p-12 lg:p-14 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-center gap-10">
             <div className="flex-1 flex flex-col items-start">
-              <div className="mb-3">
-                <MonoTag variant="primary">QUY TRÌNH {'//'} 3 BƯỚC KHỞI ĐẦU</MonoTag>
-              </div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 mb-4">
                 Sẵn sàng để tỏa sáng?
               </h2>

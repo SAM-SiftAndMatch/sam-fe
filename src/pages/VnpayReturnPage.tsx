@@ -2,10 +2,9 @@ import type React from 'react';
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { subscriptionApi } from '../api/subscription';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import GuestHeader from '../components/GuestHeader';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
-import { MonoTag } from '../components/landing/LandingButtons';
 import { PATH_CLIENT_PAYMENT, PATH_CLIENT_PROFILE } from '../routes/paths';
 
 const PENDING_CONTRACT_KEY = 'SAM_PENDING_CONTRACT';
@@ -56,9 +55,9 @@ const VnpayReturnPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col relative overflow-hidden">
+    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col relative overflow-hidden">
       <InteractiveBackground />
-      <GuestHeader />
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-xl mx-auto px-4 py-16 flex flex-col items-center justify-center z-10">
         <div
@@ -66,12 +65,6 @@ const VnpayReturnPage: React.FC = () => {
             success ? 'border-emerald-200' : 'border-rose-200'
           }`}
         >
-          <div className="flex justify-center mb-4">
-            <MonoTag variant={success ? 'primary' : 'muted'}>
-              VNPAY {'//'} {success ? 'SUCCESS' : `CODE_${responseCode || 'ERROR'}`}
-            </MonoTag>
-          </div>
-
           <div
             className={`w-14 h-14 rounded-full mx-auto flex items-center justify-center mb-5 ${
               success ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'

@@ -1,7 +1,6 @@
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as paths from '../../routes/paths';
-import { MonoTag } from './LandingButtons';
 import { ScrollReveal } from './ScrollReveal';
 
 const CATEGORIES = [
@@ -71,9 +70,6 @@ export const CategoriesSection: React.FC = () => {
     >
       <ScrollReveal className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <MonoTag variant="muted">LĨNH VỰC CHUYÊN SÂU {'//'} TALENT POOL</MonoTag>
-          </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 mb-2">
             Lĩnh vực phổ biến
           </h2>

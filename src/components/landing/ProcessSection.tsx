@@ -1,6 +1,5 @@
 import type React from 'react';
 import { Fragment, useState } from 'react';
-import { MonoTag } from './LandingButtons';
 import { ScrollReveal } from './ScrollReveal';
 
 interface WorkflowStep {
@@ -134,9 +133,6 @@ export const ProcessSection: React.FC = () => {
       className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative"
     >
       <ScrollReveal className="text-left mb-10 lg:mb-14">
-        <div className="flex items-center gap-2 mb-3">
-          <MonoTag variant="primary">WORKFLOW {'//'} 03 BƯỚC THÔNG MINH</MonoTag>
-        </div>
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 mb-4">
           Quy trình tuyển dụng thông minh
         </h2>

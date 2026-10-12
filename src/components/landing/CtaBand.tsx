@@ -1,6 +1,6 @@
 import type React from 'react';
 import * as paths from '../../routes/paths';
-import { MonoTag, PrimaryButton, SecondaryButton } from './LandingButtons';
+import { PrimaryButton, SecondaryButton } from './LandingButtons';
 import { ScrollReveal } from './ScrollReveal';
 
 export const CtaBand: React.FC = () => {
@@ -8,10 +8,6 @@ export const CtaBand: React.FC = () => {
     <section className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 relative">
       <ScrollReveal>
         <div className="w-full bg-white rounded-[12px] p-8 sm:p-12 lg:p-16 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col items-start text-left relative overflow-hidden">
-          <div className="flex items-center gap-2 mb-4">
-            <MonoTag variant="primary">BẮT ĐẦU NGAY {'//'} KHỞI TẠO DỰ ÁN</MonoTag>
-          </div>
-
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 mb-4 max-w-2xl">
             Bắt đầu thuê đúng Freelancer ngay hôm nay
           </h2>

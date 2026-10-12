@@ -60,7 +60,7 @@ const FREELANCERS = [
 
 const FindFreelancerPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
+    <div className="client-route min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
       <AppHeader />
 
       <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-10">
