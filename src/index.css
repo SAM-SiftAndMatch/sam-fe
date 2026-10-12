@@ -27,6 +27,83 @@ body {
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Global dark mode. Attribute selectors also cover existing Tailwind utility classes across pages. */
+html.theme-dark,
+html.theme-dark body {
+  color-scheme: dark;
+  background: #090f1d;
+  color: #e5edf9;
+}
+
+html.theme-dark [class~="bg-white"],
+html.theme-dark [class~="bg-white/95"],
+html.theme-dark [class~="bg-white/90"],
+html.theme-dark [class~="bg-white/80"],
+html.theme-dark [class~="bg-gray-50"],
+html.theme-dark [class~="bg-gray-100"],
+html.theme-dark [class~="bg-gray-200"],
+html.theme-dark [class~="bg-slate-50"],
+html.theme-dark [class~="bg-slate-100"],
+html.theme-dark [class~="bg-slate-200"],
+html.theme-dark [class*="bg-[#F8FAFC]"],
+html.theme-dark [class*="bg-[#F1F5F9]"],
+html.theme-dark [class*="bg-[#EEF2FF]"],
+html.theme-dark [class*="bg-[#E2E8F0]"] {
+  background-color: #111a2b !important;
+}
+
+html.theme-dark [class~="bg-transparent"] {
+  color: inherit;
+}
+
+html.theme-dark [class~="text-slate-900"],
+html.theme-dark [class~="text-slate-800"],
+html.theme-dark [class~="text-gray-900"],
+html.theme-dark [class~="text-gray-800"],
+html.theme-dark [class*="text-[#0F172A]"] {
+  color: #f8fbff !important;
+}
+
+html.theme-dark [class~="text-slate-700"],
+html.theme-dark [class~="text-slate-600"],
+html.theme-dark [class~="text-gray-700"],
+html.theme-dark [class~="text-gray-600"] {
+  color: #cbd8ea !important;
+}
+
+html.theme-dark [class~="text-slate-500"],
+html.theme-dark [class~="text-slate-400"],
+html.theme-dark [class~="text-gray-500"],
+html.theme-dark [class~="text-gray-400"] {
+  color: #93a6c1 !important;
+}
+
+html.theme-dark [class~="border-slate-100"],
+html.theme-dark [class~="border-slate-200"],
+html.theme-dark [class~="border-slate-300"],
+html.theme-dark [class~="border-gray-100"],
+html.theme-dark [class~="border-gray-200"],
+html.theme-dark [class~="border-gray-300"] {
+  border-color: #27364d !important;
+}
+
+html.theme-dark .theme-toggle {
+  border-color: #33445e !important;
+  background-color: #17243a !important;
+  color: #a9c7ff !important;
+}
+
+html.theme-dark input,
+html.theme-dark textarea,
+html.theme-dark select {
+  color: #e5edf9;
+}
+
+html.theme-dark input::placeholder,
+html.theme-dark textarea::placeholder {
+  color: #7f91ab;
+}
 /* Button light sweep animation */
 .btn-sweep {
   position: relative;
@@ -73,6 +150,101 @@ body {
 .animate-hero-fade-up {
   opacity: 0;
   animation: heroFadeUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hero signal field: subtle animated data flow behind the homepage message. */
+.hero-signal-grid {
+  background-image: linear-gradient(rgba(29, 78, 216, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 78, 216, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 66% 56% at 50% 46%, black 8%, transparent 76%);
+  opacity: 0.8;
+  animation: heroGridDrift 18s linear infinite;
+}
+
+.hero-signal-orb {
+  position: absolute;
+  width: 34rem;
+  height: 34rem;
+  border-radius: 9999px;
+  filter: blur(18px);
+  opacity: 0.2;
+}
+
+.hero-signal-orb-one {
+  top: -16rem;
+  left: 8%;
+  background: radial-gradient(circle, rgba(10, 170, 215, 0.56), rgba(10, 170, 215, 0));
+  animation: heroOrbFloatOne 14s ease-in-out infinite alternate;
+}
+
+.hero-signal-orb-two {
+  right: 5%;
+  bottom: -20rem;
+  background: radial-gradient(circle, rgba(29, 78, 216, 0.62), rgba(29, 78, 216, 0));
+  animation: heroOrbFloatTwo 17s ease-in-out infinite alternate;
+}
+
+.hero-signal-paths path {
+  stroke: rgba(29, 78, 216, 0.24);
+  stroke-width: 1.25;
+  stroke-dasharray: 12 18;
+  animation: heroSignalFlow 11s linear infinite;
+}
+
+.hero-signal-node {
+  fill: #1d4ed8;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: heroNodePulse 2.8s ease-in-out infinite;
+}
+
+.hero-signal-node-two {
+  animation-delay: 0.8s;
+}
+
+.hero-signal-node-three {
+  animation-delay: 1.6s;
+}
+
+@keyframes heroGridDrift {
+  to {
+    background-position: 44px 44px;
+  }
+}
+
+@keyframes heroOrbFloatOne {
+  to {
+    transform: translate3d(8rem, 5rem, 0) scale(1.12);
+  }
+}
+
+@keyframes heroOrbFloatTwo {
+  to {
+    transform: translate3d(-7rem, -4rem, 0) scale(1.08);
+  }
+}
+
+@keyframes heroSignalFlow {
+  to {
+    stroke-dashoffset: -180;
+  }
+}
+
+@keyframes heroNodePulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(2.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-signal-grid,
+  .hero-signal-orb,
+  .hero-signal-paths path,
+  .hero-signal-node {
+    animation: none;
+  }
 }
 
 /* Scroll reveal utility */

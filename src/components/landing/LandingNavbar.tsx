@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import * as paths from '../../routes/paths';
 import { useAuthStore } from '../../stores/useAuthStore';
+import ThemeToggle from '../ThemeToggle';
 import { PrimaryButton, SecondaryButton } from './LandingButtons';
 
 export interface NavItem {
@@ -160,6 +161,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
 
         {/* Actions - Right */}
         <div className="hidden sm:flex items-center gap-2">
+          <ThemeToggle />
           {isAuthenticated ? (
             <PrimaryButton to={dashboardPath} size={isScrolled ? 'sm' : 'default'}>
               Bảng điều khiển
@@ -183,6 +185,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
 
         {/* Mobile Hamburger Button */}
         <div className="sm:hidden flex items-center gap-1.5">
+          <ThemeToggle />
           {!isAuthenticated && (
             <Link
               to={paths.PATH_LOGIN}

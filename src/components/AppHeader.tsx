@@ -24,6 +24,7 @@ import {
   PATH_WORKSPACES,
 } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
+import ThemeToggle from './ThemeToggle';
 
 type NavItem = { label: string; path: string; state?: { role: 'client' | 'freelancer' } };
 
@@ -173,6 +174,7 @@ const AppHeader: React.FC = () => {
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+          <ThemeToggle />
           {isAuthenticated ? (
             <>
               {isClient && (

@@ -6,8 +6,9 @@ import CategoriesSection from '../components/landing/CategoriesSection';
 import ComparisonSection from '../components/landing/ComparisonSection';
 import CtaBand from '../components/landing/CtaBand';
 import FeaturesBento from '../components/landing/FeaturesBento';
+import HeroSignalBackground from '../components/landing/HeroSignalBackground';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
-import { MonoTag, PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
+import { PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
 import LandingFooter from '../components/landing/LandingFooter';
 import LandingNavbar from '../components/landing/LandingNavbar';
 import PricingSection from '../components/landing/PricingSection';
@@ -75,40 +76,33 @@ const ClientLandingPage: React.FC = () => {
         {/* ================= HERO SECTION ================= */}
         <section
           id="hero"
-          className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-20 lg:pb-28 flex flex-col items-start text-left"
+          className="relative isolate flex w-full max-w-[1440px] flex-col items-center overflow-hidden px-4 pt-20 pb-20 text-center sm:px-6 sm:pt-24 lg:min-h-[calc(100svh-4rem)] lg:justify-center lg:px-8 lg:pb-28"
         >
-          {/* Hero Kicker (Item 1 - 0ms delay) */}
-          <div className="animate-hero-fade-up mb-4" style={{ animationDelay: '0ms' }}>
-            <MonoTag variant="primary">AI FREELANCE MARKETPLACE {'//'} SIFT & MATCH</MonoTag>
-          </div>
+          <HeroSignalBackground />
 
-          {/* Left-Aligned Headline (Item 2 - 80ms delay) */}
+          {/* Centered Headline */}
           <h1
-            className="animate-hero-fade-up text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold text-slate-900 leading-[1.18] tracking-tight mb-5 max-w-3xl"
-            style={{ animationDelay: '80ms' }}
+            className="animate-hero-fade-up relative z-10 mb-7 max-w-4xl text-4xl font-extrabold leading-[1.08] tracking-[-0.04em] text-slate-900 sm:text-5xl md:text-6xl lg:text-[68px]"
+            style={{ animationDelay: '0ms' }}
           >
-            Kết nối Freelancer <br />
-            <span className="text-[#1D4ED8]">phù hợp nhất</span> cho dự án
+            Kết nối{' '}
+            <span className="bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] bg-clip-text text-transparent">
+              đúng Freelancer
+            </span>
+            <span className="block mt-1 text-slate-800">cho dự án của bạn</span>
           </h1>
 
-          {/* Short Sub-Copy (Item 3 - 160ms delay) */}
-          <p
-            className="animate-hero-fade-up text-sm sm:text-base text-slate-600 mb-8 max-w-2xl leading-relaxed"
+          {/* Chat prompt label */}
+          <div
+            className="animate-hero-fade-up relative z-10 flex w-full flex-col items-center"
             style={{ animationDelay: '160ms' }}
           >
-            Nền tảng đầu tiên tại Việt Nam ứng dụng AI để phân tích và đề xuất nhân tài chính xác
-            99% cho nhu cầu doanh nghiệp. AI PM phỏng vấn lập specs, AI Matching quét portfolio, và
-            AI QC kiểm định chất lượng trước khi bàn giao.
-          </p>
-
-          {/* Chat prompt label (Item 4 - 240ms delay) */}
-          <div className="animate-hero-fade-up w-full" style={{ animationDelay: '240ms' }}>
-            <h2 className="text-sm font-mono uppercase tracking-wider font-semibold text-slate-700 mb-3">
+            <h2 className="mb-3 text-sm font-mono font-semibold uppercase tracking-wider text-slate-700">
               Bạn cần hoàn thành công việc gì?
             </h2>
 
             {/* LOCKED COMPONENT: Chat Input Box (Exact markup, classes, styling and behavior preserved) */}
-            <div className="w-full max-w-4xl bg-white rounded-[28px] sm:rounded-full p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100 relative z-10 mb-4 gap-2 sm:gap-0">
+            <div className="relative z-10 mb-4 flex w-full max-w-5xl flex-col items-stretch gap-2 rounded-[28px] border border-gray-100 bg-white p-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] sm:flex-row sm:items-center sm:gap-0 sm:rounded-full">
               <div className="flex items-center flex-1 min-w-0">
                 <span className="pl-4 text-gray-400">
                   <svg
@@ -149,7 +143,7 @@ const ClientLandingPage: React.FC = () => {
 
           {/* 3 Small Example-Prompt Chips (Item 5 - 320ms delay, outside chat component) */}
           <div
-            className="animate-hero-fade-up flex flex-wrap items-center gap-2 mb-4 text-xs text-slate-500"
+            className="animate-hero-fade-up relative z-10 mb-5 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500"
             style={{ animationDelay: '320ms' }}
           >
             <span className="font-mono text-slate-400 text-xs">Gợi ý:</span>
@@ -167,7 +161,7 @@ const ClientLandingPage: React.FC = () => {
 
           {/* Small Trust Line (Item 6 - 400ms delay) */}
           <div
-            className="animate-hero-fade-up flex flex-wrap items-center gap-3 sm:gap-6 text-xs text-slate-600 font-mono mb-8"
+            className="animate-hero-fade-up relative z-10 mb-10 flex flex-wrap items-center justify-center gap-3 font-mono text-xs text-slate-600 sm:gap-6"
             style={{ animationDelay: '400ms' }}
           >
             <span className="flex items-center gap-1.5 text-slate-700">
@@ -188,7 +182,7 @@ const ClientLandingPage: React.FC = () => {
 
           {/* Action Buttons (Item 7 - 440ms delay) */}
           <div
-            className="animate-hero-fade-up flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto mb-16"
+            className="animate-hero-fade-up relative z-10 mb-16 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center"
             style={{ animationDelay: '440ms' }}
           >
             <PrimaryButton to={paths.PATH_CLIENT_AI_BRIEF}>Tạo yêu cầu công việc</PrimaryButton>
@@ -197,36 +191,36 @@ const ClientLandingPage: React.FC = () => {
 
           {/* Hero Quick Stats Row (Item 8 - 480ms delay, aligned, clean numbers) */}
           <div
-            className="animate-hero-fade-up w-full grid grid-cols-2 md:grid-cols-4 gap-6 pt-10 border-t border-slate-200/80"
+            className="animate-hero-fade-up relative z-10 grid w-full grid-cols-2 gap-6 border-t border-slate-200/80 pt-10 md:grid-cols-4"
             style={{ animationDelay: '480ms' }}
           >
-            <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-black text-[#1D4ED8]">
+            <div className="flex flex-col items-center text-center">
+              <span className="text-3xl font-black text-[#1D4ED8] sm:text-4xl">
                 <AnimatedNumber value={10000} suffix="+" />
               </span>
-              <span className="font-mono text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
+              <span className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Freelancer xác thực
               </span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-black text-[#1D4ED8]">
+            <div className="flex flex-col items-center text-center">
+              <span className="text-3xl font-black text-[#1D4ED8] sm:text-4xl">
                 <AnimatedNumber value={5000} suffix="+" />
               </span>
-              <span className="font-mono text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
+              <span className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Dự án hoàn thành
               </span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-black text-[#1D4ED8]">
+            <div className="flex flex-col items-center text-center">
+              <span className="text-3xl font-black text-[#1D4ED8] sm:text-4xl">
                 <AnimatedNumber value={98} suffix="%" />
               </span>
-              <span className="font-mono text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
+              <span className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Khách hàng hài lòng
               </span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-black text-[#1D4ED8]">&lt; 24H</span>
-              <span className="font-mono text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
+            <div className="flex flex-col items-center text-center">
+              <span className="text-3xl font-black text-[#1D4ED8] sm:text-4xl">&lt; 24H</span>
+              <span className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Kết nối nhân tài
               </span>
             </div>

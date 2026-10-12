@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from './routes';
 import { useAuthStore } from './stores/useAuthStore';
+import { useThemeStore } from './stores/useThemeStore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,10 +17,16 @@ const queryClient = new QueryClient({
 
 function App() {
   const { initAuth } = useAuthStore();
+  const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {
     initAuth();
   }, [initAuth]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('theme-dark', theme === 'dark');
+    document.documentElement.style.colorScheme = theme;
+  }, [theme]);
 
   return (
     <QueryClientProvider client={queryClient}>
