@@ -136,7 +136,7 @@ const WorkspacesPage: React.FC = () => {
               <div
                 key={room.id}
                 onClick={() => navigate(`/workspace/${room.id}`)}
-                className="flex items-start gap-4 p-5 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
+                className="workspace-list-item flex items-start gap-4 p-5 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
               >
                 <div className="relative">
                   <div className="w-12 h-12 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-black text-lg border border-gray-200">

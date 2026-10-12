@@ -248,7 +248,7 @@ const CreateFreelancerProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
+    <div className="profile-page min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
       {/* Top Navigation */}
       <header className="w-full h-16 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50 shadow-sm">
         <div

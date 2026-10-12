@@ -40,6 +40,8 @@ html.theme-dark [class~="bg-white"],
 html.theme-dark [class~="bg-white/95"],
 html.theme-dark [class~="bg-white/90"],
 html.theme-dark [class~="bg-white/80"],
+html.theme-dark [class~="bg-white/60"],
+html.theme-dark [class~="bg-white/50"],
 html.theme-dark [class~="bg-gray-50"],
 html.theme-dark [class~="bg-gray-100"],
 html.theme-dark [class~="bg-gray-200"],
@@ -49,8 +51,36 @@ html.theme-dark [class~="bg-slate-200"],
 html.theme-dark [class*="bg-[#F8FAFC]"],
 html.theme-dark [class*="bg-[#F1F5F9]"],
 html.theme-dark [class*="bg-[#EEF2FF]"],
-html.theme-dark [class*="bg-[#E2E8F0]"] {
+html.theme-dark [class*="bg-[#E2E8F0]"],
+html.theme-dark [class*="bg-[#F5F3FF]"] {
   background-color: #111a2b !important;
+}
+
+/* Keep Freelancer status panels readable instead of leaving their light semantic tints on dark surfaces. */
+html.theme-dark [class~="bg-blue-50"],
+html.theme-dark [class~="bg-blue-100"] {
+  background-color: #112b4c !important;
+}
+
+html.theme-dark [class~="bg-emerald-50"],
+html.theme-dark [class~="bg-emerald-100"] {
+  background-color: #10342e !important;
+}
+
+html.theme-dark [class~="bg-amber-50"],
+html.theme-dark [class~="bg-amber-100"],
+html.theme-dark [class~="bg-yellow-50"] {
+  background-color: #382c12 !important;
+}
+
+html.theme-dark [class~="bg-red-50"],
+html.theme-dark [class~="bg-red-100"] {
+  background-color: #3a1f2a !important;
+}
+
+html.theme-dark [class~="bg-purple-50"],
+html.theme-dark [class~="bg-purple-100"] {
+  background-color: #2c2149 !important;
 }
 
 html.theme-dark [class~="bg-transparent"] {
@@ -79,6 +109,37 @@ html.theme-dark [class~="text-gray-400"] {
   color: #93a6c1 !important;
 }
 
+html.theme-dark [class~="text-blue-600"],
+html.theme-dark [class~="text-blue-700"] {
+  color: #83baff !important;
+}
+
+html.theme-dark [class~="text-emerald-600"],
+html.theme-dark [class~="text-emerald-700"] {
+  color: #5ee1bc !important;
+}
+
+html.theme-dark [class~="text-amber-600"],
+html.theme-dark [class~="text-amber-700"],
+html.theme-dark [class~="text-amber-800"] {
+  color: #ffd06f !important;
+}
+
+html.theme-dark [class~="text-red-500"],
+html.theme-dark [class~="text-red-600"] {
+  color: #ff9aaa !important;
+}
+
+html.theme-dark [class~="text-purple-500"],
+html.theme-dark [class~="text-purple-600"] {
+  color: #c4b5fd !important;
+}
+
+html.theme-dark [class~="text-yellow-500"],
+html.theme-dark [class~="text-yellow-400"] {
+  color: #fde68a !important;
+}
+
 html.theme-dark [class~="border-slate-100"],
 html.theme-dark [class~="border-slate-200"],
 html.theme-dark [class~="border-slate-300"],
@@ -88,10 +149,76 @@ html.theme-dark [class~="border-gray-300"] {
   border-color: #27364d !important;
 }
 
+html.theme-dark [class~="border-blue-100"],
+html.theme-dark [class~="border-blue-200"] {
+  border-color: #28517e !important;
+}
+
+html.theme-dark [class~="border-emerald-100"],
+html.theme-dark [class~="border-emerald-200"] {
+  border-color: #286456 !important;
+}
+
+html.theme-dark [class~="border-amber-100"],
+html.theme-dark [class~="border-amber-200"] {
+  border-color: #73541a !important;
+}
+
+html.theme-dark [class~="border-red-100"],
+html.theme-dark [class~="border-red-200"] {
+  border-color: #713746 !important;
+}
+
+html.theme-dark [class~="border-purple-100"] {
+  border-color: #50417b !important;
+}
+
 html.theme-dark .theme-toggle {
   border-color: #33445e !important;
   background-color: #17243a !important;
   color: #a9c7ff !important;
+}
+
+/* Keep the app header as airy as the landing header, then give its floating state contrast. */
+html.theme-dark .app-header {
+  background-color: transparent !important;
+}
+
+html.theme-dark .app-header-shell--scrolled {
+  border-color: #27364d !important;
+  background-color: rgba(9, 15, 29, 0.9) !important;
+}
+
+.app-header button,
+.app-header a {
+  cursor: pointer;
+}
+
+html.theme-dark .app-header-nav-item {
+  color: #9bacc4 !important;
+}
+
+html.theme-dark .app-header-nav-item:hover {
+  background-color: #17243a !important;
+  color: #e5edf9 !important;
+}
+
+html.theme-dark .app-header-nav-item--active {
+  background-color: #17335c !important;
+  color: #a9cfff !important;
+}
+
+/* Freelancer jobs keeps its hero dark instead of inheriting the light blue-to-white gradient. */
+html.theme-dark .freelancer-jobs-hero {
+  border-color: #27364d !important;
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(29, 78, 216, 0.28), transparent 62%),
+    linear-gradient(135deg, #0d1728 0%, #111a2b 52%, #0b1424 100%) !important;
+}
+
+html.theme-dark .workspace-list-item:hover,
+html.theme-dark .workspace-back-button:hover {
+  background-color: #17243a !important;
+  box-shadow: none !important;
 }
 
 html.theme-dark input,
@@ -103,6 +230,28 @@ html.theme-dark select {
 html.theme-dark input::placeholder,
 html.theme-dark textarea::placeholder {
   color: #7f91ab;
+}
+
+/* Profile forms: keep fields calm on focus instead of switching back to stark white. */
+html.theme-dark .profile-page input,
+html.theme-dark .profile-page textarea,
+html.theme-dark .profile-page select {
+  border-color: #33445e !important;
+  background-color: #101b2e !important;
+  color: #e5edf9 !important;
+}
+
+html.theme-dark .profile-page input:focus,
+html.theme-dark .profile-page textarea:focus,
+html.theme-dark .profile-page select:focus {
+  border-color: #5b9cff !important;
+  background-color: #15243b !important;
+  box-shadow: 0 0 0 1px rgba(91, 156, 255, 0.72) !important;
+}
+
+html.theme-dark .profile-page input::placeholder,
+html.theme-dark .profile-page textarea::placeholder {
+  color: #7185a3;
 }
 /* Button light sweep animation */
 .btn-sweep {
@@ -152,98 +301,66 @@ html.theme-dark textarea::placeholder {
   animation: heroFadeUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Hero signal field: subtle animated data flow behind the homepage message. */
-.hero-signal-grid {
-  background-image: linear-gradient(rgba(29, 78, 216, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(29, 78, 216, 0.06) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse 66% 56% at 50% 46%, black 8%, transparent 76%);
-  opacity: 0.8;
-  animation: heroGridDrift 18s linear infinite;
+.hero-title-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(26px);
+  animation: heroTitleReveal 720ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.hero-signal-orb {
-  position: absolute;
-  width: 34rem;
-  height: 34rem;
-  border-radius: 9999px;
-  filter: blur(18px);
-  opacity: 0.2;
+.hero-title-line-two {
+  animation-delay: 140ms;
 }
 
-.hero-signal-orb-one {
-  top: -16rem;
-  left: 8%;
-  background: radial-gradient(circle, rgba(10, 170, 215, 0.56), rgba(10, 170, 215, 0));
-  animation: heroOrbFloatOne 14s ease-in-out infinite alternate;
+.hero-title-accent {
+  position: relative;
+  display: inline-block;
+  background-image: linear-gradient(
+    108deg,
+    #1d4ed8 0%,
+    #0066ff 34%,
+    #9cecff 49%,
+    #0aaad7 62%,
+    #1d4ed8 100%
+  );
+  background-position: 0% center;
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 10px rgba(29, 78, 216, 0.1));
+  will-change: background-position;
+  animation: heroAccentSweep 3.2s cubic-bezier(0.65, 0, 0.35, 1) 0.5s infinite;
 }
 
-.hero-signal-orb-two {
-  right: 5%;
-  bottom: -20rem;
-  background: radial-gradient(circle, rgba(29, 78, 216, 0.62), rgba(29, 78, 216, 0));
-  animation: heroOrbFloatTwo 17s ease-in-out infinite alternate;
-}
-
-.hero-signal-paths path {
-  stroke: rgba(29, 78, 216, 0.24);
-  stroke-width: 1.25;
-  stroke-dasharray: 12 18;
-  animation: heroSignalFlow 11s linear infinite;
-}
-
-.hero-signal-node {
-  fill: #1d4ed8;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: heroNodePulse 2.8s ease-in-out infinite;
-}
-
-.hero-signal-node-two {
-  animation-delay: 0.8s;
-}
-
-.hero-signal-node-three {
-  animation-delay: 1.6s;
-}
-
-@keyframes heroGridDrift {
+@keyframes heroTitleReveal {
   to {
-    background-position: 44px 44px;
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes heroOrbFloatOne {
-  to {
-    transform: translate3d(8rem, 5rem, 0) scale(1.12);
+@keyframes heroAccentSweep {
+  0%,
+  18%,
+  100% {
+    background-position: 0% center;
   }
-}
-
-@keyframes heroOrbFloatTwo {
-  to {
-    transform: translate3d(-7rem, -4rem, 0) scale(1.08);
-  }
-}
-
-@keyframes heroSignalFlow {
-  to {
-    stroke-dashoffset: -180;
-  }
-}
-
-@keyframes heroNodePulse {
-  50% {
-    opacity: 0.35;
-    transform: scale(2.2);
+  48%,
+  66% {
+    background-position: 100% center;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-signal-grid,
-  .hero-signal-orb,
-  .hero-signal-paths path,
-  .hero-signal-node {
+  .hero-title-line,
+  .hero-title-accent {
     animation: none;
+  }
+
+  .hero-title-line {
+    opacity: 1;
+    transform: none;
   }
 }
 

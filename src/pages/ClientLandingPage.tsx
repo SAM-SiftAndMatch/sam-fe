@@ -6,7 +6,6 @@ import CategoriesSection from '../components/landing/CategoriesSection';
 import ComparisonSection from '../components/landing/ComparisonSection';
 import CtaBand from '../components/landing/CtaBand';
 import FeaturesBento from '../components/landing/FeaturesBento';
-import HeroSignalBackground from '../components/landing/HeroSignalBackground';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
 import { PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
 import LandingFooter from '../components/landing/LandingFooter';
@@ -71,31 +70,27 @@ const ClientLandingPage: React.FC = () => {
       {/* 2. STICKY TOP NAVBAR (Slim 64px) */}
       <LandingNavbar />
 
-      {/* 3. MAIN CONTENT (12-Column Grid, Max 1200px) */}
+      {/* 3. MAIN CONTENT */}
       <main className="flex-1 w-full flex flex-col items-center relative z-10">
         {/* ================= HERO SECTION ================= */}
         <section
           id="hero"
           className="relative isolate flex w-full max-w-[1440px] flex-col items-center overflow-hidden px-4 pt-20 pb-20 text-center sm:px-6 sm:pt-24 lg:min-h-[calc(100svh-4rem)] lg:justify-center lg:px-8 lg:pb-28"
         >
-          <HeroSignalBackground />
-
           {/* Centered Headline */}
-          <h1
-            className="animate-hero-fade-up relative z-10 mb-7 max-w-4xl text-4xl font-extrabold leading-[1.08] tracking-[-0.04em] text-slate-900 sm:text-5xl md:text-6xl lg:text-[68px]"
-            style={{ animationDelay: '0ms' }}
-          >
-            Kết nối{' '}
-            <span className="bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] bg-clip-text text-transparent">
-              đúng Freelancer
+          <h1 className="relative z-10 mb-7 max-w-4xl text-4xl font-extrabold leading-[1.08] tracking-[-0.04em] text-slate-900 sm:text-5xl md:text-6xl lg:text-[68px]">
+            <span className="hero-title-line hero-title-line-one">
+              Kết nối <span className="hero-title-accent">đúng Freelancer</span>
             </span>
-            <span className="block mt-1 text-slate-800">cho dự án của bạn</span>
+            <span className="hero-title-line hero-title-line-two mt-1 text-slate-800">
+              cho dự án của bạn
+            </span>
           </h1>
 
           {/* Chat prompt label */}
           <div
             className="animate-hero-fade-up relative z-10 flex w-full flex-col items-center"
-            style={{ animationDelay: '160ms' }}
+            style={{ animationDelay: '320ms' }}
           >
             <h2 className="mb-3 text-sm font-mono font-semibold uppercase tracking-wider text-slate-700">
               Bạn cần hoàn thành công việc gì?
@@ -144,7 +139,7 @@ const ClientLandingPage: React.FC = () => {
           {/* 3 Small Example-Prompt Chips (Item 5 - 320ms delay, outside chat component) */}
           <div
             className="animate-hero-fade-up relative z-10 mb-5 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500"
-            style={{ animationDelay: '320ms' }}
+            style={{ animationDelay: '460ms' }}
           >
             <span className="font-mono text-slate-400 text-xs">Gợi ý:</span>
             {['Phát triển Website', 'Trợ lý ảo AI', 'AI Engineer'].map((tag) => (
@@ -162,7 +157,7 @@ const ClientLandingPage: React.FC = () => {
           {/* Small Trust Line (Item 6 - 400ms delay) */}
           <div
             className="animate-hero-fade-up relative z-10 mb-10 flex flex-wrap items-center justify-center gap-3 font-mono text-xs text-slate-600 sm:gap-6"
-            style={{ animationDelay: '400ms' }}
+            style={{ animationDelay: '540ms' }}
           >
             <span className="flex items-center gap-1.5 text-slate-700">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
@@ -183,7 +178,7 @@ const ClientLandingPage: React.FC = () => {
           {/* Action Buttons (Item 7 - 440ms delay) */}
           <div
             className="animate-hero-fade-up relative z-10 mb-16 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center"
-            style={{ animationDelay: '440ms' }}
+            style={{ animationDelay: '620ms' }}
           >
             <PrimaryButton to={paths.PATH_CLIENT_AI_BRIEF}>Tạo yêu cầu công việc</PrimaryButton>
             <SecondaryButton to={paths.PATH_FREELANCER}>Tìm Việc Freelance</SecondaryButton>
@@ -192,7 +187,7 @@ const ClientLandingPage: React.FC = () => {
           {/* Hero Quick Stats Row (Item 8 - 480ms delay, aligned, clean numbers) */}
           <div
             className="animate-hero-fade-up relative z-10 grid w-full grid-cols-2 gap-6 border-t border-slate-200/80 pt-10 md:grid-cols-4"
-            style={{ animationDelay: '480ms' }}
+            style={{ animationDelay: '700ms' }}
           >
             <div className="flex flex-col items-center text-center">
               <span className="text-3xl font-black text-[#1D4ED8] sm:text-4xl">

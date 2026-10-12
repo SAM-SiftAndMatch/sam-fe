@@ -36,6 +36,7 @@ const AppHeader: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const isClient = user?.role === 'CLIENT';
@@ -69,6 +70,13 @@ const AppHeader: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 24);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
     setMobileOpen(false);
     setAccountOpen(false);
   }, [location.pathname]);
@@ -92,9 +100,9 @@ const AppHeader: React.FC = () => {
       ? location.pathname === PATH_WORKSPACES || location.pathname.startsWith('/workspace/')
       : location.pathname === path || location.pathname.startsWith(`${path}/`);
   const navClass = (path: string) =>
-    `rounded-full px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8] ${
+    `app-header-nav-item cursor-pointer rounded-full px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8] ${
       isActive(path)
-        ? 'bg-[#1D4ED8]/10 text-[#1D4ED8]'
+        ? 'app-header-nav-item--active bg-[#1D4ED8]/10 text-[#1D4ED8]'
         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
     }`;
   const openNotification = (jobId?: string | null, roomId?: string | null, type?: string) => {
@@ -121,27 +129,39 @@ const AppHeader: React.FC = () => {
     ));
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
-      <div className="mx-auto flex min-h-16 max-w-[1440px] items-center gap-3 px-4 sm:px-6 lg:px-8">
+    <header className="app-header sticky top-0 z-50 flex h-16 w-full items-center justify-center pointer-events-none transition-all duration-300">
+      <div
+        className={`app-header-shell pointer-events-auto relative flex w-full items-center justify-between gap-3 transition-all duration-300 ease-out ${
+          isScrolled
+            ? 'app-header-shell--scrolled mx-4 h-[56px] max-w-[1160px] translate-y-2 rounded-full border border-slate-200/80 bg-white/80 px-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-md sm:px-7'
+            : 'mx-auto h-16 max-w-[1440px] border-b border-transparent bg-transparent px-4 sm:px-6 lg:px-8'
+        }`}
+      >
         <button
           type="button"
           onClick={() => navigate(isAuthenticated ? homePath : PATH_HOME)}
-          className="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8]"
+          className="flex shrink-0 cursor-pointer items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8]"
           aria-label="Về trang chính SAM"
         >
           <span
-            className="bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] bg-clip-text text-3xl font-black leading-none tracking-tighter text-transparent sm:text-[34px]"
+            className={`bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] bg-clip-text font-black leading-none tracking-tighter text-transparent transition-all duration-300 ${
+              isScrolled ? 'text-2xl sm:text-[28px]' : 'text-3xl sm:text-[38px]'
+            }`}
             style={{ fontFamily: "'Quedora', sans-serif" }}
           >
             SAM
           </span>
-          <span className="hidden border-l border-slate-200 pl-2 font-mono text-[10px] font-medium uppercase tracking-widest text-slate-500 xl:inline">
+          <span
+            className={`hidden border-l border-slate-200 pl-2 font-mono text-[10px] font-medium uppercase tracking-widest text-slate-500 transition-opacity duration-200 xl:inline ${
+              isScrolled ? 'opacity-80' : 'opacity-100'
+            }`}
+          >
             Sift &amp; Match
           </span>
         </button>
 
         <nav
-          className="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex"
+          className={`hidden min-w-0 flex-1 items-center justify-center lg:flex ${isScrolled ? 'gap-2' : 'gap-1'}`}
           aria-label="Điều hướng chính"
         >
           {isAuthenticated ? (
@@ -173,7 +193,9 @@ const AppHeader: React.FC = () => {
           )}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+        <div
+          className={`ml-auto flex shrink-0 items-center ${isScrolled ? 'gap-3' : 'gap-2 sm:gap-3'}`}
+        >
           <ThemeToggle />
           {isAuthenticated ? (
             <>
@@ -375,7 +397,7 @@ const AppHeader: React.FC = () => {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-slate-200 bg-white px-4 py-4 shadow-lg lg:hidden">
+        <div className="pointer-events-auto border-t border-slate-200 bg-white px-4 py-4 shadow-lg lg:hidden">
           <div className="mx-auto flex max-w-[1440px] flex-col gap-1">
             {isAuthenticated && (
               <div className="mb-2 border-b border-slate-100 px-3 pb-3">

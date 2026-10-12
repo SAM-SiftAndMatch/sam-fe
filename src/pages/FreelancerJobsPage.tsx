@@ -190,7 +190,7 @@ const FreelancerJobsPage: React.FC = () => {
       <AppHeader />
 
       {/* Hero Search Section */}
-      <section className="bg-gradient-to-br from-blue-50 via-white to-gray-50 py-16 px-4 md:px-8 relative overflow-hidden border-b border-gray-100">
+      <section className="freelancer-jobs-hero bg-gradient-to-br from-blue-50 via-white to-gray-50 py-16 px-4 md:px-8 relative overflow-hidden border-b border-gray-100">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-blue-400/10 to-transparent rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-blue-800/10 to-transparent rounded-full pointer-events-none translate-y-1/3 -translate-x-1/4" />
 

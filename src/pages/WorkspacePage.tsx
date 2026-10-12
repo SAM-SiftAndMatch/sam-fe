@@ -246,7 +246,7 @@ const WorkspacePage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/workspaces')}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-gray-600 hover:bg-white hover:shadow-sm transition-all cursor-pointer border-0 text-left"
+              className="workspace-back-button flex items-center gap-3 w-full px-4 py-3 rounded-xl text-gray-600 hover:bg-white hover:shadow-sm transition-all cursor-pointer border-0 text-left"
             >
               <span className="font-medium text-sm">Tất cả hội thoại</span>
             </button>
