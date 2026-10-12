@@ -15,11 +15,11 @@ interface FundingPanelProps {
 const paidBadge = (paid: boolean) =>
   paid ? (
     <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-200">
-      ✓ Đã chuyển
+      Đã chuyển
     </span>
   ) : (
     <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold border border-gray-200">
-      ○ Chưa chuyển
+      Chưa chuyển
     </span>
   );
 
@@ -128,7 +128,7 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
     <div className="bg-white rounded-[28px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.05)] overflow-hidden">
       <div className="px-6 md:px-8 py-5 border-b border-gray-100 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-black text-gray-900">💰 Nạp tiền khởi động</h2>
+          <h2 className="text-base font-black text-gray-900">Nạp tiền khởi động</h2>
           <p className="text-xs text-gray-400 mt-0.5">
             Đủ tiền 2 bên mới cho dự án chạy — cuối dự án freelancer nhận 90%, sàn giữ 10%
           </p>
@@ -159,7 +159,6 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
                     : 'bg-red-50 border-red-200'
               }`}
             >
-              <span className="text-xl">{verifying ? '🔍' : verifiedOk ? '✅' : '⛔'}</span>
               <div className="flex-1">
                 <p className="text-xs font-bold text-gray-800">
                   {verifying
@@ -252,7 +251,7 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
             {funding.allPaid || funding.jobStatus === 'IN_PROGRESS' ? (
               <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 text-center">
                 <p className="text-sm font-bold text-emerald-700">
-                  🎉 Đã nạp đủ tiền 2 bên — dự án chính thức bắt đầu!
+                  Đã nạp đủ tiền hai bên — dự án chính thức bắt đầu.
                 </p>
               </div>
             ) : (

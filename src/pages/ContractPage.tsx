@@ -298,7 +298,7 @@ const ContractPage: React.FC = () => {
   };
 
   const startEditing = () => {
-    if (!contract) return;
+    if (!contract || contract.status !== 'DRAFT') return;
     setEditAmount(String(contract.agreedAmount ?? ''));
     setEditTerms(contract.termsAndConditions ?? '');
     dirtyRef.current = { amount: false, terms: false };
@@ -415,36 +415,39 @@ const ContractPage: React.FC = () => {
   const otherKeep =
     role === 'client' ? contract?.freelancerKeepConfirmed : contract?.clientKeepConfirmed;
   const needsConfirm = contract?.status === 'DRAFT' && contract?.reviewStatus === 'NEEDS_CONFIRM';
+  const hasEffectiveSignatures = contract?.status === 'ACTIVE' || contract?.status === 'COMPLETED';
+  const clientSigned = hasEffectiveSignatures || Boolean(contract?.clientAgreed);
+  const freelancerSigned = hasEffectiveSignatures || Boolean(contract?.freelancerAgreed);
 
   const statusBadge = () => {
     if (!contract) return null;
     if (contract.status === 'ACTIVE')
       return (
         <span className="px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-200">
-          ✓ Đã ký — có hiệu lực
+          Đã ký — có hiệu lực
         </span>
       );
     if (contract.clientAgreed && contract.freelancerAgreed)
       return (
         <span className="px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-200">
-          ✓ Cả 2 đã ký
+          Cả 2 đã ký
         </span>
       );
     if (contract.clientAgreed || contract.freelancerAgreed)
       return (
         <span className="px-4 py-1.5 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200">
-          ⏳ Chờ chữ ký còn lại
+          Chờ chữ ký còn lại
         </span>
       );
     if (contract.reviewStatus === 'NEEDS_CONFIRM' && contract.status === 'DRAFT')
       return (
         <span className="px-4 py-1.5 bg-red-50 text-red-700 rounded-full text-xs font-bold border border-red-200">
-          🔍 AI yêu cầu xác nhận lại
+          AI yêu cầu xác nhận lại
         </span>
       );
     return (
       <span className="px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200">
-        📝 Nháp — đang thương lượng
+        Nháp — đang thương lượng
       </span>
     );
   };
@@ -452,7 +455,7 @@ const ContractPage: React.FC = () => {
   const renderConfirmPanel = () => (
     <div className="bg-red-50/60 rounded-[24px] p-5 border border-red-200 shadow-sm flex flex-col gap-3 animate-rise">
       <p className="text-sm font-bold text-red-700">
-        🤖 AI thẩm định: hợp đồng có điểm cần xác nhận lại
+        AI thẩm định: hợp đồng có điểm cần xác nhận lại
       </p>
       {contract?.reviewNote && (
         <p className="text-xs text-gray-700 leading-relaxed bg-white rounded-xl p-4 border border-red-100 whitespace-pre-wrap">
@@ -467,7 +470,7 @@ const ContractPage: React.FC = () => {
               : 'bg-gray-100 text-gray-500 border-gray-200'
           }`}
         >
-          Bạn: {myKeep ? '✓ đã giữ nguyên' : '○ chưa xác nhận'}
+          Bạn: {myKeep ? 'đã giữ nguyên' : 'chưa xác nhận'}
         </span>
         <span
           className={`px-2.5 py-1 rounded-full border ${
@@ -476,7 +479,7 @@ const ContractPage: React.FC = () => {
               : 'bg-gray-100 text-gray-500 border-gray-200'
           }`}
         >
-          Đối phương: {otherKeep ? '✓ đã giữ nguyên' : '○ chưa xác nhận'}
+          Đối phương: {otherKeep ? 'đã giữ nguyên' : 'chưa xác nhận'}
         </span>
       </div>
       <div className="flex flex-col sm:flex-row gap-2">
@@ -485,14 +488,14 @@ const ContractPage: React.FC = () => {
           onClick={startEditing}
           className="flex-1 py-3 rounded-xl bg-white border-2 border-[#1D4ED8] text-[#1D4ED8] font-bold text-sm hover:bg-blue-50 transition-colors cursor-pointer"
         >
-          ✏️ Sửa lại rồi ký tiếp
+          Sửa lại rồi ký tiếp
         </button>
         <button
           type="button"
           onClick={() => room && navigate(`/workspace/${room.id}`)}
           className="flex-1 py-3 rounded-xl bg-white border-2 border-violet-300 text-violet-700 font-bold text-sm hover:bg-violet-50 transition-colors cursor-pointer"
         >
-          💬 Sang phòng chat đọc AI nhắn
+          Sang phòng chat đọc AI nhắn
         </button>
         {!myKeep ? (
           <button
@@ -500,7 +503,7 @@ const ContractPage: React.FC = () => {
             onClick={() => handleConfirmKeep(true)}
             className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-bold text-sm shadow-md hover:bg-emerald-600 transition-colors cursor-pointer border-0"
           >
-            👍 Giữ nguyên bản này
+            Giữ nguyên bản này
           </button>
         ) : (
           <button
@@ -508,7 +511,7 @@ const ContractPage: React.FC = () => {
             onClick={() => handleConfirmKeep(false)}
             className="flex-1 py-3 rounded-xl bg-white border-2 border-gray-300 text-gray-500 font-bold text-sm hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            {otherKeep ? 'Đã giữ nguyên ✓ (chờ chốt)' : 'Đã giữ nguyên ✓ — Hủy xác nhận'}
+            {otherKeep ? 'Đã giữ nguyên (chờ chốt)' : 'Đã giữ nguyên — Hủy xác nhận'}
           </button>
         )}
       </div>
@@ -558,9 +561,6 @@ const ContractPage: React.FC = () => {
           </div>
         ) : !contract ? (
           <div className="bg-white rounded-[28px] p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.05)] text-center">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[#1D4ED8] to-[#0AAAD7] text-white flex items-center justify-center text-3xl mb-5">
-              📄
-            </div>
             <h1 className="text-2xl font-black text-gray-900 mb-2">Chưa có hợp đồng</h1>
             <p className="text-sm text-gray-500 leading-relaxed max-w-md mx-auto mb-6">
               Dự án <span className="font-bold text-gray-800">{room.jobTitle}</span> chưa có hợp
@@ -581,10 +581,10 @@ const ContractPage: React.FC = () => {
                 disabled={creating}
                 className="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold text-sm shadow-lg hover:opacity-90 transition-opacity cursor-pointer border-0 disabled:opacity-60"
               >
-                {creating ? 'AI đang soạn nháp...' : '✨ Tạo hợp đồng bằng AI'}
+                {creating ? 'AI đang soạn nháp...' : 'Tạo hợp đồng bằng AI'}
               </button>
             ) : (
-              <p className="text-xs font-bold text-gray-400">⏳ Đang chờ client tạo hợp đồng...</p>
+              <p className="text-xs font-bold text-gray-400">Đang chờ client tạo hợp đồng...</p>
             )}
           </div>
         ) : (
@@ -614,7 +614,7 @@ const ContractPage: React.FC = () => {
                       : 'bg-white text-gray-500 border border-gray-200'
                   }`}
                 >
-                  📄 Văn bản
+                  Văn bản
                 </button>
                 <button
                   type="button"
@@ -628,7 +628,7 @@ const ContractPage: React.FC = () => {
                       : 'bg-white text-gray-500 border border-gray-200'
                   }`}
                 >
-                  🕘 Lịch sử thay đổi{revisions.length > 0 ? ` (${revisions.length})` : ''}
+                  Lịch sử thay đổi{revisions.length > 0 ? ` (${revisions.length})` : ''}
                 </button>
               </div>
             </div>
@@ -693,7 +693,7 @@ const ContractPage: React.FC = () => {
                       <div>
                         {compareDiff.amountChanged && (
                           <p className="text-xs font-bold mb-3 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700">
-                            💰 Giá đổi: {formatMoney(Number(compareDiff.oldAmount))} đ →{' '}
+                            Giá đổi: {formatMoney(Number(compareDiff.oldAmount))} đ →{' '}
                             {formatMoney(Number(contract.agreedAmount))} đ
                           </p>
                         )}
@@ -761,12 +761,12 @@ const ContractPage: React.FC = () => {
                         </p>
                         <span
                           className={`text-[11px] font-bold px-2.5 py-1 rounded-full border w-fit ${
-                            contract.clientAgreed
+                            clientSigned
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : 'bg-gray-100 text-gray-500 border-gray-200'
                           }`}
                         >
-                          {contract.clientAgreed ? '✓ Đã ký' : '○ Chưa ký'}
+                          {clientSigned ? 'Đã ký' : 'Chưa ký'}
                         </span>
                       </div>
                       <div className="bg-[#F8FAFC] rounded-2xl p-5 border border-gray-100">
@@ -778,12 +778,12 @@ const ContractPage: React.FC = () => {
                         </p>
                         <span
                           className={`text-[11px] font-bold px-2.5 py-1 rounded-full border w-fit ${
-                            contract.freelancerAgreed
+                            freelancerSigned
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : 'bg-gray-100 text-gray-500 border-gray-200'
                           }`}
                         >
-                          {contract.freelancerAgreed ? '✓ Đã ký' : '○ Chưa ký'}
+                          {freelancerSigned ? 'Đã ký' : 'Chưa ký'}
                         </span>
                       </div>
                     </div>
@@ -880,7 +880,7 @@ const ContractPage: React.FC = () => {
                           />
                           <div className="bg-[#F8FAFC] border border-blue-100 rounded-2xl p-6 overflow-y-auto max-h-[520px]">
                             <p className="text-[10px] font-bold text-[#1D4ED8] uppercase tracking-widest mb-3">
-                              👁 Xem trước (bên kia cũng thấy y hệt)
+                              Xem trước (bên kia cũng thấy y hệt)
                             </p>
                             <ContractMarkdown content={editTerms} />
                           </div>
@@ -901,14 +901,18 @@ const ContractPage: React.FC = () => {
                           Bên A
                         </p>
                         <p className="text-sm font-bold text-gray-900">{contract.clientName}</p>
-                        <p className="text-lg mt-1">{contract.clientAgreed ? '✅' : '⬜'}</p>
+                        <p className="text-xs font-semibold mt-1">
+                          {clientSigned ? 'Đã ký' : 'Chưa ký'}
+                        </p>
                       </div>
                       <div className="text-center border-t-2 border-gray-900 pt-3">
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
                           Bên B
                         </p>
                         <p className="text-sm font-bold text-gray-900">{contract.freelancerName}</p>
-                        <p className="text-lg mt-1">{contract.freelancerAgreed ? '✅' : '⬜'}</p>
+                        <p className="text-xs font-semibold mt-1">
+                          {freelancerSigned ? 'Đã ký' : 'Chưa ký'}
+                        </p>
                       </div>
                     </div>
                   </section>
@@ -936,20 +940,27 @@ const ContractPage: React.FC = () => {
                 {contract.status === 'ACTIVE' ? (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-[24px] p-6 text-center">
                     <p className="text-base font-bold text-emerald-700">
-                      🎉 Hợp đồng đã có hiệu lực! Hai bên bắt đầu làm việc.
+                      Hợp đồng đã có hiệu lực. Hai bên cần hoàn tất nạp tiền khởi động.
                     </p>
                     <p className="text-xs text-emerald-600/80 mt-1">
                       Bước tiếp theo: 2 bên nạp tiền khởi động ở mục bên dưới.
+                    </p>
+                  </div>
+                ) : contract.status !== 'DRAFT' ? (
+                  <div className="bg-slate-50 border border-slate-200 rounded-[24px] p-6 text-center">
+                    <p className="text-base font-bold text-slate-700">Hợp đồng chỉ có thể xem.</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Hợp đồng ở trạng thái {contract.status.toLowerCase()} không thể chỉnh sửa.
                     </p>
                   </div>
                 ) : isEditing ? (
                   <div className="bg-white rounded-[24px] p-5 border border-blue-100 shadow-sm">
                     <div className="flex items-center justify-between gap-3 mb-3">
                       <p className="text-xs font-bold text-gray-500">
-                        {saveState === 'typing' && '● Đang nhập...'}
-                        {saveState === 'saving' && '↻ Đang lưu...'}
+                        {saveState === 'typing' && 'Đang nhập...'}
+                        {saveState === 'saving' && 'Đang lưu...'}
                         {saveState === 'saved' &&
-                          `✓ Đã lưu tự động${savedAt ? ` lúc ${savedAt}` : ''} — bên kia thấy ngay`}
+                          `Đã lưu tự động${savedAt ? ` lúc ${savedAt}` : ''} — bên kia thấy ngay`}
                         {saveState === 'idle' && 'Mọi thay đổi tự lưu sau ~1s'}
                       </p>
                       <button
@@ -961,8 +972,8 @@ const ContractPage: React.FC = () => {
                       </button>
                     </div>
                     <p className="text-[11px] text-amber-600 font-semibold">
-                      ⚠️ Mỗi lần lưu sẽ reset chữ ký của cả 2 bên về chưa ký. Hai bên cứ sửa thoải
-                      mái, không ai bị đá ra ngoài.
+                      Mỗi lần lưu sẽ reset chữ ký của cả 2 bên về chưa ký. Hai bên cứ sửa thoải mái,
+                      không ai bị đá ra ngoài.
                     </p>
                   </div>
                 ) : needsConfirm ? (
@@ -974,7 +985,7 @@ const ContractPage: React.FC = () => {
                       onClick={startEditing}
                       className="flex-1 py-3 rounded-xl bg-white border-2 border-[#1D4ED8] text-[#1D4ED8] font-bold text-sm hover:bg-blue-50 transition-colors cursor-pointer"
                     >
-                      ✏️ Cùng sửa hợp đồng
+                      Cùng sửa hợp đồng
                     </button>
                     {!myAgreed ? (
                       <button
@@ -982,7 +993,7 @@ const ContractPage: React.FC = () => {
                         onClick={() => handleSign(true)}
                         className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-bold text-sm shadow-md hover:bg-emerald-600 transition-colors cursor-pointer border-0"
                       >
-                        ✍️ Ký hợp đồng
+                        Ký hợp đồng
                       </button>
                     ) : (
                       <button
@@ -990,7 +1001,7 @@ const ContractPage: React.FC = () => {
                         onClick={() => handleSign(false)}
                         className="flex-1 py-3 rounded-xl bg-white border-2 border-gray-300 text-gray-500 font-bold text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                       >
-                        {otherAgreed ? 'Đã ký ✓ (chờ hiệu lực)' : 'Đã ký ✓ — Hủy chữ ký / Sửa lại'}
+                        {otherAgreed ? 'Đã ký (chờ hiệu lực)' : 'Đã ký — Hủy chữ ký / Sửa lại'}
                       </button>
                     )}
                   </div>

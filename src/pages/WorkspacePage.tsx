@@ -8,7 +8,25 @@ import { type ChatMessage, type ChatRoom, chatApi } from '../api/chat';
 import { type ContractBroadcast, type ContractDetail, contractApi } from '../api/contract';
 import AppHeader from '../components/AppHeader';
 import { useAuthStore } from '../stores/useAuthStore';
+import type { JobStatus } from '../types/job';
 import { formatMoney } from '../utils/format';
+
+const jobStatusLabel = (status: JobStatus | undefined): string => {
+  switch (status) {
+    case 'NEGOTIATING':
+      return 'Đang thương lượng';
+    case 'AWAITING_PAYMENT':
+      return 'Chờ nạp tiền';
+    case 'IN_PROGRESS':
+      return 'Đang thực hiện';
+    case 'COMPLETED':
+      return 'Hoàn thành';
+    case 'CANCELLED':
+      return 'Đã hủy';
+    default:
+      return 'Đang trao đổi';
+  }
+};
 
 const WorkspacePage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -178,6 +196,11 @@ const WorkspacePage: React.FC = () => {
             status: payload.contractStatus ?? prev.status,
           };
         });
+        if (payload.contractStatus === 'ACTIVE') {
+          setRoom((prev) =>
+            prev ? { ...prev, jobStatus: 'AWAITING_PAYMENT', contractStatus: 'ACTIVE' } : prev
+          );
+        }
       } catch {
         // bỏ qua
       }
@@ -231,7 +254,7 @@ const WorkspacePage: React.FC = () => {
                 {room?.jobTitle || 'Đang tải...'}
               </h2>
               <span className="text-[10px] font-bold text-[#1D4ED8] tracking-widest uppercase">
-                Đang trao đổi
+                {jobStatusLabel(room?.jobStatus)}
               </span>
             </div>
           </div>
@@ -275,9 +298,6 @@ const WorkspacePage: React.FC = () => {
           {/* Thanh hợp đồng ghim cố định — không trôi theo đoạn chat */}
           {!roomError && room && (
             <div className="bg-white px-6 py-3 border-b border-gray-100 flex items-center gap-4 shadow-sm z-10">
-              <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1D4ED8] to-[#0AAAD7] text-white flex items-center justify-center font-black shrink-0">
-                📄
-              </span>
               <span className="flex-1 min-w-0">
                 <span className="block text-sm font-bold text-gray-900">Hợp đồng</span>
                 {contractLoading ? (
@@ -303,20 +323,19 @@ const WorkspacePage: React.FC = () => {
                 className="shrink-0 px-4 py-2.5 rounded-xl bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold text-xs shadow-md transition-colors cursor-pointer border-0"
               >
                 {contract?.reviewStatus === 'NEEDS_CONFIRM'
-                  ? '⚠️ Xem AI thẩm định'
-                  : contract
-                    ? '✏️ Sửa hợp đồng'
-                    : '📄 Mở hợp đồng'}
+                  ? 'Xem AI thẩm định'
+                  : contract?.status === 'DRAFT'
+                    ? 'Sửa hợp đồng'
+                    : contract
+                      ? 'Xem hợp đồng'
+                      : 'Mở hợp đồng'}
               </button>
             </div>
           )}
 
           {/* Banner chờ AI thẩm định sau khi ký đôi (tự tắt khi tin AI tới) */}
           {awaitingReview && room && !roomError && (
-            <div className="mx-6 mt-4 rounded-2xl px-5 py-4 bg-gradient-to-r from-violet-600 to-[#1D4ED8] text-white shadow-lg flex items-center gap-3 animate-rise">
-              <span className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-xl animate-pulse shrink-0">
-                🤖
-              </span>
+            <div className="mx-6 mt-4 rounded-2xl px-5 py-4 bg-gradient-to-r from-violet-600 to-[#1D4ED8] text-white shadow-lg animate-rise">
               <div className="flex-1">
                 <p className="text-sm font-bold">Đã đủ 2 chữ ký! AI đang thẩm định hợp đồng...</p>
                 <p className="text-xs text-white/75">
@@ -356,10 +375,7 @@ const WorkspacePage: React.FC = () => {
                   return (
                     <div key={m.id} className="flex justify-center animate-rise">
                       <div className="max-w-[90%] bg-gradient-to-br from-violet-600 via-[#6D28D9] to-[#1D4ED8] text-white rounded-3xl px-5 py-4 shadow-lg">
-                        <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-white/80 mb-1.5">
-                          <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-sm">
-                            🤖
-                          </span>
+                        <p className="text-[11px] font-black uppercase tracking-widest text-white/80 mb-1.5">
                           SAM AI hệ thống
                         </p>
                         <p className="text-[13px] leading-relaxed whitespace-pre-wrap">

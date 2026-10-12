@@ -1,11 +1,15 @@
 import { requireApiResult } from '../lib/api-error';
 import apiClient from '../lib/axios';
 import type { ApiResponse } from '../types/api';
+import type { JobStatus } from '../types/job';
+import type { ContractStatus } from './contract';
 
 export interface ChatRoom {
   id: string;
   jobId: string;
   jobTitle: string;
+  jobStatus: JobStatus;
+  contractStatus?: ContractStatus | null;
   clientId: string;
   clientName: string;
   freelancerId: string;
