@@ -1,43 +1,315 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
-  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+@theme {
+  --font-sans: "Be Vietnam Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+:root {
+  --sans: "Be Vietnam Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --primary: #1d4ed8;
+  --primary-hover: #153bb5;
+  --surface: #ffffff;
+  --bg: #f8fafc;
+  --border: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
 }
 
 body {
   margin: 0;
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--text);
+  font-family: var(--font-sans);
+  background: #f8fafc;
+  color: #0f172a;
   -webkit-font-smoothing: antialiased;
+}
+/* Button light sweep animation */
+.btn-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-sweep::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -100%;
+  width: 50%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+
+.btn-sweep:hover::after {
+  animation: btnSweep 600ms ease-out;
+}
+
+@keyframes btnSweep {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+
+/* Hero sequential entrance animations */
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hero-fade-up {
+  opacity: 0;
+  animation: heroFadeUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Scroll reveal utility */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms
+    cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================================================================
+   WORKFLOW PIPELINE AMBIENT SEQUENCE (Process Section)
+   Step 1 flashes -> Line 1-2 sweeps -> Step 2 flashes -> Line 2-3 sweeps -> Step 3 flashes -> Loop
+   Soft, eye-friendly, low-glare glow.
+   ========================================================================= */
+
+@keyframes ambientStepPulse1 {
+  0%,
+  3% {
+    border-color: rgba(37, 99, 235, 0.55);
+    box-shadow: 0 0 16px rgba(37, 99, 235, 0.14), 0 2px 6px rgba(0, 0, 0, 0.03);
+    transform: translateY(-2px);
+  }
+  16% {
+    border-color: rgba(37, 99, 235, 0.35);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(-1px);
+  }
+  24%,
+  100% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(0);
+  }
+}
+
+@keyframes ambientStepPulse2 {
+  0%,
+  33% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(0);
+  }
+  35%,
+  38% {
+    border-color: rgba(37, 99, 235, 0.55);
+    box-shadow: 0 0 16px rgba(37, 99, 235, 0.14), 0 2px 6px rgba(0, 0, 0, 0.03);
+    transform: translateY(-2px);
+  }
+  50% {
+    border-color: rgba(37, 99, 235, 0.35);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(-1px);
+  }
+  58%,
+  100% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(0);
+  }
+}
+
+@keyframes ambientStepPulse3 {
+  0%,
+  69% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(0);
+  }
+  71%,
+  74% {
+    border-color: rgba(37, 99, 235, 0.55);
+    box-shadow: 0 0 16px rgba(37, 99, 235, 0.14), 0 2px 6px rgba(0, 0, 0, 0.03);
+    transform: translateY(-2px);
+  }
+  86% {
+    border-color: rgba(37, 99, 235, 0.35);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(-1px);
+  }
+  94%,
+  100% {
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(0);
+  }
+}
+
+@keyframes ambientLineSweep1H {
+  0%,
+  18% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  19% {
+    opacity: 0.95;
+    transform: translateX(-100%);
+  }
+  35% {
+    opacity: 0.95;
+    transform: translateX(100%);
+  }
+  37%,
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ambientLineSweep2H {
+  0%,
+  54% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  55% {
+    opacity: 0.95;
+    transform: translateX(-100%);
+  }
+  71% {
+    opacity: 0.95;
+    transform: translateX(100%);
+  }
+  73%,
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ambientLineSweep1V {
+  0%,
+  18% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  19% {
+    opacity: 0.95;
+    transform: translateY(-100%);
+  }
+  35% {
+    opacity: 0.95;
+    transform: translateY(100%);
+  }
+  37%,
+  100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes ambientLineSweep2V {
+  0%,
+  54% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  55% {
+    opacity: 0.95;
+    transform: translateY(-100%);
+  }
+  71% {
+    opacity: 0.95;
+    transform: translateY(100%);
+  }
+  73%,
+  100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes ambientTrackGlow1 {
+  0%,
+  18% {
+    background-color: rgba(203, 213, 225, 0.9);
+  }
+  22%,
+  33% {
+    background-color: rgba(96, 165, 250, 0.7);
+  }
+  37%,
+  100% {
+    background-color: rgba(203, 213, 225, 0.9);
+  }
+}
+
+@keyframes ambientTrackGlow2 {
+  0%,
+  54% {
+    background-color: rgba(203, 213, 225, 0.9);
+  }
+  58%,
+  69% {
+    background-color: rgba(96, 165, 250, 0.7);
+  }
+  73%,
+  100% {
+    background-color: rgba(203, 213, 225, 0.9);
+  }
+}
+
+.animate-ambient-node-1 {
+  animation: ambientStepPulse1 6s ease-in-out infinite;
+}
+.animate-ambient-node-2 {
+  animation: ambientStepPulse2 6s ease-in-out infinite;
+}
+.animate-ambient-node-3 {
+  animation: ambientStepPulse3 6s ease-in-out infinite;
+}
+
+.animate-ambient-line-sweep-1-h {
+  animation: ambientLineSweep1H 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.animate-ambient-line-sweep-2-h {
+  animation: ambientLineSweep2H 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-ambient-line-sweep-1-v {
+  animation: ambientLineSweep1V 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.animate-ambient-line-sweep-2-v {
+  animation: ambientLineSweep2V 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-ambient-track-glow-1 {
+  animation: ambientTrackGlow1 6s ease-in-out infinite;
+}
+.animate-ambient-track-glow-2 {
+  animation: ambientTrackGlow2 6s ease-in-out infinite;
 }
 
 /* Hiệu ứng mượt cho banner/panel xuất hiện (AI thẩm định, xác nhận...) */
@@ -54,4 +326,14 @@ body {
 
 .animate-rise {
   animation: rise-in 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

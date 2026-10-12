@@ -2,6 +2,8 @@ import type React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ClientDashboardHeader from '../components/ClientDashboardHeader';
 import Footer from '../components/Footer';
+import { InteractiveBackground } from '../components/landing/InteractiveBackground';
+import { MonoTag } from '../components/landing/LandingButtons';
 import { PATH_CLIENT_DASHBOARD, PATH_CLIENT_PROJECT_DETAIL } from '../routes/paths';
 import type { JobResponse } from '../types/job';
 
@@ -23,195 +25,100 @@ const SuccessProjectPage: React.FC = () => {
     : new Date().toLocaleDateString('vi-VN');
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col relative overflow-hidden">
+      <InteractiveBackground />
       <ClientDashboardHeader />
 
-      <main className="flex-1 flex items-center justify-center py-12 px-4">
-        <div className="bg-white rounded-[32px] p-10 shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-gray-100 w-full max-w-lg flex flex-col items-center text-center px-7">
-          {/* Icon Success */}
-          <div className="relative mb-8 mt-4">
-            {/* Glow background */}
-            <div className="absolute inset-0 bg-[#0AAAD7] rounded-full opacity-20 blur-lg scale-[1.2]" />
-            {/* Main Icon Container */}
-            <div className="relative w-20 h-20 rounded-full bg-white border-[1px] border-cyan-400 flex items-center justify-center shadow-lg">
-              <svg
-                className="w-10 h-10"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="url(#samGradient)"
-                strokeWidth={3}
-                role="img"
-                aria-label="Success"
-              >
-                <defs>
-                  <linearGradient id="samGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#1D4ED8" />
-                    <stop offset="100%" stopColor="#0AAAD7" />
-                  </linearGradient>
-                </defs>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+      <main className="flex-1 flex items-center justify-center py-16 px-4 z-10">
+        <div className="bg-white rounded-xl p-8 sm:p-10 shadow-xs border border-slate-200/90 w-full max-w-lg flex flex-col items-center text-center">
+          <div className="mb-4">
+            <MonoTag variant="primary">PROJECT {'//'} PUBLISHED</MonoTag>
           </div>
 
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] mb-3">
+          {/* Main Icon Container */}
+          <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mb-5">
+            <svg
+              className="w-7 h-7"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+
+          <h1 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">
             Dự án đã được đăng thành công
           </h1>
-          <p className="text-gray-500 text-sm leading-relaxed mb-8">
+          <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
             Freelancer sẽ sớm gửi đề xuất cho dự án của bạn
           </p>
 
           {/* Tóm tắt dự án: Ngân sách + Thời gian + Kỹ năng */}
           {jobData && (
-            <div className="w-full mb-4 space-y-3">
+            <div className="w-full mb-6 space-y-3">
               {/* Ngân sách & thời gian */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-[#EEF2FF] rounded-xl p-4 border border-[#DCE4FF] text-left">
-                  <span className="text-[9px] font-bold text-[#1D4ED8] uppercase tracking-widest mb-1 block">
-                    Ngân sách
+                <div className="bg-slate-50 rounded-lg p-3.5 border border-slate-100 text-left">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1 block">
+                    NGÂN SÁCH
                   </span>
-                  <span className="text-lg font-black text-[#1D4ED8]">
+                  <span className="text-base font-bold font-mono text-[#1D4ED8]">
                     {new Intl.NumberFormat('vi-VN').format(Number(jobData.budgetMin))} đ
                   </span>
                 </div>
-                <div className="bg-[#F8FAFC] rounded-xl p-4 border border-gray-100 text-left">
-                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 block">
-                    Thời gian thực hiện
+                <div className="bg-slate-50 rounded-lg p-3.5 border border-slate-100 text-left">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1 block">
+                    THỜI GIAN
                   </span>
-                  <span className="text-lg font-black text-gray-900">
-                    {jobData.estimatedDurationMonths ?? '—'}{' '}
-                    <span className="text-xs font-bold text-gray-400">tháng</span>
+                  <span className="text-sm font-semibold text-slate-900">
+                    {jobData.estimatedDurationMonths
+                      ? `${jobData.estimatedDurationMonths} tháng`
+                      : 'Theo thỏa thuận'}
                   </span>
                 </div>
               </div>
 
-              {/* Kỹ năng + năm kinh nghiệm */}
-              {jobData.skills && jobData.skills.length > 0 && (
-                <div className="bg-[#F8FAFC] rounded-xl p-4 border border-gray-100 text-left">
-                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">
-                    Kỹ năng yêu cầu
+              {/* Chi tiết thêm */}
+              <div className="grid grid-cols-2 gap-3 text-left">
+                <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1 block">
+                    NGÀY ĐĂNG
                   </span>
-                  <div className="flex flex-wrap gap-2">
-                    {jobData.skills.map((skill) => (
-                      <span
-                        key={skill.id}
-                        className="inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1.5 text-xs font-semibold text-gray-700"
-                      >
-                        {skill.name}
-                        {skill.yearsOfExperience != null && (
-                          <span className="text-[10px] text-[#1D4ED8] font-bold">
-                            {skill.yearsOfExperience} năm
-                          </span>
-                        )}
-                      </span>
-                    ))}
-                  </div>
+                  <span className="text-xs font-semibold text-slate-900">{createdDate}</span>
                 </div>
-              )}
-
-              {/* Link SRS */}
-              {jobData.srsDocumentUrl && (
-                <a
-                  href={jobData.srsDocumentUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-[#1D4ED8] text-[#1D4ED8] font-bold text-xs hover:bg-[#EEF2FF] transition-colors"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.293.707l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  Xem tài liệu SRS đính kèm
-                </a>
-              )}
+                <div className="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
+                  <span className="text-[10px] font-mono text-[#1D4ED8] uppercase tracking-wider mb-1 block">
+                    TRẠNG THÁI
+                  </span>
+                  <span className="text-xs font-bold text-[#1D4ED8] flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#1D4ED8] animate-pulse" />
+                    {jobData.status === 'OPEN' ? 'Đang tuyển' : 'Đang chờ đề xuất'}
+                  </span>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Info Grid */}
-          <div className="grid grid-cols-3 gap-3 w-full mb-8">
-            <div className="bg-[#F8FAFC] rounded-xl p-3 flex flex-col items-start border border-gray-100">
-              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                MÃ DỰ ÁN
-              </span>
-              <span className="text-xs font-bold text-[#1D4ED8]">
-                {jobData?.id ? `#${jobData.id.slice(0, 8)}` : `ID_SAM${new Date().getFullYear()}`}
-              </span>
-            </div>
-            <div className="bg-[#F8FAFC] rounded-xl p-3 flex flex-col items-start border border-gray-100">
-              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                NGÀY ĐĂNG
-              </span>
-              <span className="text-xs font-bold text-gray-900">{createdDate}</span>
-            </div>
-            <div className="bg-[#EEF2FF] rounded-xl p-3 flex flex-col items-start border border-[#DCE4FF]">
-              <span className="text-[9px] font-bold text-[#1D4ED8] uppercase tracking-widest mb-1">
-                TRẠNG THÁI
-              </span>
-              <span className="text-xs font-bold text-[#1D4ED8] flex items-center gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#1D4ED8] animate-pulse" />
-                {jobData?.status === 'OPEN' ? 'Đang tuyển' : 'Đang chờ đề xuất'}
-              </span>
-            </div>
-          </div>
-
           {/* Actions */}
-          <div className="flex w-full gap-3">
+          <div className="flex flex-col sm:flex-row w-full gap-3">
             <button
               type="button"
               onClick={() => navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', jobId))}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] hover:opacity-90 text-white font-bold transition-opacity cursor-pointer text-sm border-0 shadow-md"
+              className="group relative flex-1 h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-medium text-sm rounded-lg border-t border-t-blue-400/30 transition-all duration-200 active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.08)] btn-sweep"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                role="img"
-                aria-label="View"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              </svg>
-              Xem dự án
+              <span>Xem dự án</span>
+              <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
+                →
+              </span>
             </button>
             <button
               type="button"
               onClick={() => navigate(PATH_CLIENT_DASHBOARD)}
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl border border-dashed border-[#1D4ED8] text-[#1D4ED8] font-bold hover:bg-[#EEF2FF] transition-colors cursor-pointer text-sm"
+              className="flex-1 h-[44px] bg-white border border-slate-200 text-slate-700 hover:text-[#1D4ED8] hover:border-[#1D4ED8] hover:bg-blue-50/40 font-medium text-sm rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                role="img"
-                aria-label="Dashboard"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                />
-              </svg>
               Về trang tổng quan
             </button>
           </div>
