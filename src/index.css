@@ -28,6 +28,34 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Shared Freelancer workspace surface. Individual pages keep their content, but speak one UI language. */
+.freelancer-route > main {
+  max-width: 1440px !important;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.freelancer-route main [class*="shadow-[0_2px_15px"],
+.freelancer-route main [class*="shadow-[0_1px_3px"],
+.freelancer-route main [class~="shadow-sm"] {
+  border-color: rgb(226 232 240 / 0.9) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.03) !important;
+}
+
+.freelancer-route main input:not([type="radio"]):not([type="checkbox"]),
+.freelancer-route main textarea,
+.freelancer-route main select {
+  border-radius: 8px;
+}
+
+@media (min-width: 768px) {
+  .freelancer-route > main {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
 /* Global dark mode. Attribute selectors also cover existing Tailwind utility classes across pages. */
 html.theme-dark,
 html.theme-dark body {

@@ -5,6 +5,7 @@ import {
 } from '@/features/subscription';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
+import AppHeader from '../components/AppHeader';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
 import { MonoTag, PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
 import LandingFooter from '../components/landing/LandingFooter';
@@ -44,12 +45,12 @@ const FreelancerPricingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans flex flex-col relative selection:bg-[#1D4ED8]/10 selection:text-[#1D4ED8]">
+    <div className="freelancer-route min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans flex flex-col relative selection:bg-[#1D4ED8]/10 selection:text-[#1D4ED8]">
       {/* Background Matrix Canvas */}
       <InteractiveBackground />
 
-      {/* Morphing Sticky Navbar */}
-      <LandingNavbar />
+      {/* Use the authenticated product header inside the Freelancer workspace. */}
+      {isAuthenticated ? <AppHeader /> : <LandingNavbar />}
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 flex flex-col items-center relative z-10">

@@ -145,7 +145,7 @@ const FreelancerEarningsPage: React.FC = () => {
   const isPositiveGrowth = Number(growthPercent) >= 0;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="freelancer-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-8">

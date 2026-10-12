@@ -69,7 +69,7 @@ const FreelancerApplicationsPage: React.FC = () => {
   const formatMoney = (n: number) => `${new Intl.NumberFormat('vi-VN').format(n)}đ`;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="freelancer-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-10 py-10">

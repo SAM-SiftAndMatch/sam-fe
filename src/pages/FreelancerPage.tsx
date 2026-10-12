@@ -88,7 +88,7 @@ const FreelancerPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans flex flex-col relative selection:bg-[#1D4ED8]/10 selection:text-[#1D4ED8]">
+    <div className="freelancer-route min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans flex flex-col relative selection:bg-[#1D4ED8]/10 selection:text-[#1D4ED8]">
       {/* Background Matrix Canvas */}
       <InteractiveBackground />
 

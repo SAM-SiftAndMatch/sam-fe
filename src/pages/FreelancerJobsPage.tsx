@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import AppHeader from '../components/AppHeader';
@@ -36,23 +36,25 @@ function timeAgo(dateStr: string): string {
   return `${days} ngày trước`;
 }
 
+const JOBS_PER_PAGE = 10;
+
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
 const JobCardSkeleton: React.FC = () => (
-  <div className="bg-white rounded-2xl p-6 border border-gray-100 animate-pulse">
+  <div className="animate-pulse rounded-[12px] border border-slate-200/90 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
     <div className="flex gap-4">
       <div className="flex-1 space-y-3">
-        <div className="h-4 bg-gray-200 rounded w-1/4" />
-        <div className="h-6 bg-gray-200 rounded w-3/4" />
+        <div className="h-3 w-1/4 rounded bg-slate-200" />
+        <div className="h-6 w-3/4 rounded bg-slate-200" />
         <div className="flex gap-2">
-          <div className="h-6 bg-gray-200 rounded-full w-16" />
-          <div className="h-6 bg-gray-200 rounded-full w-20" />
-          <div className="h-6 bg-gray-200 rounded-full w-14" />
+          <div className="h-6 w-16 rounded-[4px] bg-slate-200" />
+          <div className="h-6 w-20 rounded-[4px] bg-slate-200" />
+          <div className="h-6 w-14 rounded-[4px] bg-slate-200" />
         </div>
       </div>
       <div className="w-40 space-y-3">
-        <div className="h-4 bg-gray-200 rounded" />
-        <div className="h-10 bg-gray-200 rounded-full" />
+        <div className="h-4 rounded bg-slate-200" />
+        <div className="h-10 rounded-[8px] bg-slate-200" />
       </div>
     </div>
   </div>
@@ -67,46 +69,43 @@ interface JobCardProps {
 const JobCard: React.FC<JobCardProps> = ({ job, onApply, onDetail }) => (
   <article
     onClick={() => onDetail(job.id)}
-    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-blue-400 hover:shadow-[0_8px_30px_rgba(59,130,246,0.08)] transition-all group cursor-pointer flex flex-col md:flex-row md:items-start gap-4"
+    className="group flex cursor-pointer flex-col gap-5 rounded-[12px] border border-slate-200/90 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#1D4ED8]/60 hover:shadow-[0_8px_24px_rgba(29,78,216,0.08)] md:flex-row md:items-start"
     aria-label={`Job: ${job.title}`}
   >
-    <div className="flex-1 min-w-0">
-      {/* Badge row */}
-      <div className="flex flex-wrap items-center gap-2 mb-2">
+    <div className="min-w-0 flex-1">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         {job.isUrgentHiring && (
-          <span className="text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-md uppercase tracking-wide">
+          <span className="rounded-[4px] bg-red-500 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide text-white">
             Tuyển gấp
           </span>
         )}
         {job.isFeatured && (
-          <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md uppercase tracking-wide">
+          <span className="rounded-[4px] bg-amber-100 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide text-amber-700">
             Nổi bật
           </span>
         )}
-        <span className="text-sm text-gray-400 font-medium">Đăng {timeAgo(job.createdAt)}</span>
+        <span className="font-mono text-[10px] font-medium uppercase tracking-wide text-slate-400">
+          Đăng {timeAgo(job.createdAt)}
+        </span>
       </div>
 
-      {/* Title */}
-      <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-700 transition-colors line-clamp-2">
+      <h3 className="mb-3 line-clamp-2 text-xl font-bold text-slate-900 transition-colors group-hover:text-[#1D4ED8]">
         {job.title}
       </h3>
+      <p className="mb-5 line-clamp-2 text-sm leading-relaxed text-slate-600">{job.description}</p>
 
-      {/* Description preview */}
-      <p className="text-gray-500 text-sm mb-4 line-clamp-2">{job.description}</p>
-
-      {/* Skills */}
-      {job.skills && job.skills.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+      {job.skills.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
           {job.skills.slice(0, 5).map((skill) => (
             <span
               key={skill.id}
-              className="text-xs text-gray-600 bg-gray-100 hover:bg-blue-50 hover:text-blue-700 px-3 py-1 rounded-full transition-colors"
+              className="rounded-[4px] bg-slate-100 px-2 py-1 font-mono text-[10px] text-slate-600 transition-colors group-hover:bg-[#1D4ED8]/[0.05] group-hover:text-[#1D4ED8]"
             >
               {skill.name}
             </span>
           ))}
           {job.skills.length > 5 && (
-            <span className="text-xs text-gray-400 px-3 py-1 rounded-full bg-gray-50">
+            <span className="rounded-[4px] bg-slate-50 px-2 py-1 font-mono text-[10px] text-slate-400">
               +{job.skills.length - 5}
             </span>
           )}
@@ -114,25 +113,28 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApply, onDetail }) => (
       )}
     </div>
 
-    {/* Right panel */}
-    <div className="md:w-48 shrink-0 flex flex-col md:items-end justify-between gap-4 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
+    <div className="flex shrink-0 flex-col justify-between gap-5 border-t border-slate-100 pt-5 md:w-52 md:items-end md:border-t-0 md:border-l md:pl-6 md:pt-0">
       <div className="text-left md:text-right">
-        <p className="text-xs text-gray-400 mb-1 uppercase tracking-wide">Ngân sách</p>
-        <p className="font-bold text-gray-900 text-sm leading-snug">
+        <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Ngân sách
+        </p>
+        <p className="text-sm font-bold leading-snug text-slate-900">
           {formatBudget(job.budgetMin, job.budgetMax)}
         </p>
         {job.estimatedDurationMonths && (
-          <p className="text-xs text-gray-400 mt-1">~{job.estimatedDurationMonths} tháng</p>
+          <p className="mt-1 font-mono text-[10px] text-slate-400">
+            ~{job.estimatedDurationMonths} tháng
+          </p>
         )}
       </div>
 
       <button
         type="button"
-        onClick={(e) => {
-          e.stopPropagation();
+        onClick={(event) => {
+          event.stopPropagation();
           onApply(job.id);
         }}
-        className="w-full md:w-auto bg-gradient-to-r from-blue-700 to-sky-400 hover:shadow-[0_4px_15px_rgba(0,178,255,0.35)] text-white font-semibold py-2 px-6 rounded-full transition-all cursor-pointer border-0 text-sm whitespace-nowrap"
+        className="w-full whitespace-nowrap rounded-[8px] border-0 bg-[#1D4ED8] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#153BB5] md:w-auto"
       >
         Ứng tuyển
       </button>
@@ -144,8 +146,15 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApply, onDetail }) => (
 
 const FreelancerJobsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [projectQuery, setProjectQuery] = useState('');
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [customSkillQuery, setCustomSkillQuery] = useState('');
+  const [isCustomSkillSearchOpen, setIsCustomSkillSearchOpen] = useState(false);
+  const [budgetFilter, setBudgetFilter] = useState<
+    'all' | 'under_5m' | 'from_5m_to_20m' | 'over_20m' | 'negotiable'
+  >('all');
   const [sortBy, setSortBy] = useState<'newest' | 'budget_desc' | 'budget_asc'>('newest');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const {
     data: jobs = [],
@@ -159,15 +168,53 @@ const FreelancerJobsPage: React.FC = () => {
     staleTime: 60_000, // 1 min cache
   });
 
+  const popularSkills = useMemo(() => {
+    const counts = new Map<string, { name: string; count: number }>();
+    for (const job of jobs) {
+      for (const skill of job.skills) {
+        const key = skill.name.trim().toLowerCase();
+        const existing = counts.get(key);
+        counts.set(key, {
+          name: skill.name,
+          count: (existing?.count ?? 0) + 1,
+        });
+      }
+    }
+    return [...counts.values()]
+      .sort((first, second) => second.count - first.count)
+      .slice(0, 8)
+      .map((skill) => skill.name);
+  }, [jobs]);
+
   // Filter + sort
   const filteredJobs = useMemo(() => {
     let result = jobs.filter((job) => {
-      const q = searchTerm.toLowerCase();
-      return (
-        job.title.toLowerCase().includes(q) ||
-        job.description.toLowerCase().includes(q) ||
-        job.skills?.some((s) => s.name.toLowerCase().includes(q))
-      );
+      const projectKeyword = projectQuery.trim().toLowerCase();
+      const customSkillKeyword = customSkillQuery.trim().toLowerCase();
+      const selectedSkillKeys = selectedSkills.map((skill) => skill.toLowerCase());
+      const matchesProject =
+        !projectKeyword ||
+        job.title.toLowerCase().includes(projectKeyword) ||
+        job.description.toLowerCase().includes(projectKeyword);
+      const matchesSkill =
+        (selectedSkillKeys.length === 0 && !customSkillKeyword) ||
+        job.skills.some(
+          (skill) =>
+            selectedSkillKeys.includes(skill.name.toLowerCase()) ||
+            (Boolean(customSkillKeyword) && skill.name.toLowerCase().includes(customSkillKeyword))
+        );
+      const referenceBudget = job.budgetMax ?? job.budgetMin ?? null;
+      const matchesBudget =
+        budgetFilter === 'all' ||
+        (budgetFilter === 'negotiable' && referenceBudget === null) ||
+        (budgetFilter === 'under_5m' && referenceBudget !== null && referenceBudget < 5_000_000) ||
+        (budgetFilter === 'from_5m_to_20m' &&
+          referenceBudget !== null &&
+          referenceBudget >= 5_000_000 &&
+          referenceBudget <= 20_000_000) ||
+        (budgetFilter === 'over_20m' && referenceBudget !== null && referenceBudget > 20_000_000);
+
+      return matchesProject && matchesSkill && matchesBudget;
     });
 
     if (sortBy === 'budget_desc') {
@@ -180,36 +227,82 @@ const FreelancerJobsPage: React.FC = () => {
     // 'newest' giữ nguyên thứ tự API trả về (đã sort createdAt DESC)
 
     return result;
-  }, [jobs, searchTerm, sortBy]);
+  }, [budgetFilter, customSkillQuery, jobs, projectQuery, selectedSkills, sortBy]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [projectQuery, selectedSkills, customSkillQuery, budgetFilter, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / JOBS_PER_PAGE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedJobs = useMemo(
+    () =>
+      filteredJobs.slice((safeCurrentPage - 1) * JOBS_PER_PAGE, safeCurrentPage * JOBS_PER_PAGE),
+    [filteredJobs, safeCurrentPage]
+  );
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
+    if (safeCurrentPage <= 3) return [1, 2, 3, 4, 'ellipsis', totalPages] as const;
+    if (safeCurrentPage >= totalPages - 2)
+      return [1, 'ellipsis', totalPages - 3, totalPages - 2, totalPages - 1, totalPages] as const;
+    return [
+      1,
+      'ellipsis',
+      safeCurrentPage - 1,
+      safeCurrentPage,
+      safeCurrentPage + 1,
+      'ellipsis-end',
+      totalPages,
+    ] as const;
+  }, [safeCurrentPage, totalPages]);
 
   const handleDetail = (jobId: string) => navigate(paths.PATH_JOB_DETAIL.replace(':id', jobId));
   const handleApply = (jobId: string) => navigate(paths.PATH_JOB_APPLY.replace(':id', jobId));
+  const hasFilters = Boolean(
+    projectQuery || selectedSkills.length > 0 || customSkillQuery || budgetFilter !== 'all'
+  );
+  const clearFilters = () => {
+    setProjectQuery('');
+    setSelectedSkills([]);
+    setCustomSkillQuery('');
+    setIsCustomSkillSearchOpen(false);
+    setBudgetFilter('all');
+  };
+  const togglePopularSkill = (skill: string) => {
+    setSelectedSkills((currentSkills) =>
+      currentSkills.some((currentSkill) => currentSkill.toLowerCase() === skill.toLowerCase())
+        ? currentSkills.filter((currentSkill) => currentSkill.toLowerCase() !== skill.toLowerCase())
+        : [...currentSkills, skill]
+    );
+  };
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    document.getElementById('job-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="freelancer-route flex min-h-screen flex-col bg-[#F8FAFC] font-sans">
       <AppHeader />
 
       {/* Hero Search Section */}
-      <section className="freelancer-jobs-hero bg-gradient-to-br from-blue-50 via-white to-gray-50 py-16 px-4 md:px-8 relative overflow-hidden border-b border-gray-100">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-blue-400/10 to-transparent rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-blue-800/10 to-transparent rounded-full pointer-events-none translate-y-1/3 -translate-x-1/4" />
+      <section className="freelancer-jobs-hero relative overflow-hidden border-b border-slate-200/80 bg-[#F8FAFC] px-4 py-12 md:px-8 md:py-14">
+        <div className="pointer-events-none absolute right-0 top-0 h-80 w-80 -translate-y-1/2 translate-x-1/3 rounded-full bg-[#1D4ED8]/[0.04]" />
 
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-4">
-            Tìm dự án phù hợp với{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-sky-400">
-              kỹ năng
-            </span>{' '}
-            của bạn
-          </h1>
-          <p className="text-gray-500 mb-8 text-base md:text-lg">
-            {isLoading ? 'Đang tải...' : `${jobs.length} dự án đang mở — mới nhất trước`}
+        <div className="relative z-10 mx-auto max-w-5xl text-center">
+          <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
+            Thị trường việc làm {'//'} Realtime jobs
           </p>
+          <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+            Tìm dự án phù hợp với <span className="text-[#1D4ED8]">kỹ năng</span> của bạn
+          </h1>
 
-          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center gap-3 bg-white p-2 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-gray-100">
-            <div className="flex-1 w-full relative flex items-center">
+          <p className="mb-7 text-sm text-slate-600 md:text-base">
+            Khám phá dự án phù hợp và kết nối với khách hàng ngay hôm nay.
+          </p>
+          <div className="mx-auto flex max-w-3xl gap-3">
+            <label className="group flex h-11 min-w-0 flex-1 items-center gap-2 rounded-[8px] border border-slate-200/90 bg-white px-4 text-left shadow-[0_1px_3px_rgba(0,0,0,0.03)] transition-colors focus-within:border-[#1D4ED8] focus-within:ring-2 focus-within:ring-[#1D4ED8]/10">
               <svg
-                className="w-5 h-5 text-gray-400 absolute left-4"
+                className="h-4 w-4 shrink-0 text-slate-400 group-focus-within:text-[#1D4ED8]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -223,111 +316,308 @@ const FreelancerJobsPage: React.FC = () => {
                 />
               </svg>
               <input
-                id="job-search-input"
+                id="job-project-search-input"
                 type="text"
-                placeholder="Tìm tên dự án, kỹ năng, công nghệ..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-transparent border-none text-gray-800 placeholder:text-gray-400 text-base pl-12 pr-4 py-3 focus:outline-none focus:ring-0"
+                placeholder="Tìm theo tên hoặc mô tả dự án..."
+                value={projectQuery}
+                onChange={(e) => setProjectQuery(e.target.value)}
+                className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:ring-0"
               />
-              {searchTerm && (
-                <button
-                  type="button"
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-4 text-gray-400 hover:text-gray-600 bg-transparent border-0 cursor-pointer p-0"
-                  aria-label="Clear search"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+            </label>
             <button
               type="button"
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-700 to-sky-400 hover:shadow-[0_8px_25px_rgba(0,178,255,0.3)] text-white font-bold py-3 px-8 rounded-xl transition-all cursor-pointer border-0"
+              onClick={() =>
+                document
+                  .getElementById('job-results')
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+              className="h-11 shrink-0 cursor-pointer rounded-[8px] border-0 bg-[#1D4ED8] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#153BB5]"
             >
-              Tìm việc
+              Tìm kiếm
             </button>
           </div>
         </div>
       </section>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 py-10">
-        {/* Toolbar */}
-        <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {isLoading
-              ? 'Đang tải dự án...'
-              : `${filteredJobs.length} dự án${searchTerm ? ` cho "${searchTerm}"` : ' mở'}`}
-          </h2>
-          <select
-            id="job-sort-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 outline-none cursor-pointer"
-          >
-            <option value="newest">Mới nhất trước</option>
-            <option value="budget_desc">Ngân sách: Cao → Thấp</option>
-            <option value="budget_asc">Ngân sách: Thấp → Cao</option>
-          </select>
-        </div>
+      <main className="mx-auto w-full max-w-[1440px] flex-1 px-3 py-10 md:px-5">
+        <div className="grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
+          <aside className="h-fit rounded-[12px] border border-slate-200/90 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)] lg:sticky lg:top-24 lg:mt-[68px]">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-900">Bộ lọc tìm việc</h2>
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="cursor-pointer border-0 bg-transparent p-0 text-xs font-semibold text-[#1D4ED8] transition-colors hover:text-[#153BB5]"
+                >
+                  Xóa tất cả
+                </button>
+              )}
+            </div>
 
-        {/* States */}
-        {isError && (
-          <div className="text-center py-20 bg-white rounded-2xl border border-red-100">
-            <div className="text-5xl mb-4">⚠️</div>
-            <p className="text-gray-700 font-semibold mb-2">Không thể tải danh sách dự án</p>
-            <p className="text-gray-400 text-sm mb-6">
-              {error instanceof Error ? error.message : 'Lỗi không xác định'}
-            </p>
-            <button
-              type="button"
-              onClick={() => refetch()}
-              className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-colors border-0 cursor-pointer"
+            <div className="border-b border-slate-100 pb-5">
+              <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Kỹ năng / công nghệ
+              </p>
+              <div>
+                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Chọn một hoặc nhiều kỹ năng
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {popularSkills.map((skill) => {
+                    const isSelected = selectedSkills.some(
+                      (selectedSkill) => selectedSkill.toLowerCase() === skill.toLowerCase()
+                    );
+                    return (
+                      <button
+                        key={skill}
+                        type="button"
+                        onClick={() => togglePopularSkill(skill)}
+                        className={`cursor-pointer rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                          isSelected
+                            ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-[#1D4ED8]/50 hover:text-[#1D4ED8]'
+                        }`}
+                      >
+                        {skill}
+                      </button>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    onClick={() => setIsCustomSkillSearchOpen((isOpen) => !isOpen)}
+                    className={`cursor-pointer rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                      isCustomSkillSearchOpen
+                        ? 'border-[#1D4ED8] bg-[#1D4ED8]/[0.06] text-[#1D4ED8]'
+                        : 'border-dashed border-slate-300 bg-white text-slate-500 hover:border-[#1D4ED8]/50 hover:text-[#1D4ED8]'
+                    }`}
+                  >
+                    + Khác
+                  </button>
+                </div>
+              </div>
+              {isCustomSkillSearchOpen && (
+                <label className="group mt-3 flex items-center gap-2 rounded-[8px] border border-slate-200 bg-slate-50 px-3 py-2.5 transition-colors focus-within:border-[#1D4ED8] focus-within:ring-2 focus-within:ring-[#1D4ED8]/10">
+                  <svg
+                    className="h-4 w-4 shrink-0 text-slate-400 group-focus-within:text-[#1D4ED8]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Nhập kỹ năng khác..."
+                    value={customSkillQuery}
+                    onChange={(event) => setCustomSkillQuery(event.target.value)}
+                    className="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:ring-0"
+                    aria-label="Tìm theo kỹ năng khác"
+                  />
+                </label>
+              )}
+            </div>
+
+            <fieldset className="pt-5">
+              <legend className="mb-3 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Ngân sách dự án
+              </legend>
+              <div className="space-y-1">
+                {[
+                  { value: 'all', label: 'Mọi mức giá' },
+                  { value: 'under_5m', label: 'Dưới 5 triệu' },
+                  { value: 'from_5m_to_20m', label: 'Từ 5 đến 20 triệu' },
+                  { value: 'over_20m', label: 'Trên 20 triệu' },
+                  { value: 'negotiable', label: 'Thỏa thuận' },
+                ].map((option) => (
+                  <label
+                    key={option.value}
+                    className="flex cursor-pointer items-center gap-3 rounded-[6px] px-2 py-2 text-sm text-slate-600 transition-colors hover:bg-[#1D4ED8]/[0.05] hover:text-[#1D4ED8]"
+                  >
+                    <input
+                      type="radio"
+                      name="job-budget-filter"
+                      value={option.value}
+                      checked={budgetFilter === option.value}
+                      onChange={() => setBudgetFilter(option.value as typeof budgetFilter)}
+                      className="h-4 w-4 border-slate-300 text-[#1D4ED8] focus:ring-[#1D4ED8]"
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </aside>
+
+          <div className="min-w-0">
+            {/* Toolbar */}
+            <div
+              id="job-results"
+              className="mb-6 flex scroll-mt-24 flex-wrap items-center justify-between gap-4"
             >
-              Thử lại
-            </button>
-          </div>
-        )}
+              <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+                {isLoading
+                  ? 'Đang tải dự án...'
+                  : hasFilters
+                    ? `Có ${filteredJobs.length} dự án phù hợp`
+                    : `Có ${filteredJobs.length} dự án đã được đăng`}
+              </h2>
+              <div className="flex items-center gap-3">
+                {hasFilters && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="cursor-pointer border-0 bg-transparent px-2 py-2 text-sm font-semibold text-[#1D4ED8] transition-colors hover:text-[#153BB5]"
+                  >
+                    Xóa bộ lọc
+                  </button>
+                )}
+                <select
+                  id="job-sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="block cursor-pointer rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#1D4ED8] focus:ring-[#1D4ED8]"
+                >
+                  <option value="newest">Mới nhất trước</option>
+                  <option value="budget_desc">Ngân sách: Cao → Thấp</option>
+                  <option value="budget_asc">Ngân sách: Thấp → Cao</option>
+                </select>
+              </div>
+            </div>
 
-        {isLoading && (
-          <div className="space-y-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <JobCardSkeleton key={`skeleton-${i}`} />
-            ))}
-          </div>
-        )}
+            {/* States */}
+            {isError && (
+              <div className="rounded-[12px] border border-red-100 bg-white py-20 text-center">
+                <div className="text-5xl mb-4">⚠️</div>
+                <p className="text-gray-700 font-semibold mb-2">Không thể tải danh sách dự án</p>
+                <p className="text-gray-400 text-sm mb-6">
+                  {error instanceof Error ? error.message : 'Lỗi không xác định'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => refetch()}
+                  className="cursor-pointer rounded-[8px] border-0 bg-[#1D4ED8] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#153BB5]"
+                >
+                  Thử lại
+                </button>
+              </div>
+            )}
 
-        {!isLoading && !isError && filteredJobs.length === 0 && (
-          <div className="text-center py-24 bg-white rounded-2xl border border-gray-100">
-            <div className="text-6xl mb-4">🔍</div>
-            <p className="text-gray-700 font-bold text-lg mb-2">
-              {searchTerm ? `Không tìm thấy kết quả cho "${searchTerm}"` : 'Chưa có dự án nào'}
-            </p>
-            <p className="text-gray-400 text-sm">
-              {searchTerm
-                ? 'Thử từ khóa khác hoặc xóa bộ lọc'
-                : 'Quay lại sau nhé, các dự án mới sẽ sớm được đăng!'}
-            </p>
-            {searchTerm && (
-              <button
-                type="button"
-                onClick={() => setSearchTerm('')}
-                className="mt-4 text-blue-600 font-semibold hover:underline bg-transparent border-0 cursor-pointer"
+            {isLoading && (
+              <div className="space-y-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <JobCardSkeleton key={`skeleton-${i}`} />
+                ))}
+              </div>
+            )}
+
+            {!isLoading && !isError && filteredJobs.length === 0 && (
+              <div className="rounded-[12px] border border-slate-200/90 bg-white py-24 text-center">
+                <div className="text-6xl mb-4">🔍</div>
+                <p className="text-gray-700 font-bold text-lg mb-2">
+                  {hasFilters ? 'Không tìm thấy dự án phù hợp' : 'Chưa có dự án nào'}
+                </p>
+                <p className="text-gray-400 text-sm">
+                  {hasFilters
+                    ? 'Thử từ khóa khác hoặc xóa bộ lọc'
+                    : 'Quay lại sau nhé, các dự án mới sẽ sớm được đăng!'}
+                </p>
+                {hasFilters && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="mt-4 cursor-pointer border-0 bg-transparent font-semibold text-[#1D4ED8] hover:underline"
+                  >
+                    Xóa bộ lọc
+                  </button>
+                )}
+              </div>
+            )}
+
+            {!isLoading && !isError && filteredJobs.length > 0 && (
+              <div className="space-y-4">
+                {paginatedJobs.map((job) => (
+                  <JobCard key={job.id} job={job} onDetail={handleDetail} onApply={handleApply} />
+                ))}
+              </div>
+            )}
+            {!isLoading && !isError && filteredJobs.length > 0 && (
+              <nav
+                className="mt-8 flex flex-wrap items-center justify-center gap-2"
+                aria-label="Phân trang dự án"
               >
-                Xóa bộ lọc
-              </button>
+                <button
+                  type="button"
+                  onClick={() => goToPage(safeCurrentPage - 1)}
+                  disabled={safeCurrentPage === 1}
+                  className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-slate-200 bg-white text-slate-600 transition-colors hover:border-[#1D4ED8]/50 hover:text-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Trang trước"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                {pageNumbers.map((page, index) =>
+                  typeof page === 'number' ? (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => goToPage(page)}
+                      className={`h-10 min-w-10 rounded-xl border px-3 text-sm font-bold transition-colors cursor-pointer ${
+                        page === safeCurrentPage
+                          ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-[#1D4ED8]/50 hover:text-[#1D4ED8]'
+                      }`}
+                      aria-current={page === safeCurrentPage ? 'page' : undefined}
+                    >
+                      {page}
+                    </button>
+                  ) : (
+                    <span
+                      key={`${page}-${index}`}
+                      className="px-1 text-sm text-gray-400"
+                      aria-hidden="true"
+                    >
+                      …
+                    </span>
+                  )
+                )}
+                <button
+                  type="button"
+                  onClick={() => goToPage(safeCurrentPage + 1)}
+                  disabled={safeCurrentPage === totalPages}
+                  className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-slate-200 bg-white text-slate-600 transition-colors hover:border-[#1D4ED8]/50 hover:text-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Trang sau"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </nav>
             )}
           </div>
-        )}
-
-        {!isLoading && !isError && filteredJobs.length > 0 && (
-          <div className="space-y-4">
-            {filteredJobs.map((job) => (
-              <JobCard key={job.id} job={job} onDetail={handleDetail} onApply={handleApply} />
-            ))}
-          </div>
-        )}
+        </div>
       </main>
 
       <Footer />
