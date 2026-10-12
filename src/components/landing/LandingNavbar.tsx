@@ -92,7 +92,7 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
         className={`w-full transition-all duration-300 ease-out flex items-center justify-between pointer-events-auto relative ${
           isScrolled
             ? 'max-w-[980px] h-[52px] translate-y-2 px-4 sm:px-6 rounded-full bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-[0_8px_30px_rgba(15,23,42,0.06)] mx-4'
-            : 'max-w-[1200px] h-16 translate-y-0 px-4 sm:px-6 lg:px-8 rounded-none bg-transparent border-b border-transparent shadow-none mx-auto'
+            : 'max-w-[1440px] h-16 translate-y-0 px-4 sm:px-6 lg:px-8 rounded-none bg-transparent border-b border-transparent shadow-none mx-auto'
         }`}
       >
         {/* Logo - Left */}

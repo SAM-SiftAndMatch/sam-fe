@@ -39,7 +39,7 @@ export const TestimonialsSection: React.FC = () => {
   return (
     <section
       id="testimonials"
-      className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative"
+      className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative"
     >
       <ScrollReveal className="text-left mb-14">
         <div className="flex items-center gap-2 mb-3">

@@ -67,7 +67,7 @@ export const CategoriesSection: React.FC = () => {
   return (
     <section
       id="categories"
-      className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 relative"
+      className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 relative"
     >
       <ScrollReveal className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
         <div>

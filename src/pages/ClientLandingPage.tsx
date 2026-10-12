@@ -75,7 +75,7 @@ const ClientLandingPage: React.FC = () => {
         {/* ================= HERO SECTION ================= */}
         <section
           id="hero"
-          className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-20 lg:pb-28 flex flex-col items-start text-left"
+          className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-20 lg:pb-28 flex flex-col items-start text-left"
         >
           {/* Hero Kicker (Item 1 - 0ms delay) */}
           <div className="animate-hero-fade-up mb-4" style={{ animationDelay: '0ms' }}>
