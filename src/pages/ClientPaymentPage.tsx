@@ -3,7 +3,7 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { chatApi } from '../api/chat';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import FundingPanel from '../components/FundingPanel';
 import { PATH_CLIENT_PROJECTS } from '../routes/paths';
@@ -31,7 +31,7 @@ const ClientPaymentPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <ClientDashboardHeader />
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6">
         <button

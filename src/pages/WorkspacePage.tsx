@@ -6,8 +6,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import { type ChatMessage, type ChatRoom, chatApi } from '../api/chat';
 import { type ContractBroadcast, type ContractDetail, contractApi } from '../api/contract';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
-import Header from '../components/Header';
+import AppHeader from '../components/AppHeader';
 import { useAuthStore } from '../stores/useAuthStore';
 import { formatMoney } from '../utils/format';
 
@@ -218,7 +217,7 @@ const WorkspacePage: React.FC = () => {
 
   return (
     <div className="h-screen bg-[#F8FAFC] font-sans flex flex-col overflow-hidden">
-      {role === 'client' ? <ClientDashboardHeader /> : <Header />}
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6 min-h-0 overflow-y-auto lg:overflow-hidden">
         {/* ================= CỘT TRÁI ================= */}

@@ -2,7 +2,7 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { profileApi } from '../api/profile';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import FooterDashboard from '../components/FooterDashboard';
 import {
   PATH_CLIENT_AI_BRIEF,
@@ -183,7 +183,7 @@ const ClientDashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       {/* 1. Kế thừa Header riêng biệt */}
-      <ClientDashboardHeader />
+      <AppHeader />
 
       {/* 2. Main Content */}
       <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-12 flex flex-col gap-10">

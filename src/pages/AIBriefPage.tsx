@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 import aiApi from '../api/ai';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import { PATH_CLIENT_CONFIRM_PROJECT, PATH_CLIENT_POST_PROJECT } from '../routes/paths';
 import type { AiChatResponse, AiQuestion, ChatMessage } from '../types/ai';
 
@@ -979,7 +979,7 @@ const AIBriefPage: React.FC = () => {
   // =========================================
   return (
     <div className="min-h-screen bg-[#F1F5F9] font-sans flex flex-col">
-      <ClientDashboardHeader />
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-6 flex flex-col">
         {/* Progress bar */}

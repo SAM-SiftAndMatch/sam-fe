@@ -3,7 +3,7 @@ import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { PATH_CLIENT_PROJECT_DETAIL } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -133,7 +133,7 @@ const ClientProjectListPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <ClientDashboardHeader />
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-8">
         <div className="flex flex-col gap-6">

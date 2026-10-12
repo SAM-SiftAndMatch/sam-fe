@@ -3,8 +3,8 @@ import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
 import * as paths from '../routes/paths';
 import type { JobResponse } from '../types/job';
 
@@ -187,7 +187,7 @@ const FreelancerJobsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <Header />
+      <AppHeader />
 
       {/* Hero Search Section */}
       <section className="bg-gradient-to-br from-blue-50 via-white to-gray-50 py-16 px-4 md:px-8 relative overflow-hidden border-b border-gray-100">

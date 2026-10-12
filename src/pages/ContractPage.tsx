@@ -11,11 +11,10 @@ import {
   contractApi,
 } from '../api/contract';
 import { paymentApi } from '../api/payment';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import ContractMarkdown from '../components/ContractMarkdown';
 import Footer from '../components/Footer';
 import FundingPanel from '../components/FundingPanel';
-import Header from '../components/Header';
 import { useAuthStore } from '../stores/useAuthStore';
 import { diffLines } from '../utils/diff';
 import { formatMoney } from '../utils/format';
@@ -522,7 +521,7 @@ const ContractPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      {role === 'client' ? <ClientDashboardHeader /> : <Header />}
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8">
         <button

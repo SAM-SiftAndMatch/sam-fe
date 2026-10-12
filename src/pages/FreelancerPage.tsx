@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import { profileApi } from '../api/profile';
+import AppHeader from '../components/AppHeader';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
 import { MonoTag, PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
 import LandingFooter from '../components/landing/LandingFooter';
@@ -91,8 +92,8 @@ const FreelancerPage: React.FC = () => {
       {/* Background Matrix Canvas */}
       <InteractiveBackground />
 
-      {/* Morphing Sticky Navbar */}
-      <LandingNavbar />
+      {/* Signed-in freelancers need the work navigation and account menu. */}
+      {isAuthenticated ? <AppHeader /> : <LandingNavbar />}
 
       {/* ================= HERO SECTION ================= */}
       <section className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-16 lg:pb-24 flex flex-col items-start text-left relative z-10">

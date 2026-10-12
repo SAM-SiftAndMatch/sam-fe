@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
 import { MonoTag } from '../components/landing/LandingButtons';
@@ -27,7 +27,7 @@ const SuccessProjectPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col relative overflow-hidden">
       <InteractiveBackground />
-      <ClientDashboardHeader />
+      <AppHeader />
 
       <main className="flex-1 flex items-center justify-center py-16 px-4 z-10">
         <div className="bg-white rounded-xl p-8 sm:p-10 shadow-xs border border-slate-200/90 w-full max-w-lg flex flex-col items-center text-center">

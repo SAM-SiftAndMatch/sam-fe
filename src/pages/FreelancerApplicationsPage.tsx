@@ -3,8 +3,8 @@ import type React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { proposalApi } from '../api/proposal';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
 import * as paths from '../routes/paths';
 import type { ProposalResponse, ProposalStatus } from '../types/proposal';
 
@@ -70,7 +70,7 @@ const FreelancerApplicationsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <Header />
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-10 py-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
