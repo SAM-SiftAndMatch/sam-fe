@@ -6,6 +6,24 @@ import { chatApi } from '../api/chat';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { useAuthStore } from '../stores/useAuthStore';
+import type { JobStatus } from '../types/job';
+
+const jobStatusLabel = (status: JobStatus | undefined): string => {
+  switch (status) {
+    case 'NEGOTIATING':
+      return 'Đang thương lượng';
+    case 'AWAITING_PAYMENT':
+      return 'Chờ nạp tiền';
+    case 'IN_PROGRESS':
+      return 'Đang thực hiện';
+    case 'COMPLETED':
+      return 'Hoàn thành';
+    case 'CANCELLED':
+      return 'Đã hủy';
+    default:
+      return 'Đang trao đổi';
+  }
+};
 
 const WorkspacesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -159,7 +177,7 @@ const WorkspacesPage: React.FC = () => {
                   <div className="flex items-center gap-2 mb-1.5">
                     <span className="text-sm text-gray-500 truncate">với {otherName(room)}</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-amber-50 border-amber-200 text-amber-700">
-                      Đang trao đổi
+                      {jobStatusLabel(room.jobStatus)}
                     </span>
                   </div>
 

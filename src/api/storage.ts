@@ -4,6 +4,15 @@ import type { ApiResponse } from '../types/api';
 
 // Tải file qua BE (tránh lỗi ACL khi bấm link Cloudinary trực tiếp) — bấm là tải về máy
 export const storageApi = {
+  /** Lưu nội dung SRS cuối cùng thành file Markdown trên Cloudinary. */
+  uploadSrs: async (content: string, fileName: string): Promise<string> => {
+    const res = await apiClient.post<ApiResponse<string>>('/storage/upload-srs', {
+      content,
+      fileName,
+    });
+    return requireApiResult(res.data, 'Failed to upload SRS');
+  },
+
   uploadFile: async (file: File): Promise<string> => {
     const form = new FormData();
     form.append('file', file);

@@ -39,6 +39,13 @@ export const jobApi = {
     return requireApiResult(res.data, 'Failed to fetch my jobs');
   },
 
+  getFreelancerProjects: async (freelancerId: string): Promise<JobResponse[]> => {
+    const res = await apiClient.get<ApiResponse<JobResponse[]>>(
+      `/jobs/freelancers/${freelancerId}/projects`
+    );
+    return requireApiResult(res.data, 'Failed to fetch freelancer projects');
+  },
+
   // JB-04: Top 5 AI đề xuất (chỉ chủ job)
   getRecommendations: async (jobId: string): Promise<RecommendationResponse[]> => {
     const res = await apiClient.get<ApiResponse<RecommendationResponse[]>>(
