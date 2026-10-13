@@ -8,6 +8,7 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
 import { useNavigate } from 'react-router-dom';
 import { profileApi } from '../api/profile';
+import AppHeader from '../components/AppHeader';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import { FALLBACK_SKILLS, type SkillOption } from '../types/profile';
@@ -248,31 +249,8 @@ const CreateFreelancerProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
-      {/* Top Navigation */}
-      <header className="w-full h-16 px-6 md:px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-50 shadow-sm">
-        <div
-          onClick={() => navigate(paths.PATH_HOME)}
-          className="flex items-center gap-1 cursor-pointer group"
-        >
-          <div
-            className="text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300"
-            style={{ fontFamily: "'Quedora', sans-serif" }}
-          >
-            SAM
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate(paths.PATH_FREELANCER)}
-            className="text-gray-500 hover:text-gray-900 font-semibold px-4 py-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer border-0 text-sm"
-          >
-            Thoát
-          </button>
-        </div>
-      </header>
+    <div className="freelancer-route profile-page min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
+      <AppHeader />
 
       {/* Main Content Area */}
       <main className="flex-1 w-full px-4 md:px-8 py-8 mb-24 overflow-y-auto">

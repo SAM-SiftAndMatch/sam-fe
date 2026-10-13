@@ -1,18 +1,15 @@
 import type React from 'react';
 import * as paths from '../../routes/paths';
-import { MonoTag, PrimaryButton, SecondaryButton } from './LandingButtons';
+import { PrimaryButton, SecondaryButton } from './LandingButtons';
 import { ScrollReveal } from './ScrollReveal';
 
 export const PricingSection: React.FC = () => {
   return (
     <section
       id="pricing"
-      className="w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative"
+      className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative"
     >
       <ScrollReveal className="text-left mb-14">
-        <div className="flex items-center gap-2 mb-3">
-          <MonoTag variant="primary">BẢNG GIÁ MINH BẠCH {'//'} PLANS</MonoTag>
-        </div>
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 mb-4">
           Gói dịch vụ linh hoạt, minh bạch
         </h2>
@@ -28,8 +25,7 @@ export const PricingSection: React.FC = () => {
         <ScrollReveal delayMs={0} className="h-full">
           <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <MonoTag variant="muted">PLAN 01 {'//'} PHÍ GIAO DỊCH</MonoTag>
+              <div className="flex items-center justify-end mb-4">
                 <span className="font-mono text-xs text-slate-400">KHỞI ĐẦU</span>
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-1">Basic</h3>
@@ -79,8 +75,7 @@ export const PricingSection: React.FC = () => {
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <MonoTag variant="primary">PLAN 02 {'//'} PHÍ KIỂM ĐỊNH</MonoTag>
+              <div className="flex items-center justify-end mb-4">
                 <span className="font-mono text-xs text-[#1D4ED8] font-bold">BUSINESS + AI QC</span>
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-1">Business & Kiểm Định QC</h3>
@@ -129,8 +124,7 @@ export const PricingSection: React.FC = () => {
         <ScrollReveal delayMs={200} className="h-full">
           <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <MonoTag variant="muted">PLAN 03 {'//'} FREELANCER SAAS</MonoTag>
+              <div className="flex items-center justify-end mb-4">
                 <span className="font-mono text-xs text-slate-400">PRO DEV</span>
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-1">PRO DEV Freelancer</h3>

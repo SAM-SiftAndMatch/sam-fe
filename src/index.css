@@ -27,6 +27,389 @@ body {
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Shared Freelancer workspace surface. Individual pages keep their content, but speak one UI language. */
+.freelancer-route > main {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.freelancer-route main [class*="shadow-[0_2px_15px"],
+.freelancer-route main [class*="shadow-[0_1px_3px"],
+.freelancer-route main [class~="shadow-sm"] {
+  border-color: rgb(226 232 240 / 0.9) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.03) !important;
+}
+
+.freelancer-route main input:not([type="radio"]):not([type="checkbox"]),
+.freelancer-route main textarea,
+.freelancer-route main select {
+  border-radius: 8px;
+}
+
+/* Client routes share the homepage's wide, light and precise product language. */
+.client-route > main {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.client-route main [class*="shadow-[0_2px_15px"],
+.client-route main [class*="shadow-[0_1px_3px"],
+.client-route main [class~="shadow-sm"] {
+  border-color: rgb(226 232 240 / 0.9) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.03) !important;
+}
+
+.client-route main input:not([type="radio"]):not([type="checkbox"]),
+.client-route main textarea,
+.client-route main select {
+  border-radius: 8px;
+}
+
+/* Normalize the older Client screens to the landing/product card and control treatment. */
+.client-route main [class~="rounded-2xl"],
+.client-route main [class~="rounded-3xl"],
+.client-route main [class*="rounded-[24px]"],
+.client-route main [class*="rounded-[28px]"],
+.client-route main [class*="rounded-[32px]"] {
+  border-radius: 12px !important;
+}
+
+.client-route main [class~="bg-white"] {
+  border-color: rgb(226 232 240 / 0.9);
+}
+
+.client-route main input:not([type="radio"]):not([type="checkbox"]),
+.client-route main textarea,
+.client-route main select {
+  border-color: rgb(203 213 225) !important;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
+}
+
+.client-route main input:not([type="radio"]):not([type="checkbox"]):focus,
+.client-route main textarea:focus,
+.client-route main select:focus {
+  border-color: #1d4ed8 !important;
+  box-shadow: 0 0 0 3px rgb(29 78 216 / 0.1) !important;
+}
+
+.client-route main button {
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow
+    180ms ease, transform 180ms ease;
+}
+
+.client-route main button[class~="bg-gradient-to-r"],
+.client-route main button[class~="bg-[#1D4ED8]"],
+.client-route main button[class~="bg-blue-600"],
+.client-route main a[class~="bg-[#1D4ED8]"] {
+  border-radius: 8px !important;
+  background: #1d4ed8 !important;
+  box-shadow: 0 4px 14px rgb(29 78 216 / 0.16);
+}
+
+.client-route main button[class~="bg-gradient-to-r"]:hover,
+.client-route main button[class~="bg-[#1D4ED8]"]:hover,
+.client-route main button[class~="bg-blue-600"]:hover,
+.client-route main a[class~="bg-[#1D4ED8]"]:hover {
+  background: #153bb5 !important;
+  transform: translateY(-1px);
+}
+
+/* Secondary quick suggestions retain the white landing-page treatment. */
+.client-route main .client-dashboard-suggestion {
+  border-color: #e2e8f0 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  color: #475569 !important;
+}
+
+.client-route main .client-dashboard-suggestion:hover {
+  border-color: #1d4ed8 !important;
+  background: rgb(29 78 216 / 0.06) !important;
+  color: #1d4ed8 !important;
+  transform: none !important;
+}
+
+/* Dashboard sections use the same quiet hierarchy and compact panels as the landing page. */
+.client-dashboard-page .dashboard-surface-card {
+  border-color: rgb(226 232 240 / 0.9) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.03) !important;
+}
+
+.client-dashboard-page .dashboard-section-title {
+  color: #0f172a !important;
+  font-size: 1rem;
+  letter-spacing: -0.015em;
+}
+
+.client-dashboard-page .dashboard-stat-card [class*="uppercase"] {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.client-dashboard-page .dashboard-stat-card [class*="font-black"] {
+  color: #0f172a;
+  font-size: 1.75rem;
+  letter-spacing: -0.04em;
+}
+
+.client-dashboard-page .dashboard-primary-panel {
+  border: 1px solid rgb(29 78 216 / 0.5);
+  border-radius: 12px !important;
+  background: linear-gradient(120deg, #1d4ed8 0%, #0a78d7 100%) !important;
+  box-shadow: 0 8px 28px rgb(29 78 216 / 0.16) !important;
+}
+
+.client-dashboard-page .dashboard-primary-panel > div > span:first-child {
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+@media (min-width: 768px) {
+  .freelancer-route > main {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .client-route > main {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Global dark mode. Attribute selectors also cover existing Tailwind utility classes across pages. */
+html.theme-dark,
+html.theme-dark body {
+  color-scheme: dark;
+  background: #090f1d;
+  color: #e5edf9;
+}
+
+html.theme-dark [class~="bg-white"],
+html.theme-dark [class~="bg-white/95"],
+html.theme-dark [class~="bg-white/90"],
+html.theme-dark [class~="bg-white/80"],
+html.theme-dark [class~="bg-white/60"],
+html.theme-dark [class~="bg-white/50"],
+html.theme-dark [class~="bg-gray-50"],
+html.theme-dark [class~="bg-gray-100"],
+html.theme-dark [class~="bg-gray-200"],
+html.theme-dark [class~="bg-slate-50"],
+html.theme-dark [class~="bg-slate-100"],
+html.theme-dark [class~="bg-slate-200"],
+html.theme-dark [class*="bg-[#F8FAFC]"],
+html.theme-dark [class*="bg-[#F1F5F9]"],
+html.theme-dark [class*="bg-[#EEF2FF]"],
+html.theme-dark [class*="bg-[#E2E8F0]"],
+html.theme-dark [class*="bg-[#F5F3FF]"] {
+  background-color: #111a2b !important;
+}
+
+/* Keep Freelancer status panels readable instead of leaving their light semantic tints on dark surfaces. */
+html.theme-dark [class~="bg-blue-50"],
+html.theme-dark [class~="bg-blue-100"] {
+  background-color: #112b4c !important;
+}
+
+html.theme-dark [class~="bg-emerald-50"],
+html.theme-dark [class~="bg-emerald-100"] {
+  background-color: #10342e !important;
+}
+
+html.theme-dark [class~="bg-amber-50"],
+html.theme-dark [class~="bg-amber-100"],
+html.theme-dark [class~="bg-yellow-50"] {
+  background-color: #382c12 !important;
+}
+
+html.theme-dark [class~="bg-red-50"],
+html.theme-dark [class~="bg-red-100"] {
+  background-color: #3a1f2a !important;
+}
+
+html.theme-dark [class~="bg-purple-50"],
+html.theme-dark [class~="bg-purple-100"] {
+  background-color: #2c2149 !important;
+}
+
+html.theme-dark [class~="bg-transparent"] {
+  color: inherit;
+}
+
+html.theme-dark [class~="text-slate-900"],
+html.theme-dark [class~="text-slate-800"],
+html.theme-dark [class~="text-gray-900"],
+html.theme-dark [class~="text-gray-800"],
+html.theme-dark [class*="text-[#0F172A]"] {
+  color: #f8fbff !important;
+}
+
+html.theme-dark [class~="text-slate-700"],
+html.theme-dark [class~="text-slate-600"],
+html.theme-dark [class~="text-gray-700"],
+html.theme-dark [class~="text-gray-600"] {
+  color: #cbd8ea !important;
+}
+
+html.theme-dark [class~="text-slate-500"],
+html.theme-dark [class~="text-slate-400"],
+html.theme-dark [class~="text-gray-500"],
+html.theme-dark [class~="text-gray-400"] {
+  color: #93a6c1 !important;
+}
+
+html.theme-dark [class~="text-blue-600"],
+html.theme-dark [class~="text-blue-700"] {
+  color: #83baff !important;
+}
+
+html.theme-dark [class~="text-emerald-600"],
+html.theme-dark [class~="text-emerald-700"] {
+  color: #5ee1bc !important;
+}
+
+html.theme-dark [class~="text-amber-600"],
+html.theme-dark [class~="text-amber-700"],
+html.theme-dark [class~="text-amber-800"] {
+  color: #ffd06f !important;
+}
+
+html.theme-dark [class~="text-red-500"],
+html.theme-dark [class~="text-red-600"] {
+  color: #ff9aaa !important;
+}
+
+html.theme-dark [class~="text-purple-500"],
+html.theme-dark [class~="text-purple-600"] {
+  color: #c4b5fd !important;
+}
+
+html.theme-dark [class~="text-yellow-500"],
+html.theme-dark [class~="text-yellow-400"] {
+  color: #fde68a !important;
+}
+
+html.theme-dark [class~="border-slate-100"],
+html.theme-dark [class~="border-slate-200"],
+html.theme-dark [class~="border-slate-300"],
+html.theme-dark [class~="border-gray-100"],
+html.theme-dark [class~="border-gray-200"],
+html.theme-dark [class~="border-gray-300"] {
+  border-color: #27364d !important;
+}
+
+html.theme-dark [class~="border-blue-100"],
+html.theme-dark [class~="border-blue-200"] {
+  border-color: #28517e !important;
+}
+
+html.theme-dark [class~="border-emerald-100"],
+html.theme-dark [class~="border-emerald-200"] {
+  border-color: #286456 !important;
+}
+
+html.theme-dark [class~="border-amber-100"],
+html.theme-dark [class~="border-amber-200"] {
+  border-color: #73541a !important;
+}
+
+html.theme-dark [class~="border-red-100"],
+html.theme-dark [class~="border-red-200"] {
+  border-color: #713746 !important;
+}
+
+html.theme-dark [class~="border-purple-100"] {
+  border-color: #50417b !important;
+}
+
+html.theme-dark .theme-toggle {
+  border-color: #33445e !important;
+  background-color: #17243a !important;
+  color: #a9c7ff !important;
+}
+
+/* Keep the app header as airy as the landing header, then give its floating state contrast. */
+html.theme-dark .app-header {
+  background-color: transparent !important;
+}
+
+html.theme-dark .app-header-shell--scrolled {
+  border-color: #27364d !important;
+  background-color: rgba(9, 15, 29, 0.9) !important;
+}
+
+.app-header button,
+.app-header a {
+  cursor: pointer;
+}
+
+html.theme-dark .app-header-nav-item {
+  color: #9bacc4 !important;
+}
+
+html.theme-dark .app-header-nav-item:hover {
+  background-color: #17243a !important;
+  color: #e5edf9 !important;
+}
+
+html.theme-dark .app-header-nav-item--active {
+  background-color: #17335c !important;
+  color: #a9cfff !important;
+}
+
+/* Freelancer jobs keeps its hero dark instead of inheriting the light blue-to-white gradient. */
+html.theme-dark .freelancer-jobs-hero {
+  border-color: #27364d !important;
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(29, 78, 216, 0.28), transparent 62%),
+    linear-gradient(135deg, #0d1728 0%, #111a2b 52%, #0b1424 100%) !important;
+}
+
+html.theme-dark .workspace-list-item:hover,
+html.theme-dark .workspace-back-button:hover {
+  background-color: #17243a !important;
+  box-shadow: none !important;
+}
+
+html.theme-dark input,
+html.theme-dark textarea,
+html.theme-dark select {
+  color: #e5edf9;
+}
+
+html.theme-dark input::placeholder,
+html.theme-dark textarea::placeholder {
+  color: #7f91ab;
+}
+
+/* Profile forms: keep fields calm on focus instead of switching back to stark white. */
+html.theme-dark .profile-page input,
+html.theme-dark .profile-page textarea,
+html.theme-dark .profile-page select {
+  border-color: #33445e !important;
+  background-color: #101b2e !important;
+  color: #e5edf9 !important;
+}
+
+html.theme-dark .profile-page input:focus,
+html.theme-dark .profile-page textarea:focus,
+html.theme-dark .profile-page select:focus {
+  border-color: #5b9cff !important;
+  background-color: #15243b !important;
+  box-shadow: 0 0 0 1px rgba(91, 156, 255, 0.72) !important;
+}
+
+html.theme-dark .profile-page input::placeholder,
+html.theme-dark .profile-page textarea::placeholder {
+  color: #7185a3;
+}
 /* Button light sweep animation */
 .btn-sweep {
   position: relative;
@@ -73,6 +456,69 @@ body {
 .animate-hero-fade-up {
   opacity: 0;
   animation: heroFadeUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-title-line {
+  display: block;
+  opacity: 0;
+  transform: translateY(26px);
+  animation: heroTitleReveal 720ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-title-line-two {
+  animation-delay: 140ms;
+}
+
+.hero-title-accent {
+  position: relative;
+  display: inline-block;
+  background-image: linear-gradient(
+    108deg,
+    #1d4ed8 0%,
+    #0066ff 34%,
+    #9cecff 49%,
+    #0aaad7 62%,
+    #1d4ed8 100%
+  );
+  background-position: 0% center;
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 10px rgba(29, 78, 216, 0.1));
+  will-change: background-position;
+  animation: heroAccentSweep 3.2s cubic-bezier(0.65, 0, 0.35, 1) 0.5s infinite;
+}
+
+@keyframes heroTitleReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroAccentSweep {
+  0%,
+  18%,
+  100% {
+    background-position: 0% center;
+  }
+  48%,
+  66% {
+    background-position: 100% center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title-line,
+  .hero-title-accent {
+    animation: none;
+  }
+
+  .hero-title-line {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* Scroll reveal utility */

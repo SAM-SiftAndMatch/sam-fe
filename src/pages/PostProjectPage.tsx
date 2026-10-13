@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { PATH_CLIENT_CONFIRM_PROJECT } from '../routes/paths';
 
@@ -267,8 +267,8 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <ClientDashboardHeader />
+    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-12 flex flex-col">
         {/* Render Stepper Global */}

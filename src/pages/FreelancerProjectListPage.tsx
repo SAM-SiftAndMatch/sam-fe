@@ -1,90 +1,99 @@
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jobApi } from '../api/job';
+import { paymentApi } from '../api/payment';
+import { walletApi } from '../api/wallet';
+import { workflowApi } from '../api/workflow';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
-import { PATH_FREELANCER_PROJECT_DETAIL } from '../routes/paths';
+import { PATH_WORKSPACE } from '../routes/paths';
+import { useAuthStore } from '../stores/useAuthStore';
+import type { JobStatus } from '../types/job';
+import type { FreelancerEscrowSummary } from '../types/payment';
+import type { WalletSummary } from '../types/wallet';
 
-// === MOCK DATA ===
-const MOCK_PROJECTS = [
-  {
-    id: 'fp1',
-    title: 'Phát triển module thanh toán VNPay cho Website Next.js',
-    clientName: 'Công ty ABC Tech',
-    status: 'in_progress',
-    budget: 5000000,
-    deadline: '20/07/2024',
-    startedAt: '01/07/2024',
-    progress: 65,
-  },
-  {
-    id: 'fp2',
-    title: 'Dịch thuật bộ hợp đồng thương mại Việt - Anh (50 trang)',
-    clientName: 'Nguyễn Minh Hoàng',
-    status: 'pending_review',
-    budget: 3500000,
-    deadline: '15/07/2024',
-    startedAt: '28/06/2024',
-    progress: 100,
-    reviewStatus: 'waiting', // waiting | approved | revision_requested
-  },
-  {
-    id: 'fp3',
-    title: 'Thiết kế bộ nhận diện thương hiệu cho Startup F&B',
-    clientName: 'Trà Sữa TocoToco',
-    status: 'pending_review',
-    budget: 8000000,
-    deadline: '10/07/2024',
-    startedAt: '20/06/2024',
-    progress: 100,
-    reviewStatus: 'approved',
-  },
-  {
-    id: 'fp4',
-    title: 'Viết nội dung SEO cho 20 trang sản phẩm E-commerce',
-    clientName: 'Shop Mẹ và Bé',
-    status: 'pending_review',
-    budget: 4000000,
-    deadline: '18/07/2024',
-    startedAt: '05/07/2024',
-    progress: 100,
-    reviewStatus: 'revision_requested',
-  },
-  {
-    id: 'fp5',
-    title: 'Viết script Python tự động crawl dữ liệu chứng khoán',
-    clientName: 'Lê Hoàng Dũng',
-    status: 'completed',
-    budget: 2000000,
-    deadline: '01/07/2024',
-    startedAt: '15/06/2024',
-    progress: 100,
-    rating: 5,
-  },
-  {
-    id: 'fp6',
-    title: 'Dự án bị hủy do thay đổi yêu cầu',
-    clientName: 'Công ty XYZ',
-    status: 'cancelled',
-    budget: 6000000,
-    deadline: '25/07/2024',
-    startedAt: '10/07/2024',
-    progress: 20,
-  },
-];
+type ProjectListStatus = 'preparing' | 'in_progress' | 'completed' | 'cancelled';
 
-const STATS = {
-  totalProjects: 6,
-  totalEarnings: '10.500.000 VND',
-  avgRating: 4.8,
+interface ProjectListItem {
+  id: string;
+  title: string;
+  clientName: string;
+  status: ProjectListStatus;
+  budget: number;
+  deadline: string;
+  progress: number;
+}
+
+const toListStatus = (status: JobStatus): ProjectListStatus => {
+  if (status === 'IN_PROGRESS') return 'in_progress';
+  if (status === 'COMPLETED') return 'completed';
+  if (status === 'CANCELLED') return 'cancelled';
+  return 'preparing';
 };
 
 const FreelancerProjectListPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [projects, setProjects] = useState<ProjectListItem[]>([]);
+  const [escrow, setEscrow] = useState<FreelancerEscrowSummary | null>(null);
+  const [wallet, setWallet] = useState<WalletSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredProjects = MOCK_PROJECTS.filter((p) => {
+  useEffect(() => {
+    if (!user?.userId) return;
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    Promise.all([
+      jobApi.getFreelancerProjects(user.userId),
+      paymentApi.getFreelancerEscrowSummary(user.userId),
+      walletApi.getMyWallet(),
+    ])
+      .then(async ([jobData, escrowData, walletData]) => {
+        const mapped = await Promise.all(
+          jobData.map(async (job): Promise<ProjectListItem> => {
+            let progress = job.status === 'COMPLETED' ? 100 : 0;
+            if (job.status === 'IN_PROGRESS') {
+              progress = await workflowApi
+                .getTimeline(job.id)
+                .then((timeline) => timeline.progress)
+                .catch(() => 0);
+            }
+            return {
+              id: job.id,
+              title: job.title,
+              clientName: job.clientName,
+              status: toListStatus(job.status),
+              budget: Number(job.budgetMax ?? job.budgetMin ?? 0),
+              deadline: job.deadline
+                ? new Date(job.deadline).toLocaleDateString('vi-VN')
+                : 'Chưa xác định',
+              progress,
+            };
+          })
+        );
+        if (!cancelled) {
+          setProjects(mapped);
+          setEscrow(escrowData);
+          setWallet(walletData);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Không tải được dự án');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.userId]);
+
+  const filteredProjects = projects.filter((p) => {
     const matchFilter = filter === 'all' || p.status === filter;
     const matchSearch =
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -92,7 +101,7 @@ const FreelancerProjectListPage: React.FC = () => {
     return matchFilter && matchSearch;
   });
 
-  const getStatusBadge = (project: (typeof MOCK_PROJECTS)[0]) => {
+  const getStatusBadge = (project: ProjectListItem) => {
     switch (project.status) {
       case 'in_progress':
         return (
@@ -101,30 +110,12 @@ const FreelancerProjectListPage: React.FC = () => {
             Đang thực hiện
           </span>
         );
-      case 'pending_review': {
-        if (project.reviewStatus === 'approved') {
-          return (
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5 w-fit">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-              KH đã duyệt
-            </span>
-          );
-        }
-        if (project.reviewStatus === 'revision_requested') {
-          return (
-            <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-bold border border-amber-100 flex items-center gap-1.5 w-fit">
-              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
-              Yêu cầu sửa chữa
-            </span>
-          );
-        }
+      case 'preparing':
         return (
-          <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-bold border border-purple-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
-            Chờ nghiệm thu
+          <span className="px-3 py-1 bg-slate-50 text-slate-600 rounded-full text-xs font-bold border border-slate-200 w-fit">
+            Đang chuẩn bị
           </span>
         );
-      }
       case 'completed':
         return (
           <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5 w-fit">
@@ -147,8 +138,8 @@ const FreelancerProjectListPage: React.FC = () => {
   const formatCurrency = (val: number) => `${val.toLocaleString('vi-VN')} VND`;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <Header />
+    <div className="freelancer-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-8">
         {/* Page Header */}
@@ -181,7 +172,7 @@ const FreelancerProjectListPage: React.FC = () => {
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
                 Tổng dự án
               </p>
-              <p className="text-2xl font-black text-gray-900">{STATS.totalProjects}</p>
+              <p className="text-2xl font-black text-gray-900">{projects.length}</p>
             </div>
           </div>
 
@@ -203,9 +194,11 @@ const FreelancerProjectListPage: React.FC = () => {
             </div>
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
-                Thu nhập
+                Ví thử nghiệm
               </p>
-              <p className="text-2xl font-black text-gray-900">{STATS.totalEarnings}</p>
+              <p className="text-xl font-black text-gray-900">
+                {formatCurrency(wallet?.availableBalance ?? 0)}
+              </p>
             </div>
           </div>
 
@@ -217,10 +210,10 @@ const FreelancerProjectListPage: React.FC = () => {
             </div>
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
-                Đánh giá
+                Đang ký quỹ
               </p>
-              <p className="text-2xl font-black text-gray-900">
-                {STATS.avgRating} <span className="text-sm font-medium text-gray-400">/ 5.0</span>
+              <p className="text-xl font-black text-gray-900">
+                {formatCurrency(escrow?.heldForPayout ?? 0)}
               </p>
             </div>
           </div>
@@ -261,7 +254,7 @@ const FreelancerProjectListPage: React.FC = () => {
             >
               <option value="all">Tất cả trạng thái</option>
               <option value="in_progress">Đang thực hiện</option>
-              <option value="pending_review">Chờ nghiệm thu</option>
+              <option value="preparing">Đang chuẩn bị</option>
               <option value="completed">Hoàn thành</option>
               <option value="cancelled">Đã hủy</option>
             </select>
@@ -280,10 +273,20 @@ const FreelancerProjectListPage: React.FC = () => {
 
         {/* Project List */}
         <div className="flex flex-col gap-4">
+          {loading && (
+            <p className="text-sm text-gray-500 bg-white rounded-2xl border border-gray-100 p-5">
+              Đang tải dự án và số tiền ký quỹ...
+            </p>
+          )}
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 rounded-2xl border border-red-100 p-5">
+              {error}
+            </p>
+          )}
           {filteredProjects.map((project) => (
             <div
               key={project.id}
-              onClick={() => navigate(PATH_FREELANCER_PROJECT_DETAIL.replace(':id', project.id))}
+              onClick={() => navigate(PATH_WORKSPACE.replace(':projectId', project.id))}
               className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all cursor-pointer group flex flex-col md:flex-row md:items-center justify-between gap-6"
             >
               <div className="flex-1 flex flex-col items-start gap-3">

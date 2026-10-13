@@ -6,9 +6,10 @@ import {
 } from '@/features/subscription';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
+import AppHeader from '../components/AppHeader';
 import AnimatedNumber from '../components/landing/AnimatedNumber';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
-import { MonoTag, PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
+import { PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
 import LandingFooter from '../components/landing/LandingFooter';
 import LandingNavbar from '../components/landing/LandingNavbar';
 import ScrollReveal from '../components/landing/ScrollReveal';
@@ -81,20 +82,17 @@ const ClientPricingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans flex flex-col relative selection:bg-[#1D4ED8]/10 selection:text-[#1D4ED8]">
+    <div className="client-route min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans flex flex-col relative selection:bg-[#1D4ED8]/10 selection:text-[#1D4ED8]">
       {/* Background Matrix Canvas */}
       <InteractiveBackground />
 
       {/* Morphing Sticky Navbar */}
-      <LandingNavbar />
+      {isAuthenticated ? <AppHeader /> : <LandingNavbar />}
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 flex flex-col items-center relative z-10">
         {/* Header Section */}
         <ScrollReveal className="text-center mb-14 max-w-3xl flex flex-col items-center">
-          <div className="mb-3">
-            <MonoTag variant="primary">BẢNG GIÁ MINH BẠCH {'//'} DOANH NGHIỆP</MonoTag>
-          </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4">
             Nâng tầm dự án với <span className="text-[#1D4ED8]">Công nghệ AI</span>
           </h1>
@@ -122,8 +120,7 @@ const ClientPricingPage: React.FC = () => {
           <ScrollReveal delayMs={0} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="muted">PLAN 01 {'//'} BASIC</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-slate-400">KHỞI ĐẦU</span>
                 </div>
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Basic</h2>
@@ -172,8 +169,7 @@ const ClientPricingPage: React.FC = () => {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="primary">PLAN 02 {'//'} BUSINESS</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-[#1D4ED8] font-bold">TỐI ƯU</span>
                 </div>
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Business</h2>
@@ -220,8 +216,7 @@ const ClientPricingPage: React.FC = () => {
           <ScrollReveal delayMs={200} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <MonoTag variant="muted">PLAN 03 {'//'} PREMIUM QC</MonoTag>
+                <div className="flex items-center justify-end mb-4">
                   <span className="font-mono text-xs text-slate-400">BẢO HIỂM</span>
                 </div>
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Premium</h2>

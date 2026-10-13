@@ -5,9 +5,9 @@ import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import { proposalApi } from '../api/proposal';
+import AppHeader from '../components/AppHeader';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { extractApiResponse } from '../lib/api-error';
 import * as paths from '../routes/paths';
@@ -204,7 +204,7 @@ const JobDetailPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-        <Header />
+        <AppHeader />
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-10 py-10">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-gray-200 rounded w-1/2" />
@@ -221,7 +221,7 @@ const JobDetailPage: React.FC = () => {
     const serverMessage = extractApiResponse(error)?.message;
     return (
       <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-        <Header />
+        <AppHeader />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="text-6xl mb-4">😕</div>
@@ -245,7 +245,7 @@ const JobDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <Header />
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-10 py-10">
         <button

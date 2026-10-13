@@ -139,23 +139,3 @@ export const SecondaryButton: React.FC<ButtonProps> = ({
     </button>
   );
 };
-
-export const MonoTag: React.FC<{
-  children: React.ReactNode;
-  variant?: 'primary' | 'muted' | 'success';
-  className?: string;
-}> = ({ children, variant = 'muted', className = '' }) => {
-  const variantStyles = {
-    muted: 'border-slate-200 bg-white text-slate-600',
-    primary: 'border-[#1D4ED8]/30 bg-[#1D4ED8]/[0.06] text-[#1D4ED8]',
-    success: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  }[variant];
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 font-mono text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-[6px] border ${variantStyles} ${className}`}
-    >
-      {children}
-    </span>
-  );
-};

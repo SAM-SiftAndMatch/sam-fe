@@ -3,10 +3,27 @@ import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { chatApi } from '../api/chat';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
 import { useAuthStore } from '../stores/useAuthStore';
+import type { JobStatus } from '../types/job';
+
+const jobStatusLabel = (status: JobStatus | undefined): string => {
+  switch (status) {
+    case 'NEGOTIATING':
+      return 'Đang thương lượng';
+    case 'AWAITING_PAYMENT':
+      return 'Chờ nạp tiền';
+    case 'IN_PROGRESS':
+      return 'Đang thực hiện';
+    case 'COMPLETED':
+      return 'Hoàn thành';
+    case 'CANCELLED':
+      return 'Đã hủy';
+    default:
+      return 'Đang trao đổi';
+  }
+};
 
 const WorkspacesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -40,7 +57,7 @@ const WorkspacesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
-      {role === 'client' ? <ClientDashboardHeader /> : <Header />}
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8 flex items-center justify-between">
@@ -137,7 +154,7 @@ const WorkspacesPage: React.FC = () => {
               <div
                 key={room.id}
                 onClick={() => navigate(`/workspace/${room.id}`)}
-                className="flex items-start gap-4 p-5 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
+                className="workspace-list-item flex items-start gap-4 p-5 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
               >
                 <div className="relative">
                   <div className="w-12 h-12 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-black text-lg border border-gray-200">
@@ -160,7 +177,7 @@ const WorkspacesPage: React.FC = () => {
                   <div className="flex items-center gap-2 mb-1.5">
                     <span className="text-sm text-gray-500 truncate">với {otherName(room)}</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-amber-50 border-amber-200 text-amber-700">
-                      Đang trao đổi
+                      {jobStatusLabel(room.jobStatus)}
                     </span>
                   </div>
 

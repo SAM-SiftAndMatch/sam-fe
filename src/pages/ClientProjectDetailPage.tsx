@@ -6,7 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import { proposalApi } from '../api/proposal';
 import { storageApi } from '../api/storage';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import AppHeader from '../components/AppHeader';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
@@ -335,8 +335,8 @@ const ClientProjectDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
-      <ClientDashboardHeader />
+    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6">
         {/* Breadcrumb & Nút quay lại */}

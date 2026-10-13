@@ -5,6 +5,7 @@ import type {
   AmountVerification,
   ConfirmFundingRequest,
   CreateEscrowRequest,
+  FreelancerEscrowSummary,
   FundingStatus,
   PaymentResponse,
 } from '../types/payment';
@@ -58,6 +59,13 @@ export const paymentApi = {
       `/payments/${paymentId}/release`
     );
     return requireApiResult(res.data, 'Failed to release escrow');
+  },
+
+  getFreelancerEscrowSummary: async (freelancerId: string): Promise<FreelancerEscrowSummary> => {
+    const res = await apiClient.get<ApiResponse<FreelancerEscrowSummary>>(
+      `/payments/freelancers/${freelancerId}/escrow-summary`
+    );
+    return requireApiResult(res.data, 'Failed to fetch freelancer escrow summary');
   },
 };
 

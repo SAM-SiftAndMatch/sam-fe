@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 import aiApi from '../api/ai';
-import ClientDashboardHeader from '../components/ClientDashboardHeader';
+import storageApi from '../api/storage';
+import AppHeader from '../components/AppHeader';
 import { PATH_CLIENT_CONFIRM_PROJECT, PATH_CLIENT_POST_PROJECT } from '../routes/paths';
 import type { AiChatResponse, AiQuestion, ChatMessage } from '../types/ai';
 
@@ -631,6 +632,7 @@ const AIBriefPage: React.FC = () => {
   const [riskMessages, setRiskMessages] = useState<ChatMessage[]>([]);
   const [riskInput, setRiskInput] = useState('');
   const [isRiskSending, setIsRiskSending] = useState(false);
+  const [isSavingSrs, setIsSavingSrs] = useState(false);
 
   // --- SRS Modal ---
   const [isSrsModalOpen, setIsSrsModalOpen] = useState(false);
@@ -941,17 +943,40 @@ const AIBriefPage: React.FC = () => {
     handleStartRiskChat(latestSrsContent);
   }, [handleStartRiskChat, latestSrsContent]);
 
-  const handleComplete = useCallback(() => {
-    navigate(PATH_CLIENT_CONFIRM_PROJECT, {
-      state: {
-        srsDocumentUrl: latestSrsUrl ?? '',
-        srsContent: latestSrsContent ?? '',
-        exactBudgetVnd: exactBudgetVnd,
-        durationMonths: durationMonths,
-        fromAiBrief: true,
-      },
-    });
-  }, [navigate, latestSrsUrl, latestSrsContent, exactBudgetVnd, durationMonths]);
+  const handleComplete = useCallback(async () => {
+    const srsContent = latestSrsContent?.trim();
+    if (!srsContent || isSavingSrs) {
+      if (!srsContent) setError('Chưa có nội dung SRS để lưu. Vui lòng thử lại bước phân tích.');
+      return;
+    }
+
+    setIsSavingSrs(true);
+    setError(null);
+
+    try {
+      // Lưu bản SRS cuối cùng sau khi Client đã hoàn tất đánh giá rủi ro.
+      // URL này là nguồn dữ liệu dùng khi tạo Job, thay vì phụ thuộc vào URL tạm từ AI.
+      const srsDocumentUrl = await storageApi.uploadSrs(
+        srsContent,
+        `srs-${sessionId.current}-${Date.now()}`
+      );
+
+      navigate(PATH_CLIENT_CONFIRM_PROJECT, {
+        state: {
+          srsDocumentUrl,
+          srsContent,
+          exactBudgetVnd,
+          durationMonths,
+          fromAiBrief: true,
+        },
+      });
+    } catch (err) {
+      console.error('Failed to upload final SRS:', err);
+      setError('Không thể lưu tài liệu SRS. Vui lòng thử lại.');
+    } finally {
+      setIsSavingSrs(false);
+    }
+  }, [navigate, latestSrsContent, exactBudgetVnd, durationMonths, isSavingSrs]);
 
   const handleSkip = useCallback(() => {
     navigate(PATH_CLIENT_POST_PROJECT);
@@ -978,8 +1003,8 @@ const AIBriefPage: React.FC = () => {
   // Render
   // =========================================
   return (
-    <div className="min-h-screen bg-[#F1F5F9] font-sans flex flex-col">
-      <ClientDashboardHeader />
+    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+      <AppHeader />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-6 flex flex-col">
         {/* Progress bar */}
@@ -1454,9 +1479,10 @@ const AIBriefPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleComplete}
+                disabled={isSavingSrs}
                 className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-10 py-3.5 rounded-xl shadow-lg shadow-blue-200 hover:shadow-xl transition-all cursor-pointer border-0 flex items-center gap-2"
               >
-                Đăng dự án ngay
+                {isSavingSrs ? 'Đang lưu tài liệu SRS...' : 'Đăng dự án ngay'}
                 <svg
                   className="w-4 h-4"
                   fill="none"

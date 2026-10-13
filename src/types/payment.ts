@@ -46,3 +46,13 @@ export interface AmountVerification {
   matches?: boolean | null;
   note?: string | null;
 }
+
+export interface FreelancerEscrowSummary {
+  freelancerId: string;
+  currency: string;
+  heldForPayout: number;
+  lockedSecurityDeposit: number;
+  releasedToFreelancer: number;
+  platformFeePending: number;
+  fundedProjectCount: number;
+}
