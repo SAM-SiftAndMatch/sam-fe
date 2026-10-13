@@ -246,10 +246,10 @@ const WorkspacePage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/workspaces')}
+              onClick={() => navigate(`/workspace/${room?.id ?? projectId}/timeline`)}
               className="workspace-back-button flex items-center gap-3 w-full px-4 py-3 rounded-xl text-gray-600 hover:bg-white hover:shadow-sm transition-all cursor-pointer border-0 text-left"
             >
-              <span className="font-medium text-sm">Tất cả hội thoại</span>
+              <span className="font-medium text-sm">Tiến độ dự án</span>
             </button>
           </nav>
         </aside>
@@ -271,6 +271,13 @@ const WorkspacePage: React.FC = () => {
                 </p>
               </div>
             </div>
+            <button
+              type="button"
+              onClick={() => navigate(`/workspace/${room?.id ?? projectId}/timeline`)}
+              className="lg:hidden shrink-0 rounded-lg bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700 border-0 cursor-pointer"
+            >
+              Tiến độ
+            </button>
           </div>
 
           {/* Thanh hợp đồng ghim cố định — không trôi theo đoạn chat */}
