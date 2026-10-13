@@ -7,6 +7,7 @@ import SockJS from 'sockjs-client';
 import { type ChatMessage, type ChatRoom, chatApi } from '../api/chat';
 import { type ContractBroadcast, type ContractDetail, contractApi } from '../api/contract';
 import AppHeader from '../components/AppHeader';
+import ProjectWorkflowPanel from '../components/ProjectWorkflowPanel';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { JobStatus } from '../types/job';
 import { formatMoney } from '../utils/format';
@@ -52,29 +53,6 @@ const WorkspacePage: React.FC = () => {
   // Hợp đồng: panel gọn trong chat chỉ hiện giá + 2 tên + nút mở màn sửa full-screen
   const [contract, setContract] = useState<ContractDetail | null>(null);
   const [contractLoading, setContractLoading] = useState(false);
-
-  // Product Review States (giữ nguyên UI bàn giao)
-  const [productState, setProductState] = useState<
-    'pending' | 'checking' | 'review' | 'approved' | 'revision'
-  >('pending');
-  const [aiCheckProgress, setAiCheckProgress] = useState(0);
-  const [showRevisionInput, setShowRevisionInput] = useState(false);
-  const [revisionText, setRevisionText] = useState('');
-
-  const handleStartAiCheck = () => {
-    setProductState('checking');
-    setAiCheckProgress(0);
-    const interval = setInterval(() => {
-      setAiCheckProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => setProductState('review'), 500);
-          return 100;
-        }
-        return prev + Math.random() * 20;
-      });
-    }, 400);
-  };
 
   // Resolve phòng: param có thể là roomId (chuẩn mới) hoặc jobId (luồng cũ)
   useEffect(() => {
@@ -459,107 +437,18 @@ const WorkspacePage: React.FC = () => {
           </div>
         </section>
 
-        {/* ================= CỘT PHẢI (giữ nguyên bàn giao) ================= */}
+        {/* Timeline và sản phẩm bàn giao lấy từ dữ liệu workflow thật */}
         <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-4 lg:h-full lg:overflow-y-auto lg:pr-2 pb-10 lg:pb-0 lg:hidden xl:flex">
-          <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex flex-col h-full min-h-[400px]">
-            <h3 className="text-[17px] font-bold text-gray-900 mb-6">Sản phẩm bàn giao</h3>
-            {productState === 'pending' && (
-              <div className="flex flex-col gap-3 mt-auto">
-                <p className="text-xs text-gray-500 text-center mb-2">
-                  Freelancer vừa gửi sản phẩm bàn giao. Hãy sử dụng AI để kiểm tra trước khi duyệt.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleStartAiCheck}
-                  className="w-full py-3.5 bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition-all cursor-pointer border-0 text-sm"
-                >
-                  AI Phân tích sản phẩm
-                </button>
-              </div>
-            )}
-            {productState === 'checking' && (
-              <div className="flex flex-col items-center justify-center py-6 mt-4">
-                <span className="text-xs font-bold text-[#1D4ED8]">
-                  {Math.round(Math.min(100, aiCheckProgress))}%
-                </span>
-                <h4 className="text-sm font-bold text-gray-900 mb-1">AI đang kiểm tra...</h4>
-              </div>
-            )}
-            {productState === 'review' && (
-              <div className="flex flex-col gap-4 mt-auto">
-                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
-                  <div className="text-emerald-600 font-bold text-sm mb-1">
-                    AI Đánh giá: Đạt yêu cầu
-                  </div>
-                </div>
-                {!showRevisionInput ? (
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowRevisionInput(true)}
-                      className="flex-1 py-3 bg-white border-2 border-amber-500 text-amber-600 font-bold rounded-xl hover:bg-amber-50 transition-colors cursor-pointer text-xs"
-                    >
-                      Yêu cầu sửa đổi
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setProductState('approved')}
-                      className="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-md hover:bg-emerald-600 transition-colors cursor-pointer border-0 text-xs"
-                    >
-                      Xác nhận nhận hàng
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    <textarea
-                      className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-amber-500 resize-none h-24"
-                      placeholder="Nhập lý do cần chỉnh sửa..."
-                      value={revisionText}
-                      onChange={(e) => setRevisionText(e.target.value)}
-                    />
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        type="button"
-                        onClick={() => setShowRevisionInput(false)}
-                        className="flex-1 py-2 bg-gray-100 text-gray-600 font-bold rounded-lg hover:bg-gray-200 transition-colors cursor-pointer border-0 text-xs"
-                      >
-                        Hủy
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setProductState('revision')}
-                        disabled={!revisionText.trim()}
-                        className="flex-1 py-2 bg-amber-500 text-white font-bold rounded-lg shadow-md hover:bg-amber-600 transition-colors cursor-pointer border-0 text-xs disabled:opacity-50"
-                      >
-                        Gửi yêu cầu
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            {productState === 'approved' && (
-              <div className="flex flex-col items-center justify-center text-center mt-auto p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                <h4 className="text-sm font-bold text-emerald-700 mb-1">Đã xác nhận thanh toán</h4>
-              </div>
-            )}
-            {productState === 'revision' && (
-              <div className="flex flex-col items-center justify-center text-center mt-auto p-4 bg-amber-50 rounded-xl border border-amber-100">
-                <h4 className="text-sm font-bold text-amber-700 mb-1">Đã gửi yêu cầu chỉnh sửa</h4>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProductState('review');
-                    setShowRevisionInput(false);
-                    setRevisionText('');
-                  }}
-                  className="mt-4 text-xs text-amber-600 font-bold underline bg-transparent border-0 cursor-pointer"
-                >
-                  Hủy yêu cầu (Quay lại)
-                </button>
-              </div>
-            )}
-          </div>
+          {room && (
+            <ProjectWorkflowPanel
+              jobId={room.jobId}
+              jobStatus={room.jobStatus}
+              role={role}
+              onSettlementCompleted={() =>
+                setRoom((current) => (current ? { ...current, jobStatus: 'COMPLETED' } : current))
+              }
+            />
+          )}
         </aside>
       </main>
     </div>
