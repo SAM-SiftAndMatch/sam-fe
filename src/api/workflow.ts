@@ -1,6 +1,6 @@
 import { requireApiResult } from '../lib/api-error';
 import apiClient from '../lib/axios';
-import type { ApiResponse, PageResult } from '../types/api';
+import type { ApiResponse } from '../types/api';
 import type {
   DeliveryAcceptance,
   DeliveryCreateRequest,
@@ -19,29 +19,16 @@ export const workflowApi = {
     return requireApiResult(res.data, 'Không tải được timeline dự án');
   },
 
-  getTaskReportsPage: async (
+  getTaskReports: async (
     jobId: string,
-    taskId: string,
-    page = 0,
-    size = 10
-  ): Promise<PageResult<ProjectTimeline['tasks'][number]['reports'][number]>> => {
-    const res = await apiClient.get<
-      ApiResponse<PageResult<ProjectTimeline['tasks'][number]['reports'][number]>>
-    >(`/projects/${jobId}/timeline/tasks/${taskId}/reports/page`, { params: { page, size } });
+    taskId: string
+  ): Promise<ProjectTimeline['tasks'][number]['reports']> => {
+    const res = await apiClient.get<ApiResponse<ProjectTimeline['tasks'][number]['reports']>>(
+      `/projects/${jobId}/timeline/tasks/${taskId}/reports`
+    );
     return requireApiResult(res.data, 'Không tải được báo cáo');
   },
 
-  getDeliveriesPage: async (
-    jobId: string,
-    page = 0,
-    size = 10
-  ): Promise<PageResult<ProjectDelivery>> => {
-    const res = await apiClient.get<ApiResponse<PageResult<ProjectDelivery>>>(
-      `/projects/${jobId}/deliveries/page`,
-      { params: { page, size } }
-    );
-    return requireApiResult(res.data, 'Không tải được sản phẩm bàn giao');
-  },
   getTimeline: async (jobId: string): Promise<ProjectTimeline> => {
     const res = await apiClient.get<ApiResponse<ProjectTimeline>>(`/projects/${jobId}/timeline`);
     return requireApiResult(res.data, 'Không tải được timeline dự án');

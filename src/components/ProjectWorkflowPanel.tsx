@@ -2,8 +2,6 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { workflowApi } from '../api/workflow';
-import { readPageParam, usePageSearchParam } from '../hooks/usePageSearchParam';
-import type { PageResult } from '../types/api';
 import type {
   ProjectDelivery,
   ProjectTaskStatus,
@@ -13,7 +11,6 @@ import type {
   SandboxSettlement,
   TaskReport,
 } from '../types/workflow';
-import PaginationNav from './PaginationNav';
 
 const statusLabel: Record<ProjectTaskStatus, string> = {
   TODO: 'Chưa bắt đầu',
@@ -42,17 +39,13 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
 }) => {
   const [timeline, setTimeline] = useState<ProjectTimeline | null>(null);
   const [deliveries, setDeliveries] = useState<ProjectDelivery[]>([]);
-  const [deliveryPage, setDeliveryPage] = usePageSearchParam(
-    'page',
-    jobStatus === 'IN_PROGRESS' || jobStatus === 'COMPLETED'
-  );
   const [searchParams, setSearchParams] = useSearchParams();
   const reportTask = searchParams.get('task');
-  const reportPage = readPageParam(searchParams.get('reportPage'));
-  const [deliveryTotalPages, setDeliveryTotalPages] = useState(0);
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
-  const [reportPages, setReportPages] = useState<Record<string, PageResult<TaskReport>>>({});
+  const [reportLists, setReportLists] = useState<Record<string, TaskReport[]>>({});
   const [qaPlans, setQaPlans] = useState<Record<string, QaPlan>>({});
+  const [expandedQaId, setExpandedQaId] = useState<string | null>(null);
+  const [loadingQaId, setLoadingQaId] = useState<string | null>(null);
   const [settlement, setSettlement] = useState<SandboxSettlement | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,37 +73,22 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
     try {
       const [timelineData, deliveryData] = await Promise.all([
         workflowApi.getTimelineSummary(jobId),
-        workflowApi.getDeliveriesPage(jobId, deliveryPage),
+        workflowApi.getDeliveries(jobId),
       ]);
-      const planResults = await Promise.all(
-        deliveryData.items.map(async (delivery) => {
-          try {
-            return [delivery.id, await workflowApi.getQaPlan(jobId, delivery.id)] as const;
-          } catch {
-            return null;
-          }
-        })
-      );
       setTimeline(timelineData);
-      setDeliveries(deliveryData.items);
-      setDeliveryTotalPages(deliveryData.totalPages);
-      setQaPlans(
-        Object.fromEntries(
-          planResults.filter((item): item is readonly [string, QaPlan] => item !== null)
-        )
-      );
+      setDeliveries(deliveryData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không tải được tiến độ dự án');
     } finally {
       setLoading(false);
     }
-  }, [canUseWorkflow, jobId, deliveryPage]);
+  }, [canUseWorkflow, jobId]);
 
   const loadTaskReports = useCallback(
-    async (taskId: string, page = 0) => {
+    async (taskId: string) => {
       try {
-        const result = await workflowApi.getTaskReportsPage(jobId, taskId, page);
-        setReportPages((current) => ({ ...current, [taskId]: result }));
+        const result = await workflowApi.getTaskReports(jobId, taskId);
+        setReportLists((current) => ({ ...current, [taskId]: result }));
         setExpandedTaskId(taskId);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Không tải được báo cáo');
@@ -120,17 +98,16 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   );
 
   const setReportLocation = useCallback(
-    (taskId: string | null, page = 0, replace = false) => {
+    (taskId: string | null, replace = false) => {
       setSearchParams(
         (current) => {
           const next = new URLSearchParams(current);
           if (taskId) {
             next.set('task', taskId);
-            next.set('reportPage', String(page + 1));
           } else {
             next.delete('task');
-            next.delete('reportPage');
           }
+          next.delete('reportPage');
           return next;
         },
         { replace }
@@ -144,12 +121,43 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   }, [loadWorkflow]);
 
   useEffect(() => {
+    if (!searchParams.has('page') && !searchParams.has('reportPage')) return;
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        next.delete('page');
+        next.delete('reportPage');
+        return next;
+      },
+      { replace: true }
+    );
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
     if (!canUseWorkflow || !reportTask || !timeline?.tasks.some((task) => task.id === reportTask)) {
       setExpandedTaskId(null);
       return;
     }
-    void loadTaskReports(reportTask, reportPage);
-  }, [canUseWorkflow, loadTaskReports, reportPage, reportTask, timeline?.tasks]);
+    void loadTaskReports(reportTask);
+  }, [canUseWorkflow, loadTaskReports, reportTask, timeline?.tasks]);
+
+  const toggleQaPlan = async (deliveryId: string) => {
+    if (expandedQaId === deliveryId) {
+      setExpandedQaId(null);
+      return;
+    }
+    setExpandedQaId(deliveryId);
+    if (qaPlans[deliveryId]) return;
+    setLoadingQaId(deliveryId);
+    try {
+      const plan = await workflowApi.getQaPlan(jobId, deliveryId);
+      setQaPlans((current) => ({ ...current, [deliveryId]: plan }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không tải được checklist nghiệm thu');
+    } finally {
+      setLoadingQaId(null);
+    }
+  };
 
   const weeks = useMemo(() => {
     const grouped = new Map<number, ProjectTimeline['tasks']>();
@@ -179,7 +187,12 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         status: reportStatus,
       });
       setTimeline({ ...updated, tasks: updated.tasks.map((task) => ({ ...task, reports: [] })) });
-      setReportLocation(reportTaskId, 0, true);
+      setReportLists((current) => {
+        const next = { ...current };
+        delete next[reportTaskId];
+        return next;
+      });
+      setReportLocation(reportTaskId, true);
       setReportTaskId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không gửi được báo cáo');
@@ -199,9 +212,6 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         note: deliveryNote.trim() || undefined,
       });
       setDeliveries((current) => [delivery, ...current]);
-      setDeliveryPage(0);
-      const plan = await workflowApi.getQaPlan(jobId, delivery.id);
-      setQaPlans((current) => ({ ...current, [delivery.id]: plan }));
       setWebUrl('');
       setRepositoryUrl('');
       setDeliveryNote('');
@@ -313,8 +323,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
             <p className="text-xs font-black text-gray-900 mb-2">Tuần {weekNumber}</p>
             <div className="flex flex-col gap-2">
               {tasks.map((task) => {
-                const latestReport =
-                  reportPages[task.id]?.page === 0 ? reportPages[task.id]?.items[0] : undefined;
+                const latestReport = reportLists[task.id]?.[0];
                 return (
                   <article
                     key={task.id}
@@ -358,9 +367,9 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                     </button>
                     {expandedTaskId === task.id &&
                       reportTask === task.id &&
-                      reportPages[task.id]?.page === reportPage && (
+                      reportLists[task.id] && (
                         <div className="mt-2 text-[11px] text-gray-500">
-                          {reportPages[task.id].items.map((report) => (
+                          {reportLists[task.id].map((report) => (
                             <p
                               key={report.id}
                               className="border-t border-gray-200 py-2 whitespace-pre-wrap"
@@ -368,13 +377,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                               {report.content}
                             </p>
                           ))}
-                          <PaginationNav
-                            page={reportPages[task.id].page + 1}
-                            totalPages={reportPages[task.id].totalPages}
-                            onPageChange={(nextPage) => setReportLocation(task.id, nextPage - 1)}
-                            label="Phân trang báo cáo tiến độ"
-                            className="mt-3"
-                          />
+                          {reportLists[task.id].length === 0 && <p>Chưa có báo cáo.</p>}
                         </div>
                       )}
                     {canReport && (
@@ -541,7 +544,19 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                     {delivery.revisionReason}
                   </div>
                 )}
-                {qaPlans[delivery.id] && (
+                <button
+                  type="button"
+                  onClick={() => void toggleQaPlan(delivery.id)}
+                  disabled={loadingQaId === delivery.id}
+                  className="mt-3 text-[11px] font-bold text-blue-700 bg-transparent border-0 p-0 cursor-pointer disabled:opacity-50"
+                >
+                  {loadingQaId === delivery.id
+                    ? 'Đang tải checklist...'
+                    : expandedQaId === delivery.id
+                      ? 'Ẩn checklist nghiệm thu'
+                      : 'Xem checklist nghiệm thu'}
+                </button>
+                {expandedQaId === delivery.id && qaPlans[delivery.id] && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <p className="text-[11px] font-bold text-gray-800">Checklist nghiệm thu</p>
                     <p className="text-[10px] text-gray-500 mt-1">
@@ -589,13 +604,6 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
             ))
           )}
         </div>
-        <PaginationNav
-          page={deliveryPage + 1}
-          totalPages={deliveryTotalPages}
-          onPageChange={(nextPage) => setDeliveryPage(nextPage - 1)}
-          label="Phân trang sản phẩm bàn giao"
-          className="mt-3"
-        />
       </section>
       {modalMode && activeDelivery && (
         <div
