@@ -33,6 +33,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   jobStatus,
   role,
   onSettlementCompleted,
+  layout = 'compact',
 }) => {
   const [timeline, setTimeline] = useState<ProjectTimeline | null>(null);
   const [deliveries, setDeliveries] = useState<ProjectDelivery[]>([]);
@@ -209,7 +210,11 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex flex-col gap-5">
+    <div
+      className={`bg-white rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex flex-col gap-5 ${
+        layout === 'expanded' ? 'p-6 md:p-8' : 'p-5'
+      }`}
+    >
       <div>
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-[17px] font-bold text-gray-900">Tiến độ và bàn giao</h3>
@@ -242,7 +247,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
       {loading && <p className="text-xs text-gray-500">Đang tải timeline...</p>}
       {error && <p className="text-xs text-red-600 bg-red-50 rounded-xl p-3">{error}</p>}
 
-      <div className="flex flex-col gap-4">
+      <div className={`flex flex-col gap-4 ${layout === 'expanded' ? 'md:gap-5' : ''}`}>
         {weeks.map(([weekNumber, tasks]) => (
           <section key={weekNumber} className="relative pl-5 border-l-2 border-slate-200">
             <span className="absolute -left-[7px] top-0 w-3 h-3 rounded-full bg-blue-600 border-2 border-white" />

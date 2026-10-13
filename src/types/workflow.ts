@@ -119,4 +119,5 @@ export interface ProjectWorkflowPanelProps {
   jobStatus: JobStatus;
   role: 'client' | 'freelancer';
   onSettlementCompleted?: () => void;
+  layout?: 'compact' | 'expanded';
 }

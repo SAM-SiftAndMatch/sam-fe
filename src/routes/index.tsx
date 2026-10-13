@@ -43,6 +43,7 @@ import FreelancerProjectListPage from '../pages/FreelancerProjectListPage';
 import JobDetailPage from '../pages/JobDetailPage';
 import SuccessApplicationPage from '../pages/SuccessApplicationPage';
 import WorkspacePage from '../pages/WorkspacePage';
+import WorkspaceTimelinePage from '../pages/WorkspaceTimelinePage';
 import WorkspacesPage from '../pages/WorkspacesPage';
 
 const RootRoute: React.FC = () => {
@@ -118,6 +119,7 @@ const AppRoutes = () => {
       {/* Authenticated routes (any role) */}
       <Route element={<AuthGuard />}>
         <Route path={paths.PATH_WORKSPACES} element={<WorkspacesPage />} />
+        <Route path={paths.PATH_WORKSPACE_TIMELINE} element={<WorkspaceTimelinePage />} />
         <Route path={paths.PATH_WORKSPACE} element={<WorkspacePage />} />
         <Route path={paths.PATH_WORKSPACE_CONTRACT} element={<ContractPage />} />
       </Route>
