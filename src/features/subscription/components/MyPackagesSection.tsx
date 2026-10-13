@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PaginationNav from '../../../components/PaginationNav';
+import { usePageSearchParam } from '../../../hooks/usePageSearchParam';
 import type { UserSubscriptionResponse } from '../../../types/subscription';
 import { useMySubscriptionsPage } from '../hooks/useSubscriptions';
 import { PACKAGE_META } from '../packages';
@@ -46,7 +47,7 @@ function PackageRow({ sub }: { sub: UserSubscriptionResponse }) {
  */
 export function MyPackagesSection({ pricingPath }: { pricingPath: string }) {
   const navigate = useNavigate();
-  const [page, setPage] = useState(0);
+  const [page, setPage] = usePageSearchParam();
   const { result, isLoading, error } = useMySubscriptionsPage(page);
   const subscriptions = result?.items ?? [];
 
@@ -100,19 +101,13 @@ export function MyPackagesSection({ pricingPath }: { pricingPath: string }) {
           )}
         </div>
       )}
-      {(result?.totalPages ?? 0) > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-3 text-sm">
-          <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)}>
-            Trước
-          </button>
-          <span>
-            Trang {page + 1}/{result?.totalPages}
-          </span>
-          <button type="button" disabled={!result?.hasNext} onClick={() => setPage(page + 1)}>
-            Sau
-          </button>
-        </div>
-      )}
+      <PaginationNav
+        page={page + 1}
+        totalPages={result?.totalPages ?? 0}
+        onPageChange={(nextPage) => setPage(nextPage - 1)}
+        label="Phân trang gói dịch vụ"
+        className="mt-4"
+      />
     </div>
   );
 }

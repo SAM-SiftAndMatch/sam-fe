@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { chatApi } from '../api/chat';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import PaginationNav from '../components/PaginationNav';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { JobStatus } from '../types/job';
 
@@ -31,7 +33,8 @@ const WorkspacesPage: React.FC = () => {
   const role = user?.role === 'FREELANCER' ? 'freelancer' : 'client';
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [page, setPage] = useState(0);
+  const [page, setPage] = usePageSearchParam();
+  const previousSearch = useRef(debouncedSearch);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(searchQuery), 300);
@@ -39,8 +42,10 @@ const WorkspacesPage: React.FC = () => {
   }, [searchQuery]);
 
   useEffect(() => {
-    setPage(0);
-  }, [debouncedSearch]);
+    if (previousSearch.current === debouncedSearch) return;
+    previousSearch.current = debouncedSearch;
+    setPage(0, true);
+  }, [debouncedSearch, setPage]);
 
   const {
     data: roomPage,
@@ -199,29 +204,13 @@ const WorkspacesPage: React.FC = () => {
             ))
           )}
         </div>
-        {(roomPage?.totalPages ?? 0) > 1 && (
-          <div className="mt-5 flex items-center justify-center gap-3">
-            <button
-              type="button"
-              disabled={page === 0}
-              onClick={() => setPage(page - 1)}
-              className="px-4 py-2 rounded-lg border disabled:opacity-50"
-            >
-              Trước
-            </button>
-            <span>
-              Trang {page + 1}/{roomPage?.totalPages}
-            </span>
-            <button
-              type="button"
-              disabled={!roomPage?.hasNext}
-              onClick={() => setPage(page + 1)}
-              className="px-4 py-2 rounded-lg border disabled:opacity-50"
-            >
-              Sau
-            </button>
-          </div>
-        )}
+        <PaginationNav
+          page={page + 1}
+          totalPages={roomPage?.totalPages ?? 0}
+          onPageChange={(nextPage) => setPage(nextPage - 1)}
+          label="Phân trang cuộc trò chuyện"
+          className="mt-5"
+        />
       </main>
 
       <Footer />

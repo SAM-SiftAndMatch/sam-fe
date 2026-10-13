@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import PaginationNav from '../components/PaginationNav';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import * as paths from '../routes/paths';
 import type { JobResponse } from '../types/job';
 
@@ -154,7 +156,16 @@ const FreelancerJobsPage: React.FC = () => {
     'all' | 'under_5m' | 'from_5m_to_20m' | 'over_20m' | 'negotiable'
   >('all');
   const [sortBy, setSortBy] = useState<'newest' | 'budget_desc' | 'budget_asc'>('newest');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = usePageSearchParam();
+  const currentPage = page + 1;
+  const filterKey = JSON.stringify([
+    projectQuery,
+    selectedSkills,
+    customSkillQuery,
+    budgetFilter,
+    sortBy,
+  ]);
+  const previousFilterKey = useRef(filterKey);
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
   useEffect(() => {
@@ -225,27 +236,19 @@ const FreelancerJobsPage: React.FC = () => {
   const filteredJobs = jobs;
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [projectQuery, selectedSkills, customSkillQuery, budgetFilter, sortBy]);
+    if (previousFilterKey.current === filterKey) return;
+    previousFilterKey.current = filterKey;
+    setPage(0, true);
+  }, [filterKey, setPage]);
+
+  useEffect(() => {
+    if (!jobPage || currentPage <= Math.max(1, jobPage.totalPages)) return;
+    setPage(Math.max(0, jobPage.totalPages - 1), true);
+  }, [currentPage, jobPage, setPage]);
 
   const totalPages = Math.max(1, jobPage?.totalPages ?? 1);
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const paginatedJobs = filteredJobs;
-  const pageNumbers = useMemo(() => {
-    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
-    if (safeCurrentPage <= 3) return [1, 2, 3, 4, 'ellipsis', totalPages] as const;
-    if (safeCurrentPage >= totalPages - 2)
-      return [1, 'ellipsis', totalPages - 3, totalPages - 2, totalPages - 1, totalPages] as const;
-    return [
-      1,
-      'ellipsis',
-      safeCurrentPage - 1,
-      safeCurrentPage,
-      safeCurrentPage + 1,
-      'ellipsis-end',
-      totalPages,
-    ] as const;
-  }, [safeCurrentPage, totalPages]);
 
   const handleDetail = (jobId: string) => navigate(paths.PATH_JOB_DETAIL.replace(':id', jobId));
   const handleApply = (jobId: string) => navigate(paths.PATH_JOB_APPLY.replace(':id', jobId));
@@ -267,7 +270,7 @@ const FreelancerJobsPage: React.FC = () => {
     );
   };
   const goToPage = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    setPage(Math.max(1, Math.min(page, totalPages)) - 1);
     document.getElementById('job-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -539,73 +542,14 @@ const FreelancerJobsPage: React.FC = () => {
                 ))}
               </div>
             )}
-            {!isLoading && !isError && filteredJobs.length > 0 && (
-              <nav
-                className="mt-8 flex flex-wrap items-center justify-center gap-2"
-                aria-label="Phân trang dự án"
-              >
-                <button
-                  type="button"
-                  onClick={() => goToPage(safeCurrentPage - 1)}
-                  disabled={safeCurrentPage === 1}
-                  className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-slate-200 bg-white text-slate-600 transition-colors hover:border-[#1D4ED8]/50 hover:text-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Trang trước"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                {pageNumbers.map((page, index) =>
-                  typeof page === 'number' ? (
-                    <button
-                      key={page}
-                      type="button"
-                      onClick={() => goToPage(page)}
-                      className={`h-10 min-w-10 rounded-xl border px-3 text-sm font-bold transition-colors cursor-pointer ${
-                        page === safeCurrentPage
-                          ? 'border-[#1D4ED8] bg-[#1D4ED8] text-white'
-                          : 'border-slate-200 bg-white text-slate-600 hover:border-[#1D4ED8]/50 hover:text-[#1D4ED8]'
-                      }`}
-                      aria-current={page === safeCurrentPage ? 'page' : undefined}
-                    >
-                      {page}
-                    </button>
-                  ) : (
-                    <span
-                      key={`${page}-${index}`}
-                      className="px-1 text-sm text-gray-400"
-                      aria-hidden="true"
-                    >
-                      …
-                    </span>
-                  )
-                )}
-                <button
-                  type="button"
-                  onClick={() => goToPage(safeCurrentPage + 1)}
-                  disabled={safeCurrentPage === totalPages}
-                  className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-slate-200 bg-white text-slate-600 transition-colors hover:border-[#1D4ED8]/50 hover:text-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Trang sau"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </nav>
+            {!isLoading && !isError && (jobPage?.totalPages ?? 0) > 0 && (
+              <PaginationNav
+                page={safeCurrentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                label="Phân trang dự án"
+                className="mt-8"
+              />
             )}
           </div>
         </div>

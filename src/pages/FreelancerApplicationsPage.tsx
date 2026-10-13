@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { proposalApi } from '../api/proposal';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import PaginationNav from '../components/PaginationNav';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import * as paths from '../routes/paths';
 import type { ProposalResponse, ProposalStatus } from '../types/proposal';
 
@@ -19,7 +21,7 @@ const TABS = [
 const FreelancerApplicationsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('all');
-  const [page, setPage] = useState(0);
+  const [page, setPage] = usePageSearchParam();
 
   const { data: proposalPage, isLoading } = useQuery({
     queryKey: ['my-proposals-page', page, activeTab],
@@ -183,29 +185,13 @@ const FreelancerApplicationsPage: React.FC = () => {
             ))
           )}
         </div>
-        {(proposalPage?.totalPages ?? 0) > 1 && (
-          <div className="mt-5 flex items-center justify-center gap-3">
-            <button
-              type="button"
-              disabled={page === 0}
-              onClick={() => setPage(page - 1)}
-              className="px-4 py-2 rounded-lg border disabled:opacity-50"
-            >
-              Trước
-            </button>
-            <span>
-              Trang {page + 1}/{proposalPage?.totalPages}
-            </span>
-            <button
-              type="button"
-              disabled={!proposalPage?.hasNext}
-              onClick={() => setPage(page + 1)}
-              className="px-4 py-2 rounded-lg border disabled:opacity-50"
-            >
-              Sau
-            </button>
-          </div>
-        )}
+        <PaginationNav
+          page={page + 1}
+          totalPages={proposalPage?.totalPages ?? 0}
+          onPageChange={(nextPage) => setPage(nextPage - 1)}
+          label="Phân trang hồ sơ ứng tuyển"
+          className="mt-5"
+        />
       </main>
 
       <Footer />

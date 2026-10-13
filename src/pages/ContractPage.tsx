@@ -15,6 +15,8 @@ import AppHeader from '../components/AppHeader';
 import ContractMarkdown from '../components/ContractMarkdown';
 import Footer from '../components/Footer';
 import FundingPanel from '../components/FundingPanel';
+import PaginationNav from '../components/PaginationNav';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { useAuthStore } from '../stores/useAuthStore';
 import { diffLines } from '../utils/diff';
 import { formatMoney } from '../utils/format';
@@ -46,7 +48,7 @@ const ContractPage: React.FC = () => {
   // Tab văn bản / lịch sử + bản đang chọn để so sánh với hiện tại
   const [docTab, setDocTab] = useState<'doc' | 'history'>('doc');
   const [revisions, setRevisions] = useState<ContractRevision[]>([]);
-  const [revisionPage, setRevisionPage] = useState(0);
+  const [revisionPage, setRevisionPage] = usePageSearchParam();
   const [revisionTotalPages, setRevisionTotalPages] = useState(0);
   const [revisionTotal, setRevisionTotal] = useState(0);
   const [selectedRevId, setSelectedRevId] = useState<string | null>(null);
@@ -59,8 +61,17 @@ const ContractPage: React.FC = () => {
     if (!responseCode) return;
     const raw = localStorage.getItem('SAM_PENDING_FUNDING');
     localStorage.removeItem('SAM_PENDING_FUNDING');
-    // Xóa query VNPay khỏi URL cho sạch
-    setSearchParams({}, { replace: true });
+    // Chỉ xóa query VNPay, giữ lại trang lịch sử hợp đồng và các query khác.
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        for (const key of [...next.keys()]) {
+          if (key.startsWith('vnp_')) next.delete(key);
+        }
+        return next;
+      },
+      { replace: true }
+    );
     if (responseCode !== '00') {
       setFundingNotice('Thanh toán VNPay chưa hoàn tất, bạn có thể thử lại.');
       return;
@@ -746,27 +757,13 @@ const ContractPage: React.FC = () => {
                     )}
                   </div>
                 )}
-                {revisionTotalPages > 1 && (
-                  <div className="mt-5 flex items-center justify-center gap-3 text-sm">
-                    <button
-                      type="button"
-                      disabled={revisionPage === 0}
-                      onClick={() => setRevisionPage(revisionPage - 1)}
-                    >
-                      Trước
-                    </button>
-                    <span>
-                      Trang {revisionPage + 1}/{revisionTotalPages}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={revisionPage + 1 >= revisionTotalPages}
-                      onClick={() => setRevisionPage(revisionPage + 1)}
-                    >
-                      Sau
-                    </button>
-                  </div>
-                )}
+                <PaginationNav
+                  page={revisionPage + 1}
+                  totalPages={revisionTotalPages}
+                  onPageChange={(nextPage) => setRevisionPage(nextPage - 1)}
+                  label="Phân trang lịch sử hợp đồng"
+                  className="mt-5"
+                />
               </div>
             ) : (
               <>

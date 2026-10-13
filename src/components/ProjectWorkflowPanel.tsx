@@ -1,6 +1,8 @@
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { workflowApi } from '../api/workflow';
+import { readPageParam, usePageSearchParam } from '../hooks/usePageSearchParam';
 import type { PageResult } from '../types/api';
 import type {
   ProjectDelivery,
@@ -11,6 +13,7 @@ import type {
   SandboxSettlement,
   TaskReport,
 } from '../types/workflow';
+import PaginationNav from './PaginationNav';
 
 const statusLabel: Record<ProjectTaskStatus, string> = {
   TODO: 'Chưa bắt đầu',
@@ -39,7 +42,13 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
 }) => {
   const [timeline, setTimeline] = useState<ProjectTimeline | null>(null);
   const [deliveries, setDeliveries] = useState<ProjectDelivery[]>([]);
-  const [deliveryPage, setDeliveryPage] = useState(0);
+  const [deliveryPage, setDeliveryPage] = usePageSearchParam(
+    'page',
+    jobStatus === 'IN_PROGRESS' || jobStatus === 'COMPLETED'
+  );
+  const [searchParams, setSearchParams] = useSearchParams();
+  const reportTask = searchParams.get('task');
+  const reportPage = readPageParam(searchParams.get('reportPage'));
   const [deliveryTotalPages, setDeliveryTotalPages] = useState(0);
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [reportPages, setReportPages] = useState<Record<string, PageResult<TaskReport>>>({});
@@ -97,19 +106,50 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
     }
   }, [canUseWorkflow, jobId, deliveryPage]);
 
-  const loadTaskReports = async (taskId: string, page = 0) => {
-    try {
-      const result = await workflowApi.getTaskReportsPage(jobId, taskId, page);
-      setReportPages((current) => ({ ...current, [taskId]: result }));
-      setExpandedTaskId(taskId);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không tải được báo cáo');
-    }
-  };
+  const loadTaskReports = useCallback(
+    async (taskId: string, page = 0) => {
+      try {
+        const result = await workflowApi.getTaskReportsPage(jobId, taskId, page);
+        setReportPages((current) => ({ ...current, [taskId]: result }));
+        setExpandedTaskId(taskId);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Không tải được báo cáo');
+      }
+    },
+    [jobId]
+  );
+
+  const setReportLocation = useCallback(
+    (taskId: string | null, page = 0, replace = false) => {
+      setSearchParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          if (taskId) {
+            next.set('task', taskId);
+            next.set('reportPage', String(page + 1));
+          } else {
+            next.delete('task');
+            next.delete('reportPage');
+          }
+          return next;
+        },
+        { replace }
+      );
+    },
+    [setSearchParams]
+  );
 
   useEffect(() => {
     void loadWorkflow();
   }, [loadWorkflow]);
+
+  useEffect(() => {
+    if (!canUseWorkflow || !reportTask || !timeline?.tasks.some((task) => task.id === reportTask)) {
+      setExpandedTaskId(null);
+      return;
+    }
+    void loadTaskReports(reportTask, reportPage);
+  }, [canUseWorkflow, loadTaskReports, reportPage, reportTask, timeline?.tasks]);
 
   const weeks = useMemo(() => {
     const grouped = new Map<number, ProjectTimeline['tasks']>();
@@ -139,7 +179,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         status: reportStatus,
       });
       setTimeline({ ...updated, tasks: updated.tasks.map((task) => ({ ...task, reports: [] })) });
-      void loadTaskReports(reportTaskId);
+      setReportLocation(reportTaskId, 0, true);
       setReportTaskId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không gửi được báo cáo');
@@ -273,7 +313,8 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
             <p className="text-xs font-black text-gray-900 mb-2">Tuần {weekNumber}</p>
             <div className="flex flex-col gap-2">
               {tasks.map((task) => {
-                const latestReport = reportPages[task.id]?.items[0];
+                const latestReport =
+                  reportPages[task.id]?.page === 0 ? reportPages[task.id]?.items[0] : undefined;
                 return (
                   <article
                     key={task.id}
@@ -308,49 +349,34 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                     <button
                       type="button"
                       onClick={() => {
-                        if (expandedTaskId === task.id) setExpandedTaskId(null);
-                        else void loadTaskReports(task.id);
+                        if (expandedTaskId === task.id) setReportLocation(null);
+                        else setReportLocation(task.id);
                       }}
                       className="mt-2 text-[11px] font-bold text-blue-700 bg-transparent border-0 p-0 cursor-pointer"
                     >
                       {expandedTaskId === task.id ? 'Ẩn báo cáo' : 'Xem báo cáo'}
                     </button>
-                    {expandedTaskId === task.id && reportPages[task.id] && (
-                      <div className="mt-2 text-[11px] text-gray-500">
-                        {reportPages[task.id].items.map((report) => (
-                          <p
-                            key={report.id}
-                            className="border-t border-gray-200 py-2 whitespace-pre-wrap"
-                          >
-                            {report.content}
-                          </p>
-                        ))}
-                        <div className="flex gap-3">
-                          <button
-                            type="button"
-                            disabled={reportPages[task.id].page === 0}
-                            onClick={() =>
-                              void loadTaskReports(task.id, reportPages[task.id].page - 1)
-                            }
-                          >
-                            Trước
-                          </button>
-                          <span>
-                            Trang {reportPages[task.id].page + 1}/
-                            {Math.max(1, reportPages[task.id].totalPages)}
-                          </span>
-                          <button
-                            type="button"
-                            disabled={!reportPages[task.id].hasNext}
-                            onClick={() =>
-                              void loadTaskReports(task.id, reportPages[task.id].page + 1)
-                            }
-                          >
-                            Sau
-                          </button>
+                    {expandedTaskId === task.id &&
+                      reportTask === task.id &&
+                      reportPages[task.id]?.page === reportPage && (
+                        <div className="mt-2 text-[11px] text-gray-500">
+                          {reportPages[task.id].items.map((report) => (
+                            <p
+                              key={report.id}
+                              className="border-t border-gray-200 py-2 whitespace-pre-wrap"
+                            >
+                              {report.content}
+                            </p>
+                          ))}
+                          <PaginationNav
+                            page={reportPages[task.id].page + 1}
+                            totalPages={reportPages[task.id].totalPages}
+                            onPageChange={(nextPage) => setReportLocation(task.id, nextPage - 1)}
+                            label="Phân trang báo cáo tiến độ"
+                            className="mt-3"
+                          />
                         </div>
-                      </div>
-                    )}
+                      )}
                     {canReport && (
                       <button
                         type="button"
@@ -563,27 +589,13 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
             ))
           )}
         </div>
-        {deliveryTotalPages > 1 && (
-          <div className="mt-3 flex items-center justify-center gap-3 text-xs">
-            <button
-              type="button"
-              disabled={deliveryPage === 0}
-              onClick={() => setDeliveryPage(deliveryPage - 1)}
-            >
-              Trước
-            </button>
-            <span>
-              Trang {deliveryPage + 1}/{deliveryTotalPages}
-            </span>
-            <button
-              type="button"
-              disabled={deliveryPage + 1 >= deliveryTotalPages}
-              onClick={() => setDeliveryPage(deliveryPage + 1)}
-            >
-              Sau
-            </button>
-          </div>
-        )}
+        <PaginationNav
+          page={deliveryPage + 1}
+          totalPages={deliveryTotalPages}
+          onPageChange={(nextPage) => setDeliveryPage(nextPage - 1)}
+          label="Phân trang sản phẩm bàn giao"
+          className="mt-3"
+        />
       </section>
       {modalMode && activeDelivery && (
         <div

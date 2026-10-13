@@ -9,7 +9,9 @@ import { storageApi } from '../api/storage';
 import AppHeader from '../components/AppHeader';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
+import PaginationNav from '../components/PaginationNav';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_PROJECTS, PATH_WORKSPACE } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { JobResponse, RecommendationResponse } from '../types/job';
@@ -32,7 +34,7 @@ const ClientProjectDetailPage: React.FC = () => {
   const [project, setProject] = useState<JobResponse | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendationResponse[]>([]);
   const [proposals, setProposals] = useState<ProposalResponse[]>([]);
-  const [proposalPage, setProposalPage] = useState(0);
+  const [proposalPage, setProposalPage] = usePageSearchParam();
   const [proposalTotalPages, setProposalTotalPages] = useState(0);
   const [proposalTotal, setProposalTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -703,29 +705,13 @@ const ClientProjectDetailPage: React.FC = () => {
                       </p>
                     )}
                   </div>
-                  {proposalTotalPages > 1 && (
-                    <div className="mt-4 flex items-center justify-center gap-3">
-                      <button
-                        type="button"
-                        disabled={proposalPage === 0}
-                        onClick={() => setProposalPage(proposalPage - 1)}
-                        className="px-4 py-2 rounded-lg border disabled:opacity-50"
-                      >
-                        Trước
-                      </button>
-                      <span>
-                        Trang {proposalPage + 1}/{proposalTotalPages}
-                      </span>
-                      <button
-                        type="button"
-                        disabled={proposalPage + 1 >= proposalTotalPages}
-                        onClick={() => setProposalPage(proposalPage + 1)}
-                        className="px-4 py-2 rounded-lg border disabled:opacity-50"
-                      >
-                        Sau
-                      </button>
-                    </div>
-                  )}
+                  <PaginationNav
+                    page={proposalPage + 1}
+                    totalPages={proposalTotalPages}
+                    onPageChange={(nextPage) => setProposalPage(nextPage - 1)}
+                    label="Phân trang hồ sơ đề xuất"
+                    className="mt-4"
+                  />
                 </div>
 
                 {/* Trạng thái Đang thực hiện */}

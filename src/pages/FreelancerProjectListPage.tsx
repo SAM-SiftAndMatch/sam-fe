@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import { paymentApi } from '../api/payment';
@@ -7,6 +7,8 @@ import { walletApi } from '../api/wallet';
 import { workflowApi } from '../api/workflow';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import PaginationNav from '../components/PaginationNav';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_WORKSPACE } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { JobStatus } from '../types/job';
@@ -38,7 +40,8 @@ const FreelancerProjectListPage: React.FC = () => {
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = usePageSearchParam();
+  const previousFilters = useRef({ filter, debouncedSearch: '' });
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -53,8 +56,14 @@ const FreelancerProjectListPage: React.FC = () => {
   }, [searchQuery]);
 
   useEffect(() => {
-    setPage(0);
-  }, [filter, debouncedSearch]);
+    if (
+      previousFilters.current.filter === filter &&
+      previousFilters.current.debouncedSearch === debouncedSearch
+    )
+      return;
+    previousFilters.current = { filter, debouncedSearch };
+    setPage(0, true);
+  }, [filter, debouncedSearch, setPage]);
 
   useEffect(() => {
     if (!user?.userId) return;
@@ -366,29 +375,12 @@ const FreelancerProjectListPage: React.FC = () => {
             </div>
           )}
         </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3">
-            <button
-              type="button"
-              disabled={page === 0}
-              onClick={() => setPage(page - 1)}
-              className="px-4 py-2 rounded-lg border disabled:opacity-50"
-            >
-              Trước
-            </button>
-            <span>
-              Trang {page + 1}/{totalPages}
-            </span>
-            <button
-              type="button"
-              disabled={page + 1 >= totalPages}
-              onClick={() => setPage(page + 1)}
-              className="px-4 py-2 rounded-lg border disabled:opacity-50"
-            >
-              Sau
-            </button>
-          </div>
-        )}
+        <PaginationNav
+          page={page + 1}
+          totalPages={totalPages}
+          onPageChange={(nextPage) => setPage(nextPage - 1)}
+          label="Phân trang dự án freelancer"
+        />
       </main>
 
       <Footer />
