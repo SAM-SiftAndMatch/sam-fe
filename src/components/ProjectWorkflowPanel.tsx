@@ -50,6 +50,9 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   const [webUrl, setWebUrl] = useState('');
   const [repositoryUrl, setRepositoryUrl] = useState('');
   const [deliveryNote, setDeliveryNote] = useState('');
+  const [activeDelivery, setActiveDelivery] = useState<ProjectDelivery | null>(null);
+  const [modalMode, setModalMode] = useState<'accept' | 'revision' | null>(null);
+  const [revisionReason, setRevisionReason] = useState('');
 
   const canUseWorkflow = jobStatus === 'IN_PROGRESS' || jobStatus === 'COMPLETED';
   const canReport = role === 'freelancer' && jobStatus === 'IN_PROGRESS';
@@ -151,13 +154,6 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   };
 
   const acceptDelivery = async (delivery: ProjectDelivery) => {
-    if (
-      !window.confirm(
-        'Bạn xác nhận đã tự kiểm tra website, báo cáo freelancer và checklist nghiệm thu? Thao tác này sẽ quyết toán bằng ví thử nghiệm.'
-      )
-    ) {
-      return;
-    }
     setSubmitting(true);
     setError(null);
     try {
@@ -166,9 +162,36 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         current.map((item) => (item.id === result.delivery.id ? result.delivery : item))
       );
       setSettlement(result.settlement);
+      setModalMode(null);
+      setActiveDelivery(null);
       onSettlementCompleted?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể xác nhận nghiệm thu');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openRevisionModal = (delivery: ProjectDelivery) => {
+    setActiveDelivery(delivery);
+    setRevisionReason('');
+    setModalMode('revision');
+  };
+
+  const requestRevision = async () => {
+    if (!activeDelivery || !revisionReason.trim()) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const updated = await workflowApi.requestDeliveryRevision(jobId, activeDelivery.id, {
+        reason: revisionReason.trim(),
+      });
+      setDeliveries((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+      setModalMode(null);
+      setActiveDelivery(null);
+      setRevisionReason('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể gửi yêu cầu chỉnh sửa');
     } finally {
       setSubmitting(false);
     }
@@ -400,7 +423,11 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                     Phiên bản {delivery.versionNumber}
                   </p>
                   <span className="text-[10px] font-bold text-violet-700">
-                    {delivery.status === 'ACCEPTED' ? 'Đã nghiệm thu' : 'Chờ nghiệm thu'}
+                    {delivery.status === 'ACCEPTED'
+                      ? 'Đã nghiệm thu'
+                      : delivery.status === 'REVISION_REQUESTED'
+                        ? 'Cần chỉnh sửa'
+                        : 'Chờ nghiệm thu'}
                   </span>
                 </div>
                 <a
@@ -412,6 +439,12 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                   Mở website bàn giao
                 </a>
                 {delivery.note && <p className="text-[11px] text-gray-500 mt-1">{delivery.note}</p>}
+                {delivery.revisionReason && (
+                  <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-900">
+                    <span className="font-bold">Yêu cầu chỉnh sửa: </span>
+                    {delivery.revisionReason}
+                  </div>
+                )}
                 {qaPlans[delivery.id] && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <p className="text-[11px] font-bold text-gray-800">Checklist nghiệm thu</p>
@@ -433,21 +466,127 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                     </ol>
                   </div>
                 )}
-                {role === 'client' && delivery.status === 'SUBMITTED' && qaPlans[delivery.id] && (
-                  <button
-                    type="button"
-                    onClick={() => void acceptDelivery(delivery)}
-                    disabled={submitting}
-                    className="w-full mt-3 py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-bold border-0 cursor-pointer disabled:opacity-50"
-                  >
-                    Xác nhận đã nghiệm thu
-                  </button>
+                {role === 'client' && delivery.status === 'SUBMITTED' && (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openRevisionModal(delivery)}
+                      disabled={submitting}
+                      className="py-2.5 rounded-lg border border-amber-300 bg-white text-amber-800 text-xs font-bold cursor-pointer disabled:opacity-50"
+                    >
+                      Yêu cầu chỉnh sửa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveDelivery(delivery);
+                        setModalMode('accept');
+                      }}
+                      disabled={submitting || !qaPlans[delivery.id]}
+                      className="py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-bold border-0 cursor-pointer disabled:opacity-50"
+                    >
+                      Xác nhận nghiệm thu
+                    </button>
+                  </div>
                 )}
               </div>
             ))
           )}
         </div>
       </section>
+      {modalMode && activeDelivery && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !submitting) {
+              setModalMode(null);
+              setActiveDelivery(null);
+            }
+          }}
+        >
+          <dialog
+            open
+            aria-labelledby="delivery-modal-title"
+            className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl"
+          >
+            {modalMode === 'accept' ? (
+              <>
+                <h4 id="delivery-modal-title" className="text-base font-bold text-gray-900">
+                  Xác nhận nghiệm thu
+                </h4>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                  Bạn xác nhận đã kiểm tra website, báo cáo của freelancer và checklist nghiệm thu
+                  cho phiên bản {activeDelivery.versionNumber}.
+                </p>
+                <p className="mt-2 rounded-lg bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
+                  Sau khi xác nhận, hệ thống sẽ quyết toán bằng ví thử nghiệm và không thể yêu cầu
+                  chỉnh sửa phiên bản này.
+                </p>
+                <div className="mt-5 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalMode(null);
+                      setActiveDelivery(null);
+                    }}
+                    disabled={submitting}
+                    className="flex-1 rounded-lg bg-slate-100 py-2.5 text-xs font-bold text-slate-700 disabled:opacity-50"
+                  >
+                    Quay lại
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void acceptDelivery(activeDelivery)}
+                    disabled={submitting}
+                    className="flex-1 rounded-lg bg-emerald-600 py-2.5 text-xs font-bold text-white disabled:opacity-50"
+                  >
+                    {submitting ? 'Đang xác nhận...' : 'Xác nhận nghiệm thu'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h4 id="delivery-modal-title" className="text-base font-bold text-gray-900">
+                  Yêu cầu chỉnh sửa
+                </h4>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                  Hãy nêu rõ lỗi hoặc hạng mục cần Freelancer điều chỉnh cho phiên bản{' '}
+                  {activeDelivery.versionNumber}.
+                </p>
+                <textarea
+                  value={revisionReason}
+                  onChange={(event) => setRevisionReason(event.target.value)}
+                  maxLength={5000}
+                  placeholder="Ví dụ: Chức năng đăng nhập chưa hiển thị thông báo lỗi khi nhập sai mật khẩu."
+                  className="mt-3 min-h-28 w-full resize-y rounded-lg border border-slate-200 p-3 text-sm outline-none focus:border-blue-500"
+                />
+                <div className="mt-5 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalMode(null);
+                      setActiveDelivery(null);
+                    }}
+                    disabled={submitting}
+                    className="flex-1 rounded-lg bg-slate-100 py-2.5 text-xs font-bold text-slate-700 disabled:opacity-50"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void requestRevision()}
+                    disabled={submitting || !revisionReason.trim()}
+                    className="flex-1 rounded-lg bg-amber-600 py-2.5 text-xs font-bold text-white disabled:opacity-50"
+                  >
+                    {submitting ? 'Đang gửi...' : 'Gửi yêu cầu'}
+                  </button>
+                </div>
+              </>
+            )}
+          </dialog>
+        </div>
+      )}
     </div>
   );
 };

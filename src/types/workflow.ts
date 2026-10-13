@@ -72,6 +72,10 @@ export interface DeliveryCreateRequest {
   note?: string;
 }
 
+export interface DeliveryRevisionRequest {
+  reason: string;
+}
+
 export type QaPlanStatus = 'GENERATED' | 'FALLBACK';
 
 export interface QaChecklistItem {
