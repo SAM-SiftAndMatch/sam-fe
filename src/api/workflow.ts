@@ -4,6 +4,7 @@ import type { ApiResponse } from '../types/api';
 import type {
   DeliveryAcceptance,
   DeliveryCreateRequest,
+  DeliveryRevisionRequest,
   ProjectDelivery,
   ProjectTimeline,
   QaPlan,
@@ -48,6 +49,18 @@ export const workflowApi = {
       `/projects/${jobId}/deliveries/${deliveryId}/qa-plan`
     );
     return requireApiResult(res.data, 'Không tải được checklist nghiệm thu');
+  },
+
+  requestDeliveryRevision: async (
+    jobId: string,
+    deliveryId: string,
+    data: DeliveryRevisionRequest
+  ): Promise<ProjectDelivery> => {
+    const res = await apiClient.post<ApiResponse<ProjectDelivery>>(
+      `/projects/${jobId}/deliveries/${deliveryId}/request-revision`,
+      data
+    );
+    return requireApiResult(res.data, 'Không thể gửi yêu cầu chỉnh sửa');
   },
 
   acceptDelivery: async (jobId: string, deliveryId: string): Promise<DeliveryAcceptance> => {
