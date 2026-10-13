@@ -513,7 +513,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
           <dialog
             open
             aria-labelledby="delivery-modal-title"
-            className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl"
+            className="relative m-0 w-full max-w-md border-0 rounded-2xl bg-white p-5 shadow-2xl"
           >
             {modalMode === 'accept' ? (
               <>
