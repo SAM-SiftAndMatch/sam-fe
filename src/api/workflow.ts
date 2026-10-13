@@ -12,6 +12,23 @@ import type {
 } from '../types/workflow';
 
 export const workflowApi = {
+  getTimelineSummary: async (jobId: string): Promise<ProjectTimeline> => {
+    const res = await apiClient.get<ApiResponse<ProjectTimeline>>(
+      `/projects/${jobId}/timeline/summary`
+    );
+    return requireApiResult(res.data, 'Không tải được timeline dự án');
+  },
+
+  getTaskReports: async (
+    jobId: string,
+    taskId: string
+  ): Promise<ProjectTimeline['tasks'][number]['reports']> => {
+    const res = await apiClient.get<ApiResponse<ProjectTimeline['tasks'][number]['reports']>>(
+      `/projects/${jobId}/timeline/tasks/${taskId}/reports`
+    );
+    return requireApiResult(res.data, 'Không tải được báo cáo');
+  },
+
   getTimeline: async (jobId: string): Promise<ProjectTimeline> => {
     const res = await apiClient.get<ApiResponse<ProjectTimeline>>(`/projects/${jobId}/timeline`);
     return requireApiResult(res.data, 'Không tải được timeline dự án');

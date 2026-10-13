@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { requireApiResult } from '../lib/api-error';
 import apiClient from '../lib/axios';
-import type { ApiResponse } from '../types/api';
+import type { ApiResponse, PageResult } from '../types/api';
 
 export interface ContractDraft {
   contractId: string;
@@ -55,6 +55,17 @@ export interface ContractRevision {
 }
 
 export const contractApi = {
+  getRevisionsPage: async (
+    roomId: string,
+    page = 0,
+    size = 10
+  ): Promise<PageResult<ContractRevision>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<ContractRevision>>>(
+      `/chat/rooms/${roomId}/contract/revisions/page`,
+      { params: { page, size } }
+    );
+    return requireApiResult(res.data, 'Failed to fetch contract revisions');
+  },
   generateAiDraft: async (roomId: string): Promise<ContractDraft> => {
     const res = await apiClient.post<ApiResponse<ContractDraft>>(
       `/chat/rooms/${roomId}/contracts/ai-draft`

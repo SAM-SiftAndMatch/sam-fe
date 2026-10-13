@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { chatApi } from '../api/chat';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import PaginationNav from '../components/PaginationNav';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { JobStatus } from '../types/job';
 
@@ -30,27 +32,38 @@ const WorkspacesPage: React.FC = () => {
   const { user } = useAuthStore();
   const role = user?.role === 'FREELANCER' ? 'freelancer' : 'client';
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = usePageSearchParam();
+  const previousSearch = useRef(debouncedSearch);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (previousSearch.current === debouncedSearch) return;
+    previousSearch.current = debouncedSearch;
+    setPage(0, true);
+  }, [debouncedSearch, setPage]);
 
   const {
-    data: rooms = [],
+    data: roomPage,
     isLoading,
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['chat-rooms'],
-    queryFn: () => chatApi.getMyRooms(),
+    queryKey: ['chat-rooms-page', page, debouncedSearch],
+    queryFn: () =>
+      chatApi.getMyRoomsPage({
+        page,
+        size: 10,
+        search: debouncedSearch.trim() || undefined,
+      }),
   });
 
-  const filtered = useMemo(() => {
-    const q = searchQuery.toLowerCase();
-    if (!q) return rooms;
-    return rooms.filter(
-      (r) =>
-        r.jobTitle.toLowerCase().includes(q) ||
-        r.clientName.toLowerCase().includes(q) ||
-        r.freelancerName.toLowerCase().includes(q)
-    );
-  }, [rooms, searchQuery]);
+  const rooms = roomPage?.items ?? [];
+  const filtered = rooms;
 
   const otherName = (room: (typeof rooms)[number]) =>
     role === 'client' ? room.freelancerName : room.clientName;
@@ -68,7 +81,7 @@ const WorkspacesPage: React.FC = () => {
             <p className="text-gray-500">
               {isLoading
                 ? 'Đang tải...'
-                : `${rooms.length} cuộc trò chuyện với ${role === 'client' ? 'freelancer' : 'khách hàng'} của bạn.`}
+                : `${roomPage?.totalElements ?? 0} cuộc trò chuyện với ${role === 'client' ? 'freelancer' : 'khách hàng'} của bạn.`}
             </p>
           </div>
           <button
@@ -119,7 +132,7 @@ const WorkspacesPage: React.FC = () => {
                 Thử lại
               </button>
             </div>
-          ) : rooms.length === 0 ? (
+          ) : (roomPage?.totalElements ?? 0) === 0 && !debouncedSearch ? (
             <div className="p-10 text-center">
               <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
                 <svg
@@ -191,6 +204,13 @@ const WorkspacesPage: React.FC = () => {
             ))
           )}
         </div>
+        <PaginationNav
+          page={page + 1}
+          totalPages={roomPage?.totalPages ?? 0}
+          onPageChange={(nextPage) => setPage(nextPage - 1)}
+          label="Phân trang cuộc trò chuyện"
+          className="mt-5"
+        />
       </main>
 
       <Footer />

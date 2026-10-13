@@ -1,9 +1,19 @@
 import { requireApiResult } from '../lib/api-error';
 import apiClient from '../lib/axios';
-import type { ApiResponse } from '../types/api';
+import type { ApiResponse, PageResult } from '../types/api';
 import type { PurchaseSubscriptionRequest, UserSubscriptionResponse } from '../types/subscription';
 
 export const subscriptionApi = {
+  mySubscriptionsPage: async (
+    page = 0,
+    size = 10
+  ): Promise<PageResult<UserSubscriptionResponse>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<UserSubscriptionResponse>>>(
+      '/subscriptions/me/page',
+      { params: { page, size } }
+    );
+    return requireApiResult(res.data, 'Failed to fetch subscriptions');
+  },
   purchase: async (data: PurchaseSubscriptionRequest): Promise<UserSubscriptionResponse> => {
     const res = await apiClient.post<ApiResponse<UserSubscriptionResponse>>(
       '/subscriptions/purchase',

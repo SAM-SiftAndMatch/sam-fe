@@ -1,7 +1,6 @@
 import { Client } from '@stomp/stompjs';
-import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import { type ChatMessage, type ChatRoom, chatApi } from '../api/chat';
@@ -40,6 +39,11 @@ const WorkspacePage: React.FC = () => {
   const [room, setRoom] = useState<ChatRoom | null>(null);
   const [roomError, setRoomError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [historyCursor, setHistoryCursor] = useState<string | null>(null);
+  const [hasOlderMessages, setHasOlderMessages] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   // Vừa ký đôi xong nhảy về đây đợi AI thẩm định (ContractPage navigate kèm state)
@@ -49,6 +53,13 @@ const WorkspacePage: React.FC = () => {
   const stompRef = useRef<Client | null>(null);
   const contractSubRef = useRef<{ unsubscribe: () => void } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const pendingScrollRestore = useRef<{ height: number; top: number } | null>(null);
+  const shouldScrollToBottom = useRef(true);
+  const contractIdRef = useRef<string | null>(null);
+  const loadingOlderRef = useRef(false);
+  const activeRoomIdRef = useRef<string | null>(null);
+  const previousScrollTopRef = useRef(0);
 
   // Hợp đồng: panel gọn trong chat chỉ hiện giá + 2 tên + nút mở màn sửa full-screen
   const [contract, setContract] = useState<ContractDetail | null>(null);
@@ -60,45 +71,122 @@ const WorkspacePage: React.FC = () => {
     let cancelled = false;
     setRoomError(null);
     setRoom(null);
+    activeRoomIdRef.current = null;
     setMessages([]);
+    setHistoryCursor(null);
+    setHasOlderMessages(false);
+    setHistoryLoading(true);
+    setHistoryError(null);
     setContract(null);
-    chatApi
+    contractIdRef.current = null;
+    shouldScrollToBottom.current = true;
+    previousScrollTopRef.current = 0;
+    const initialHistory = chatApi.getHistoryPage(projectId, { size: 30 }).catch(() => null);
+    void chatApi
       .getRoomDetail(projectId)
       .catch(() => chatApi.getRoomByJob(projectId))
-      .then((r) => {
-        if (!cancelled) setRoom(r);
+      .then(async (r) => {
+        if (cancelled) return;
+        activeRoomIdRef.current = r.id;
+        setRoom(r);
+        try {
+          const result =
+            r.id === projectId
+              ? await initialHistory
+              : await chatApi.getHistoryPage(r.id, { size: 30 });
+          if (cancelled) return;
+          if (!result) throw new Error('Không tải được tin nhắn');
+          setMessages((current) => [
+            ...result.items,
+            ...current.filter((message) => !result.items.some((item) => item.id === message.id)),
+          ]);
+          setHistoryCursor(result.nextCursor);
+          setHasOlderMessages(result.hasMore);
+        } catch {
+          if (!cancelled) setHistoryError('Không tải được tin nhắn. Hãy thử tải lại.');
+        } finally {
+          if (!cancelled) setHistoryLoading(false);
+        }
       })
       .catch(() => {
-        if (!cancelled)
+        if (!cancelled) {
           setRoomError('Không tìm thấy phòng chat. Hãy chắc chắn bạn đã bắt tay 1 chạm trước.');
+          setHistoryLoading(false);
+        }
       });
     return () => {
       cancelled = true;
     };
   }, [projectId]);
 
-  const { refetch: refetchHistory } = useQuery({
-    queryKey: ['chat-history', room?.id],
-    queryFn: () => chatApi.getHistory(room!.id),
-    enabled: !!room?.id,
-    retry: false,
-  });
+  const loadOlderMessages = async () => {
+    if (!room?.id || !historyCursor || loadingOlderRef.current) return;
+    const roomId = room.id;
+    const container = messagesContainerRef.current;
+    if (container) {
+      pendingScrollRestore.current = { height: container.scrollHeight, top: container.scrollTop };
+    }
+    shouldScrollToBottom.current = false;
+    loadingOlderRef.current = true;
+    setHistoryError(null);
+    setLoadingOlder(true);
+    try {
+      const result = await chatApi.getHistoryPage(roomId, { before: historyCursor, size: 30 });
+      if (activeRoomIdRef.current !== roomId) return;
+      setMessages((current) => [
+        ...result.items.filter(
+          (message) => !current.some((existing) => existing.id === message.id)
+        ),
+        ...current,
+      ]);
+      setHistoryCursor(result.nextCursor);
+      setHasOlderMessages(result.hasMore);
+    } catch {
+      pendingScrollRestore.current = null;
+      if (activeRoomIdRef.current === roomId) {
+        setHistoryError('Không tải được tin nhắn cũ. Hãy cuộn lên để thử lại.');
+      }
+    } finally {
+      loadingOlderRef.current = false;
+      setLoadingOlder(false);
+    }
+  };
 
-  useEffect(() => {
+  const reloadHistory = async () => {
     if (!room?.id) return;
-    chatApi
-      .getHistory(room.id)
-      .then(setMessages)
-      .catch(() => setMessages([]));
-  }, [room?.id]);
+    const roomId = room.id;
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      const result = await chatApi.getHistoryPage(roomId, { size: 30 });
+      if (activeRoomIdRef.current !== roomId) return;
+      setMessages((current) => [
+        ...result.items,
+        ...current.filter((message) => !result.items.some((item) => item.id === message.id)),
+      ]);
+      setHistoryCursor(result.nextCursor);
+      setHasOlderMessages(result.hasMore);
+    } catch {
+      if (activeRoomIdRef.current === roomId) {
+        setHistoryError('Không tải được tin nhắn. Hãy thử tải lại.');
+      }
+    } finally {
+      if (activeRoomIdRef.current === roomId) setHistoryLoading(false);
+    }
+  };
 
-  // WS realtime: 1 client duy nhất cho cả chat + hợp đồng.
-  // Phụ thuộc cả contract?.id để khi hợp đồng vừa được tạo/xong thì nối lại và
-  // subscribe kênh /topic/contracts/{id} (tránh race: contract về trước WS nối xong).
+  useLayoutEffect(() => {
+    const pending = pendingScrollRestore.current;
+    const container = messagesContainerRef.current;
+    if (!pending || !container) return;
+    container.scrollTop = pending.top + container.scrollHeight - pending.height;
+    pendingScrollRestore.current = null;
+  }, [messages]);
+
+  // Giữ một kết nối WebSocket cho phòng chat; hợp đồng đến sau chỉ thêm subscription.
   useEffect(() => {
     if (!room?.id) return;
     const roomId = room.id;
-    const currentContractId = contract?.id;
     const client = new Client({
       webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL}/ws`) as WebSocket,
       reconnectDelay: 5000,
@@ -117,8 +205,8 @@ const WorkspacePage: React.FC = () => {
           // bỏ qua
         }
       });
-      if (currentContractId) {
-        subscribeContract(client, currentContractId);
+      if (contractIdRef.current) {
+        subscribeContract(client, contractIdRef.current);
       }
     };
     client.activate();
@@ -130,7 +218,14 @@ const WorkspacePage: React.FC = () => {
       if (stompRef.current === client) stompRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room?.id, contract?.id]);
+  }, [room?.id]);
+
+  useEffect(() => {
+    contractIdRef.current = contract?.id ?? null;
+    const client = stompRef.current;
+    if (contract?.id && client?.connected) subscribeContract(client, contract.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contract?.id]);
 
   // Tự tắt banner chờ sau 2 phút nếu AI lâu (tránh kẹt màn hình)
   useEffect(() => {
@@ -187,8 +282,8 @@ const WorkspacePage: React.FC = () => {
   };
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (shouldScrollToBottom.current) bottomRef.current?.scrollIntoView();
+  }, [messages.length, messages.at(-1)?.id]);
 
   const handleSend = () => {
     const text = input.trim();
@@ -196,8 +291,13 @@ const WorkspacePage: React.FC = () => {
     const client = stompRef.current;
     if (!client?.active) {
       // Fallback: reload lịch sử nếu WS chưa nối
-      void refetchHistory().then((r) => {
-        if (r.data) setMessages(r.data);
+      void chatApi.getHistoryPage(room.id).then((result) => {
+        setMessages((current) => [
+          ...current,
+          ...result.items.filter(
+            (message) => !current.some((existing) => existing.id === message.id)
+          ),
+        ]);
       });
       return;
     }
@@ -330,7 +430,40 @@ const WorkspacePage: React.FC = () => {
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 hide-scrollbar">
+          <div
+            ref={messagesContainerRef}
+            onScroll={(event) => {
+              const container = event.currentTarget;
+              const movingUp = container.scrollTop < previousScrollTopRef.current;
+              previousScrollTopRef.current = container.scrollTop;
+              shouldScrollToBottom.current =
+                container.scrollHeight - container.scrollTop - container.clientHeight < 120;
+              if (
+                movingUp &&
+                container.scrollTop < 80 &&
+                hasOlderMessages &&
+                !loadingOlderRef.current
+              ) {
+                void loadOlderMessages();
+              }
+            }}
+            className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 hide-scrollbar"
+          >
+            {loadingOlder && (
+              <p className="self-center text-xs text-gray-400">Đang tải tin cũ...</p>
+            )}
+            {historyError && (
+              <div className="self-center text-center text-xs text-red-600">
+                <p>{historyError}</p>
+                <button
+                  type="button"
+                  onClick={() => void (hasOlderMessages ? loadOlderMessages() : reloadHistory())}
+                  className="mt-1 text-blue-700 underline"
+                >
+                  Thử lại
+                </button>
+              </div>
+            )}
             {roomError ? (
               <div className="text-center py-16">
                 <p className="text-sm text-red-600 font-semibold mb-2">{roomError}</p>
@@ -344,7 +477,9 @@ const WorkspacePage: React.FC = () => {
               </div>
             ) : !room ? (
               <p className="text-center text-sm text-gray-400 py-16">Đang tải phòng chat...</p>
-            ) : messages.length === 0 ? (
+            ) : historyLoading ? (
+              <p className="text-center text-sm text-gray-400 py-16">Đang tải tin nhắn...</p>
+            ) : messages.length === 0 && !historyError ? (
               <div className="text-center py-16">
                 <p className="text-sm text-gray-500 mb-1">
                   Bắt tay thành công! Đây là phòng thương lượng của 2 bên.

@@ -9,7 +9,9 @@ import { storageApi } from '../api/storage';
 import AppHeader from '../components/AppHeader';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
+import PaginationNav from '../components/PaginationNav';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_PROJECTS, PATH_WORKSPACE } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { JobResponse, RecommendationResponse } from '../types/job';
@@ -32,6 +34,9 @@ const ClientProjectDetailPage: React.FC = () => {
   const [project, setProject] = useState<JobResponse | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendationResponse[]>([]);
   const [proposals, setProposals] = useState<ProposalResponse[]>([]);
+  const [proposalPage, setProposalPage] = usePageSearchParam();
+  const [proposalTotalPages, setProposalTotalPages] = useState(0);
+  const [proposalTotal, setProposalTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -67,7 +72,10 @@ const ClientProjectDetailPage: React.FC = () => {
       }
       // Hồ sơ phổ thông: client xem được ở mọi trạng thái (trừ khi chưa có ai nộp)
       try {
-        setProposals(await proposalApi.getByJob(id));
+        const result = await proposalApi.getByJobPage(id, { page: proposalPage, size: 10 });
+        setProposals(result.items);
+        setProposalTotalPages(result.totalPages);
+        setProposalTotal(result.totalElements);
       } catch {
         setProposals([]);
       }
@@ -81,7 +89,7 @@ const ClientProjectDetailPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, id]);
+  }, [isAuthenticated, id, proposalPage]);
 
   useEffect(() => {
     void loadData();
@@ -608,7 +616,7 @@ const ClientProjectDetailPage: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-gray-900">
-                      Hồ sơ ứng tuyển ({proposals.length})
+                      Hồ sơ ứng tuyển ({proposalTotal})
                     </h2>
                   </div>
 
@@ -697,6 +705,13 @@ const ClientProjectDetailPage: React.FC = () => {
                       </p>
                     )}
                   </div>
+                  <PaginationNav
+                    page={proposalPage + 1}
+                    totalPages={proposalTotalPages}
+                    onPageChange={(nextPage) => setProposalPage(nextPage - 1)}
+                    label="Phân trang hồ sơ đề xuất"
+                    className="mt-4"
+                  />
                 </div>
 
                 {/* Trạng thái Đang thực hiện */}

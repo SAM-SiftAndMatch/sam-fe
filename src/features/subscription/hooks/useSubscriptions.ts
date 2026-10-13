@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { subscriptionApi } from '../../../api/subscription';
 import { useAuthStore } from '../../../stores/useAuthStore';
+import type { PageResult } from '../../../types/api';
 import type { UserSubscriptionResponse } from '../../../types/subscription';
 
 function toMessage(error: unknown, fallback: string): string {
@@ -40,6 +41,32 @@ export function useMySubscriptions() {
   }, [load]);
 
   return { subscriptions, isLoading, error, refetch: load };
+}
+
+export function useMySubscriptionsPage(page: number) {
+  const { isAuthenticated } = useAuthStore();
+  const [result, setResult] = useState<PageResult<UserSubscriptionResponse> | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const load = useCallback(async () => {
+    if (!isAuthenticated) {
+      setResult(null);
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      setResult(await subscriptionApi.mySubscriptionsPage(page));
+    } catch (e) {
+      setError(toMessage(e, 'Không tải được danh sách gói dịch vụ'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, page]);
+  useEffect(() => {
+    void load();
+  }, [load]);
+  return { result, isLoading, error, refetch: load };
 }
 
 export function usePurchasePackage() {

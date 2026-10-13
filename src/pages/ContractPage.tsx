@@ -15,6 +15,8 @@ import AppHeader from '../components/AppHeader';
 import ContractMarkdown from '../components/ContractMarkdown';
 import Footer from '../components/Footer';
 import FundingPanel from '../components/FundingPanel';
+import PaginationNav from '../components/PaginationNav';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { useAuthStore } from '../stores/useAuthStore';
 import { diffLines } from '../utils/diff';
 import { formatMoney } from '../utils/format';
@@ -46,6 +48,9 @@ const ContractPage: React.FC = () => {
   // Tab văn bản / lịch sử + bản đang chọn để so sánh với hiện tại
   const [docTab, setDocTab] = useState<'doc' | 'history'>('doc');
   const [revisions, setRevisions] = useState<ContractRevision[]>([]);
+  const [revisionPage, setRevisionPage] = usePageSearchParam();
+  const [revisionTotalPages, setRevisionTotalPages] = useState(0);
+  const [revisionTotal, setRevisionTotal] = useState(0);
   const [selectedRevId, setSelectedRevId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [fundingNotice, setFundingNotice] = useState<string | null>(null);
@@ -56,8 +61,17 @@ const ContractPage: React.FC = () => {
     if (!responseCode) return;
     const raw = localStorage.getItem('SAM_PENDING_FUNDING');
     localStorage.removeItem('SAM_PENDING_FUNDING');
-    // Xóa query VNPay khỏi URL cho sạch
-    setSearchParams({}, { replace: true });
+    // Chỉ xóa query VNPay, giữ lại trang lịch sử hợp đồng và các query khác.
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        for (const key of [...next.keys()]) {
+          if (key.startsWith('vnp_')) next.delete(key);
+        }
+        return next;
+      },
+      { replace: true }
+    );
     if (responseCode !== '00') {
       setFundingNotice('Thanh toán VNPay chưa hoàn tất, bạn có thể thử lại.');
       return;
@@ -349,9 +363,11 @@ const ContractPage: React.FC = () => {
   // Tải lịch sử sửa của phòng (mở tab là có, không cần chờ)
   const loadRevisions = async (roomId: string) => {
     try {
-      const list = await contractApi.getRevisions(roomId);
-      setRevisions(list);
-      setSelectedRevId((prev) => prev ?? list[0]?.id ?? null);
+      const result = await contractApi.getRevisionsPage(roomId, revisionPage);
+      setRevisions(result.items);
+      setRevisionTotalPages(result.totalPages);
+      setRevisionTotal(result.totalElements);
+      setSelectedRevId(result.items[0]?.id ?? null);
     } catch {
       // chưa có hoặc lỗi thì thôi, tab lịch sử sẽ báo trống
     }
@@ -359,7 +375,7 @@ const ContractPage: React.FC = () => {
 
   useEffect(() => {
     if (room?.id) void loadRevisions(room.id);
-  }, [room?.id]);
+  }, [room?.id, revisionPage]);
 
   // Bản đang chọn để so sánh với hiện tại + diff đã tính sẵn
   const selectedRev = useMemo(
@@ -628,7 +644,7 @@ const ContractPage: React.FC = () => {
                       : 'bg-white text-gray-500 border border-gray-200'
                   }`}
                 >
-                  Lịch sử thay đổi{revisions.length > 0 ? ` (${revisions.length})` : ''}
+                  Lịch sử thay đổi{revisionTotal > 0 ? ` (${revisionTotal})` : ''}
                 </button>
               </div>
             </div>
@@ -741,6 +757,13 @@ const ContractPage: React.FC = () => {
                     )}
                   </div>
                 )}
+                <PaginationNav
+                  page={revisionPage + 1}
+                  totalPages={revisionTotalPages}
+                  onPageChange={(nextPage) => setRevisionPage(nextPage - 1)}
+                  label="Phân trang lịch sử hợp đồng"
+                  className="mt-5"
+                />
               </div>
             ) : (
               <>

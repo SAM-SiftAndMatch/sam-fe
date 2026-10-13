@@ -1,12 +1,15 @@
 import axios from 'axios';
 import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import PaginationNav from '../components/PaginationNav';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_CLIENT_PROJECT_DETAIL } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
+import type { PageResult } from '../types/api';
 import type { JobResponse } from '../types/job';
 import { formatDate, formatMoney } from '../utils/format';
 
@@ -25,16 +28,44 @@ const ClientProjectListPage: React.FC = () => {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [jobs, setJobs] = useState<JobResponse[]>([]);
+  const [page, setPage] = usePageSearchParam();
+  const previousFilters = useRef({ filter, debouncedSearch: '' });
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (
+      previousFilters.current.filter === filter &&
+      previousFilters.current.debouncedSearch === debouncedSearch
+    )
+      return;
+    previousFilters.current = { filter, debouncedSearch };
+    setPage(0, true);
+  }, [filter, debouncedSearch, setPage]);
 
   const loadJobs = useCallback(async () => {
     if (!isAuthenticated) return;
     setIsLoading(true);
     setServerError(null);
     try {
-      setJobs(await jobApi.getMyJobs());
+      const result: PageResult<JobResponse> = await jobApi.getMyJobsPage({
+        page,
+        size: 10,
+        status: filter === 'all' ? undefined : filter,
+        search: debouncedSearch.trim() || undefined,
+      });
+      setJobs(result.items);
+      setTotalPages(result.totalPages);
+      setTotalElements(result.totalElements);
     } catch (e) {
       if (axios.isAxiosError(e)) {
         const data = e.response?.data as { message?: string } | undefined;
@@ -45,7 +76,7 @@ const ClientProjectListPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, page, filter, debouncedSearch]);
 
   useEffect(() => {
     void loadJobs();
@@ -70,17 +101,7 @@ const ClientProjectListPage: React.FC = () => {
     }
   };
 
-  const filteredProjects = jobs
-    .filter((p) => {
-      const matchFilter = filter === 'all' || p.status === filter;
-      const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchFilter && matchSearch;
-    })
-    .sort((a, b) => {
-      if (a.status === 'CANCELLED' && b.status !== 'CANCELLED') return 1;
-      if (a.status !== 'CANCELLED' && b.status === 'CANCELLED') return -1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+  const filteredProjects = jobs;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -213,6 +234,7 @@ const ClientProjectListPage: React.FC = () => {
           </div>
         )}
         <div className="flex flex-col gap-4">
+          <p className="text-sm text-gray-500">Tổng {totalElements} dự án</p>
           {isLoading ? (
             <p className="text-sm text-gray-500 text-center py-10">Đang tải dự án...</p>
           ) : (
@@ -298,6 +320,12 @@ const ClientProjectListPage: React.FC = () => {
             </div>
           )}
         </div>
+        <PaginationNav
+          page={page + 1}
+          totalPages={totalPages}
+          onPageChange={(nextPage) => setPage(nextPage - 1)}
+          label="Phân trang dự án của tôi"
+        />
       </main>
 
       <Footer />
