@@ -38,10 +38,23 @@ const FreelancerProjectListPage: React.FC = () => {
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [escrow, setEscrow] = useState<FreelancerEscrowSummary | null>(null);
   const [wallet, setWallet] = useState<WalletSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [filter, debouncedSearch]);
 
   useEffect(() => {
     if (!user?.userId) return;
@@ -49,17 +62,22 @@ const FreelancerProjectListPage: React.FC = () => {
     setLoading(true);
     setError(null);
     Promise.all([
-      jobApi.getFreelancerProjects(user.userId),
+      jobApi.getFreelancerProjectsPage(user.userId, {
+        page,
+        size: 10,
+        group: filter === 'all' ? undefined : filter,
+        search: debouncedSearch.trim() || undefined,
+      }),
       paymentApi.getFreelancerEscrowSummary(user.userId),
       walletApi.getMyWallet(),
     ])
-      .then(async ([jobData, escrowData, walletData]) => {
+      .then(async ([jobPage, escrowData, walletData]) => {
         const mapped = await Promise.all(
-          jobData.map(async (job): Promise<ProjectListItem> => {
+          jobPage.items.map(async (job): Promise<ProjectListItem> => {
             let progress = job.status === 'COMPLETED' ? 100 : 0;
             if (job.status === 'IN_PROGRESS') {
               progress = await workflowApi
-                .getTimeline(job.id)
+                .getTimelineSummary(job.id)
                 .then((timeline) => timeline.progress)
                 .catch(() => 0);
             }
@@ -78,6 +96,8 @@ const FreelancerProjectListPage: React.FC = () => {
         );
         if (!cancelled) {
           setProjects(mapped);
+          setTotalPages(jobPage.totalPages);
+          setTotalElements(jobPage.totalElements);
           setEscrow(escrowData);
           setWallet(walletData);
         }
@@ -91,15 +111,9 @@ const FreelancerProjectListPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [user?.userId]);
+  }, [user?.userId, page, filter, debouncedSearch]);
 
-  const filteredProjects = projects.filter((p) => {
-    const matchFilter = filter === 'all' || p.status === filter;
-    const matchSearch =
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.clientName.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchFilter && matchSearch;
-  });
+  const filteredProjects = projects;
 
   const getStatusBadge = (project: ProjectListItem) => {
     switch (project.status) {
@@ -172,7 +186,7 @@ const FreelancerProjectListPage: React.FC = () => {
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
                 Tổng dự án
               </p>
-              <p className="text-2xl font-black text-gray-900">{projects.length}</p>
+              <p className="text-2xl font-black text-gray-900">{totalElements}</p>
             </div>
           </div>
 
@@ -328,7 +342,7 @@ const FreelancerProjectListPage: React.FC = () => {
             </div>
           ))}
 
-          {filteredProjects.length === 0 && (
+          {!loading && filteredProjects.length === 0 && (
             <div className="py-20 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-dashed border-gray-200">
               <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-400">
                 <svg
@@ -352,6 +366,29 @@ const FreelancerProjectListPage: React.FC = () => {
             </div>
           )}
         </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3">
+            <button
+              type="button"
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+              className="px-4 py-2 rounded-lg border disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span>
+              Trang {page + 1}/{totalPages}
+            </span>
+            <button
+              type="button"
+              disabled={page + 1 >= totalPages}
+              onClick={() => setPage(page + 1)}
+              className="px-4 py-2 rounded-lg border disabled:opacity-50"
+            >
+              Sau
+            </button>
+          </div>
+        )}
       </main>
 
       <Footer />

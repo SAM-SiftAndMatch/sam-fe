@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { UserSubscriptionResponse } from '../../../types/subscription';
-import { useMySubscriptions } from '../hooks/useSubscriptions';
+import { useMySubscriptionsPage } from '../hooks/useSubscriptions';
 import { PACKAGE_META } from '../packages';
 
 const STATUS_TEXT: Record<string, { text: string; className: string }> = {
@@ -45,7 +46,9 @@ function PackageRow({ sub }: { sub: UserSubscriptionResponse }) {
  */
 export function MyPackagesSection({ pricingPath }: { pricingPath: string }) {
   const navigate = useNavigate();
-  const { subscriptions, isLoading } = useMySubscriptions();
+  const [page, setPage] = useState(0);
+  const { result, isLoading, error } = useMySubscriptionsPage(page);
+  const subscriptions = result?.items ?? [];
 
   const monthly = subscriptions.filter((s) => s.endDate !== null || s.status !== 'ACTIVE');
   const single = subscriptions.filter((s) => s.endDate === null && s.status === 'ACTIVE');
@@ -67,6 +70,8 @@ export function MyPackagesSection({ pricingPath }: { pricingPath: string }) {
       </p>
       {isLoading ? (
         <p className="text-sm text-gray-500">Đang tải gói...</p>
+      ) : error ? (
+        <p className="text-sm text-red-600">{error}</p>
       ) : subscriptions.length === 0 ? (
         <p className="text-sm text-gray-500">
           Bạn chưa mua gói nào. Bấm "Mua thêm gói" để xem bảng giá.
@@ -93,6 +98,19 @@ export function MyPackagesSection({ pricingPath }: { pricingPath: string }) {
               ))}
             </div>
           )}
+        </div>
+      )}
+      {(result?.totalPages ?? 0) > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+          <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)}>
+            Trước
+          </button>
+          <span>
+            Trang {page + 1}/{result?.totalPages}
+          </span>
+          <button type="button" disabled={!result?.hasNext} onClick={() => setPage(page + 1)}>
+            Sau
+          </button>
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 import { requireApiResult } from '../lib/api-error';
 import apiClient from '../lib/axios';
-import type { ApiResponse } from '../types/api';
+import type { ApiResponse, PageResult } from '../types/api';
 import type {
   AmountVerification,
   ConfirmFundingRequest,
@@ -11,6 +11,17 @@ import type {
 } from '../types/payment';
 
 export const paymentApi = {
+  getByContractPage: async (
+    contractId: string,
+    page = 0,
+    size = 10
+  ): Promise<PageResult<PaymentResponse>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<PaymentResponse>>>(
+      `/payments/contract/${contractId}/page`,
+      { params: { page, size } }
+    );
+    return requireApiResult(res.data, 'Failed to fetch contract payments');
+  },
   // Client nạp 100% giá trị hợp đồng (trả về vnpayUrl để redirect)
   createFund: async (data: CreateEscrowRequest): Promise<PaymentResponse> => {
     const res = await apiClient.post<ApiResponse<PaymentResponse>>('/payments/fund', data);

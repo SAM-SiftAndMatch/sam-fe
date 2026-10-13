@@ -46,6 +46,9 @@ const ContractPage: React.FC = () => {
   // Tab văn bản / lịch sử + bản đang chọn để so sánh với hiện tại
   const [docTab, setDocTab] = useState<'doc' | 'history'>('doc');
   const [revisions, setRevisions] = useState<ContractRevision[]>([]);
+  const [revisionPage, setRevisionPage] = useState(0);
+  const [revisionTotalPages, setRevisionTotalPages] = useState(0);
+  const [revisionTotal, setRevisionTotal] = useState(0);
   const [selectedRevId, setSelectedRevId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [fundingNotice, setFundingNotice] = useState<string | null>(null);
@@ -349,9 +352,11 @@ const ContractPage: React.FC = () => {
   // Tải lịch sử sửa của phòng (mở tab là có, không cần chờ)
   const loadRevisions = async (roomId: string) => {
     try {
-      const list = await contractApi.getRevisions(roomId);
-      setRevisions(list);
-      setSelectedRevId((prev) => prev ?? list[0]?.id ?? null);
+      const result = await contractApi.getRevisionsPage(roomId, revisionPage);
+      setRevisions(result.items);
+      setRevisionTotalPages(result.totalPages);
+      setRevisionTotal(result.totalElements);
+      setSelectedRevId(result.items[0]?.id ?? null);
     } catch {
       // chưa có hoặc lỗi thì thôi, tab lịch sử sẽ báo trống
     }
@@ -359,7 +364,7 @@ const ContractPage: React.FC = () => {
 
   useEffect(() => {
     if (room?.id) void loadRevisions(room.id);
-  }, [room?.id]);
+  }, [room?.id, revisionPage]);
 
   // Bản đang chọn để so sánh với hiện tại + diff đã tính sẵn
   const selectedRev = useMemo(
@@ -628,7 +633,7 @@ const ContractPage: React.FC = () => {
                       : 'bg-white text-gray-500 border border-gray-200'
                   }`}
                 >
-                  Lịch sử thay đổi{revisions.length > 0 ? ` (${revisions.length})` : ''}
+                  Lịch sử thay đổi{revisionTotal > 0 ? ` (${revisionTotal})` : ''}
                 </button>
               </div>
             </div>
@@ -739,6 +744,27 @@ const ContractPage: React.FC = () => {
                         </p>
                       </div>
                     )}
+                  </div>
+                )}
+                {revisionTotalPages > 1 && (
+                  <div className="mt-5 flex items-center justify-center gap-3 text-sm">
+                    <button
+                      type="button"
+                      disabled={revisionPage === 0}
+                      onClick={() => setRevisionPage(revisionPage - 1)}
+                    >
+                      Trước
+                    </button>
+                    <span>
+                      Trang {revisionPage + 1}/{revisionTotalPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={revisionPage + 1 >= revisionTotalPages}
+                      onClick={() => setRevisionPage(revisionPage + 1)}
+                    >
+                      Sau
+                    </button>
                   </div>
                 )}
               </div>

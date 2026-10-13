@@ -32,6 +32,9 @@ const ClientProjectDetailPage: React.FC = () => {
   const [project, setProject] = useState<JobResponse | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendationResponse[]>([]);
   const [proposals, setProposals] = useState<ProposalResponse[]>([]);
+  const [proposalPage, setProposalPage] = useState(0);
+  const [proposalTotalPages, setProposalTotalPages] = useState(0);
+  const [proposalTotal, setProposalTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -67,7 +70,10 @@ const ClientProjectDetailPage: React.FC = () => {
       }
       // Hồ sơ phổ thông: client xem được ở mọi trạng thái (trừ khi chưa có ai nộp)
       try {
-        setProposals(await proposalApi.getByJob(id));
+        const result = await proposalApi.getByJobPage(id, { page: proposalPage, size: 10 });
+        setProposals(result.items);
+        setProposalTotalPages(result.totalPages);
+        setProposalTotal(result.totalElements);
       } catch {
         setProposals([]);
       }
@@ -81,7 +87,7 @@ const ClientProjectDetailPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, id]);
+  }, [isAuthenticated, id, proposalPage]);
 
   useEffect(() => {
     void loadData();
@@ -608,7 +614,7 @@ const ClientProjectDetailPage: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-gray-900">
-                      Hồ sơ ứng tuyển ({proposals.length})
+                      Hồ sơ ứng tuyển ({proposalTotal})
                     </h2>
                   </div>
 
@@ -697,6 +703,29 @@ const ClientProjectDetailPage: React.FC = () => {
                       </p>
                     )}
                   </div>
+                  {proposalTotalPages > 1 && (
+                    <div className="mt-4 flex items-center justify-center gap-3">
+                      <button
+                        type="button"
+                        disabled={proposalPage === 0}
+                        onClick={() => setProposalPage(proposalPage - 1)}
+                        className="px-4 py-2 rounded-lg border disabled:opacity-50"
+                      >
+                        Trước
+                      </button>
+                      <span>
+                        Trang {proposalPage + 1}/{proposalTotalPages}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={proposalPage + 1 >= proposalTotalPages}
+                        onClick={() => setProposalPage(proposalPage + 1)}
+                        className="px-4 py-2 rounded-lg border disabled:opacity-50"
+                      >
+                        Sau
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Trạng thái Đang thực hiện */}

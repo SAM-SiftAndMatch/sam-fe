@@ -1,6 +1,7 @@
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { workflowApi } from '../api/workflow';
+import type { PageResult } from '../types/api';
 import type {
   ProjectDelivery,
   ProjectTaskStatus,
@@ -8,6 +9,7 @@ import type {
   ProjectWorkflowPanelProps,
   QaPlan,
   SandboxSettlement,
+  TaskReport,
 } from '../types/workflow';
 
 const statusLabel: Record<ProjectTaskStatus, string> = {
@@ -37,6 +39,10 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
 }) => {
   const [timeline, setTimeline] = useState<ProjectTimeline | null>(null);
   const [deliveries, setDeliveries] = useState<ProjectDelivery[]>([]);
+  const [deliveryPage, setDeliveryPage] = useState(0);
+  const [deliveryTotalPages, setDeliveryTotalPages] = useState(0);
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const [reportPages, setReportPages] = useState<Record<string, PageResult<TaskReport>>>({});
   const [qaPlans, setQaPlans] = useState<Record<string, QaPlan>>({});
   const [settlement, setSettlement] = useState<SandboxSettlement | null>(null);
   const [loading, setLoading] = useState(false);
@@ -64,11 +70,11 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
     setError(null);
     try {
       const [timelineData, deliveryData] = await Promise.all([
-        workflowApi.getTimeline(jobId),
-        workflowApi.getDeliveries(jobId),
+        workflowApi.getTimelineSummary(jobId),
+        workflowApi.getDeliveriesPage(jobId, deliveryPage),
       ]);
       const planResults = await Promise.all(
-        deliveryData.map(async (delivery) => {
+        deliveryData.items.map(async (delivery) => {
           try {
             return [delivery.id, await workflowApi.getQaPlan(jobId, delivery.id)] as const;
           } catch {
@@ -77,7 +83,8 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         })
       );
       setTimeline(timelineData);
-      setDeliveries(deliveryData);
+      setDeliveries(deliveryData.items);
+      setDeliveryTotalPages(deliveryData.totalPages);
       setQaPlans(
         Object.fromEntries(
           planResults.filter((item): item is readonly [string, QaPlan] => item !== null)
@@ -88,7 +95,17 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [canUseWorkflow, jobId]);
+  }, [canUseWorkflow, jobId, deliveryPage]);
+
+  const loadTaskReports = async (taskId: string, page = 0) => {
+    try {
+      const result = await workflowApi.getTaskReportsPage(jobId, taskId, page);
+      setReportPages((current) => ({ ...current, [taskId]: result }));
+      setExpandedTaskId(taskId);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không tải được báo cáo');
+    }
+  };
 
   useEffect(() => {
     void loadWorkflow();
@@ -121,7 +138,8 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         progress: reportProgress,
         status: reportStatus,
       });
-      setTimeline(updated);
+      setTimeline({ ...updated, tasks: updated.tasks.map((task) => ({ ...task, reports: [] })) });
+      void loadTaskReports(reportTaskId);
       setReportTaskId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không gửi được báo cáo');
@@ -141,6 +159,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         note: deliveryNote.trim() || undefined,
       });
       setDeliveries((current) => [delivery, ...current]);
+      setDeliveryPage(0);
       const plan = await workflowApi.getQaPlan(jobId, delivery.id);
       setQaPlans((current) => ({ ...current, [delivery.id]: plan }));
       setWebUrl('');
@@ -254,7 +273,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
             <p className="text-xs font-black text-gray-900 mb-2">Tuần {weekNumber}</p>
             <div className="flex flex-col gap-2">
               {tasks.map((task) => {
-                const latestReport = task.reports[0];
+                const latestReport = reportPages[task.id]?.items[0];
                 return (
                   <article
                     key={task.id}
@@ -284,6 +303,52 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                             Xem bằng chứng
                           </a>
                         )}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (expandedTaskId === task.id) setExpandedTaskId(null);
+                        else void loadTaskReports(task.id);
+                      }}
+                      className="mt-2 text-[11px] font-bold text-blue-700 bg-transparent border-0 p-0 cursor-pointer"
+                    >
+                      {expandedTaskId === task.id ? 'Ẩn báo cáo' : 'Xem báo cáo'}
+                    </button>
+                    {expandedTaskId === task.id && reportPages[task.id] && (
+                      <div className="mt-2 text-[11px] text-gray-500">
+                        {reportPages[task.id].items.map((report) => (
+                          <p
+                            key={report.id}
+                            className="border-t border-gray-200 py-2 whitespace-pre-wrap"
+                          >
+                            {report.content}
+                          </p>
+                        ))}
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            disabled={reportPages[task.id].page === 0}
+                            onClick={() =>
+                              void loadTaskReports(task.id, reportPages[task.id].page - 1)
+                            }
+                          >
+                            Trước
+                          </button>
+                          <span>
+                            Trang {reportPages[task.id].page + 1}/
+                            {Math.max(1, reportPages[task.id].totalPages)}
+                          </span>
+                          <button
+                            type="button"
+                            disabled={!reportPages[task.id].hasNext}
+                            onClick={() =>
+                              void loadTaskReports(task.id, reportPages[task.id].page + 1)
+                            }
+                          >
+                            Sau
+                          </button>
+                        </div>
                       </div>
                     )}
                     {canReport && (
@@ -498,6 +563,27 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
             ))
           )}
         </div>
+        {deliveryTotalPages > 1 && (
+          <div className="mt-3 flex items-center justify-center gap-3 text-xs">
+            <button
+              type="button"
+              disabled={deliveryPage === 0}
+              onClick={() => setDeliveryPage(deliveryPage - 1)}
+            >
+              Trước
+            </button>
+            <span>
+              Trang {deliveryPage + 1}/{deliveryTotalPages}
+            </span>
+            <button
+              type="button"
+              disabled={deliveryPage + 1 >= deliveryTotalPages}
+              onClick={() => setDeliveryPage(deliveryPage + 1)}
+            >
+              Sau
+            </button>
+          </div>
+        )}
       </section>
       {modalMode && activeDelivery && (
         <div

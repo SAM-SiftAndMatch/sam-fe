@@ -155,18 +155,54 @@ const FreelancerJobsPage: React.FC = () => {
   >('all');
   const [sortBy, setSortBy] = useState<'newest' | 'budget_desc' | 'budget_asc'>('newest');
   const [currentPage, setCurrentPage] = useState(1);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQuery(projectQuery), 300);
+    return () => window.clearTimeout(timer);
+  }, [projectQuery]);
 
   const {
-    data: jobs = [],
+    data: jobPage,
     isLoading,
     isError,
     error,
     refetch,
   } = useQuery({
-    queryKey: ['open-jobs'],
-    queryFn: () => jobApi.getAllOpenJobs(),
+    queryKey: [
+      'open-jobs-page',
+      currentPage,
+      debouncedQuery,
+      selectedSkills,
+      customSkillQuery,
+      budgetFilter,
+      sortBy,
+    ],
+    queryFn: () =>
+      jobApi.getOpenJobsPage({
+        page: currentPage - 1,
+        size: JOBS_PER_PAGE,
+        search: debouncedQuery.trim() || undefined,
+        skillNames: selectedSkills.join(',') || undefined,
+        customSkill: customSkillQuery.trim() || undefined,
+        negotiable: budgetFilter === 'negotiable',
+        minBudget:
+          budgetFilter === 'from_5m_to_20m'
+            ? 5_000_000
+            : budgetFilter === 'over_20m'
+              ? 20_000_001
+              : undefined,
+        maxBudget:
+          budgetFilter === 'under_5m'
+            ? 4_999_999
+            : budgetFilter === 'from_5m_to_20m'
+              ? 20_000_000
+              : undefined,
+        sort: sortBy,
+      }),
     staleTime: 60_000, // 1 min cache
   });
+  const jobs = jobPage?.items ?? [];
 
   const popularSkills = useMemo(() => {
     const counts = new Map<string, { name: string; count: number }>();
@@ -186,60 +222,15 @@ const FreelancerJobsPage: React.FC = () => {
       .map((skill) => skill.name);
   }, [jobs]);
 
-  // Filter + sort
-  const filteredJobs = useMemo(() => {
-    let result = jobs.filter((job) => {
-      const projectKeyword = projectQuery.trim().toLowerCase();
-      const customSkillKeyword = customSkillQuery.trim().toLowerCase();
-      const selectedSkillKeys = selectedSkills.map((skill) => skill.toLowerCase());
-      const matchesProject =
-        !projectKeyword ||
-        job.title.toLowerCase().includes(projectKeyword) ||
-        job.description.toLowerCase().includes(projectKeyword);
-      const matchesSkill =
-        (selectedSkillKeys.length === 0 && !customSkillKeyword) ||
-        job.skills.some(
-          (skill) =>
-            selectedSkillKeys.includes(skill.name.toLowerCase()) ||
-            (Boolean(customSkillKeyword) && skill.name.toLowerCase().includes(customSkillKeyword))
-        );
-      const referenceBudget = job.budgetMax ?? job.budgetMin ?? null;
-      const matchesBudget =
-        budgetFilter === 'all' ||
-        (budgetFilter === 'negotiable' && referenceBudget === null) ||
-        (budgetFilter === 'under_5m' && referenceBudget !== null && referenceBudget < 5_000_000) ||
-        (budgetFilter === 'from_5m_to_20m' &&
-          referenceBudget !== null &&
-          referenceBudget >= 5_000_000 &&
-          referenceBudget <= 20_000_000) ||
-        (budgetFilter === 'over_20m' && referenceBudget !== null && referenceBudget > 20_000_000);
-
-      return matchesProject && matchesSkill && matchesBudget;
-    });
-
-    if (sortBy === 'budget_desc') {
-      result = [...result].sort(
-        (a, b) => (b.budgetMax ?? b.budgetMin ?? 0) - (a.budgetMax ?? a.budgetMin ?? 0)
-      );
-    } else if (sortBy === 'budget_asc') {
-      result = [...result].sort((a, b) => (a.budgetMin ?? 0) - (b.budgetMin ?? 0));
-    }
-    // 'newest' giữ nguyên thứ tự API trả về (đã sort createdAt DESC)
-
-    return result;
-  }, [budgetFilter, customSkillQuery, jobs, projectQuery, selectedSkills, sortBy]);
+  const filteredJobs = jobs;
 
   useEffect(() => {
     setCurrentPage(1);
   }, [projectQuery, selectedSkills, customSkillQuery, budgetFilter, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / JOBS_PER_PAGE));
+  const totalPages = Math.max(1, jobPage?.totalPages ?? 1);
   const safeCurrentPage = Math.min(currentPage, totalPages);
-  const paginatedJobs = useMemo(
-    () =>
-      filteredJobs.slice((safeCurrentPage - 1) * JOBS_PER_PAGE, safeCurrentPage * JOBS_PER_PAGE),
-    [filteredJobs, safeCurrentPage]
-  );
+  const paginatedJobs = filteredJobs;
   const pageNumbers = useMemo(() => {
     if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
     if (safeCurrentPage <= 3) return [1, 2, 3, 4, 'ellipsis', totalPages] as const;
@@ -466,8 +457,8 @@ const FreelancerJobsPage: React.FC = () => {
                 {isLoading
                   ? 'Đang tải dự án...'
                   : hasFilters
-                    ? `Có ${filteredJobs.length} dự án phù hợp`
-                    : `Có ${filteredJobs.length} dự án đã được đăng`}
+                    ? `Có ${jobPage?.totalElements ?? 0} dự án phù hợp`
+                    : `Có ${jobPage?.totalElements ?? 0} dự án đã được đăng`}
               </h2>
               <div className="flex items-center gap-3">
                 {hasFilters && (

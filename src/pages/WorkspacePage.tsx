@@ -1,5 +1,4 @@
 import { Client } from '@stomp/stompjs';
-import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -40,6 +39,9 @@ const WorkspacePage: React.FC = () => {
   const [room, setRoom] = useState<ChatRoom | null>(null);
   const [roomError, setRoomError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [historyCursor, setHistoryCursor] = useState<string | null>(null);
+  const [hasOlderMessages, setHasOlderMessages] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   // Vừa ký đôi xong nhảy về đây đợi AI thẩm định (ContractPage navigate kèm state)
@@ -61,6 +63,8 @@ const WorkspacePage: React.FC = () => {
     setRoomError(null);
     setRoom(null);
     setMessages([]);
+    setHistoryCursor(null);
+    setHasOlderMessages(false);
     setContract(null);
     chatApi
       .getRoomDetail(projectId)
@@ -77,20 +81,45 @@ const WorkspacePage: React.FC = () => {
     };
   }, [projectId]);
 
-  const { refetch: refetchHistory } = useQuery({
-    queryKey: ['chat-history', room?.id],
-    queryFn: () => chatApi.getHistory(room!.id),
-    enabled: !!room?.id,
-    retry: false,
-  });
-
   useEffect(() => {
     if (!room?.id) return;
+    let cancelled = false;
     chatApi
-      .getHistory(room.id)
-      .then(setMessages)
-      .catch(() => setMessages([]));
+      .getHistoryPage(room.id)
+      .then((result) => {
+        if (cancelled) return;
+        setMessages((current) => [
+          ...result.items,
+          ...current.filter((message) => !result.items.some((item) => item.id === message.id)),
+        ]);
+        setHistoryCursor(result.nextCursor);
+        setHasOlderMessages(result.hasMore);
+      })
+      .catch(() => {
+        if (!cancelled) setMessages([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [room?.id]);
+
+  const loadOlderMessages = async () => {
+    if (!room?.id || !historyCursor || loadingOlder) return;
+    setLoadingOlder(true);
+    try {
+      const result = await chatApi.getHistoryPage(room.id, { before: historyCursor });
+      setMessages((current) => [
+        ...result.items.filter(
+          (message) => !current.some((existing) => existing.id === message.id)
+        ),
+        ...current,
+      ]);
+      setHistoryCursor(result.nextCursor);
+      setHasOlderMessages(result.hasMore);
+    } finally {
+      setLoadingOlder(false);
+    }
+  };
 
   // WS realtime: 1 client duy nhất cho cả chat + hợp đồng.
   // Phụ thuộc cả contract?.id để khi hợp đồng vừa được tạo/xong thì nối lại và
@@ -188,7 +217,7 @@ const WorkspacePage: React.FC = () => {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages.at(-1)?.id]);
 
   const handleSend = () => {
     const text = input.trim();
@@ -196,8 +225,13 @@ const WorkspacePage: React.FC = () => {
     const client = stompRef.current;
     if (!client?.active) {
       // Fallback: reload lịch sử nếu WS chưa nối
-      void refetchHistory().then((r) => {
-        if (r.data) setMessages(r.data);
+      void chatApi.getHistoryPage(room.id).then((result) => {
+        setMessages((current) => [
+          ...current,
+          ...result.items.filter(
+            (message) => !current.some((existing) => existing.id === message.id)
+          ),
+        ]);
       });
       return;
     }
@@ -331,6 +365,16 @@ const WorkspacePage: React.FC = () => {
           )}
 
           <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 hide-scrollbar">
+            {room && hasOlderMessages && (
+              <button
+                type="button"
+                disabled={loadingOlder}
+                onClick={() => void loadOlderMessages()}
+                className="self-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-blue-700 disabled:opacity-50"
+              >
+                {loadingOlder ? 'Đang tải...' : 'Xem tin nhắn cũ hơn'}
+              </button>
+            )}
             {roomError ? (
               <div className="text-center py-16">
                 <p className="text-sm text-red-600 font-semibold mb-2">{roomError}</p>

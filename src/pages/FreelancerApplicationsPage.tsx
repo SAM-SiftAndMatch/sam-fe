@@ -19,15 +19,19 @@ const TABS = [
 const FreelancerApplicationsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [page, setPage] = useState(0);
 
-  const { data: applications = [], isLoading } = useQuery({
-    queryKey: ['my-proposals'],
-    queryFn: () => proposalApi.getMine(),
+  const { data: proposalPage, isLoading } = useQuery({
+    queryKey: ['my-proposals-page', page, activeTab],
+    queryFn: () =>
+      proposalApi.getMinePage({
+        page,
+        size: 10,
+        status: activeTab === 'all' ? undefined : activeTab,
+      }),
   });
 
-  const filteredApps = applications.filter(
-    (app) => activeTab === 'all' || app.status === activeTab
-  );
+  const filteredApps = proposalPage?.items ?? [];
 
   const getStatusBadge = (status: ProposalStatus) => {
     switch (status) {
@@ -85,7 +89,10 @@ const FreelancerApplicationsPage: React.FC = () => {
           <div className="relative w-full md:w-56 shrink-0">
             <select
               value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value)}
+              onChange={(e) => {
+                setActiveTab(e.target.value);
+                setPage(0);
+              }}
               className="w-full appearance-none bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-10 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
             >
               {TABS.map((tab) => (
@@ -176,6 +183,29 @@ const FreelancerApplicationsPage: React.FC = () => {
             ))
           )}
         </div>
+        {(proposalPage?.totalPages ?? 0) > 1 && (
+          <div className="mt-5 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+              className="px-4 py-2 rounded-lg border disabled:opacity-50"
+            >
+              Trước
+            </button>
+            <span>
+              Trang {page + 1}/{proposalPage?.totalPages}
+            </span>
+            <button
+              type="button"
+              disabled={!proposalPage?.hasNext}
+              onClick={() => setPage(page + 1)}
+              className="px-4 py-2 rounded-lg border disabled:opacity-50"
+            >
+              Sau
+            </button>
+          </div>
+        )}
       </main>
 
       <Footer />
