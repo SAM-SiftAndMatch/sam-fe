@@ -23,13 +23,6 @@ export interface AuthResponse {
   role: UserRole;
 }
 
-export interface CurrentUser {
-  userId: string;
-  email: string;
-  accountType: UserRole;
-  sessionId: string;
-}
-
 export interface AuthUser {
   userId: string;
   email: string;

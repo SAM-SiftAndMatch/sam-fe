@@ -1,6 +1,6 @@
 import { requireApiResult } from '../lib/api-error';
 import apiClient from '../lib/axios';
-import type { ApiResponse, PageResult } from '../types/api';
+import type { ApiResponse } from '../types/api';
 import type {
   AmountVerification,
   ConfirmFundingRequest,
@@ -11,17 +11,6 @@ import type {
 } from '../types/payment';
 
 export const paymentApi = {
-  getByContractPage: async (
-    contractId: string,
-    page = 0,
-    size = 10
-  ): Promise<PageResult<PaymentResponse>> => {
-    const res = await apiClient.get<ApiResponse<PageResult<PaymentResponse>>>(
-      `/payments/contract/${contractId}/page`,
-      { params: { page, size } }
-    );
-    return requireApiResult(res.data, 'Failed to fetch contract payments');
-  },
   // Client nạp 100% giá trị hợp đồng (trả về vnpayUrl để redirect)
   createFund: async (data: CreateEscrowRequest): Promise<PaymentResponse> => {
     const res = await apiClient.post<ApiResponse<PaymentResponse>>('/payments/fund', data);
@@ -56,20 +45,6 @@ export const paymentApi = {
       `/payments/contracts/${contractId}/verify-amount`
     );
     return requireApiResult(res.data, 'Failed to verify amount');
-  },
-
-  getByContract: async (contractId: string): Promise<PaymentResponse[]> => {
-    const res = await apiClient.get<ApiResponse<PaymentResponse[]>>(
-      `/payments/contract/${contractId}`
-    );
-    return requireApiResult(res.data, 'Failed to fetch contract payments');
-  },
-
-  release: async (paymentId: string): Promise<PaymentResponse> => {
-    const res = await apiClient.post<ApiResponse<PaymentResponse>>(
-      `/payments/${paymentId}/release`
-    );
-    return requireApiResult(res.data, 'Failed to release escrow');
   },
 
   getFreelancerEscrowSummary: async (freelancerId: string): Promise<FreelancerEscrowSummary> => {
