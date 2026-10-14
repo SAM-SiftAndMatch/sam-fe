@@ -38,11 +38,12 @@ const FreelancerPage: React.FC = () => {
   const [profile, setProfile] = useState<FreelancerProfileResponse | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
-  const { data: openJobs = [] } = useQuery({
-    queryKey: ['open-jobs'],
-    queryFn: () => jobApi.getAllOpenJobs(),
+  const { data: openJobPage } = useQuery({
+    queryKey: ['open-jobs-preview'],
+    queryFn: () => jobApi.getOpenJobsPage({ page: 0, size: 4 }),
     staleTime: 60_000,
   });
+  const openJobs = openJobPage?.items ?? [];
 
   // If a Client lands here, redirect to Client dashboard
   useEffect(() => {

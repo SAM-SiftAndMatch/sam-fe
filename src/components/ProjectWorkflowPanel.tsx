@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { workflowApi } from '../api/workflow';
 import type {
   ProjectDelivery,
@@ -8,6 +9,7 @@ import type {
   ProjectWorkflowPanelProps,
   QaPlan,
   SandboxSettlement,
+  TaskReport,
 } from '../types/workflow';
 
 const statusLabel: Record<ProjectTaskStatus, string> = {
@@ -37,7 +39,13 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
 }) => {
   const [timeline, setTimeline] = useState<ProjectTimeline | null>(null);
   const [deliveries, setDeliveries] = useState<ProjectDelivery[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const reportTask = searchParams.get('task');
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const [reportLists, setReportLists] = useState<Record<string, TaskReport[]>>({});
   const [qaPlans, setQaPlans] = useState<Record<string, QaPlan>>({});
+  const [expandedQaId, setExpandedQaId] = useState<string | null>(null);
+  const [loadingQaId, setLoadingQaId] = useState<string | null>(null);
   const [settlement, setSettlement] = useState<SandboxSettlement | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,25 +72,11 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
     setError(null);
     try {
       const [timelineData, deliveryData] = await Promise.all([
-        workflowApi.getTimeline(jobId),
+        workflowApi.getTimelineSummary(jobId),
         workflowApi.getDeliveries(jobId),
       ]);
-      const planResults = await Promise.all(
-        deliveryData.map(async (delivery) => {
-          try {
-            return [delivery.id, await workflowApi.getQaPlan(jobId, delivery.id)] as const;
-          } catch {
-            return null;
-          }
-        })
-      );
       setTimeline(timelineData);
       setDeliveries(deliveryData);
-      setQaPlans(
-        Object.fromEntries(
-          planResults.filter((item): item is readonly [string, QaPlan] => item !== null)
-        )
-      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không tải được tiến độ dự án');
     } finally {
@@ -90,9 +84,80 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
     }
   }, [canUseWorkflow, jobId]);
 
+  const loadTaskReports = useCallback(
+    async (taskId: string) => {
+      try {
+        const result = await workflowApi.getTaskReports(jobId, taskId);
+        setReportLists((current) => ({ ...current, [taskId]: result }));
+        setExpandedTaskId(taskId);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Không tải được báo cáo');
+      }
+    },
+    [jobId]
+  );
+
+  const setReportLocation = useCallback(
+    (taskId: string | null, replace = false) => {
+      setSearchParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          if (taskId) {
+            next.set('task', taskId);
+          } else {
+            next.delete('task');
+          }
+          next.delete('reportPage');
+          return next;
+        },
+        { replace }
+      );
+    },
+    [setSearchParams]
+  );
+
   useEffect(() => {
     void loadWorkflow();
   }, [loadWorkflow]);
+
+  useEffect(() => {
+    if (!searchParams.has('page') && !searchParams.has('reportPage')) return;
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        next.delete('page');
+        next.delete('reportPage');
+        return next;
+      },
+      { replace: true }
+    );
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (!canUseWorkflow || !reportTask || !timeline?.tasks.some((task) => task.id === reportTask)) {
+      setExpandedTaskId(null);
+      return;
+    }
+    void loadTaskReports(reportTask);
+  }, [canUseWorkflow, loadTaskReports, reportTask, timeline?.tasks]);
+
+  const toggleQaPlan = async (deliveryId: string) => {
+    if (expandedQaId === deliveryId) {
+      setExpandedQaId(null);
+      return;
+    }
+    setExpandedQaId(deliveryId);
+    if (qaPlans[deliveryId]) return;
+    setLoadingQaId(deliveryId);
+    try {
+      const plan = await workflowApi.getQaPlan(jobId, deliveryId);
+      setQaPlans((current) => ({ ...current, [deliveryId]: plan }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không tải được checklist nghiệm thu');
+    } finally {
+      setLoadingQaId(null);
+    }
+  };
 
   const weeks = useMemo(() => {
     const grouped = new Map<number, ProjectTimeline['tasks']>();
@@ -121,7 +186,13 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         progress: reportProgress,
         status: reportStatus,
       });
-      setTimeline(updated);
+      setTimeline({ ...updated, tasks: updated.tasks.map((task) => ({ ...task, reports: [] })) });
+      setReportLists((current) => {
+        const next = { ...current };
+        delete next[reportTaskId];
+        return next;
+      });
+      setReportLocation(reportTaskId, true);
       setReportTaskId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không gửi được báo cáo');
@@ -141,8 +212,6 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         note: deliveryNote.trim() || undefined,
       });
       setDeliveries((current) => [delivery, ...current]);
-      const plan = await workflowApi.getQaPlan(jobId, delivery.id);
-      setQaPlans((current) => ({ ...current, [delivery.id]: plan }));
       setWebUrl('');
       setRepositoryUrl('');
       setDeliveryNote('');
@@ -254,7 +323,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
             <p className="text-xs font-black text-gray-900 mb-2">Tuần {weekNumber}</p>
             <div className="flex flex-col gap-2">
               {tasks.map((task) => {
-                const latestReport = task.reports[0];
+                const latestReport = reportLists[task.id]?.[0];
                 return (
                   <article
                     key={task.id}
@@ -286,6 +355,31 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                         )}
                       </div>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (expandedTaskId === task.id) setReportLocation(null);
+                        else setReportLocation(task.id);
+                      }}
+                      className="mt-2 text-[11px] font-bold text-blue-700 bg-transparent border-0 p-0 cursor-pointer"
+                    >
+                      {expandedTaskId === task.id ? 'Ẩn báo cáo' : 'Xem báo cáo'}
+                    </button>
+                    {expandedTaskId === task.id &&
+                      reportTask === task.id &&
+                      reportLists[task.id] && (
+                        <div className="mt-2 text-[11px] text-gray-500">
+                          {reportLists[task.id].map((report) => (
+                            <p
+                              key={report.id}
+                              className="border-t border-gray-200 py-2 whitespace-pre-wrap"
+                            >
+                              {report.content}
+                            </p>
+                          ))}
+                          {reportLists[task.id].length === 0 && <p>Chưa có báo cáo.</p>}
+                        </div>
+                      )}
                     {canReport && (
                       <button
                         type="button"
@@ -450,7 +544,19 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                     {delivery.revisionReason}
                   </div>
                 )}
-                {qaPlans[delivery.id] && (
+                <button
+                  type="button"
+                  onClick={() => void toggleQaPlan(delivery.id)}
+                  disabled={loadingQaId === delivery.id}
+                  className="mt-3 text-[11px] font-bold text-blue-700 bg-transparent border-0 p-0 cursor-pointer disabled:opacity-50"
+                >
+                  {loadingQaId === delivery.id
+                    ? 'Đang tải checklist...'
+                    : expandedQaId === delivery.id
+                      ? 'Ẩn checklist nghiệm thu'
+                      : 'Xem checklist nghiệm thu'}
+                </button>
+                {expandedQaId === delivery.id && qaPlans[delivery.id] && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <p className="text-[11px] font-bold text-gray-800">Checklist nghiệm thu</p>
                     <p className="text-[10px] text-gray-500 mt-1">

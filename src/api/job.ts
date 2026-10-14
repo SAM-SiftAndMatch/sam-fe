@@ -1,6 +1,6 @@
 import { assertApiSuccess, requireApiResult } from '../lib/api-error';
 import apiClient from '../lib/axios';
-import type { ApiResponse } from '../types/api';
+import type { ApiResponse, PageResult } from '../types/api';
 import type {
   AcceptInvitationResponse,
   JobCreateRequest,
@@ -9,6 +9,49 @@ import type {
 } from '../types/job';
 
 export const jobApi = {
+  getOpenJobsPage: async (
+    params: {
+      page?: number;
+      size?: number;
+      search?: string;
+      skillId?: number;
+      skillNames?: string;
+      customSkill?: string;
+      negotiable?: boolean;
+      minBudget?: number;
+      maxBudget?: number;
+      sort?: 'newest' | 'budget_asc' | 'budget_desc';
+    } = {}
+  ): Promise<PageResult<JobResponse>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<JobResponse>>>('/jobs/page', { params });
+    return requireApiResult(res.data, 'Failed to fetch open jobs');
+  },
+
+  getMyJobsPage: async (
+    params: { page?: number; size?: number; status?: JobResponse['status']; search?: string } = {}
+  ): Promise<PageResult<JobResponse>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<JobResponse>>>('/jobs/client/me/page', {
+      params,
+    });
+    return requireApiResult(res.data, 'Failed to fetch my jobs');
+  },
+
+  getFreelancerProjectsPage: async (
+    freelancerId: string,
+    params: {
+      page?: number;
+      size?: number;
+      status?: JobResponse['status'];
+      group?: string;
+      search?: string;
+    } = {}
+  ): Promise<PageResult<JobResponse>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<JobResponse>>>(
+      `/jobs/freelancers/${freelancerId}/projects/page`,
+      { params }
+    );
+    return requireApiResult(res.data, 'Failed to fetch freelancer projects');
+  },
   // PUBLIC: lấy tất cả OPEN jobs, sắp xếp mới nhất trước (không cần auth)
   getAllOpenJobs: async (): Promise<JobResponse[]> => {
     const res = await apiClient.get<ApiResponse<JobResponse[]>>('/jobs');

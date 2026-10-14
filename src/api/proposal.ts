@@ -1,6 +1,6 @@
 import { assertApiSuccess, requireApiResult } from '../lib/api-error';
 import apiClient from '../lib/axios';
-import type { ApiResponse } from '../types/api';
+import type { ApiResponse, PageResult } from '../types/api';
 import type {
   AcceptProposalResponse,
   ProposalCreateRequest,
@@ -8,6 +8,26 @@ import type {
 } from '../types/proposal';
 
 export const proposalApi = {
+  getMinePage: async (
+    params: { page?: number; size?: number; status?: string } = {}
+  ): Promise<PageResult<ProposalResponse>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<ProposalResponse>>>(
+      '/proposals/me/page',
+      { params }
+    );
+    return requireApiResult(res.data, 'Failed to fetch my proposals');
+  },
+
+  getByJobPage: async (
+    jobId: string,
+    params: { page?: number; size?: number; status?: string } = {}
+  ): Promise<PageResult<ProposalResponse>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<ProposalResponse>>>(
+      `/proposals/job/${jobId}/page`,
+      { params }
+    );
+    return requireApiResult(res.data, 'Failed to fetch proposals');
+  },
   submit: async (data: ProposalCreateRequest): Promise<ProposalResponse> => {
     const res = await apiClient.post<ApiResponse<ProposalResponse>>('/proposals', data);
     return requireApiResult(res.data, 'Failed to submit proposal');

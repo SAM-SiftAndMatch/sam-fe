@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { proposalApi } from '../api/proposal';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import PaginationNav from '../components/PaginationNav';
+import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import * as paths from '../routes/paths';
 import type { ProposalResponse, ProposalStatus } from '../types/proposal';
 
@@ -19,15 +21,19 @@ const TABS = [
 const FreelancerApplicationsPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [page, setPage] = usePageSearchParam();
 
-  const { data: applications = [], isLoading } = useQuery({
-    queryKey: ['my-proposals'],
-    queryFn: () => proposalApi.getMine(),
+  const { data: proposalPage, isLoading } = useQuery({
+    queryKey: ['my-proposals-page', page, activeTab],
+    queryFn: () =>
+      proposalApi.getMinePage({
+        page,
+        size: 10,
+        status: activeTab === 'all' ? undefined : activeTab,
+      }),
   });
 
-  const filteredApps = applications.filter(
-    (app) => activeTab === 'all' || app.status === activeTab
-  );
+  const filteredApps = proposalPage?.items ?? [];
 
   const getStatusBadge = (status: ProposalStatus) => {
     switch (status) {
@@ -85,7 +91,10 @@ const FreelancerApplicationsPage: React.FC = () => {
           <div className="relative w-full md:w-56 shrink-0">
             <select
               value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value)}
+              onChange={(e) => {
+                setActiveTab(e.target.value);
+                setPage(0);
+              }}
               className="w-full appearance-none bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-10 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
             >
               {TABS.map((tab) => (
@@ -176,6 +185,13 @@ const FreelancerApplicationsPage: React.FC = () => {
             ))
           )}
         </div>
+        <PaginationNav
+          page={page + 1}
+          totalPages={proposalPage?.totalPages ?? 0}
+          onPageChange={(nextPage) => setPage(nextPage - 1)}
+          label="Phân trang hồ sơ ứng tuyển"
+          className="mt-5"
+        />
       </main>
 
       <Footer />

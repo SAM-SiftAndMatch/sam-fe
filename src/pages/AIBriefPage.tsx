@@ -131,13 +131,20 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
   };
 
   const setCustom = (qId: string, text: string) => {
-    setAnswers((prev) => ({ ...prev, [qId]: { ...prev[qId], customInput: text } }));
+    setAnswers((prev) => ({
+      ...prev,
+      [qId]: { ...prev[qId], customInput: text },
+    }));
   };
 
   const toggleShowCustom = (qId: string) => {
     setAnswers((prev) => ({
       ...prev,
-      [qId]: { ...prev[qId], showCustom: !prev[qId].showCustom, customInput: '' },
+      [qId]: {
+        ...prev[qId],
+        showCustom: !prev[qId].showCustom,
+        customInput: '',
+      },
     }));
   };
 
@@ -159,7 +166,11 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
   return (
     <div className="mt-3 w-full space-y-3">
       {questions.map((q) => {
-        const ans = answers[q.id] || { selectedOptions: [], customInput: '', showCustom: false };
+        const ans = answers[q.id] || {
+          selectedOptions: [],
+          customInput: '',
+          showCustom: false,
+        };
         const hasOpts = (q.options || []).length > 0;
         return (
           <div key={q.id} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
@@ -203,7 +214,7 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
                     onClick={() => toggleShowCustom(q.id)}
                     className="text-xs px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-gray-400 bg-white hover:border-gray-400 hover:text-gray-600 transition-all cursor-pointer font-medium"
                   >
-                    ✏️ Khác...
+                    Khác...
                   </button>
                 )}
               </div>
@@ -340,7 +351,10 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onSubmitAnswers, isSen
         )}
 
         <span className="text-[10px] text-gray-400 mt-1 px-1">
-          {message.timestamp.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+          {message.timestamp.toLocaleTimeString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
         </span>
       </div>
     </div>
@@ -679,7 +693,10 @@ const AIBriefPage: React.FC = () => {
   // =========================================
   const handleToggleOption = useCallback((questionId: string, option: string) => {
     setBaseAnswers((prev) => {
-      const current = prev[questionId] || { selectedOptions: [], customInput: '' };
+      const current = prev[questionId] || {
+        selectedOptions: [],
+        customInput: '',
+      };
       const isSelected = current.selectedOptions.includes(option);
       return {
         ...prev,
@@ -696,7 +713,10 @@ const AIBriefPage: React.FC = () => {
   const handleCustomInput = useCallback((questionId: string, text: string) => {
     setBaseAnswers((prev) => ({
       ...prev,
-      [questionId]: { ...(prev[questionId] || { selectedOptions: [] }), customInput: text },
+      [questionId]: {
+        ...(prev[questionId] || { selectedOptions: [] }),
+        customInput: text,
+      },
     }));
   }, []);
 
@@ -1311,7 +1331,7 @@ const AIBriefPage: React.FC = () => {
                     onClick={handleRequestSrsRevision}
                     className="text-sm font-semibold text-gray-600 hover:text-blue-700 px-4 py-3 rounded-xl border border-gray-200 hover:border-blue-200 hover:bg-blue-50 transition-all cursor-pointer bg-white"
                   >
-                    ← Yêu cầu chỉnh sửa SRS
+                    Yêu cầu chỉnh sửa SRS
                   </button>
                   <button
                     type="button"

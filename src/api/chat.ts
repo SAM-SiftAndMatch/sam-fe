@@ -1,6 +1,12 @@
 import { requireApiResult } from '../lib/api-error';
 import apiClient from '../lib/axios';
-import type { ApiResponse } from '../types/api';
+import type { ApiResponse, PageResult } from '../types/api';
+
+export interface CursorResult<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
+}
 import type { JobStatus } from '../types/job';
 import type { ContractStatus } from './contract';
 
@@ -30,6 +36,25 @@ export interface ChatMessage {
 }
 
 export const chatApi = {
+  getMyRoomsPage: async (
+    params: { page?: number; size?: number; search?: string } = {}
+  ): Promise<PageResult<ChatRoom>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<ChatRoom>>>('/chat/rooms/page', {
+      params,
+    });
+    return requireApiResult(res.data, 'Failed to fetch chat rooms');
+  },
+
+  getHistoryPage: async (
+    roomId: string,
+    params: { size?: number; before?: string } = {}
+  ): Promise<CursorResult<ChatMessage>> => {
+    const res = await apiClient.get<ApiResponse<CursorResult<ChatMessage>>>(
+      `/chat/rooms/${roomId}/messages/page`,
+      { params }
+    );
+    return requireApiResult(res.data, 'Failed to fetch messages');
+  },
   getMyRooms: async (): Promise<ChatRoom[]> => {
     const res = await apiClient.get<ApiResponse<ChatRoom[]>>('/chat/rooms');
     return requireApiResult(res.data, 'Failed to fetch chat rooms');

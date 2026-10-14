@@ -6,3 +6,12 @@ export interface ApiResponse<T = unknown> {
   timestamp?: string;
   path?: string;
 }
+
+export interface PageResult<T> {
+  items: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+}
