@@ -1,7 +1,7 @@
 import apiClient from '../lib/axios';
 import { tokenManager } from '../lib/token-manager';
 import type { ApiResponse } from '../types/api';
-import type { AuthResponse, CurrentUser, LoginRequest, RegisterRequest } from '../types/auth';
+import type { AuthResponse, LoginRequest, RegisterRequest } from '../types/auth';
 
 export const authApi = {
   login: async (data: LoginRequest): Promise<AuthResponse> => {
@@ -40,14 +40,6 @@ export const authApi = {
     } finally {
       tokenManager.clearToken();
     }
-  },
-
-  getMe: async (): Promise<CurrentUser> => {
-    const res = await apiClient.get<ApiResponse<CurrentUser>>('/auth/me');
-    if (!res.data.result) {
-      throw new Error(res.data.message || 'Failed to fetch user');
-    }
-    return res.data.result;
   },
 };
 
