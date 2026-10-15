@@ -589,7 +589,7 @@ const ContractPage: React.FC = () => {
           </div>
         ) : !contract ? (
           <div className="bg-white rounded-[28px] p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.05)] text-center">
-            <h1 className="text-2xl font-black text-gray-900 mb-2">Chưa có hợp đồng</h1>
+            <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Chưa có hợp đồng</h1>
             <p className="text-sm text-gray-500 leading-relaxed max-w-md mx-auto mb-6">
               Dự án <span className="font-bold text-gray-800">{room.jobTitle}</span> chưa có hợp
               đồng.
@@ -622,7 +622,7 @@ const ContractPage: React.FC = () => {
               <p className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.25em] mb-2">
                 Cộng hòa xã hội chủ nghĩa Việt Nam
               </p>
-              <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-3">
+              <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-3">
                 Hợp đồng dịch vụ Freelance
               </h1>
               <div className="flex items-center justify-center gap-3">
@@ -783,7 +783,7 @@ const ContractPage: React.FC = () => {
                 <article className="bg-white rounded-[28px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.05)] overflow-hidden">
                   {/* Điều 1: Các bên */}
                   <section className="p-6 md:p-8 border-b border-gray-100">
-                    <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-4">
+                    <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-widest mb-4">
                       Điều 1 — Các bên tham gia
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -826,7 +826,7 @@ const ContractPage: React.FC = () => {
 
                   {/* Điều 2: Giá trị */}
                   <section className="p-6 md:p-8 border-b border-gray-100">
-                    <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-4">
+                    <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-widest mb-4">
                       Điều 2 — Giá trị hợp đồng
                     </h2>
                     <div className="rounded-2xl p-5 bg-gradient-to-br from-[#1D4ED8] to-[#0AAAD7] text-white">
@@ -840,10 +840,10 @@ const ContractPage: React.FC = () => {
                           value={editAmount}
                           onChange={(e) => onAmountChange(e.target.value)}
                           placeholder="VD: 15000000"
-                          className="w-full bg-white/15 border border-white/30 rounded-lg px-3 py-2 text-lg font-black text-white placeholder:text-white/50 outline-none focus:bg-white/20"
+                          className="w-full bg-white/15 border border-white/30 rounded-lg px-3 py-2 text-lg font-extrabold text-white placeholder:text-white/50 outline-none focus:bg-white/20"
                         />
                       ) : (
-                        <p className="text-2xl font-black">
+                        <p className="text-2xl font-extrabold">
                           {formatMoney(Number(contract.agreedAmount))} đ
                         </p>
                       )}
@@ -852,7 +852,7 @@ const ContractPage: React.FC = () => {
 
                   {/* Điều 3: Điều khoản — sửa thì chia đôi: trái gõ + toolbar, phải xem đẹp live */}
                   <section className="p-6 md:p-8">
-                    <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-4">
+                    <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-widest mb-4">
                       Điều 3 — Điều khoản chi tiết
                     </h2>
                     {isEditing ? (
@@ -911,7 +911,7 @@ const ContractPage: React.FC = () => {
                             onChange={(e) => onTermsChange(e.target.value)}
                             rows={18}
                             placeholder="Gõ nội dung... dùng nút định dạng ở trên để in đậm, tiêu đề, danh sách"
-                            className="w-full bg-[#F8FAFC] border border-gray-200 rounded-2xl p-5 font-mono text-[13px] text-gray-800 leading-relaxed outline-none focus:border-[#1D4ED8] resize-y min-h-[320px]"
+                            className="w-full bg-[#F8FAFC] border border-gray-200 rounded-2xl p-5 text-[13px] text-gray-800 leading-relaxed outline-none focus:border-[#1D4ED8] resize-y min-h-[320px]"
                           />
                           <div className="bg-[#F8FAFC] border border-blue-100 rounded-2xl p-6 overflow-y-auto max-h-[520px]">
                             <p className="text-[10px] font-bold text-[#1D4ED8] uppercase tracking-widest mb-3">

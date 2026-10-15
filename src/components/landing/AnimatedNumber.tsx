@@ -77,7 +77,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
       : Math.round(displayValue).toLocaleString('vi-VN');
 
   return (
-    <span ref={elementRef} className={`font-mono tabular-nums ${className}`}>
+    <span ref={elementRef} className={`tabular-nums ${className}`}>
       {prefix}
       {formatted}
       {suffix}

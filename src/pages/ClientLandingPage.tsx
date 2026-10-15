@@ -92,7 +92,7 @@ const ClientLandingPage: React.FC = () => {
             className="animate-hero-fade-up relative z-10 flex w-full flex-col items-center"
             style={{ animationDelay: '320ms' }}
           >
-            <h2 className="mb-3 text-sm font-mono font-semibold uppercase tracking-wider text-slate-700">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-700">
               Bạn cần hoàn thành công việc gì?
             </h2>
 
@@ -141,13 +141,13 @@ const ClientLandingPage: React.FC = () => {
             className="animate-hero-fade-up relative z-10 mb-5 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500"
             style={{ animationDelay: '460ms' }}
           >
-            <span className="font-mono text-slate-400 text-xs">Gợi ý:</span>
+            <span className="text-slate-400 text-xs">Gợi ý:</span>
             {['Phát triển Website', 'Trợ lý ảo AI', 'AI Engineer'].map((tag) => (
               <button
                 key={tag}
                 type="button"
                 onClick={() => handleSearch(tag)}
-                className="font-mono text-xs px-3 py-1.5 rounded-[6px] border border-slate-200 bg-white text-slate-700 hover:border-[#1D4ED8] hover:text-[#1D4ED8] hover:bg-[#1D4ED8]/[0.06] transition-colors cursor-pointer active:scale-[0.97]"
+                className="text-xs px-3 py-1.5 rounded-[6px] border border-slate-200 bg-white text-slate-700 hover:border-[#1D4ED8] hover:text-[#1D4ED8] hover:bg-[#1D4ED8]/[0.06] transition-colors cursor-pointer active:scale-[0.97]"
               >
                 + {tag}
               </button>
@@ -156,7 +156,7 @@ const ClientLandingPage: React.FC = () => {
 
           {/* Small Trust Line (Item 6 - 400ms delay) */}
           <div
-            className="animate-hero-fade-up relative z-10 mb-10 flex flex-wrap items-center justify-center gap-3 font-mono text-xs text-slate-600 sm:gap-6"
+            className="animate-hero-fade-up relative z-10 mb-10 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-600 sm:gap-6"
             style={{ animationDelay: '540ms' }}
           >
             <span className="flex items-center gap-1.5 text-slate-700">
@@ -190,32 +190,32 @@ const ClientLandingPage: React.FC = () => {
             style={{ animationDelay: '700ms' }}
           >
             <div className="flex flex-col items-center text-center">
-              <span className="text-3xl font-black text-[#1D4ED8] sm:text-4xl">
+              <span className="text-3xl font-extrabold text-[#1D4ED8] sm:text-4xl">
                 <AnimatedNumber value={10000} suffix="+" />
               </span>
-              <span className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <span className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Freelancer xác thực
               </span>
             </div>
             <div className="flex flex-col items-center text-center">
-              <span className="text-3xl font-black text-[#1D4ED8] sm:text-4xl">
+              <span className="text-3xl font-extrabold text-[#1D4ED8] sm:text-4xl">
                 <AnimatedNumber value={5000} suffix="+" />
               </span>
-              <span className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <span className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Dự án hoàn thành
               </span>
             </div>
             <div className="flex flex-col items-center text-center">
-              <span className="text-3xl font-black text-[#1D4ED8] sm:text-4xl">
+              <span className="text-3xl font-extrabold text-[#1D4ED8] sm:text-4xl">
                 <AnimatedNumber value={98} suffix="%" />
               </span>
-              <span className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <span className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Khách hàng hài lòng
               </span>
             </div>
             <div className="flex flex-col items-center text-center">
-              <span className="text-3xl font-black text-[#1D4ED8] sm:text-4xl">&lt; 24H</span>
-              <span className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <span className="text-3xl font-extrabold text-[#1D4ED8] sm:text-4xl">&lt; 24H</span>
+              <span className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 Kết nối nhân tài
               </span>
             </div>

@@ -8,9 +8,6 @@
 }
 
 :root {
-  --sans: "Be Vietnam Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --primary: #1d4ed8;
   --primary-hover: #153bb5;
   --surface: #ffffff;
@@ -148,13 +145,12 @@ body {
 }
 
 .client-dashboard-page .dashboard-stat-card [class*="uppercase"] {
-  font-family: var(--mono);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.08em;
 }
 
-.client-dashboard-page .dashboard-stat-card [class*="font-black"] {
+.client-dashboard-page .dashboard-stat-card [class*="font-extrabold"] {
   color: #0f172a;
   font-size: 1.75rem;
   letter-spacing: -0.04em;
@@ -169,7 +165,6 @@ body {
 
 .client-dashboard-page .dashboard-primary-panel > div > span:first-child {
   border-radius: 6px;
-  font-family: var(--mono);
   font-size: 10px;
 }
 
@@ -230,6 +225,10 @@ html.theme-dark [class~="bg-yellow-50"] {
   background-color: #382c12 !important;
 }
 
+html.theme-dark [class~="bg-orange-50"] {
+  background-color: #3b271b !important;
+}
+
 html.theme-dark [class~="bg-red-50"],
 html.theme-dark [class~="bg-red-100"] {
   background-color: #3a1f2a !important;
@@ -278,12 +277,18 @@ html.theme-dark [class~="text-emerald-700"] {
 
 html.theme-dark [class~="text-amber-600"],
 html.theme-dark [class~="text-amber-700"],
-html.theme-dark [class~="text-amber-800"] {
+html.theme-dark [class~="text-amber-800"],
+html.theme-dark [class~="text-yellow-700"] {
   color: #ffd06f !important;
 }
 
+html.theme-dark [class~="text-orange-700"] {
+  color: #ffbd83 !important;
+}
+
 html.theme-dark [class~="text-red-500"],
-html.theme-dark [class~="text-red-600"] {
+html.theme-dark [class~="text-red-600"],
+html.theme-dark [class~="text-red-700"] {
   color: #ff9aaa !important;
 }
 

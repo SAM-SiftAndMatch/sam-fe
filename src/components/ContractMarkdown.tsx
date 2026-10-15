@@ -6,12 +6,12 @@ const ContractMarkdown: React.FC<{ content: string }> = ({ content }) => (
   <ReactMarkdown
     components={{
       h1: ({ children }) => (
-        <h1 className="text-lg font-black text-gray-900 mt-4 mb-2 first:mt-0 text-center">
+        <h1 className="text-lg font-extrabold text-gray-900 mt-4 mb-2 first:mt-0 text-center">
           {children}
         </h1>
       ),
       h2: ({ children }) => (
-        <h2 className="text-base font-black text-[#1D4ED8] mt-5 mb-2 pb-2 border-b border-blue-100">
+        <h2 className="text-base font-extrabold text-[#1D4ED8] mt-5 mb-2 pb-2 border-b border-blue-100">
           {children}
         </h2>
       ),

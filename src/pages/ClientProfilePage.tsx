@@ -156,7 +156,7 @@ const ClientProfilePage: React.FC = () => {
               <div className="bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-6 md:p-10 space-y-8">
                 {/* Section 1: Identity Header (read-only) */}
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-gray-100">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-[#1D4ED8] to-[#00A3FF] text-white flex items-center justify-center font-black text-2xl sm:text-3xl shadow-md shrink-0">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-[#1D4ED8] to-[#00A3FF] text-white flex items-center justify-center font-extrabold text-2xl sm:text-3xl shadow-md shrink-0">
                     {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'CL'}
                   </div>
 

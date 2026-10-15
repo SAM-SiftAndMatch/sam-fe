@@ -144,15 +144,14 @@ const AppHeader: React.FC = () => {
           aria-label="Về trang chính SAM"
         >
           <span
-            className={`bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] bg-clip-text font-black leading-none tracking-tighter text-transparent transition-all duration-300 ${
+            className={`bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] bg-clip-text font-extrabold leading-none tracking-tighter text-transparent transition-all duration-300 ${
               isScrolled ? 'text-2xl sm:text-[28px]' : 'text-3xl sm:text-[38px]'
             }`}
-            style={{ fontFamily: "'Quedora', sans-serif" }}
           >
             SAM
           </span>
           <span
-            className={`hidden border-l border-slate-200 pl-2 font-mono text-[10px] font-medium uppercase tracking-widest text-slate-500 transition-opacity duration-200 xl:inline ${
+            className={`hidden border-l border-slate-200 pl-2 text-[10px] font-medium uppercase tracking-widest text-slate-500 transition-opacity duration-200 xl:inline ${
               isScrolled ? 'opacity-80' : 'opacity-100'
             }`}
           >

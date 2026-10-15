@@ -9,7 +9,9 @@ import { storageApi } from '../api/storage';
 import AppHeader from '../components/AppHeader';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
+import JobStatusBadge from '../components/JobStatusBadge';
 import PaginationNav from '../components/PaginationNav';
+import ProposalStatusBadge from '../components/ProposalStatusBadge';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_PROJECTS, PATH_WORKSPACE } from '../routes/paths';
@@ -225,55 +227,6 @@ const ClientProjectDetailPage: React.FC = () => {
     });
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'OPEN':
-        return (
-          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-            Đang chờ đề xuất
-          </span>
-        );
-      case 'NEGOTIATING':
-        return (
-          <span className="px-3 py-1 bg-yellow-50 text-yellow-600 rounded-full text-xs font-bold border border-yellow-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
-            Đang thương lượng
-          </span>
-        );
-      case 'AWAITING_PAYMENT':
-        return (
-          <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-            Chờ nạp tiền khởi động
-          </span>
-        );
-      case 'IN_PROGRESS':
-        return (
-          <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-xs font-bold border border-orange-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-            Đang thực hiện
-          </span>
-        );
-      case 'COMPLETED':
-        return (
-          <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-            Đã hoàn thành
-          </span>
-        );
-      case 'CANCELLED':
-        return (
-          <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-bold border border-red-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-            Đã hủy
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
   const getRecStatusBadge = (status: string) => {
     switch (status) {
       case 'AUTO_MATCHED':
@@ -292,37 +245,6 @@ const ClientProjectDetailPage: React.FC = () => {
         return (
           <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-bold border border-purple-100 w-fit">
             Dev yêu cầu Chat
-          </span>
-        );
-      case 'ACCEPTED':
-        return (
-          <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-100 w-fit">
-            Đã nhận việc
-          </span>
-        );
-      case 'REJECTED':
-        return (
-          <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold border border-gray-200 w-fit">
-            Đã từ chối
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const getProposalStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return (
-          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 w-fit">
-            Chờ duyệt
-          </span>
-        );
-      case 'INVITED':
-        return (
-          <span className="px-3 py-1 bg-yellow-50 text-yellow-600 rounded-full text-xs font-bold border border-yellow-100 w-fit">
-            Đã mời — chờ dev đồng ý
           </span>
         );
       case 'ACCEPTED':
@@ -390,7 +312,7 @@ const ClientProjectDetailPage: React.FC = () => {
               <div className="flex flex-col gap-6">
                 <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
                   <div className="flex justify-between items-start mb-4">
-                    {getStatusBadge(project.status)}
+                    <JobStatusBadge status={project.status} />
                     <span className="text-xs font-semibold text-gray-400">
                       {formatDate(project.createdAt)}
                     </span>
@@ -443,7 +365,7 @@ const ClientProjectDetailPage: React.FC = () => {
                       >
                         {skill.name}
                         {skill.yearsOfExperience != null && (
-                          <span className="text-[10px] text-[#1D4ED8] font-black">
+                          <span className="text-[10px] text-[#1D4ED8] font-extrabold">
                             {skill.yearsOfExperience} năm
                           </span>
                         )}
@@ -543,7 +465,7 @@ const ClientProjectDetailPage: React.FC = () => {
                         >
                           {/* Info Freelancer */}
                           <div className="flex flex-col items-center text-center md:w-1/4">
-                            <div className="w-16 h-16 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-black text-xl mb-3">
+                            <div className="w-16 h-16 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-extrabold text-xl mb-3">
                               {rec.fullName.charAt(0)}
                             </div>
                             <h4 className="font-bold text-gray-900 text-sm mb-1">{rec.fullName}</h4>
@@ -627,7 +549,7 @@ const ClientProjectDetailPage: React.FC = () => {
                         className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] flex flex-col md:flex-row gap-6"
                       >
                         <div className="flex flex-col items-center text-center md:w-1/4">
-                          <div className="w-16 h-16 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-black text-xl mb-3">
+                          <div className="w-16 h-16 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-extrabold text-xl mb-3">
                             {p.freelancerName.charAt(0)}
                           </div>
                           <h4 className="font-bold text-gray-900 text-sm mb-1">
@@ -647,7 +569,7 @@ const ClientProjectDetailPage: React.FC = () => {
                         <div className="md:w-3/4 flex flex-col">
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex flex-col gap-1">
-                              {getProposalStatusBadge(p.status)}
+                              <ProposalStatusBadge status={p.status} audience="client" />
                             </div>
                             {p.attachmentUrl && (
                               <button

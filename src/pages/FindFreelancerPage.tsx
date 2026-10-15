@@ -66,7 +66,7 @@ const FindFreelancerPage: React.FC = () => {
       <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-10">
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-2">
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
               Tìm kiếm Freelancer
             </h1>
             <p className="text-gray-500">

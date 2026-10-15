@@ -14,13 +14,10 @@ export const LandingFooter: React.FC = () => {
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="flex items-center gap-2 mb-3 group"
             >
-              <span
-                className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300 leading-none"
-                style={{ fontFamily: "'Quedora', sans-serif" }}
-              >
+              <span className="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300 leading-none">
                 SAM
               </span>
-              <span className="font-mono text-[10px] text-slate-400 uppercase tracking-wider self-center">
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider self-center">
                 SIFT & MATCH
               </span>
             </Link>
@@ -29,7 +26,7 @@ export const LandingFooter: React.FC = () => {
               bảo vệ chất lượng dự án.
             </p>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] text-slate-400 bg-slate-50 px-2.5 py-1 rounded-[4px] border border-slate-200">
+              <span className="text-[10px] text-slate-400 bg-slate-50 px-2.5 py-1 rounded-[4px] border border-slate-200">
                 SYSTEM: ALL OPERATIONAL
               </span>
             </div>
@@ -37,7 +34,7 @@ export const LandingFooter: React.FC = () => {
 
           {/* Cột 2: Dành cho Khách hàng */}
           <div className="flex flex-col items-start col-span-1">
-            <h4 className="text-xs font-mono font-semibold text-slate-900 uppercase tracking-wider mb-4">
+            <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4">
               Dành cho Khách hàng
             </h4>
             <div className="flex flex-col gap-2.5 text-xs sm:text-sm text-slate-600">
@@ -70,7 +67,7 @@ export const LandingFooter: React.FC = () => {
 
           {/* Cột 3: Về chúng tôi */}
           <div className="flex flex-col items-start col-span-1">
-            <h4 className="text-xs font-mono font-semibold text-slate-900 uppercase tracking-wider mb-4">
+            <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4">
               Về SAM
             </h4>
             <div className="flex flex-col gap-2.5 text-xs sm:text-sm text-slate-600">
@@ -91,7 +88,7 @@ export const LandingFooter: React.FC = () => {
 
           {/* Cột 4: Chính sách & Pháp lý */}
           <div className="flex flex-col items-start col-span-1">
-            <h4 className="text-xs font-mono font-semibold text-slate-900 uppercase tracking-wider mb-4">
+            <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4">
               Chính sách & An toàn
             </h4>
             <div className="flex flex-col gap-2.5 text-xs sm:text-sm text-slate-600">
@@ -112,7 +109,7 @@ export const LandingFooter: React.FC = () => {
         </div>
 
         {/* Bottom copyright */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-mono">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>© 2026 SAM AI Marketplace. All rights reserved.</div>
           <div className="flex items-center gap-4">
             <span>

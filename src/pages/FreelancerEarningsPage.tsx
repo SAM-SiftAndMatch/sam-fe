@@ -178,7 +178,7 @@ const FreelancerEarningsPage: React.FC = () => {
                 Tổng thu nhập
               </p>
             </div>
-            <p className="text-2xl font-black text-gray-900">
+            <p className="text-2xl font-extrabold text-gray-900">
               {formatCurrency(EARNINGS_STATS.totalEarnings)}
             </p>
           </div>
@@ -204,7 +204,9 @@ const FreelancerEarningsPage: React.FC = () => {
                 Số dư khả dụng
               </p>
             </div>
-            <p className="text-2xl font-black text-[#1D4ED8]">{formatCurrency(availableBalance)}</p>
+            <p className="text-2xl font-extrabold text-[#1D4ED8]">
+              {formatCurrency(availableBalance)}
+            </p>
           </div>
 
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
@@ -228,7 +230,7 @@ const FreelancerEarningsPage: React.FC = () => {
                 Đang chờ (Escrow)
               </p>
             </div>
-            <p className="text-2xl font-black text-amber-600">
+            <p className="text-2xl font-extrabold text-amber-600">
               {formatCurrency(EARNINGS_STATS.escrowPending)}
             </p>
           </div>

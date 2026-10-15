@@ -116,9 +116,7 @@ const FreelancerPage: React.FC = () => {
             {isLoadingProfile ? (
               <div className="bg-white rounded-[12px] p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex items-center justify-center gap-3">
                 <div className="w-5 h-5 border-2 border-[#1D4ED8] border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-slate-500 font-mono">
-                  Đang tải thông tin hồ sơ của bạn...
-                </span>
+                <span className="text-sm text-slate-500">Đang tải thông tin hồ sơ của bạn...</span>
               </div>
             ) : hasProfile && profile ? (
               <div className="bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] text-left space-y-6">
@@ -137,18 +135,16 @@ const FreelancerPage: React.FC = () => {
                       <p className="text-sm font-semibold text-[#1D4ED8]">
                         {profile.headline || 'Chưa cập nhật tiêu đề nghề nghiệp'}
                       </p>
-                      <p className="text-xs text-slate-400 font-mono">
-                        {profile.email || user.email}
-                      </p>
+                      <p className="text-xs text-slate-400">{profile.email || user.email}</p>
                     </div>
                   </div>
 
                   {/* Hourly Rate Box */}
                   <div className="bg-slate-50 border border-slate-200/80 rounded-[8px] px-5 py-3 w-full sm:w-auto text-left sm:text-right">
-                    <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 font-mono">
+                    <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
                       Mức giá theo giờ
                     </span>
-                    <span className="text-lg font-black text-[#1D4ED8] font-mono">
+                    <span className="text-lg font-extrabold text-[#1D4ED8]">
                       {profile.hourlyRate
                         ? `${Number(profile.hourlyRate).toLocaleString('vi-VN')} VNĐ / giờ`
                         : 'Chưa đặt mức giá'}
@@ -159,7 +155,7 @@ const FreelancerPage: React.FC = () => {
                 {/* Bio Section */}
                 {profile.bio && (
                   <div className="pb-4 border-b border-slate-100">
-                    <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400 block mb-1">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">
                       Giới thiệu bản thân
                     </span>
                     <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
@@ -171,14 +167,14 @@ const FreelancerPage: React.FC = () => {
                 {/* Skills tags */}
                 {profile.skills && profile.skills.length > 0 && (
                   <div className="pb-4 border-b border-slate-100">
-                    <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400 block mb-2.5">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2.5">
                       Kỹ năng chuyên môn ({profile.skills.length})
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {profile.skills.map((skill) => (
                         <div
                           key={skill.skillId || skill.skillName}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-[#1D4ED8]/[0.05] border border-slate-200 hover:border-[#1D4ED8]/30 rounded-[6px] text-xs font-medium text-slate-700 transition-colors font-mono"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-[#1D4ED8]/[0.05] border border-slate-200 hover:border-[#1D4ED8]/30 rounded-[6px] text-xs font-medium text-slate-700 transition-colors"
                         >
                           <span className="font-semibold">{skill.skillName}</span>
                           <span className="text-[10px] text-slate-400">
@@ -192,7 +188,7 @@ const FreelancerPage: React.FC = () => {
 
                 {/* Card Action Footer */}
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-2 text-xs text-emerald-700 font-mono">
+                  <div className="flex items-center gap-2 text-xs text-emerald-700">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     <span>Hồ sơ đã sẵn sàng nhận dự án</span>
                   </div>
@@ -273,7 +269,7 @@ const FreelancerPage: React.FC = () => {
                 key={filter}
                 type="button"
                 onClick={() => setActiveFilter(filter)}
-                className={`whitespace-nowrap px-4 py-2 rounded-[6px] text-xs font-mono font-medium transition-colors cursor-pointer border ${
+                className={`whitespace-nowrap px-4 py-2 rounded-[6px] text-xs font-medium transition-colors cursor-pointer border ${
                   activeFilter === filter
                     ? 'bg-[#1D4ED8] text-white border-[#1D4ED8]'
                     : 'bg-white text-slate-700 border-slate-200 hover:border-[#1D4ED8] hover:text-[#1D4ED8]'
@@ -287,7 +283,7 @@ const FreelancerPage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {openJobs.length === 0 ? (
-            <div className="col-span-full py-12 text-center text-slate-400 font-mono text-xs">
+            <div className="col-span-full py-12 text-center text-slate-400 text-xs">
               Hiện chưa có dự án nào đang mở tuyển.
             </div>
           ) : (
@@ -296,12 +292,12 @@ const FreelancerPage: React.FC = () => {
                 <div className="group h-full bg-white rounded-[12px] p-6 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-end gap-2 mb-4">
-                      <span className="font-mono text-[10px] text-slate-400">AI MATCHED</span>
+                      <span className="text-[10px] text-slate-400">AI MATCHED</span>
                     </div>
                     <h3 className="text-base font-bold text-slate-900 leading-snug mb-3 line-clamp-2">
                       {job.title}
                     </h3>
-                    <div className="flex items-center gap-1.5 mb-4 font-mono">
+                    <div className="flex items-center gap-1.5 mb-4">
                       <span className="text-xs text-slate-400">NGÂN SÁCH:</span>
                       <span className="text-sm font-bold text-[#1D4ED8]">
                         {formatBudget(job.budgetMin, job.budgetMax)}
@@ -311,7 +307,7 @@ const FreelancerPage: React.FC = () => {
                       {job.skills?.slice(0, 4).map((skill) => (
                         <span
                           key={skill.id}
-                          className="text-[10px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded-[4px]"
+                          className="text-[10px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded-[4px]"
                         >
                           {skill.name}
                         </span>
@@ -355,7 +351,7 @@ const FreelancerPage: React.FC = () => {
                   'Bắt đầu làm việc & Nhận thanh toán',
                 ].map((step, index) => (
                   <div key={step} className="flex items-center gap-3">
-                    <span className="w-6 h-6 shrink-0 rounded-[6px] bg-[#1D4ED8] flex items-center justify-center text-white font-mono font-bold text-xs">
+                    <span className="w-6 h-6 shrink-0 rounded-[6px] bg-[#1D4ED8] flex items-center justify-center text-white font-bold text-xs">
                       {index + 1}
                     </span>
                     <span className="text-slate-800 text-xs sm:text-sm font-medium">{step}</span>
@@ -386,12 +382,12 @@ const FreelancerPage: React.FC = () => {
 
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex justify-between items-end">
                 <div>
-                  <span className="text-white/70 font-mono text-[10px] tracking-widest uppercase mb-0.5 block">
+                  <span className="text-white/70 text-[10px] tracking-widest uppercase mb-0.5 block">
                     HƯỚNG DẪN {'//'} ONBOARDING
                   </span>
                   <span className="text-white font-bold text-sm">Cách hoạt động của SAM</span>
                 </div>
-                <span className="bg-slate-900/80 text-white font-mono text-[10px] px-2 py-0.5 rounded-[4px] border border-slate-700">
+                <span className="bg-slate-900/80 text-white text-[10px] px-2 py-0.5 rounded-[4px] border border-slate-700">
                   02:45
                 </span>
               </div>

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import JobStatusBadge from '../components/JobStatusBadge';
 import PaginationNav from '../components/PaginationNav';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_CLIENT_PROJECT_DETAIL } from '../routes/paths';
@@ -103,55 +104,6 @@ const ClientProjectListPage: React.FC = () => {
 
   const filteredProjects = jobs;
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'OPEN':
-        return (
-          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-            Đang chờ đề xuất
-          </span>
-        );
-      case 'NEGOTIATING':
-        return (
-          <span className="px-3 py-1 bg-yellow-50 text-yellow-600 rounded-full text-xs font-bold border border-yellow-100 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
-            Đang thương lượng
-          </span>
-        );
-      case 'AWAITING_PAYMENT':
-        return (
-          <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-            Chờ nạp tiền
-          </span>
-        );
-      case 'IN_PROGRESS':
-        return (
-          <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-xs font-bold border border-orange-100 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-            Đang thực hiện
-          </span>
-        );
-      case 'COMPLETED':
-        return (
-          <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-            Đã hoàn thành
-          </span>
-        );
-      case 'CANCELLED':
-        return (
-          <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-bold border border-red-100 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-            Đã hủy
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
@@ -249,7 +201,7 @@ const ClientProjectListPage: React.FC = () => {
                 {/* Cột trái: Tên & Trạng thái */}
                 <div className="flex-1 flex flex-col items-start gap-3">
                   <div className="flex items-center justify-between w-full md:w-auto md:justify-start gap-4">
-                    {getStatusBadge(project.status)}
+                    <JobStatusBadge status={project.status} />
                     <span className="text-xs font-semibold text-gray-400 md:hidden">
                       {formatDate(project.createdAt)}
                     </span>

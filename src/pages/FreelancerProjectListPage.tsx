@@ -7,6 +7,7 @@ import { walletApi } from '../api/wallet';
 import { workflowApi } from '../api/workflow';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import JobStatusBadge from '../components/JobStatusBadge';
 import PaginationNav from '../components/PaginationNav';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_WORKSPACE } from '../routes/paths';
@@ -15,24 +16,15 @@ import type { JobStatus } from '../types/job';
 import type { FreelancerEscrowSummary } from '../types/payment';
 import type { WalletSummary } from '../types/wallet';
 
-type ProjectListStatus = 'preparing' | 'in_progress' | 'completed' | 'cancelled';
-
 interface ProjectListItem {
   id: string;
   title: string;
   clientName: string;
-  status: ProjectListStatus;
+  status: JobStatus;
   budget: number;
   deadline: string;
   progress: number;
 }
-
-const toListStatus = (status: JobStatus): ProjectListStatus => {
-  if (status === 'IN_PROGRESS') return 'in_progress';
-  if (status === 'COMPLETED') return 'completed';
-  if (status === 'CANCELLED') return 'cancelled';
-  return 'preparing';
-};
 
 const FreelancerProjectListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -94,7 +86,7 @@ const FreelancerProjectListPage: React.FC = () => {
               id: job.id,
               title: job.title,
               clientName: job.clientName,
-              status: toListStatus(job.status),
+              status: job.status,
               budget: Number(job.budgetMax ?? job.budgetMin ?? 0),
               deadline: job.deadline
                 ? new Date(job.deadline).toLocaleDateString('vi-VN')
@@ -123,40 +115,6 @@ const FreelancerProjectListPage: React.FC = () => {
   }, [user?.userId, page, filter, debouncedSearch]);
 
   const filteredProjects = projects;
-
-  const getStatusBadge = (project: ProjectListItem) => {
-    switch (project.status) {
-      case 'in_progress':
-        return (
-          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-            Đang thực hiện
-          </span>
-        );
-      case 'preparing':
-        return (
-          <span className="px-3 py-1 bg-slate-50 text-slate-600 rounded-full text-xs font-bold border border-slate-200 w-fit">
-            Đang chuẩn bị
-          </span>
-        );
-      case 'completed':
-        return (
-          <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-            Hoàn thành
-          </span>
-        );
-      case 'cancelled':
-        return (
-          <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-bold border border-red-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-            Đã hủy
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
 
   const formatCurrency = (val: number) => `${val.toLocaleString('vi-VN')} VND`;
 
@@ -195,7 +153,7 @@ const FreelancerProjectListPage: React.FC = () => {
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
                 Tổng dự án
               </p>
-              <p className="text-2xl font-black text-gray-900">{totalElements}</p>
+              <p className="text-2xl font-extrabold text-gray-900">{totalElements}</p>
             </div>
           </div>
 
@@ -219,7 +177,7 @@ const FreelancerProjectListPage: React.FC = () => {
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
                 Ví thử nghiệm
               </p>
-              <p className="text-xl font-black text-gray-900">
+              <p className="text-xl font-extrabold text-gray-900">
                 {formatCurrency(wallet?.availableBalance ?? 0)}
               </p>
             </div>
@@ -235,7 +193,7 @@ const FreelancerProjectListPage: React.FC = () => {
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
                 Đang ký quỹ
               </p>
-              <p className="text-xl font-black text-gray-900">
+              <p className="text-xl font-extrabold text-gray-900">
                 {formatCurrency(escrow?.heldForPayout ?? 0)}
               </p>
             </div>
@@ -314,7 +272,7 @@ const FreelancerProjectListPage: React.FC = () => {
             >
               <div className="flex-1 flex flex-col items-start gap-3">
                 <div className="flex items-center justify-between w-full md:w-auto md:justify-start gap-4">
-                  {getStatusBadge(project)}
+                  <JobStatusBadge status={project.status} />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 group-hover:text-[#1D4ED8] transition-colors line-clamp-2">
                   {project.title}
@@ -339,7 +297,7 @@ const FreelancerProjectListPage: React.FC = () => {
                   </span>
                   <span className="text-sm font-bold text-gray-900">{project.deadline}</span>
                 </div>
-                {project.status === 'in_progress' && (
+                {project.status === 'IN_PROGRESS' && (
                   <div className="flex flex-col items-center">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                       Tiến độ

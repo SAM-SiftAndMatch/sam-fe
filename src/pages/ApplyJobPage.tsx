@@ -170,17 +170,17 @@ const ApplyJobPage: React.FC = () => {
             </div>
           )}
           {job.status !== 'OPEN' && (
-            <div className="p-4 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium rounded-xl text-center font-mono">
+            <div className="p-4 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium rounded-xl text-center">
               Dự án đã đóng tuyển, không nhận hồ sơ mới.
             </div>
           )}
 
           <div className="bg-white rounded-xl p-6 md:p-8 shadow-xs border border-slate-200/90">
-            <span className="font-mono text-[10px] text-blue-600 uppercase tracking-widest block mb-2">
+            <span className="text-[10px] text-blue-600 uppercase tracking-widest block mb-2">
               {'//'} DỰ ÁN ỨNG TUYỂN
             </span>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{job.title}</h1>
-            <p className="text-sm font-mono font-bold text-[#1D4ED8]">
+            <p className="text-sm font-bold text-[#1D4ED8]">
               Ngân sách: {formatBudget(job.budgetMin, job.budgetMax)}
             </p>
           </div>

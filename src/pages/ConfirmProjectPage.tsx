@@ -152,7 +152,7 @@ const ConfirmProjectPage: React.FC = () => {
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 text-white shadow-xs">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h4 className="text-[10px] font-mono font-bold uppercase tracking-widest text-blue-400 mb-1">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1">
                       {'//'} HỢP ĐỒNG AI ĐÃ CHỐT
                     </h4>
                     <p className="text-xs text-slate-400">
@@ -213,7 +213,7 @@ const ConfirmProjectPage: React.FC = () => {
                     <div className="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1">
                       Ngân sách dự án
                     </div>
-                    <div className="text-2xl font-black leading-tight">
+                    <div className="text-2xl font-extrabold leading-tight">
                       {new Intl.NumberFormat('vi-VN').format(
                         state.exactBudgetVnd || state.budgetAmount || 0
                       )}{' '}
@@ -227,7 +227,7 @@ const ConfirmProjectPage: React.FC = () => {
                     <div className="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1">
                       Thời gian thực hiện dự án
                     </div>
-                    <div className="text-2xl font-black leading-tight">
+                    <div className="text-2xl font-extrabold leading-tight">
                       {state.durationMonths}{' '}
                       <span className="text-sm font-bold text-blue-100">tháng</span>
                     </div>
@@ -367,7 +367,7 @@ const ConfirmProjectPage: React.FC = () => {
             {totalUpgradesCost > 0 && (
               <div className="mt-4 p-4 bg-gray-50 rounded-xl flex justify-between items-center border border-gray-100">
                 <span className="text-sm font-medium text-gray-600">Tổng phí nâng cấp:</span>
-                <span className="text-lg font-black text-blue-700">
+                <span className="text-lg font-extrabold text-blue-700">
                   {new Intl.NumberFormat('vi-VN').format(totalUpgradesCost)} đ
                 </span>
               </div>

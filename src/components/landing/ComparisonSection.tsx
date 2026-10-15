@@ -62,7 +62,7 @@ export const ComparisonSection: React.FC = () => {
           {/* Table Headers */}
           <div className="grid grid-cols-1 md:grid-cols-2 border-b border-slate-200/90 bg-slate-50/70">
             <div className="p-5 sm:p-6 border-b md:border-b-0 md:border-r border-slate-200/90 flex flex-col justify-center">
-              <span className="font-mono text-[11px] text-slate-500 uppercase tracking-wider block mb-1">
+              <span className="text-[11px] text-slate-500 uppercase tracking-wider block mb-1">
                 TRUYỀN THỐNG
               </span>
               <h3 className="text-lg font-bold text-slate-700">Chợ Freelance Truyền Thống</h3>
@@ -71,7 +71,7 @@ export const ComparisonSection: React.FC = () => {
 
             <div className="p-5 sm:p-6 bg-[#1D4ED8]/[0.03] flex flex-col justify-center">
               <div className="flex items-center justify-between mb-1">
-                <span className="font-mono text-[11px] text-[#1D4ED8] uppercase tracking-wider font-semibold">
+                <span className="text-[11px] text-[#1D4ED8] uppercase tracking-wider font-semibold">
                   NỀN TẢNG THẾ HỆ MỚI
                 </span>
               </div>
@@ -92,10 +92,10 @@ export const ComparisonSection: React.FC = () => {
                 {/* Left Column: Traditional */}
                 <div className="p-5 sm:p-6 border-b md:border-b-0 md:border-r border-slate-200/70 flex flex-col justify-start">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-4 h-4 rounded-full bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center font-mono text-[10px] shrink-0 font-bold">
+                    <span className="w-4 h-4 rounded-full bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center text-[10px] shrink-0 font-bold">
                       ✕
                     </span>
-                    <span className="text-xs font-mono font-semibold text-slate-800 uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-slate-800 uppercase tracking-wider">
                       {row.aspect}
                     </span>
                   </div>
@@ -107,10 +107,10 @@ export const ComparisonSection: React.FC = () => {
                 {/* Right Column: SAM */}
                 <div className="p-5 sm:p-6 bg-[#1D4ED8]/[0.015] flex flex-col justify-start">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center font-mono text-[10px] shrink-0 font-bold">
+                    <span className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-[10px] shrink-0 font-bold">
                       ✓
                     </span>
-                    <span className="text-xs font-mono font-semibold text-[#1D4ED8] uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-[#1D4ED8] uppercase tracking-wider">
                       {row.aspect}
                     </span>
                   </div>

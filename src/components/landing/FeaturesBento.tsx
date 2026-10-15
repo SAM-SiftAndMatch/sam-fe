@@ -26,7 +26,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">CORE SENTINEL</span>
+                  <span className="text-xs text-slate-400">CORE SENTINEL</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
                   AI Trọng tài QC & Quét mã nguồn tự động
@@ -39,7 +39,7 @@ export const FeaturesBento: React.FC = () => {
               </div>
 
               {/* Tiny live-looking UI mockup: Terminal Code Scan Result */}
-              <div className="rounded-[8px] bg-slate-900 text-slate-200 p-4 font-mono text-[11px] space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 shadow-inner">
+              <div className="font-mono rounded-[8px] bg-slate-900 text-slate-200 p-4 text-[11px] space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 shadow-inner">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-2 text-slate-400 text-[10px]">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-slate-700 inline-block" />
@@ -84,7 +84,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">99% PRECISION</span>
+                  <span className="text-xs text-slate-400">99% PRECISION</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
                   AI Matching Score
@@ -98,8 +98,8 @@ export const FeaturesBento: React.FC = () => {
               {/* Live Mockup: Match Score Card */}
               <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-4 space-y-3 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-xs font-mono text-slate-500 uppercase">Match Score</span>
-                  <div className="text-2xl sm:text-3xl font-black text-[#1D4ED8]">
+                  <span className="text-xs text-slate-500 uppercase">Match Score</span>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-[#1D4ED8]">
                     <AnimatedNumber value={98.4} decimals={1} suffix="%" />
                   </div>
                 </div>
@@ -108,7 +108,7 @@ export const FeaturesBento: React.FC = () => {
                   <div className="bg-[#1D4ED8] h-full rounded-full w-[98.4%]" />
                 </div>
 
-                <div className="font-mono text-[10.5px] space-y-1.5 text-slate-600 pt-1">
+                <div className="text-[10.5px] space-y-1.5 text-slate-600 pt-1">
                   <div className="flex justify-between">
                     <span>Độ khớp kỹ năng:</span>
                     <span className="font-semibold text-slate-900">99.2%</span>
@@ -133,7 +133,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">VERIFIED ORIGINAL</span>
+                  <span className="text-xs text-slate-400">VERIFIED ORIGINAL</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
                   Kiểm tra chống đạo văn & Bản quyền
@@ -145,7 +145,7 @@ export const FeaturesBento: React.FC = () => {
               </div>
 
               {/* Live Mockup: Plagiarism Percentage */}
-              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-4 space-y-3 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 font-mono">
+              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-4 space-y-3 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-slate-500 uppercase">Tỷ lệ trùng lặp:</span>
                   <span className="text-lg font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-[4px] border border-emerald-200">
@@ -178,7 +178,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">ANTI-CREEP</span>
+                  <span className="text-xs text-slate-400">ANTI-CREEP</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
                   Lá chắn yêu cầu tự động (Scope Shield)
@@ -190,7 +190,7 @@ export const FeaturesBento: React.FC = () => {
               </div>
 
               {/* Live Mockup: Scope Shield Sentinel */}
-              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3.5 space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 font-mono text-[11px]">
+              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3.5 space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 text-[11px]">
                 <div className="flex items-center justify-between bg-white border border-slate-200/80 p-2 rounded-[6px]">
                   <span className="text-slate-600">Phạm vi gốc (SRS):</span>
                   <span className="text-slate-900 font-bold">5 modules [ĐÃ KHÓA]</span>
@@ -213,7 +213,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">100% AN TOÀN</span>
+                  <span className="text-xs text-slate-400">100% AN TOÀN</span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">
                   Ký quỹ Escrow theo từng cột mốc
@@ -225,7 +225,7 @@ export const FeaturesBento: React.FC = () => {
               </div>
 
               {/* Live Mockup: Milestone Tracker */}
-              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3 space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 font-mono text-[10.5px]">
+              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3 space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 text-[10.5px]">
                 <div className="flex items-center justify-between bg-white border border-slate-200 px-2.5 py-1.5 rounded-[5px]">
                   <span className="text-slate-700">Mốc 1: Giao diện UI & Specs</span>
                   <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded text-[10px]">
@@ -249,7 +249,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">CHỈ 30 GIÂY</span>
+                  <span className="text-xs text-slate-400">CHỈ 30 GIÂY</span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">
                   AI PM Phỏng vấn & Lập đặc tả
@@ -261,7 +261,7 @@ export const FeaturesBento: React.FC = () => {
               </div>
 
               {/* Live Mockup: Prompt to SRS breakdown */}
-              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3 space-y-1.5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 font-mono text-[10.5px]">
+              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3 space-y-1.5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 text-[10.5px]">
                 <div className="text-slate-500 text-[10px]">ĐẦU VÀO Ý TƯỞNG THÔ:</div>
                 <div className="text-slate-800 bg-white border border-slate-200 px-2 py-1 rounded">
                   "Website bán khóa học online có thi trắc nghiệm"

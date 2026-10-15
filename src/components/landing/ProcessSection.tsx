@@ -24,17 +24,15 @@ const WORKFLOW_STEPS: WorkflowStep[] = [
     snippet: (
       <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3 space-y-2">
         <div className="flex items-start gap-2">
-          <span className="font-mono text-[10px] text-slate-400 shrink-0 mt-0.5">YOU:</span>
+          <span className="text-[10px] text-slate-400 shrink-0 mt-0.5">YOU:</span>
           <div className="text-[11px] text-slate-700 bg-white border border-slate-200/60 rounded-[6px] px-2.5 py-1.5 shadow-2xs">
             "Tôi cần xây dựng app giao đồ ăn cho nhà hàng..."
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <span className="font-mono text-[10px] text-[#1D4ED8] font-semibold shrink-0 mt-0.5">
-            AI PM:
-          </span>
+          <span className="text-[10px] text-[#1D4ED8] font-semibold shrink-0 mt-0.5">AI PM:</span>
           <div className="text-[11px] text-slate-800 bg-[#1D4ED8]/[0.05] border border-[#1D4ED8]/20 rounded-[6px] px-2.5 py-1.5">
-            <span className="font-mono text-[10px] text-[#1D4ED8] block font-semibold mb-0.5">
+            <span className="text-[10px] text-[#1D4ED8] block font-semibold mb-0.5">
               ✓ ĐÃ TẠO SRS (4 MODULES)
             </span>
             <span className="text-slate-600 text-[10.5px] block">
@@ -57,30 +55,30 @@ const WORKFLOW_STEPS: WorkflowStep[] = [
       <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-2.5 space-y-1.5">
         <div className="bg-white border border-slate-200/80 rounded-[6px] p-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-[#1D4ED8]/10 text-[#1D4ED8] flex items-center justify-center font-mono text-[10px] font-bold">
+            <div className="w-6 h-6 rounded bg-[#1D4ED8]/10 text-[#1D4ED8] flex items-center justify-center text-[10px] font-bold">
               HN
             </div>
             <div>
               <div className="text-[11px] font-semibold text-slate-900">Hoàng Nam</div>
-              <div className="text-[10px] text-slate-500 font-mono">Senior Fullstack · 5.0★</div>
+              <div className="text-[10px] text-slate-500">Senior Fullstack · 5.0★</div>
             </div>
           </div>
-          <span className="font-mono text-[10px] font-semibold text-[#1D4ED8] bg-[#1D4ED8]/[0.08] px-2 py-0.5 rounded-[4px]">
+          <span className="text-[10px] font-semibold text-[#1D4ED8] bg-[#1D4ED8]/[0.08] px-2 py-0.5 rounded-[4px]">
             98.4% MATCH
           </span>
         </div>
 
         <div className="bg-white border border-slate-200/80 rounded-[6px] p-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-slate-100 text-slate-600 flex items-center justify-center font-mono text-[10px] font-bold">
+            <div className="w-6 h-6 rounded bg-slate-100 text-slate-600 flex items-center justify-center text-[10px] font-bold">
               TT
             </div>
             <div>
               <div className="text-[11px] font-semibold text-slate-900">Thanh Trúc</div>
-              <div className="text-[10px] text-slate-500 font-mono">FastAPI Engineer · 4.9★</div>
+              <div className="text-[10px] text-slate-500">FastAPI Engineer · 4.9★</div>
             </div>
           </div>
-          <span className="font-mono text-[10px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-[4px]">
+          <span className="text-[10px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-[4px]">
             95.1% MATCH
           </span>
         </div>
@@ -96,7 +94,7 @@ const WORKFLOW_STEPS: WorkflowStep[] = [
     description:
       'Rà soát mã nguồn tự động, phát hiện lỗi cú pháp, kiểm tra bảo mật và bản quyền trước khi giải ngân thanh toán.',
     snippet: (
-      <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-2.5 space-y-1.5 font-mono text-[10.5px]">
+      <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-2.5 space-y-1.5 text-[10.5px]">
         <div className="flex items-center justify-between bg-white border border-slate-200/70 px-2 py-1.5 rounded-[5px]">
           <span className="text-slate-700">Static Code Analysis</span>
           <span className="text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded text-[10px]">
@@ -143,7 +141,7 @@ export const ProcessSection: React.FC = () => {
       </ScrollReveal>
 
       {/* Sub-label guideline */}
-      <div className="flex items-center justify-between text-xs text-slate-400 font-mono mb-6 px-1">
+      <div className="flex items-center justify-between text-xs text-slate-400 mb-6 px-1">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#1D4ED8] animate-pulse" />
           <span className="font-semibold text-slate-700 uppercase tracking-wider text-[11px]">
@@ -192,7 +190,7 @@ export const ProcessSection: React.FC = () => {
                 <div className="flex flex-col items-center text-center select-none">
                   {/* STEP Badge ở trên đầu chính giữa */}
                   <span
-                    className={`font-mono text-[10px] sm:text-[10.5px] tracking-widest uppercase font-bold px-2.5 py-1 rounded-[5px] transition-colors mb-2 ${
+                    className={`text-[10px] sm:text-[10.5px] tracking-widest uppercase font-bold px-2.5 py-1 rounded-[5px] transition-colors mb-2 ${
                       isActive
                         ? 'bg-[#1D4ED8] text-white shadow-xs'
                         : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-800'
@@ -221,7 +219,7 @@ export const ProcessSection: React.FC = () => {
                     }`}
                   >
                     <div className="overflow-hidden">
-                      <span className="font-mono text-[10px] text-slate-400 block truncate">
+                      <span className="text-[10px] text-slate-400 block truncate">
                         {step.subtitle}
                       </span>
                     </div>
@@ -240,12 +238,10 @@ export const ProcessSection: React.FC = () => {
                     <div className="border-t border-slate-100 pt-3.5 mt-3.5 flex flex-col justify-between">
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="font-mono text-[9px] font-bold text-[#1D4ED8] bg-[#1D4ED8]/10 px-2 py-0.5 rounded-[4px]">
+                          <span className="text-[9px] font-bold text-[#1D4ED8] bg-[#1D4ED8]/10 px-2 py-0.5 rounded-[4px]">
                             {step.shortTag} SPECIFICATION
                           </span>
-                          <span className="font-mono text-xs text-slate-400">
-                            {step.stepNumber} / 03
-                          </span>
+                          <span className="text-xs text-slate-400">{step.stepNumber} / 03</span>
                         </div>
                         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-3.5 text-left">
                           {step.description}

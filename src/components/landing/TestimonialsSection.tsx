@@ -56,7 +56,7 @@ export const TestimonialsSection: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center mb-4">
-                  <span className="font-mono text-[10px] text-slate-400">VERIFIED REVIEW</span>
+                  <span className="text-[10px] text-slate-400">VERIFIED REVIEW</span>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6 italic">
                   {review.content}
@@ -71,7 +71,7 @@ export const TestimonialsSection: React.FC = () => {
                 />
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">{review.name}</h4>
-                  <p className="text-[11px] text-slate-500 font-mono">{review.role}</p>
+                  <p className="text-[11px] text-slate-500">{review.role}</p>
                 </div>
               </div>
             </div>

@@ -6,6 +6,7 @@ import { workflowApi } from '../api/workflow';
 import { workspaceKeys } from '../pages/workspace-query';
 import { useAuthStore } from '../stores/useAuthStore';
 import type {
+  DeliveryStatus,
   ProjectDelivery,
   ProjectTaskStatus,
   ProjectTimeline,
@@ -26,11 +27,17 @@ const statusLabel: Record<ProjectTaskStatus, string> = {
 
 const statusClass: Record<ProjectTaskStatus, string> = {
   TODO: 'bg-slate-100 text-slate-600',
-  IN_PROGRESS: 'bg-blue-50 text-blue-700',
+  IN_PROGRESS: 'bg-orange-50 text-orange-700',
   BLOCKED: 'bg-red-50 text-red-700',
   SUBMITTED: 'bg-violet-50 text-violet-700',
   ACCEPTED: 'bg-emerald-50 text-emerald-700',
   REOPENED: 'bg-amber-50 text-amber-700',
+};
+
+const deliveryStatusAppearance: Record<DeliveryStatus, { label: string; className: string }> = {
+  SUBMITTED: { label: 'Chờ nghiệm thu', className: 'text-violet-700' },
+  REVISION_REQUESTED: { label: 'Cần chỉnh sửa', className: 'text-amber-700' },
+  ACCEPTED: { label: 'Đã nghiệm thu', className: 'text-emerald-700' },
 };
 
 const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
@@ -353,7 +360,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         {weeks.map(([weekNumber, tasks]) => (
           <section key={weekNumber} className="relative pl-5 border-l-2 border-slate-200">
             <span className="absolute -left-[7px] top-0 w-3 h-3 rounded-full bg-blue-600 border-2 border-white" />
-            <p className="text-xs font-black text-gray-900 mb-2">Tuần {weekNumber}</p>
+            <p className="text-xs font-extrabold text-gray-900 mb-2">Tuần {weekNumber}</p>
             <div className="flex flex-col gap-2">
               {tasks.map((task) => {
                 const latestReport = reportLists[task.id]?.[0];
@@ -554,12 +561,10 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                   <p className="text-xs font-bold text-gray-800">
                     Phiên bản {delivery.versionNumber}
                   </p>
-                  <span className="text-[10px] font-bold text-violet-700">
-                    {delivery.status === 'ACCEPTED'
-                      ? 'Đã nghiệm thu'
-                      : delivery.status === 'REVISION_REQUESTED'
-                        ? 'Cần chỉnh sửa'
-                        : 'Chờ nghiệm thu'}
+                  <span
+                    className={`text-[10px] font-semibold ${deliveryStatusAppearance[delivery.status].className}`}
+                  >
+                    {deliveryStatusAppearance[delivery.status].label}
                   </span>
                 </div>
                 <a

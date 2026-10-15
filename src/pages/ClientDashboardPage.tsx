@@ -276,7 +276,7 @@ const ClientDashboardPage: React.FC = () => {
           </div>
 
           <div className="relative z-10 mb-4 flex flex-wrap items-center justify-center gap-2">
-            <span className="mr-1 font-mono text-[10px] font-medium uppercase tracking-wider text-slate-400">
+            <span className="mr-1 text-[10px] font-medium uppercase tracking-wider text-slate-400">
               Gợi ý nhanh
             </span>
             {[
@@ -290,7 +290,7 @@ const ClientDashboardPage: React.FC = () => {
                 key={tag}
                 type="button"
                 onClick={() => handleSearch(tag)}
-                className="client-dashboard-suggestion rounded-[6px] border border-slate-200 bg-white px-3 py-1.5 font-mono text-xs text-slate-700 transition-colors active:scale-[0.97]"
+                className="client-dashboard-suggestion rounded-[6px] border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 transition-colors active:scale-[0.97]"
               >
                 + {tag}
               </button>
@@ -326,7 +326,7 @@ const ClientDashboardPage: React.FC = () => {
                 </span>
               </div>
               <div className="mt-auto">
-                <div className="text-3xl font-black text-gray-900 leading-none mb-1">
+                <div className="text-3xl font-extrabold text-gray-900 leading-none mb-1">
                   {stat.count}
                 </div>
                 <div className="text-xs font-semibold text-gray-500">{stat.desc}</div>

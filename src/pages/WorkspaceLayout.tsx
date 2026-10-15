@@ -8,6 +8,7 @@ import { type ChatMessage, chatApi } from '../api/chat';
 import type { ContractBroadcast } from '../api/contract';
 import { type WorkspaceSummary, workspaceApi } from '../api/workspace';
 import AppHeader from '../components/AppHeader';
+import { getJobStatusAppearance } from '../components/JobStatusBadge';
 import { useAuthStore } from '../stores/useAuthStore';
 import { type MessagePages, appendConfirmedMessage, workspaceKeys } from './workspace-query';
 
@@ -22,23 +23,6 @@ export interface WorkspaceContext {
   getScrollTop: () => number | undefined;
   saveScrollTop: (position: number) => void;
 }
-
-const statusLabel = (status: WorkspaceSummary['jobStatus'] | undefined) => {
-  switch (status) {
-    case 'NEGOTIATING':
-      return 'Đang thương lượng';
-    case 'AWAITING_PAYMENT':
-      return 'Chờ nạp tiền';
-    case 'IN_PROGRESS':
-      return 'Đang thực hiện';
-    case 'COMPLETED':
-      return 'Hoàn thành';
-    case 'CANCELLED':
-      return 'Đã hủy';
-    default:
-      return 'Đang trao đổi';
-  }
-};
 
 export default function WorkspaceLayout() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -214,8 +198,10 @@ export default function WorkspaceLayout() {
               <h1 className="text-[15px] font-bold text-gray-900 leading-tight line-clamp-1">
                 {summary?.jobTitle || 'Đang tải...'}
               </h1>
-              <span className="text-[10px] font-bold text-[#1D4ED8] tracking-widest uppercase">
-                {statusLabel(summary?.jobStatus)}
+              <span
+                className={`text-[10px] font-semibold tracking-wider uppercase ${getJobStatusAppearance(summary?.jobStatus).textClass}`}
+              >
+                {getJobStatusAppearance(summary?.jobStatus).label}
               </span>
             </div>
           </div>

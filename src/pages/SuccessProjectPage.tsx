@@ -2,6 +2,7 @@ import type React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import JobStatusBadge from '../components/JobStatusBadge';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
 import { PATH_CLIENT_DASHBOARD, PATH_CLIENT_PROJECT_DETAIL } from '../routes/paths';
 import type { JobResponse } from '../types/job';
@@ -57,15 +58,15 @@ const SuccessProjectPage: React.FC = () => {
               {/* Ngân sách & thời gian */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-50 rounded-lg p-3.5 border border-slate-100 text-left">
-                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1 block">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 block">
                     NGÂN SÁCH
                   </span>
-                  <span className="text-base font-bold font-mono text-[#1D4ED8]">
+                  <span className="text-base font-bold text-[#1D4ED8]">
                     {new Intl.NumberFormat('vi-VN').format(Number(jobData.budgetMin))} đ
                   </span>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-3.5 border border-slate-100 text-left">
-                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1 block">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 block">
                     THỜI GIAN
                   </span>
                   <span className="text-sm font-semibold text-slate-900">
@@ -79,19 +80,16 @@ const SuccessProjectPage: React.FC = () => {
               {/* Chi tiết thêm */}
               <div className="grid grid-cols-2 gap-3 text-left">
                 <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
-                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1 block">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 block">
                     NGÀY ĐĂNG
                   </span>
                   <span className="text-xs font-semibold text-slate-900">{createdDate}</span>
                 </div>
-                <div className="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
-                  <span className="text-[10px] font-mono text-[#1D4ED8] uppercase tracking-wider mb-1 block">
+                <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 block">
                     TRẠNG THÁI
                   </span>
-                  <span className="text-xs font-bold text-[#1D4ED8] flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#1D4ED8] animate-pulse" />
-                    {jobData.status === 'OPEN' ? 'Đang tuyển' : 'Đang chờ đề xuất'}
-                  </span>
+                  <JobStatusBadge status={jobData.status} />
                 </div>
               </div>
             </div>

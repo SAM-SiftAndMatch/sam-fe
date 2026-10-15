@@ -615,7 +615,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   </div>
 
                   <div className="text-center mb-8">
-                    <div className="text-[48px] font-black text-[#1D4ED8] leading-none mb-4">
+                    <div className="text-[48px] font-extrabold text-[#1D4ED8] leading-none mb-4">
                       {new Intl.NumberFormat('vi-VN').format(budgetAmount)}
                     </div>
                     <div className="w-full max-w-lg mx-auto relative px-4">
@@ -1023,7 +1023,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 SAM AI sẽ tự động kiểm tra sản phẩm đầu ra, hỗ trợ khắc phục lỗi và giải quyết các
                 vấn đề phát sinh trong 30 ngày sau nghiệm thu.
               </p>
-              <div className="text-2xl font-black text-white relative z-10">59.000 VNĐ</div>
+              <div className="text-2xl font-extrabold text-white relative z-10">59.000 VNĐ</div>
 
               {/* Check icon top right if active */}
               <div
@@ -1060,7 +1060,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
                     Tổng cộng dự kiến:
                   </div>
-                  <div className="text-[28px] font-black text-[#1D4ED8] leading-none">
+                  <div className="text-[28px] font-extrabold text-[#1D4ED8] leading-none">
                     {new Intl.NumberFormat('vi-VN').format(totalPrice)} VNĐ
                   </div>
                   <div className="text-[9px] text-gray-400 italic mt-1">
@@ -1220,7 +1220,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                     Ngân sách dự kiến
                   </div>
-                  <div className="text-xl font-black text-[#1D4ED8]">
+                  <div className="text-xl font-extrabold text-[#1D4ED8]">
                     {new Intl.NumberFormat('vi-VN').format(budgetAmount)} VNĐ
                   </div>
                 </div>
@@ -1426,7 +1426,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   Bao gồm phí nâng cấp và bảo đảm thanh toán.
                 </div>
               </div>
-              <div className="text-[36px] font-black text-[#1D4ED8] leading-none">
+              <div className="text-[36px] font-extrabold text-[#1D4ED8] leading-none">
                 {new Intl.NumberFormat('vi-VN').format(totalPrice)} VNĐ
               </div>
             </div>

@@ -320,7 +320,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onSubmitAnswers, isSen
               em: ({ children }) => <em className="italic">{children}</em>,
               code: ({ children }) => (
                 <code
-                  className={`px-1.5 py-0.5 rounded text-xs font-mono ${
+                  className={`font-mono px-1.5 py-0.5 rounded text-xs ${
                     isUser ? 'bg-blue-700 text-blue-100' : 'bg-gray-100 text-gray-800'
                   }`}
                 >
@@ -465,7 +465,7 @@ const SrsPreview: React.FC<SrsPreviewProps> = ({ srsContent, variant = 'full', o
               ),
               em: ({ children }) => <em className="italic text-gray-800">{children}</em>,
               code: ({ children }) => (
-                <code className="bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-[11px] font-mono">
+                <code className="font-mono bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-[11px]">
                   {children}
                 </code>
               ),
@@ -566,7 +566,7 @@ const SrsModal: React.FC<SrsModalProps> = ({ isOpen, onClose, srsContent }) => {
                   ),
                   em: ({ children }) => <em className="italic text-gray-800">{children}</em>,
                   code: ({ children }) => (
-                    <code className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-xs font-mono">
+                    <code className="font-mono bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-xs">
                       {children}
                     </code>
                   ),

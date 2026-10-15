@@ -81,7 +81,7 @@ const ChatBubble = memo(function ChatBubble({
     return (
       <div className="flex justify-center">
         <div className="max-w-[90%] bg-gradient-to-br from-violet-600 via-[#6D28D9] to-[#1D4ED8] text-white rounded-3xl px-5 py-4 shadow-lg">
-          <p className="text-[11px] font-black uppercase tracking-widest text-white/80 mb-1.5">
+          <p className="text-[11px] font-extrabold uppercase tracking-widest text-white/80 mb-1.5">
             SAM AI hệ thống
           </p>
           <p className="text-[13px] leading-relaxed whitespace-pre-wrap">
@@ -259,7 +259,7 @@ export default function WorkspaceChatView() {
       <section className="flex-1 flex flex-col min-w-0 h-full border border-gray-100 bg-white/50 backdrop-blur-sm rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
         <div className="bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-[32px] shadow-sm z-10">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-[#EEF2FF] text-[#1D4ED8] rounded-full flex items-center justify-center font-black text-xl">
+            <div className="w-12 h-12 bg-[#EEF2FF] text-[#1D4ED8] rounded-full flex items-center justify-center font-extrabold text-xl">
               {otherName.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -280,7 +280,7 @@ export default function WorkspaceChatView() {
             <span className="block text-sm font-bold text-gray-900">Hợp đồng</span>
             {summary.contractId ? (
               <>
-                <span className="block text-sm font-black text-[#1D4ED8]">
+                <span className="block text-sm font-extrabold text-[#1D4ED8]">
                   Giá thỏa thuận: {formatMoney(Number(summary.agreedAmount))} đ
                 </span>
                 <span className="block text-xs text-gray-500 truncate">
