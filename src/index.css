@@ -415,6 +415,106 @@ html.theme-dark .profile-page input::placeholder,
 html.theme-dark .profile-page textarea::placeholder {
   color: #7185a3;
 }
+
+/* Dashboard-only night colors; the blue light-mode panels remain unchanged. */
+html.theme-dark .client-dashboard-page .dashboard-section-title {
+  color: #f8fbff !important;
+}
+
+html.theme-dark .client-dashboard-page [class~="text-[#1D4ED8]"] {
+  color: #93c5fd !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-profile-warning {
+  border-color: #73541a !important;
+  background-color: #302711 !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-search {
+  border-color: #33445e !important;
+  background-color: #101b2e !important;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 0.18) !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-search:focus-within {
+  border-color: #5b9cff !important;
+  box-shadow: 0 0 0 3px rgb(91 156 255 / 0.18) !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-history-search {
+  border-color: #33445e !important;
+  background-color: #101b2e !important;
+  color: #e5edf9 !important;
+}
+
+html.theme-dark .client-route .client-dashboard-page .dashboard-history-search:focus {
+  border-color: #5b9cff !important;
+  background-color: #15243b !important;
+  box-shadow: 0 0 0 2px rgb(91 156 255 / 0.18) !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-search input,
+html.theme-dark .client-dashboard-page .dashboard-search input:focus {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html.theme-dark .client-route .client-dashboard-page .client-dashboard-suggestion {
+  border-color: #33445e !important;
+  background-color: #15243b !important;
+  color: #cbd8ea !important;
+}
+
+html.theme-dark .client-route .client-dashboard-page .client-dashboard-suggestion:hover {
+  border-color: #5b9cff !important;
+  background-color: #203754 !important;
+  color: #d4e8ff !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-premium-panel {
+  border-color: #6953ae !important;
+  background: linear-gradient(120deg, #312e81 0%, #4c1d95 55%, #1e293b 100%) !important;
+  box-shadow: 0 8px 28px rgb(49 46 129 / 0.25) !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-premium-cta {
+  background-color: #f3e8ff !important;
+  color: #35235f !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-premium-cta:hover {
+  background-color: #e9d5ff !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-stat-card [class*="bg-[#E0F7FA]"] {
+  background-color: #123340 !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-draft-action {
+  border-color: #35547b !important;
+  background-color: #14243d !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-draft-action:hover {
+  background-color: #1d3554 !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-history-filter {
+  border-color: #33445e !important;
+  background-color: #111a2b !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-history-filter:hover,
+html.theme-dark .client-dashboard-page .dashboard-history-row:hover {
+  background-color: #1a2a43 !important;
+}
+
+html.theme-dark .client-dashboard-page .dashboard-support-panel {
+  border-color: #28517e !important;
+  background: linear-gradient(120deg, #123b66 0%, #164f70 100%) !important;
+}
+
 /* Button light sweep animation */
 .btn-sweep {
   position: relative;

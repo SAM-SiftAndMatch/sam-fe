@@ -200,7 +200,7 @@ const ClientDashboardPage: React.FC = () => {
       <main className="client-dashboard-page relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
         {/* Profile incomplete warning (mirror freelancer landing) */}
         {!isLoadingProfile && !hasCompanyProfile && (
-          <section className="border border-amber-200/80 bg-amber-50/90 p-6 text-center shadow-[0_1px_3px_rgba(0,0,0,0.03)] md:p-8 rounded-[12px]">
+          <section className="dashboard-profile-warning border border-amber-200/80 bg-amber-50/90 p-6 text-center shadow-[0_1px_3px_rgba(0,0,0,0.03)] md:p-8 rounded-[12px]">
             <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3">
               <svg
                 className="w-6 h-6"
@@ -241,7 +241,7 @@ const ClientDashboardPage: React.FC = () => {
             Bắt đầu dự án mới hoặc quản lý các công việc đang diễn ra một cách thông minh và hiệu
             quả hơn với SAM AI
           </p>
-          <div className="relative z-10 mb-5 flex w-full max-w-3xl flex-col items-stretch gap-2 rounded-[12px] border border-slate-200/90 bg-white p-2 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:flex-row sm:items-center sm:gap-0">
+          <div className="dashboard-search relative z-10 mb-5 flex w-full max-w-3xl flex-col items-stretch gap-2 rounded-[12px] border border-slate-200/90 bg-white p-2 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:flex-row sm:items-center sm:gap-0">
             <div className="flex items-center flex-1 min-w-0">
               <span className="pl-4 text-slate-400">
                 <svg
@@ -336,7 +336,7 @@ const ClientDashboardPage: React.FC = () => {
         </section>
 
         {/* ================= VIP BANNER ================= */}
-        <section className="dashboard-primary-panel w-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] rounded-[32px] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0_8px_30px_rgba(29,78,216,0.2)] relative overflow-hidden">
+        <section className="dashboard-primary-panel dashboard-premium-panel w-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] rounded-[32px] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0_8px_30px_rgba(29,78,216,0.2)] relative overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-white opacity-5 rounded-full blur-3xl pointer-events-none" />
 
           <div className="flex flex-col items-start relative z-10 w-full md:w-2/3">
@@ -362,7 +362,7 @@ const ClientDashboardPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate(PATH_CLIENT_PRICING)}
-              className="bg-white text-[#1D4ED8] hover:bg-gray-50 font-bold px-8 py-3 rounded-full shadow-md transition-colors cursor-pointer border-0 text-sm"
+              className="dashboard-premium-cta bg-white text-[#1D4ED8] hover:bg-gray-50 font-bold px-8 py-3 rounded-full shadow-md transition-colors cursor-pointer border-0 text-sm"
             >
               Nâng cấp VIP
             </button>
@@ -449,7 +449,7 @@ const ClientDashboardPage: React.FC = () => {
 
                     <button
                       type="button"
-                      className="w-full py-3 rounded-xl border border-[#DCE4FF] text-[#1D4ED8] text-xs font-bold hover:bg-[#EEF2FF] transition-colors cursor-pointer mt-auto"
+                      className="dashboard-draft-action w-full py-3 rounded-xl border border-[#DCE4FF] text-[#1D4ED8] text-xs font-bold hover:bg-[#EEF2FF] transition-colors cursor-pointer mt-auto"
                     >
                       Tiếp tục chỉnh sửa
                     </button>
@@ -474,7 +474,7 @@ const ClientDashboardPage: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer"
+                    className="dashboard-history-filter flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer"
                   >
                     <svg
                       className="w-3.5 h-3.5 text-gray-400"
@@ -512,7 +512,7 @@ const ClientDashboardPage: React.FC = () => {
                     <input
                       type="text"
                       placeholder="Tìm dự án..."
-                      className="w-36 text-xs bg-white border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 focus:outline-none focus:border-[#1D4ED8] placeholder:text-gray-400"
+                      className="dashboard-history-search w-36 text-xs bg-white border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 focus:outline-none focus:border-[#1D4ED8] placeholder:text-gray-400"
                     />
                   </div>
                 </div>
@@ -522,7 +522,7 @@ const ClientDashboardPage: React.FC = () => {
                 {HISTORY.map((item, index) => (
                   <div
                     key={item.id}
-                    className={`p-5 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer ${index !== HISTORY.length - 1 ? 'border-b border-gray-100' : ''}`}
+                    className={`dashboard-history-row p-5 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer ${index !== HISTORY.length - 1 ? 'border-b border-gray-100' : ''}`}
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center shrink-0">
@@ -629,7 +629,7 @@ const ClientDashboardPage: React.FC = () => {
             </div>
 
             {/* Support Banner */}
-            <div className="dashboard-primary-panel bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] rounded-3xl p-6 text-white relative overflow-hidden flex flex-col items-start shadow-md">
+            <div className="dashboard-primary-panel dashboard-support-panel bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] rounded-3xl p-6 text-white relative overflow-hidden flex flex-col items-start shadow-md">
               <div className="absolute -bottom-6 -right-6 opacity-30 pointer-events-none">
                 <svg
                   className="w-32 h-32"
