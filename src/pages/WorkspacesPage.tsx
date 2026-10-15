@@ -149,7 +149,9 @@ const WorkspacesPage: React.FC = () => {
             filtered.map((room) => (
               <div
                 key={room.id}
-                onClick={() => navigate(`/workspace/${room.id}`)}
+                onClick={() =>
+                  navigate(`/workspace/${room.id}`, { state: { workspacesPage: page + 1 } })
+                }
                 className="workspace-list-item flex items-start gap-4 p-5 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors last:border-0"
               >
                 <div className="relative">

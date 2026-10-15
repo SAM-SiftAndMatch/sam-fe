@@ -1,8 +1,8 @@
 import { Client } from '@stomp/stompjs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-import { Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
-import { NavLink, Outlet, useParams } from 'react-router-dom';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import { type ChatMessage, chatApi } from '../api/chat';
 import type { ContractBroadcast } from '../api/contract';
@@ -16,6 +16,7 @@ export interface WorkspaceContext {
   summary: WorkspaceSummary;
   userId: string;
   role: 'client' | 'freelancer';
+  workspacesPage: number;
   markCompleted: () => void;
   sendMessage: (content: string) => boolean;
   getDraft: () => string;
@@ -26,6 +27,11 @@ export interface WorkspaceContext {
 
 export default function WorkspaceLayout() {
   const { projectId } = useParams<{ projectId: string }>();
+  const location = useLocation();
+  const [workspacesPage] = useState(() => {
+    const page = (location.state as { workspacesPage?: unknown } | null)?.workspacesPage;
+    return typeof page === 'number' && Number.isSafeInteger(page) && page > 0 ? page : 1;
+  });
   const userId = useAuthStore((state) => state.user?.userId) ?? '';
   const role = useAuthStore((state) => state.user?.role) === 'FREELANCER' ? 'freelancer' : 'client';
   const queryClient = useQueryClient();
@@ -155,6 +161,7 @@ export default function WorkspaceLayout() {
             summary,
             userId,
             role,
+            workspacesPage,
             sendMessage,
             getDraft,
             saveDraft,
@@ -175,6 +182,7 @@ export default function WorkspaceLayout() {
       summary,
       userId,
       role,
+      workspacesPage,
       projectId,
       queryClient,
       sendMessage,
@@ -188,6 +196,24 @@ export default function WorkspaceLayout() {
   return (
     <div className="h-screen bg-[#F8FAFC] font-sans flex flex-col overflow-hidden">
       <AppHeader />
+      <div className="w-full max-w-[1600px] mx-auto px-4 pt-3 md:px-6">
+        <Link
+          to={`/workspaces?page=${workspacesPage}`}
+          className="inline-flex items-center gap-2 text-sm font-semibold text-black hover:underline"
+        >
+          <svg
+            aria-hidden="true"
+            className="h-6 w-6 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5m7 7-7-7 7-7" />
+          </svg>
+          <span>Tất cả tin nhắn</span>
+        </Link>
+      </div>
       <main className="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-6 flex gap-6 min-h-0 overflow-y-auto lg:overflow-hidden">
         <aside className="w-64 shrink-0 hidden lg:flex flex-col gap-6 h-full overflow-y-auto pr-2">
           <div className="flex items-center gap-3">

@@ -2,7 +2,7 @@ import { Client } from '@stomp/stompjs';
 import { useQueryClient } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import { type ChatRoom, chatApi } from '../api/chat';
 import {
@@ -25,6 +25,14 @@ import { formatMoney } from '../utils/format';
 const ContractPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const pageFromWorkspace = (location.state as { workspacesPage?: unknown } | null)?.workspacesPage;
+  const workspacesPage =
+    typeof pageFromWorkspace === 'number' &&
+    Number.isSafeInteger(pageFromWorkspace) &&
+    pageFromWorkspace > 0
+      ? pageFromWorkspace
+      : 1;
   const { user } = useAuthStore();
   const role = user?.role === 'FREELANCER' ? 'freelancer' : 'client';
   const myId = user?.userId;
@@ -292,7 +300,9 @@ const ContractPage: React.FC = () => {
     }, 2500);
     // Mình là người ký thứ 2 (bên kia đã ký) → ra phòng chat đợi AI thẩm định
     if (agreed && otherAgreed && room?.id) {
-      navigate(`/workspace/${room.id}`, { state: { awaitingReview: true } });
+      navigate(`/workspace/${room.id}`, {
+        state: { awaitingReview: true, workspacesPage },
+      });
     }
   };
 
@@ -319,7 +329,9 @@ const ContractPage: React.FC = () => {
     }, 2500);
     // Mình là người chốt đôi (bên kia đã giữ nguyên) → ra phòng chat đợi kết quả
     if (agreed && otherKeep && room?.id) {
-      navigate(`/workspace/${room.id}`, { state: { awaitingReview: true } });
+      navigate(`/workspace/${room.id}`, {
+        state: { awaitingReview: true, workspacesPage },
+      });
     }
   };
 
@@ -520,7 +532,7 @@ const ContractPage: React.FC = () => {
         </button>
         <button
           type="button"
-          onClick={() => room && navigate(`/workspace/${room.id}`)}
+          onClick={() => room && navigate(`/workspace/${room.id}`, { state: { workspacesPage } })}
           className="flex-1 py-3 rounded-xl bg-white border-2 border-violet-300 text-violet-700 font-bold text-sm hover:bg-violet-50 transition-colors cursor-pointer"
         >
           Sang phòng chat đọc AI nhắn
@@ -555,22 +567,25 @@ const ContractPage: React.FC = () => {
       <AppHeader />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8">
-        <button
-          type="button"
-          onClick={() => navigate(room ? `/workspace/${room.id}` : '/workspaces')}
-          className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-medium transition-colors cursor-pointer bg-transparent border-0 mb-6"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
+        {room && (
+          <button
+            type="button"
+            onClick={() => navigate(`/workspace/${room.id}`, { state: { workspacesPage } })}
+            className="mb-6 flex items-center gap-2 text-gray-500 hover:text-gray-900 font-medium transition-colors cursor-pointer bg-transparent border-0"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Về phòng chat
-        </button>
+            <svg
+              aria-hidden="true"
+              className="h-5 w-5 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5m7 7-7-7 7-7" />
+            </svg>
+            Quay lại phòng chat
+          </button>
+        )}
 
         {loading ? (
           <p className="text-sm text-gray-500 text-center py-20">Đang tải hợp đồng...</p>
@@ -581,7 +596,7 @@ const ContractPage: React.FC = () => {
             </p>
             <button
               type="button"
-              onClick={() => navigate('/workspaces')}
+              onClick={() => navigate(`/workspaces?page=${workspacesPage}`)}
               className="text-sm font-bold text-blue-600 hover:underline bg-transparent border-0 cursor-pointer"
             >
               Về danh sách tin nhắn

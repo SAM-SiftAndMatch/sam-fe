@@ -180,7 +180,7 @@ function WorkflowPreview({ context }: { context: WorkspaceContext }) {
 
 export default function WorkspaceChatView() {
   const context = useOutletContext<WorkspaceContext>();
-  const { summary, userId, role } = context;
+  const { summary, userId, role, workspacesPage } = context;
   const navigate = useNavigate();
   const location = useLocation();
   const wide = useWideWorkspace();
@@ -293,7 +293,11 @@ export default function WorkspaceChatView() {
           </span>
           <button
             type="button"
-            onClick={() => navigate(`/workspace/${summary.roomId}/contract`)}
+            onClick={() =>
+              navigate(`/workspace/${summary.roomId}/contract`, {
+                state: { workspacesPage },
+              })
+            }
             className="shrink-0 px-4 py-2.5 rounded-xl bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold text-xs shadow-md border-0 cursor-pointer"
           >
             {summary.reviewStatus === 'NEEDS_CONFIRM'
