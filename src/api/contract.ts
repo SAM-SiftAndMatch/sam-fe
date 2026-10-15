@@ -87,12 +87,6 @@ export const contractApi = {
       throw e;
     }
   },
-  getRevisions: async (roomId: string): Promise<ContractRevision[]> => {
-    const res = await apiClient.get<ApiResponse<ContractRevision[]>>(
-      `/chat/rooms/${roomId}/contract/revisions`
-    );
-    return requireApiResult(res.data, 'Failed to fetch revisions');
-  },
 };
 
 export default contractApi;

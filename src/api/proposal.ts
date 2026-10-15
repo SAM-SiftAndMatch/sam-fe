@@ -33,16 +33,6 @@ export const proposalApi = {
     return requireApiResult(res.data, 'Failed to submit proposal');
   },
 
-  getByJob: async (jobId: string): Promise<ProposalResponse[]> => {
-    const res = await apiClient.get<ApiResponse<ProposalResponse[]>>(`/proposals/job/${jobId}`);
-    return requireApiResult(res.data, 'Failed to fetch proposals');
-  },
-
-  getMine: async (): Promise<ProposalResponse[]> => {
-    const res = await apiClient.get<ApiResponse<ProposalResponse[]>>('/proposals/me');
-    return requireApiResult(res.data, 'Failed to fetch my proposals');
-  },
-
   getMineForJob: async (jobId: string): Promise<ProposalResponse> => {
     const res = await apiClient.get<ApiResponse<ProposalResponse>>(`/proposals/me/job/${jobId}`);
     return requireApiResult(res.data, 'Failed to fetch my proposal');

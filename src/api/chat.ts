@@ -55,11 +55,6 @@ export const chatApi = {
     );
     return requireApiResult(res.data, 'Failed to fetch messages');
   },
-  getMyRooms: async (): Promise<ChatRoom[]> => {
-    const res = await apiClient.get<ApiResponse<ChatRoom[]>>('/chat/rooms');
-    return requireApiResult(res.data, 'Failed to fetch chat rooms');
-  },
-
   getRoomDetail: async (roomId: string): Promise<ChatRoom> => {
     const res = await apiClient.get<ApiResponse<ChatRoom>>(`/chat/rooms/${roomId}`);
     return requireApiResult(res.data, 'Failed to fetch chat room');
@@ -73,10 +68,6 @@ export const chatApi = {
   getRoomByContract: async (contractId: string): Promise<ChatRoom> => {
     const res = await apiClient.get<ApiResponse<ChatRoom>>(`/chat/by-contract/${contractId}`);
     return requireApiResult(res.data, 'Failed to fetch chat room');
-  },
-  getHistory: async (roomId: string): Promise<ChatMessage[]> => {
-    const res = await apiClient.get<ApiResponse<ChatMessage[]>>(`/chat/rooms/${roomId}/messages`);
-    return requireApiResult(res.data, 'Failed to fetch messages');
   },
 };
 

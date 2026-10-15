@@ -29,11 +29,6 @@ export const workflowApi = {
     return requireApiResult(res.data, 'Không tải được báo cáo');
   },
 
-  getTimeline: async (jobId: string): Promise<ProjectTimeline> => {
-    const res = await apiClient.get<ApiResponse<ProjectTimeline>>(`/projects/${jobId}/timeline`);
-    return requireApiResult(res.data, 'Không tải được timeline dự án');
-  },
-
   addTaskReport: async (
     jobId: string,
     taskId: string,

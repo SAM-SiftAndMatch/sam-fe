@@ -52,12 +52,6 @@ export const jobApi = {
     );
     return requireApiResult(res.data, 'Failed to fetch freelancer projects');
   },
-  // PUBLIC: lấy tất cả OPEN jobs, sắp xếp mới nhất trước (không cần auth)
-  getAllOpenJobs: async (): Promise<JobResponse[]> => {
-    const res = await apiClient.get<ApiResponse<JobResponse[]>>('/jobs');
-    return requireApiResult(res.data, 'Failed to fetch open jobs');
-  },
-
   // JB-01: tạo job (BE tự gọi AI bóc skills; isUrgentHiring kích hoạt Headhunter)
   createJob: async (data: JobCreateRequest): Promise<JobResponse> => {
     const res = await apiClient.post<ApiResponse<JobResponse>>('/jobs', data);
@@ -74,19 +68,6 @@ export const jobApi = {
   getJobById: async (jobId: string): Promise<JobResponse> => {
     const res = await apiClient.get<ApiResponse<JobResponse>>(`/jobs/${jobId}`);
     return requireApiResult(res.data, 'Failed to fetch job');
-  },
-
-  // JB-03: jobs của client đang đăng nhập
-  getMyJobs: async (): Promise<JobResponse[]> => {
-    const res = await apiClient.get<ApiResponse<JobResponse[]>>('/jobs/client/me');
-    return requireApiResult(res.data, 'Failed to fetch my jobs');
-  },
-
-  getFreelancerProjects: async (freelancerId: string): Promise<JobResponse[]> => {
-    const res = await apiClient.get<ApiResponse<JobResponse[]>>(
-      `/jobs/freelancers/${freelancerId}/projects`
-    );
-    return requireApiResult(res.data, 'Failed to fetch freelancer projects');
   },
 
   // JB-04: Top 5 AI đề xuất (chỉ chủ job)
