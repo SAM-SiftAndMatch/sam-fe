@@ -9,6 +9,7 @@ export interface WorkspaceSummary {
   jobId: string;
   jobTitle: string;
   jobStatus: JobStatus;
+  selectedFreelancerId: string | null;
   clientId: string;
   clientName: string;
   freelancerId: string;

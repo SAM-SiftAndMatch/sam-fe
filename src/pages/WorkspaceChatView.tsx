@@ -211,6 +211,12 @@ export default function WorkspaceChatView() {
   const previousLastId = useRef<string | undefined>(undefined);
   const initializedScroll = useRef(false);
   const otherName = role === 'client' ? summary.freelancerName : summary.clientName;
+  const canOpenContract =
+    role === 'client'
+      ? !summary.selectedFreelancerId || summary.selectedFreelancerId === summary.freelancerId
+      : summary.selectedFreelancerId === userId;
+  const canChat =
+    !summary.selectedFreelancerId || summary.selectedFreelancerId === summary.freelancerId;
 
   useEffect(() => {
     if (!awaitingReview) return;
@@ -291,23 +297,29 @@ export default function WorkspaceChatView() {
               <span className="block text-xs text-gray-500">Chưa có hợp đồng cho phòng này</span>
             )}
           </span>
-          <button
-            type="button"
-            onClick={() =>
-              navigate(`/workspace/${summary.roomId}/contract`, {
-                state: { workspacesPage },
-              })
-            }
-            className="shrink-0 px-4 py-2.5 rounded-xl bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold text-xs shadow-md border-0 cursor-pointer"
-          >
-            {summary.reviewStatus === 'NEEDS_CONFIRM'
-              ? 'Xem AI thẩm định'
-              : summary.contractStatus === 'DRAFT'
-                ? 'Sửa hợp đồng'
-                : summary.contractId
-                  ? 'Xem hợp đồng'
-                  : 'Mở hợp đồng'}
-          </button>
+          {canOpenContract ? (
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/workspace/${summary.roomId}/contract`, {
+                  state: { workspacesPage },
+                })
+              }
+              className="shrink-0 px-4 py-2.5 rounded-xl bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold text-xs shadow-md border-0 cursor-pointer"
+            >
+              {summary.reviewStatus === 'NEEDS_CONFIRM'
+                ? 'Xem AI thẩm định'
+                : summary.contractStatus === 'DRAFT'
+                  ? 'Sửa hợp đồng'
+                  : summary.contractId
+                    ? 'Xem hợp đồng'
+                    : 'Mở hợp đồng'}
+            </button>
+          ) : (
+            <span className="shrink-0 text-xs font-medium text-gray-500">
+              Dự án đã chọn freelancer khác
+            </span>
+          )}
         </div>
         {awaitingReview && (
           <div className="mx-6 mt-4 rounded-2xl px-5 py-4 bg-gradient-to-r from-violet-600 to-[#1D4ED8] text-white shadow-lg">
@@ -356,11 +368,17 @@ export default function WorkspaceChatView() {
           )}
           <div ref={bottomRef} />
         </div>
-        <ChatComposer
-          getDraft={context.getDraft}
-          saveDraft={context.saveDraft}
-          sendMessage={context.sendMessage}
-        />
+        {canChat ? (
+          <ChatComposer
+            getDraft={context.getDraft}
+            saveDraft={context.saveDraft}
+            sendMessage={context.sendMessage}
+          />
+        ) : (
+          <p className="px-6 py-4 text-center text-sm text-gray-600">
+            Dự án đã chọn freelancer khác. Phòng chat này được giữ để xem lại trao đổi trước đó.
+          </p>
+        )}
       </section>
       {wide && (
         <aside className="w-80 shrink-0 flex flex-col gap-4 h-full overflow-y-auto pr-2">

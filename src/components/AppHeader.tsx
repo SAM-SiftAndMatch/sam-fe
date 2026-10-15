@@ -14,6 +14,7 @@ import {
   PATH_FREELANCER_APPLICATIONS,
   PATH_FREELANCER_CREATE_PROFILE,
   PATH_FREELANCER_EARNINGS,
+  PATH_FREELANCER_INVITATIONS,
   PATH_FREELANCER_JOBS,
   PATH_FREELANCER_PROJECTS,
   PATH_HOME,
@@ -53,6 +54,7 @@ const AppHeader: React.FC = () => {
     : [
         { label: 'Tìm việc', path: PATH_FREELANCER_JOBS },
         { label: 'Ứng tuyển', path: PATH_FREELANCER_APPLICATIONS },
+        { label: 'Lời mời', path: PATH_FREELANCER_INVITATIONS },
         { label: 'Dự án của tôi', path: PATH_FREELANCER_PROJECTS },
         { label: 'Tin nhắn', path: PATH_WORKSPACES, state: { role: 'freelancer' } },
         { label: 'Thu nhập', path: PATH_FREELANCER_EARNINGS },
@@ -140,6 +142,7 @@ const AppHeader: React.FC = () => {
   const openNotification = (jobId?: string | null, roomId?: string | null, type?: string) => {
     setNotificationsOpen(false);
     if (roomId) return navigate(PATH_WORKSPACE.replace(':projectId', roomId));
+    if (!isClient && type?.startsWith('JOB_INVITE')) return navigate(PATH_FREELANCER_INVITATIONS);
     if (!jobId) return;
     navigate(
       isClient && type !== '1_TOUCH_INVITE'
@@ -293,19 +296,31 @@ const AppHeader: React.FC = () => {
                           <p className="text-xs font-bold text-slate-800">
                             {notification.type === '1_TOUCH_INVITE'
                               ? '🔥 Lời mời tuyển gấp'
-                              : notification.type === 'DEV_CLAIM'
-                                ? '🙋 Dev muốn chat'
-                                : notification.type === 'CHAT_OPENED'
-                                  ? '💬 Đã mở phòng chat'
-                                  : notification.type === 'PROPOSAL_RECEIVED'
-                                    ? '📨 Hồ sơ ứng tuyển mới'
-                                    : notification.type === 'PROPOSAL_INVITE'
-                                      ? '🤝 Client mời hợp tác'
-                                      : notification.type === 'PROPOSAL_ACCEPTED'
-                                        ? '✅ Dev đã đồng ý hợp tác'
-                                        : notification.type === 'PROPOSAL_REJECTED'
-                                          ? '🚫 Hồ sơ bị từ chối'
-                                          : 'Có cập nhật mới'}
+                              : notification.type === 'JOB_INVITE'
+                                ? 'Lời mời làm việc mới'
+                                : notification.type === 'JOB_INVITE_ACCEPTED'
+                                  ? 'Freelancer đã đồng ý lời mời'
+                                  : notification.type === 'JOB_INVITE_DECLINED'
+                                    ? 'Freelancer đã từ chối lời mời'
+                                    : notification.type === 'JOB_INVITE_WITHDRAWN'
+                                      ? 'Lời mời đã được thu hồi'
+                                      : notification.type === 'JOB_INVITE_SELECTED'
+                                        ? 'Bạn được chọn cho dự án'
+                                        : notification.type === 'JOB_INVITE_NOT_SELECTED'
+                                          ? 'Dự án đã chọn freelancer khác'
+                                          : notification.type === 'DEV_CLAIM'
+                                            ? '🙋 Dev muốn chat'
+                                            : notification.type === 'CHAT_OPENED'
+                                              ? '💬 Đã mở phòng chat'
+                                              : notification.type === 'PROPOSAL_RECEIVED'
+                                                ? '📨 Hồ sơ ứng tuyển mới'
+                                                : notification.type === 'PROPOSAL_INVITE'
+                                                  ? '🤝 Client mời hợp tác'
+                                                  : notification.type === 'PROPOSAL_ACCEPTED'
+                                                    ? '✅ Dev đã đồng ý hợp tác'
+                                                    : notification.type === 'PROPOSAL_REJECTED'
+                                                      ? '🚫 Hồ sơ bị từ chối'
+                                                      : 'Có cập nhật mới'}
                           </p>
                           <p className="mt-1 line-clamp-2 text-xs text-slate-600">
                             {notification.jobTitle ||

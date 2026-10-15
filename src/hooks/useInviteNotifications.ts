@@ -1,4 +1,5 @@
 import { Client } from '@stomp/stompjs';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import SockJS from 'sockjs-client';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -10,6 +11,7 @@ export interface InviteNotification {
   matchScore?: number | null;
   recommendationId?: string | null;
   proposalId?: string | null;
+  invitationId?: string | null;
   roomId?: string | null;
   actorName?: string | null;
   message?: string | null;
@@ -37,6 +39,7 @@ function loadStored(userId: string): InviteNotification[] {
  * Lưu lại để chuông Header hiển thị + bấm là nhảy đúng job.
  */
 export function useInviteNotifications(onEvent?: (n: InviteNotification) => void) {
+  const queryClient = useQueryClient();
   const { isAuthenticated, user } = useAuthStore();
   const userId = user?.userId;
   const [notifications, setNotifications] = useState<InviteNotification[]>([]);
@@ -66,7 +69,13 @@ export function useInviteNotifications(onEvent?: (n: InviteNotification) => void
             payload.type !== 'PROPOSAL_RECEIVED' &&
             payload.type !== 'PROPOSAL_INVITE' &&
             payload.type !== 'PROPOSAL_ACCEPTED' &&
-            payload.type !== 'PROPOSAL_REJECTED'
+            payload.type !== 'PROPOSAL_REJECTED' &&
+            payload.type !== 'JOB_INVITE' &&
+            payload.type !== 'JOB_INVITE_ACCEPTED' &&
+            payload.type !== 'JOB_INVITE_DECLINED' &&
+            payload.type !== 'JOB_INVITE_WITHDRAWN' &&
+            payload.type !== 'JOB_INVITE_SELECTED' &&
+            payload.type !== 'JOB_INVITE_NOT_SELECTED'
           ) {
             return;
           }
@@ -80,6 +89,10 @@ export function useInviteNotifications(onEvent?: (n: InviteNotification) => void
             return next;
           });
           setLatest(payload);
+          void queryClient.invalidateQueries({ queryKey: ['my-job-invitations'] });
+          if (payload.jobId) {
+            void queryClient.invalidateQueries({ queryKey: ['job-invitations', payload.jobId] });
+          }
           handlerRef.current?.(payload);
         } catch {
           // Bỏ qua message không parse được
@@ -90,7 +103,7 @@ export function useInviteNotifications(onEvent?: (n: InviteNotification) => void
     return () => {
       void client.deactivate();
     };
-  }, [isAuthenticated, userId]);
+  }, [isAuthenticated, userId, queryClient]);
 
   const clear = useCallback(() => {
     setNotifications([]);

@@ -23,6 +23,7 @@ export const PATH_FREELANCER_PRICING = '/freelancer/pricing';
 export const PATH_FREELANCER_JOBS = '/freelancer/jobs';
 export const PATH_FREELANCER_CREATE_PROFILE = '/freelancer/profile/create';
 export const PATH_FREELANCER_APPLICATIONS = '/freelancer/applications';
+export const PATH_FREELANCER_INVITATIONS = '/freelancer/invitations';
 export const PATH_FREELANCER_PROJECTS = '/freelancer/projects';
 export const PATH_FREELANCER_PROJECT_DETAIL = '/freelancer/projects/:id';
 export const PATH_FREELANCER_EARNINGS = '/freelancer/earnings';

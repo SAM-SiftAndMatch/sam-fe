@@ -7,6 +7,7 @@ import { jobApi } from '../api/job';
 import { proposalApi } from '../api/proposal';
 import { storageApi } from '../api/storage';
 import AppHeader from '../components/AppHeader';
+import ClientJobInvitations from '../components/ClientJobInvitations';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
 import JobStatusBadge from '../components/JobStatusBadge';
@@ -447,6 +448,17 @@ const ClientProjectDetailPage: React.FC = () => {
                     </div>
                   )}
                 </div>
+
+                <ClientJobInvitations
+                  jobId={project.id}
+                  isOpen={project.status === 'OPEN'}
+                  onSelected={() => {
+                    setProject((current) =>
+                      current ? { ...current, status: 'NEGOTIATING' } : current
+                    );
+                    setRecommendations([]);
+                  }}
+                />
 
                 {/* Danh sách ứng viên AI đề xuất */}
                 {project.status === 'OPEN' && (
