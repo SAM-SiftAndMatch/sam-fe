@@ -24,6 +24,7 @@ import {
   PATH_WORKSPACES,
 } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
+import SamBrandLogo from './SamBrandLogo';
 import ThemeToggle from './ThemeToggle';
 
 type NavItem = { label: string; path: string; state?: { role: 'client' | 'freelancer' } };
@@ -39,6 +40,8 @@ const AppHeader: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const isClient = user?.role === 'CLIENT';
 
   const navItems: NavItem[] = isClient
@@ -74,6 +77,35 @@ const AppHeader: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!mobileMenuRef.current?.contains(target) && !mobileButtonRef.current?.contains(target))
+        setMobileOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setMobileOpen(false);
+      mobileButtonRef.current?.focus();
+    };
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1280px)');
+    const closeOnDesktop = () => {
+      if (desktop.matches) setMobileOpen(false);
+    };
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => desktop.removeEventListener('change', closeOnDesktop);
   }, []);
 
   useEffect(() => {
@@ -140,27 +172,14 @@ const AppHeader: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate(isAuthenticated ? homePath : PATH_HOME)}
-          className="flex shrink-0 cursor-pointer items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8]"
+          className="group flex shrink-0 cursor-pointer items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8]"
           aria-label="Về trang chính SAM"
         >
-          <span
-            className={`bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] bg-clip-text font-extrabold leading-none tracking-tighter text-transparent transition-all duration-300 ${
-              isScrolled ? 'text-2xl sm:text-[28px]' : 'text-3xl sm:text-[38px]'
-            }`}
-          >
-            SAM
-          </span>
-          <span
-            className={`hidden border-l border-slate-200 pl-2 text-[10px] font-medium uppercase tracking-widest text-slate-500 transition-opacity duration-200 xl:inline ${
-              isScrolled ? 'opacity-80' : 'opacity-100'
-            }`}
-          >
-            Sift &amp; Match
-          </span>
+          <SamBrandLogo isScrolled={isScrolled} />
         </button>
 
         <nav
-          className={`hidden min-w-0 flex-1 items-center justify-center lg:flex ${isScrolled ? 'gap-2' : 'gap-1'}`}
+          className={`hidden min-w-0 flex-1 items-center justify-center xl:flex ${isScrolled ? 'gap-2' : 'gap-1'}`}
           aria-label="Điều hướng chính"
         >
           {isAuthenticated ? (
@@ -210,7 +229,11 @@ const AppHeader: React.FC = () => {
               <div className="relative" ref={notificationsRef}>
                 <button
                   type="button"
-                  onClick={() => setNotificationsOpen((value) => !value)}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setAccountOpen(false);
+                    setNotificationsOpen((value) => !value);
+                  }}
                   className="relative rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#1D4ED8]"
                   aria-label="Mở thông báo"
                   aria-expanded={notificationsOpen}
@@ -295,11 +318,15 @@ const AppHeader: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="relative hidden sm:block" ref={accountRef}>
+              <div className="relative" ref={accountRef}>
                 <button
                   type="button"
-                  onClick={() => setAccountOpen((value) => !value)}
-                  className="flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 transition-colors hover:bg-slate-100"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setNotificationsOpen(false);
+                    setAccountOpen((value) => !value);
+                  }}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 p-0 transition-colors hover:bg-slate-100 sm:w-auto sm:gap-2 sm:px-3"
                   aria-label="Mở menu tài khoản"
                   aria-expanded={accountOpen}
                 >
@@ -310,7 +337,7 @@ const AppHeader: React.FC = () => {
                     {user?.fullName || user?.email}
                   </span>
                   <svg
-                    className="h-3.5 w-3.5 text-slate-400"
+                    className="hidden h-3.5 w-3.5 text-slate-400 sm:block"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -371,11 +398,17 @@ const AppHeader: React.FC = () => {
             </div>
           )}
           <button
+            ref={mobileButtonRef}
             type="button"
-            onClick={() => setMobileOpen((value) => !value)}
-            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:hidden"
-            aria-label="Mở điều hướng"
+            onClick={() => {
+              setAccountOpen(false);
+              setNotificationsOpen(false);
+              setMobileOpen((value) => !value);
+            }}
+            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 xl:hidden"
+            aria-label={mobileOpen ? 'Đóng điều hướng' : 'Mở điều hướng'}
             aria-expanded={mobileOpen}
+            aria-controls="app-header-mobile-menu"
           >
             <svg
               className="h-5 w-5"
@@ -393,19 +426,18 @@ const AppHeader: React.FC = () => {
             </svg>
           </button>
         </div>
-      </div>
 
-      {mobileOpen && (
-        <div className="pointer-events-auto border-t border-slate-200 bg-white px-4 py-4 shadow-lg lg:hidden">
-          <div className="mx-auto flex max-w-[1440px] flex-col gap-1">
-            {isAuthenticated && (
-              <div className="mb-2 border-b border-slate-100 px-3 pb-3">
-                <p className="text-sm font-bold text-slate-800">{user?.fullName || user?.email}</p>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  {isClient ? 'Tài khoản khách hàng' : 'Tài khoản freelancer'}
-                </p>
-              </div>
-            )}
+        <div
+          id="app-header-mobile-menu"
+          ref={mobileMenuRef}
+          aria-hidden={!mobileOpen}
+          className={`absolute right-0 top-[calc(100%+8px)] z-50 w-64 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-5rem)] origin-top-right overflow-y-auto rounded-xl border border-slate-200 bg-white/95 p-2 shadow-xl backdrop-blur-md transition-[opacity,transform,visibility] duration-200 ease-out motion-reduce:transition-none xl:hidden ${
+            mobileOpen
+              ? 'visible pointer-events-auto translate-y-0 scale-100 opacity-100'
+              : 'invisible pointer-events-none -translate-y-2 scale-[0.98] opacity-0'
+          }`}
+        >
+          <nav className="flex flex-col gap-1" aria-label="Điều hướng thu gọn">
             {isAuthenticated ? (
               renderNav(true)
             ) : (
@@ -433,7 +465,7 @@ const AppHeader: React.FC = () => {
                 </button>
               </>
             )}
-            {isClient && (
+            {isAuthenticated && isClient && (
               <button
                 type="button"
                 onClick={() => {
@@ -445,55 +477,33 @@ const AppHeader: React.FC = () => {
                 Đăng dự án
               </button>
             )}
-            <div className="mt-2 border-t border-slate-100 pt-2">
-              {isAuthenticated ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenus();
-                      navigate(profilePath);
-                    }}
-                    className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    {profileLabel}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={logoutAndRedirect}
-                    className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-rose-600 hover:bg-rose-50"
-                  >
-                    Đăng xuất
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenus();
-                      navigate(PATH_LOGIN);
-                    }}
-                    className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    Đăng nhập
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenus();
-                      navigate(PATH_REGISTER);
-                    }}
-                    className="mt-1 w-full rounded-lg bg-[#1D4ED8] px-3 py-2 text-left text-sm font-bold text-white hover:bg-[#153bb5]"
-                  >
-                    Bắt đầu ngay
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+            {!isAuthenticated && (
+              <div className="mt-2 border-t border-slate-100 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenus();
+                    navigate(PATH_LOGIN);
+                  }}
+                  className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Đăng nhập
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenus();
+                    navigate(PATH_REGISTER);
+                  }}
+                  className="mt-1 w-full rounded-lg bg-[#1D4ED8] px-3 py-2 text-left text-sm font-bold text-white hover:bg-[#153bb5]"
+                >
+                  Bắt đầu ngay
+                </button>
+              </div>
+            )}
+          </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 };

@@ -815,6 +815,8 @@ const ClientProjectDetailPage: React.FC = () => {
         title="Hủy dự án"
         message="Bạn có chắc chắn muốn hủy dự án này? Chỉ dự án đang mở mới hủy được."
         confirmText={isCancelling ? 'Đang hủy...' : 'Hủy dự án'}
+        cancelText="Giữ dự án"
+        isPending={isCancelling}
       />
     </div>
   );
