@@ -1,6 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { chatApi } from '../api/chat';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import {
   PATH_CLIENT_AI_BRIEF,
@@ -20,6 +22,7 @@ import {
   PATH_HOME,
   PATH_JOB_DETAIL,
   PATH_LOGIN,
+  PATH_NOTIFICATIONS,
   PATH_REGISTER,
   PATH_WORKSPACE,
   PATH_WORKSPACES,
@@ -34,7 +37,7 @@ const AppHeader: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { notifications, unreadCount, clear } = useInviteNotifications();
+  const { notifications, unreadCount, markRead, clear } = useInviteNotifications();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -44,6 +47,12 @@ const AppHeader: React.FC = () => {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const isClient = user?.role === 'CLIENT';
+  const chatUnread = useQuery({
+    queryKey: ['chat-unread-count', user?.userId],
+    queryFn: chatApi.unreadCount,
+    enabled: Boolean(isAuthenticated && user?.userId),
+    staleTime: 10_000,
+  });
 
   const navItems: NavItem[] = isClient
     ? [
@@ -159,7 +168,14 @@ const AppHeader: React.FC = () => {
         onClick={() => go(item)}
         className={`${navClass(item.path)} ${mobile ? 'w-full text-left text-sm' : ''}`}
       >
-        {item.label}
+        <span className="inline-flex items-center gap-1.5">
+          {item.label}
+          {item.label === 'Tin nhắn' && (chatUnread.data ?? 0) > 0 && (
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">
+              {(chatUnread.data ?? 0) > 99 ? '99+' : chatUnread.data}
+            </span>
+          )}
+        </span>
       </button>
     ));
 
@@ -265,13 +281,13 @@ const AppHeader: React.FC = () => {
                   <div className="absolute right-0 mt-2 max-h-96 w-80 overflow-y-auto rounded-xl border border-slate-200 bg-white py-2 shadow-xl">
                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2">
                       <p className="text-xs font-bold text-slate-800">Thông báo</p>
-                      {notifications.length > 0 && (
+                      {unreadCount > 0 && (
                         <button
                           type="button"
                           onClick={clear}
                           className="text-[11px] font-semibold text-slate-500 hover:text-[#1D4ED8]"
                         >
-                          Xóa hết
+                          Đánh dấu đã đọc
                         </button>
                       )}
                     </div>
@@ -280,18 +296,19 @@ const AppHeader: React.FC = () => {
                         Chưa có thông báo nào.
                       </p>
                     ) : (
-                      notifications.map((notification, index) => (
+                      notifications.map((notification) => (
                         <button
-                          key={`${notification.jobId}-${notification.timestamp}-${index}`}
+                          key={notification.id}
                           type="button"
-                          onClick={() =>
+                          onClick={() => {
+                            void markRead(notification.id);
                             openNotification(
                               notification.jobId,
                               notification.roomId,
                               notification.type
-                            )
-                          }
-                          className="w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50"
+                            );
+                          }}
+                          className={`w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50 ${notification.readAt ? '' : 'bg-blue-50/50'}`}
                         >
                           <p className="text-xs font-bold text-slate-800">
                             {notification.type === '1_TOUCH_INVITE'
@@ -308,28 +325,44 @@ const AppHeader: React.FC = () => {
                                         ? 'Bạn được chọn cho dự án'
                                         : notification.type === 'JOB_INVITE_NOT_SELECTED'
                                           ? 'Dự án đã chọn freelancer khác'
-                                          : notification.type === 'DEV_CLAIM'
-                                            ? '🙋 Dev muốn chat'
-                                            : notification.type === 'CHAT_OPENED'
-                                              ? '💬 Đã mở phòng chat'
-                                              : notification.type === 'PROPOSAL_RECEIVED'
-                                                ? '📨 Hồ sơ ứng tuyển mới'
-                                                : notification.type === 'PROPOSAL_INVITE'
-                                                  ? '🤝 Client mời hợp tác'
-                                                  : notification.type === 'PROPOSAL_ACCEPTED'
-                                                    ? '✅ Dev đã đồng ý hợp tác'
-                                                    : notification.type === 'PROPOSAL_REJECTED'
-                                                      ? '🚫 Hồ sơ bị từ chối'
-                                                      : 'Có cập nhật mới'}
+                                          : notification.type === 'CHAT_MESSAGE'
+                                            ? 'Tin nhắn mới'
+                                            : notification.type === 'DEV_CLAIM'
+                                              ? '🙋 Dev muốn chat'
+                                              : notification.type === 'CHAT_OPENED'
+                                                ? '💬 Đã mở phòng chat'
+                                                : notification.type === 'PROPOSAL_RECEIVED'
+                                                  ? '📨 Hồ sơ ứng tuyển mới'
+                                                  : notification.type === 'PROPOSAL_INVITE'
+                                                    ? '🤝 Client mời hợp tác'
+                                                    : notification.type === 'PROPOSAL_ACCEPTED'
+                                                      ? '✅ Dev đã đồng ý hợp tác'
+                                                      : notification.type === 'PROPOSAL_REJECTED'
+                                                        ? '🚫 Hồ sơ bị từ chối'
+                                                        : 'Có cập nhật mới'}
                           </p>
                           <p className="mt-1 line-clamp-2 text-xs text-slate-600">
-                            {notification.jobTitle ||
-                              notification.message ||
-                              'Có cập nhật mới cho dự án'}
+                            {notification.type === 'CHAT_MESSAGE'
+                              ? `${notification.actorName || 'Người dùng'} • ${notification.unreadCount} tin nhắn mới${notification.jobTitle ? ` • ${notification.jobTitle}` : ''}`
+                              : notification.actorName
+                                ? `${notification.actorName} • ${notification.jobTitle || notification.message || 'Có cập nhật mới cho dự án'}`
+                                : notification.jobTitle ||
+                                  notification.message ||
+                                  'Có cập nhật mới cho dự án'}
                           </p>
                         </button>
                       ))
                     )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNotificationsOpen(false);
+                        navigate(PATH_NOTIFICATIONS);
+                      }}
+                      className="w-full px-4 py-3 text-center text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                    >
+                      Xem tất cả thông báo
+                    </button>
                   </div>
                 )}
               </div>

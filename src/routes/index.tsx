@@ -43,6 +43,7 @@ import FreelancerJobsPage from '../pages/FreelancerJobsPage';
 import FreelancerProjectDetailPage from '../pages/FreelancerProjectDetailPage';
 import FreelancerProjectListPage from '../pages/FreelancerProjectListPage';
 import JobDetailPage from '../pages/JobDetailPage';
+import NotificationsPage from '../pages/NotificationsPage';
 import SuccessApplicationPage from '../pages/SuccessApplicationPage';
 import WorkspacesPage from '../pages/WorkspacesPage';
 
@@ -123,6 +124,7 @@ const AppRoutes = () => {
 
       {/* Authenticated routes (any role) */}
       <Route element={<AuthGuard />}>
+        <Route path={paths.PATH_NOTIFICATIONS} element={<NotificationsPage />} />
         <Route path={paths.PATH_WORKSPACES} element={<WorkspacesPage />} />
         <Route
           path={paths.PATH_WORKSPACE}

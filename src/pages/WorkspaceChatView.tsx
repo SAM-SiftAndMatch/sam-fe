@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { type ChatMessage, chatApi } from '../api/chat';
@@ -183,6 +183,7 @@ export default function WorkspaceChatView() {
   const { summary, userId, role, workspacesPage } = context;
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const wide = useWideWorkspace();
   const [awaitingReview, setAwaitingReview] = useState(
     () => (location.state as { awaitingReview?: boolean } | null)?.awaitingReview === true
@@ -203,6 +204,14 @@ export default function WorkspaceChatView() {
     () => [...(messagesQuery.data?.pages ?? [])].reverse().flatMap((page) => page.items),
     [messagesQuery.data]
   );
+  const latestMessageId = messages.at(-1)?.id;
+  useEffect(() => {
+    if (!messagesQuery.isSuccess) return;
+    void chatApi.markRoomRead(summary.roomId).then(() => {
+      void queryClient.invalidateQueries({ queryKey: ['chat-unread-count'] });
+      void queryClient.invalidateQueries({ queryKey: ['user-notifications', 'recent'] });
+    });
+  }, [messagesQuery.isSuccess, summary.roomId, latestMessageId, queryClient]);
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const shouldScrollBottom = useRef(true);
