@@ -1,4 +1,5 @@
 import { Client } from '@stomp/stompjs';
+import { useQueryClient } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -27,6 +28,17 @@ const ContractPage: React.FC = () => {
   const { user } = useAuthStore();
   const role = user?.role === 'FREELANCER' ? 'freelancer' : 'client';
   const myId = user?.userId;
+  const queryClient = useQueryClient();
+
+  // ContractPage nằm ngoài layout workspace. Khi rời trang, buộc header và hợp đồng
+  // đối chiếu lại với BE (kể cả trường hợp WebSocket bị rớt trong lúc ký/nạp tiền).
+  useEffect(
+    () => () => {
+      if (!myId) return;
+      void queryClient.invalidateQueries({ queryKey: ['workspace', 'summary', myId] });
+    },
+    [myId, queryClient]
+  );
 
   const [room, setRoom] = useState<ChatRoom | null>(null);
   const [roomError, setRoomError] = useState<string | null>(null);

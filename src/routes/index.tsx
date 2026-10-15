@@ -1,4 +1,5 @@
 import type React from 'react';
+import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import LoadingScreen from '../components/LoadingScreen';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -42,9 +43,11 @@ import FreelancerProjectDetailPage from '../pages/FreelancerProjectDetailPage';
 import FreelancerProjectListPage from '../pages/FreelancerProjectListPage';
 import JobDetailPage from '../pages/JobDetailPage';
 import SuccessApplicationPage from '../pages/SuccessApplicationPage';
-import WorkspacePage from '../pages/WorkspacePage';
-import WorkspaceTimelinePage from '../pages/WorkspaceTimelinePage';
 import WorkspacesPage from '../pages/WorkspacesPage';
+
+const WorkspaceLayout = lazy(() => import('../pages/WorkspaceLayout'));
+const WorkspaceChatView = lazy(() => import('../pages/WorkspaceChatView'));
+const WorkspaceTimelineView = lazy(() => import('../pages/WorkspaceTimelineView'));
 
 const RootRoute: React.FC = () => {
   const { isAuthenticated, isLoading, user } = useAuthStore();
@@ -119,8 +122,17 @@ const AppRoutes = () => {
       {/* Authenticated routes (any role) */}
       <Route element={<AuthGuard />}>
         <Route path={paths.PATH_WORKSPACES} element={<WorkspacesPage />} />
-        <Route path={paths.PATH_WORKSPACE_TIMELINE} element={<WorkspaceTimelinePage />} />
-        <Route path={paths.PATH_WORKSPACE} element={<WorkspacePage />} />
+        <Route
+          path={paths.PATH_WORKSPACE}
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <WorkspaceLayout />
+            </Suspense>
+          }
+        >
+          <Route index element={<WorkspaceChatView />} />
+          <Route path="timeline" element={<WorkspaceTimelineView />} />
+        </Route>
         <Route path={paths.PATH_WORKSPACE_CONTRACT} element={<ContractPage />} />
       </Route>
     </Routes>
