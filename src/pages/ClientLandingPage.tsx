@@ -118,7 +118,7 @@ const ClientLandingPage: React.FC = () => {
                 </span>
                 <input
                   type="text"
-                  aria-label="Tìm kiếm công việc"
+                  aria-label="Mô tả sơ bộ dự án"
                   placeholder={placeholderText}
                   className="flex-1 bg-transparent border-0 focus:ring-0 outline-none text-sm px-3 text-gray-700 placeholder:text-gray-400 min-w-0"
                   value={searchQuery}
@@ -131,7 +131,7 @@ const ClientLandingPage: React.FC = () => {
                 onClick={() => handleSearch()}
                 className="bg-[#1D4ED8] hover:bg-[#153bb5] text-white text-sm font-bold px-6 sm:px-8 py-3 rounded-full transition-colors cursor-pointer border-0 shrink-0"
               >
-                Tạo mô tả
+                Tiếp tục
               </button>
             </div>
           </div>

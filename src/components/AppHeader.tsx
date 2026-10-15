@@ -220,7 +220,7 @@ const AppHeader: React.FC = () => {
               {isClient && (
                 <button
                   type="button"
-                  onClick={() => navigate(PATH_CLIENT_AI_BRIEF)}
+                  onClick={() => navigate(PATH_CLIENT_AI_BRIEF, { state: { resetBrief: true } })}
                   className="hidden rounded-full bg-[#1D4ED8] px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#153bb5] xl:inline-flex"
                 >
                   Đăng dự án
@@ -470,7 +470,7 @@ const AppHeader: React.FC = () => {
                 type="button"
                 onClick={() => {
                   closeMenus();
-                  navigate(PATH_CLIENT_AI_BRIEF);
+                  navigate(PATH_CLIENT_AI_BRIEF, { state: { resetBrief: true } });
                 }}
                 className="mt-2 rounded-lg bg-[#1D4ED8] px-4 py-3 text-left text-sm font-bold text-white hover:bg-[#153bb5]"
               >

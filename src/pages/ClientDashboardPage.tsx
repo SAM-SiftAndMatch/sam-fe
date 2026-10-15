@@ -262,7 +262,7 @@ const ClientDashboardPage: React.FC = () => {
               </span>
               <input
                 type="text"
-                aria-label="Tìm kiếm công việc"
+                aria-label="Mô tả sơ bộ dự án"
                 placeholder={placeholderText}
                 className="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:ring-0"
                 value={searchQuery}
@@ -271,7 +271,7 @@ const ClientDashboardPage: React.FC = () => {
               />
             </div>
             <PrimaryButton onClick={() => handleSearch()} className="shrink-0" withArrow={false}>
-              Tạo mô tả
+              Tiếp tục
             </PrimaryButton>
           </div>
 
