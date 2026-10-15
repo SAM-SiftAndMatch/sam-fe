@@ -283,9 +283,6 @@ const FreelancerJobsPage: React.FC = () => {
         <div className="pointer-events-none absolute right-0 top-0 h-80 w-80 -translate-y-1/2 translate-x-1/3 rounded-full bg-[#1D4ED8]/[0.04]" />
 
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
-            Thị trường việc làm {'//'} Realtime jobs
-          </p>
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
             Tìm dự án phù hợp với <span className="text-[#1D4ED8]">kỹ năng</span> của bạn
           </h1>
