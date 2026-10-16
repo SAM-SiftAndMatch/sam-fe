@@ -102,7 +102,7 @@ export const LandingFooter: React.FC = () => {
                 Cơ chế Ký quỹ Escrow
               </a>
               <a href="#" className="hover:text-[#1D4ED8] transition-colors">
-                Tiêu chuẩn AI Trọng tài
+                Checklist nghiệm thu
               </a>
             </div>
           </div>

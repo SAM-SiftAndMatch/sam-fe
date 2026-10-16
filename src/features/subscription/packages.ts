@@ -20,7 +20,7 @@ export const PACKAGE_META: Record<string, PackageMeta> = {
     name: 'Ghim Nổi bật',
     price: '59.000đ/lượt',
     kind: 'single',
-    blurb: 'Ghim 1 dự án lên đầu tìm kiếm trong suốt vòng đời dự án.',
+    blurb: 'Ưu tiên 1 dự án trong kết quả tìm kiếm khi còn tuyển, đến hết hạn nhận ứng tuyển.',
   },
   [PACKAGE_URGENT_ID]: {
     name: 'Tuyển gấp (AI Headhunter)',

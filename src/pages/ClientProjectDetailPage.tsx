@@ -222,7 +222,6 @@ const ClientProjectDetailPage: React.FC = () => {
         upgrades: {
           featured: project.isFeatured,
           urgent: project.isUrgentHiring,
-          warranty: project.requiresAiQa,
         },
       },
     });
@@ -689,7 +688,7 @@ const ClientProjectDetailPage: React.FC = () => {
               <div className="flex flex-col gap-6">
                 <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
                   <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">
-                    Gói nâng cấp đã mua
+                    Tùy chọn dự án
                   </h3>
                   <div className="flex flex-col gap-3">
                     {project.isFeatured && (
@@ -705,7 +704,9 @@ const ClientProjectDetailPage: React.FC = () => {
                         </div>
                         <div>
                           <div className="font-bold text-sm text-yellow-700">Dự án Nổi bật</div>
-                          <div className="text-xs text-yellow-600">Được ưu tiên hiển thị</div>
+                          <div className="text-xs text-yellow-600">
+                            Ưu tiên khi còn tuyển, đến hết hạn nhận hồ sơ
+                          </div>
                         </div>
                       </div>
                     )}
@@ -727,41 +728,18 @@ const ClientProjectDetailPage: React.FC = () => {
                           </svg>
                         </div>
                         <div>
-                          <div className="font-bold text-sm text-red-700">Tuyển gấp</div>
+                          <div className="font-bold text-sm text-red-700">Gợi ý freelancer</div>
                           <div className="text-xs text-red-600">Thông báo đẩy tới Freelancers</div>
                         </div>
                       </div>
                     )}
-                    {project.requiresAiQa && (
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                            />
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="font-bold text-sm text-blue-700">Gói Bảo Hành</div>
-                          <div className="text-xs text-blue-600">Đảm bảo hoàn tiền 100%</div>
-                        </div>
-                      </div>
-                    )}
-                    {!project.isFeatured && !project.isUrgentHiring && !project.requiresAiQa && (
-                      <p className="text-xs text-gray-500">Chưa mua gói nâng cấp nào.</p>
+                    {!project.isFeatured && !project.isUrgentHiring && (
+                      <p className="text-xs text-gray-500">Chưa bật tùy chọn nào.</p>
                     )}
                   </div>
                 </div>
 
-                {/* Gói lẻ (Ghim/Tuyển gấp/QA) chỉ bán lúc đăng việc — xem các gói đã mua ở Hồ sơ → Gói của tôi */}
+                {/* Lịch sử gói đã mua được hiển thị trong Hồ sơ → Gói của tôi. */}
 
                 <div className="bg-[#EEF2FF] rounded-[24px] p-6 border border-[#DCE4FF] text-center flex flex-col items-center">
                   <div className="w-12 h-12 bg-[#1D4ED8] rounded-full text-white flex items-center justify-center mb-4">

@@ -14,8 +14,8 @@ export const PricingSection: React.FC = () => {
           Gói dịch vụ linh hoạt, minh bạch
         </h2>
         <p className="text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed">
-          Lựa chọn giải pháp tối ưu theo nhu cầu của bạn: từ cá nhân khởi đầu, doanh nghiệp cần bảo
-          hiểm chất lượng AI QC, đến gói công cụ chuyên nghiệp cho freelancer.
+          Lựa chọn giải pháp phù hợp: đăng dự án miễn phí, tăng hiển thị và tìm freelancer phù hợp,
+          hoặc sử dụng gói dành cho freelancer.
         </p>
       </ScrollReveal>
 
@@ -64,7 +64,7 @@ export const PricingSection: React.FC = () => {
           </div>
         </ScrollReveal>
 
-        {/* ================= PLAN 2: Phí kiểm định (Business & AI QC) - HIGHLIGHTED ================= */}
+        {/* ================= PLAN 2: Business - HIGHLIGHTED ================= */}
         <ScrollReveal delayMs={100} className="h-full">
           <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border-2 border-[#1D4ED8] shadow-[0_4px_20px_rgba(29,78,216,0.08)] hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between relative">
             {/* Highlight Tag */}
@@ -76,11 +76,11 @@ export const PricingSection: React.FC = () => {
 
             <div>
               <div className="flex items-center justify-end mb-4">
-                <span className="text-xs text-[#1D4ED8] font-bold">BUSINESS + AI QC</span>
+                <span className="text-xs text-[#1D4ED8] font-bold">BUSINESS</span>
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Business & Kiểm Định QC</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-1">Business</h3>
               <p className="text-xs text-slate-500 mb-6">
-                Dành cho doanh nghiệp cần tối ưu & bảo hiểm chất lượng
+                Dành cho khách hàng muốn tăng hiệu quả tuyển freelancer
               </p>
 
               <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-slate-100">
@@ -97,7 +97,7 @@ export const PricingSection: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-2.5 font-medium">
                   <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
-                  <span>AI QC kiểm định mã nguồn & chống đạo văn mọi dự án</span>
+                  <span>Checklist hỗ trợ nghiệm thu cho mọi dự án</span>
                 </li>
                 <li className="flex items-start gap-2.5 font-medium">
                   <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
@@ -172,8 +172,8 @@ export const PricingSection: React.FC = () => {
 
       <div className="mt-8 text-center">
         <p className="text-xs text-slate-500">
-          * Gói lẻ theo từng dự án (Ghim 59k · Tuyển gấp 99k · Trọng tài Code 59k) chỉ bán lúc đăng
-          việc.
+          * Gói lẻ theo từng dự án: Nổi bật 59k · Gợi ý freelancer 99k. Checklist hỗ trợ nghiệm thu
+          vẫn có cho mọi dự án.
         </p>
       </div>
     </section>

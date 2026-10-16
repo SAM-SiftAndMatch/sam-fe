@@ -293,11 +293,13 @@ const JobDetailPage: React.FC = () => {
                     🔥 Tuyển gấp
                   </span>
                 )}
-                {job.isFeatured && (
-                  <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-md">
-                    ⭐ Nổi bật
-                  </span>
-                )}
+                {job.isFeatured &&
+                  job.status === 'OPEN' &&
+                  (!job.deadline || new Date(job.deadline).getTime() >= Date.now()) && (
+                    <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-md">
+                      ⭐ Nổi bật
+                    </span>
+                  )}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold text-slate-900 leading-snug mb-4 tracking-tight">
                 {job.title}
@@ -618,11 +620,9 @@ const JobDetailPage: React.FC = () => {
                     />
                   </svg>
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                    Loại dự án
+                    Nghiệm thu
                   </span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {job.requiresAiQa ? 'Có bảo vệ QA' : 'Tiêu chuẩn'}
-                  </span>
+                  <span className="text-sm font-bold text-gray-900">Có checklist hỗ trợ</span>
                 </div>
               </div>
             </section>

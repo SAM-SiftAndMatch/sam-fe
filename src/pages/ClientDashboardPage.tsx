@@ -356,8 +356,8 @@ const ClientDashboardPage: React.FC = () => {
               Gói tháng: dùng thả ga, khỏi mua lẻ
             </h2>
             <p className="text-white/80 text-sm mb-8 leading-relaxed max-w-md">
-              BUSINESS 249k/tháng: Ghim Nổi bật + Tuyển gấp không giới hạn mọi dự án. AI QA Nâng cao
-              299k/tháng: bảo hành code mọi dự án. Gói lẻ từng dự án chỉ bán lúc đăng việc.
+              BUSINESS 249k/tháng: Nổi bật + Gợi ý freelancer cho mọi dự án. Checklist hỗ trợ nghiệm
+              thu vẫn có sẵn cho mọi dự án.
             </p>
             <button
               type="button"

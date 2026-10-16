@@ -24,7 +24,7 @@ type LocationState = {
   description?: string;
   category?: string;
   budgetAmount?: number;
-  upgrades?: { featured: boolean; urgent: boolean; warranty: boolean };
+  upgrades?: { featured: boolean; urgent: boolean };
   selectedSkills?: string[];
   selectedTags?: string[];
   srsDocumentUrl?: string;
@@ -46,9 +46,10 @@ const ConfirmProjectPage: React.FC = () => {
   const [title, setTitle] = useState(state.projectName || '');
   const [category, setCategory] = useState(state.category || '');
   const [customCategory, setCustomCategory] = useState('');
-  const [upgrades, setUpgrades] = useState(
-    state.upgrades || { featured: false, urgent: false, warranty: false }
-  );
+  const [upgrades, setUpgrades] = useState({
+    featured: state.upgrades?.featured ?? false,
+    urgent: state.upgrades?.urgent ?? false,
+  });
   const defaultDeadline = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     .toISOString()
     .split('T')[0];
@@ -58,11 +59,7 @@ const ConfirmProjectPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const totalUpgradesCost = useMemo(() => {
-    return (
-      (upgrades.featured ? 59000 : 0) +
-      (upgrades.urgent ? 99000 : 0) +
-      (upgrades.warranty ? 59000 : 0)
-    );
+    return (upgrades.featured ? 59000 : 0) + (upgrades.urgent ? 99000 : 0);
   }, [upgrades]);
 
   const handleConfirm = async () => {
@@ -102,10 +99,11 @@ const ConfirmProjectPage: React.FC = () => {
         estimatedDurationMonths: durationMonths,
         srsDocumentUrl: state.srsDocumentUrl || '',
         srsContent: state.srsContent || '',
-        deadline: deadline ? new Date(deadline).toISOString() : undefined,
+        // Hạn đăng theo ngày: còn nhận hồ sơ đến hết ngày client đã chọn.
+        deadline: deadline ? `${deadline.slice(0, 10)}T23:59:59` : undefined,
         isFeatured: upgrades.featured,
         isUrgentHiring: upgrades.urgent,
-        requiresAiQa: upgrades.warranty,
+        requiresAiQa: false,
       };
 
       const createdJob = await jobApi.createJob(jobPayload);
@@ -323,7 +321,7 @@ const ConfirmProjectPage: React.FC = () => {
                 />
                 <div className="flex-1">
                   <div className="font-bold text-sm text-gray-900">Gói Nổi Bật</div>
-                  <div className="text-xs text-gray-500">Ghim dự án lên top tìm kiếm</div>
+                  <div className="text-xs text-gray-500">Ưu tiên đến khi hết hạn đăng dự án</div>
                 </div>
                 <div className="font-bold text-blue-600 text-sm">+59.000 đ</div>
               </label>
@@ -336,34 +334,18 @@ const ConfirmProjectPage: React.FC = () => {
                   className="w-5 h-5 text-blue-600 rounded border-gray-300"
                 />
                 <div className="flex-1">
-                  <div className="font-bold text-sm text-gray-900">Gói Tuyển Gấp AI</div>
+                  <div className="font-bold text-sm text-gray-900">Gợi ý freelancer</div>
                   <div className="text-xs text-gray-500">
                     Hệ thống gửi thông báo trực tiếp đến Top 5 chuyên gia
                   </div>
                 </div>
                 <div className="font-bold text-blue-600 text-sm">+99.000 đ</div>
               </label>
-
-              <label className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={upgrades.warranty}
-                  onChange={(e) => setUpgrades({ ...upgrades, warranty: e.target.checked })}
-                  className="w-5 h-5 text-blue-600 rounded border-gray-300"
-                />
-                <div className="flex-1">
-                  <div className="font-bold text-sm text-gray-900">Trọng tài Code QA</div>
-                  <div className="text-xs text-gray-500">
-                    Bảo vệ source code an toàn trước khi nghiệm thu
-                  </div>
-                </div>
-                <div className="font-bold text-blue-600 text-sm">+59.000 đ</div>
-              </label>
             </div>
 
             {totalUpgradesCost > 0 && (
               <div className="mt-4 p-4 bg-gray-50 rounded-xl flex justify-between items-center border border-gray-100">
-                <span className="text-sm font-medium text-gray-600">Tổng phí nâng cấp:</span>
+                <span className="text-sm font-medium text-gray-600">Phí nâng cấp dự kiến:</span>
                 <span className="text-lg font-extrabold text-blue-700">
                   {new Intl.NumberFormat('vi-VN').format(totalUpgradesCost)} đ
                 </span>
@@ -411,8 +393,6 @@ const ConfirmProjectPage: React.FC = () => {
                   </svg>
                   <span>Đang đăng dự án...</span>
                 </>
-              ) : totalUpgradesCost > 0 ? (
-                'Thanh toán & Đăng dự án'
               ) : (
                 'Xác nhận đăng dự án'
               )}

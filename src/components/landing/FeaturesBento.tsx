@@ -20,7 +20,7 @@ export const FeaturesBento: React.FC = () => {
 
       {/* Bento Grid: 1 large, 2 medium, 3 small */}
       <div className="grid grid-cols-12 gap-6">
-        {/* ================= TILE 1: LARGE (8 cols on lg) - CODE SCAN RESULT ================= */}
+        {/* ================= TILE 1: LARGE (8 cols on lg) - ACCEPTANCE CHECKLIST ================= */}
         <div className="col-span-12 lg:col-span-8">
           <ScrollReveal delayMs={0} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
@@ -29,49 +29,42 @@ export const FeaturesBento: React.FC = () => {
                   <span className="text-xs text-slate-400">CORE SENTINEL</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
-                  AI Trọng tài QC & Quét mã nguồn tự động
+                  Checklist hỗ trợ nghiệm thu
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl mb-6">
-                  Loại bỏ nguy cơ nhận về mã nguồn rác, lỗi tiềm ẩn hay thiếu kiểm thử. Hệ thống tự
-                  động kiểm tra cú pháp, quét lỗ hổng bảo mật và đối soát chất lượng trước khi
-                  nghiệm thu.
+                  Khi freelancer bàn giao, hệ thống gợi ý các bước kiểm tra từ SRS và tiến độ dự án.
+                  Client truy cập sản phẩm, đối chiếu báo cáo rồi tự xác nhận nghiệm thu hoặc yêu
+                  cầu chỉnh sửa.
                 </p>
               </div>
 
-              {/* Tiny live-looking UI mockup: Terminal Code Scan Result */}
+              {/* Tiny mockup: manual acceptance checklist */}
               <div className="font-mono rounded-[8px] bg-slate-900 text-slate-200 p-4 text-[11px] space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 shadow-inner">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-2 text-slate-400 text-[10px]">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-slate-700 inline-block" />
                     <span className="w-2.5 h-2.5 rounded-full bg-slate-700 inline-block" />
                     <span className="w-2.5 h-2.5 rounded-full bg-slate-700 inline-block" />
-                    <span className="ml-1 text-slate-400">sam-qc --inspect delivery-v2.4</span>
+                    <span className="ml-1 text-slate-400">Checklist bàn giao dự án</span>
                   </div>
-                  <span className="text-emerald-400 font-semibold">STATUS: PASSED</span>
+                  <span className="text-blue-400 font-semibold">CHỜ NGHIỆM THU</span>
                 </div>
 
                 <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-300">✓ Syntax & Code Smell Analysis</span>
-                  <span className="text-emerald-400 font-bold">
-                    <AnimatedNumber value={0} /> BUGS / 0 WARNINGS
-                  </span>
+                  <span className="text-slate-300">Đối chiếu chức năng chính với SRS</span>
+                  <span className="text-blue-400 font-bold">CẦN KIỂM TRA</span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-300">✓ Security Audit (OWASP Top 10)</span>
-                  <span className="text-emerald-400 font-bold">CLEAN & SECURE</span>
+                  <span className="text-slate-300">Truy cập URL sản phẩm bàn giao</span>
+                  <span className="text-blue-400 font-bold">CẦN KIỂM TRA</span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-300">✓ Automated Unit Test Suite</span>
-                  <span className="text-blue-400 font-bold">
-                    <AnimatedNumber value={48} suffix="/48" /> PASSED (
-                    <AnimatedNumber value={100} suffix="%" />)
-                  </span>
+                  <span className="text-slate-300">Xem báo cáo và yêu cầu chỉnh sửa nếu cần</span>
+                  <span className="text-blue-400 font-bold">CLIENT QUYẾT ĐỊNH</span>
                 </div>
                 <div className="flex items-center justify-between py-1 border-t border-slate-800/80 pt-2 text-[10px] text-slate-400">
-                  <span>Execution Time: 1.42s</span>
-                  <span className="text-slate-300 font-semibold">
-                    QA Verdict: ĐẠT TIÊU CHUẨN BÀN GIAO
-                  </span>
+                  <span>Áp dụng cho mọi dự án</span>
+                  <span className="text-slate-300 font-semibold">Nghiệm thu thủ công</span>
                 </div>
               </div>
             </div>

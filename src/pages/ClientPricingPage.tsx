@@ -1,5 +1,4 @@
 import {
-  PACKAGE_AI_QA_ADVANCED_ID,
   PACKAGE_BUSINESS_ID,
   useMySubscriptions,
   usePurchasePackage,
@@ -97,8 +96,8 @@ const ClientPricingPage: React.FC = () => {
             Nâng tầm dự án với <span className="text-[#1D4ED8]">Công nghệ AI</span>
           </h1>
           <p className="text-sm sm:text-base text-slate-600 max-w-xl leading-relaxed">
-            Chọn gói dịch vụ phù hợp để kết nối với những tài năng hàng đầu và đảm bảo chất lượng kỹ
-            thuật tối ưu qua hệ thống kiểm định AI QC.
+            Chọn gói phù hợp để dự án được chú ý hơn và kết nối với freelancer. Khi bàn giao, mọi dự
+            án đều có checklist hỗ trợ bạn nghiệm thu.
           </p>
         </ScrollReveal>
 
@@ -114,8 +113,8 @@ const ClientPricingPage: React.FC = () => {
           </div>
         )}
 
-        {/* Pricing Grid (3 Cột Đồng Nhất) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 w-full items-stretch mb-16">
+        {/* Pricing Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 w-full items-stretch mb-16">
           {/* Gói 1: Basic */}
           <ScrollReveal delayMs={0} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
@@ -211,58 +210,11 @@ const ClientPricingPage: React.FC = () => {
               {renderPackageButton(PACKAGE_BUSINESS_ID, 'Nâng cấp ngay', true)}
             </div>
           </ScrollReveal>
-
-          {/* Gói 3: Premium */}
-          <ScrollReveal delayMs={200} className="h-full">
-            <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-end mb-4">
-                  <span className="text-xs text-slate-400">BẢO HIỂM</span>
-                </div>
-                <h2 className="text-xl font-bold text-slate-900 mb-1">Premium</h2>
-                <p className="text-xs text-slate-500 mb-6">
-                  Bảo hành AI QA cho mọi dự án trong 30 ngày (bản tháng của gói lẻ 59k)
-                </p>
-
-                <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-slate-100">
-                  <span className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-none">
-                    299.000đ
-                  </span>
-                  <span className="text-xs text-slate-500">/tháng</span>
-                </div>
-
-                <ul className="space-y-3 mb-8 text-xs sm:text-sm text-slate-700">
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
-                    <span>Bảo hiểm chất lượng bàn giao</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
-                    <span>AI quét lỗi + bảo mật khi bàn giao, mọi dự án</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
-                    <span>Bản tháng của gói lẻ Trọng tài Code 59k</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
-                    <span>Chống nhận về mã nguồn rác</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
-                    <span>Hỗ trợ 24/7 qua Hotline</span>
-                  </li>
-                </ul>
-              </div>
-
-              {renderPackageButton(PACKAGE_AI_QA_ADVANCED_ID, 'Nâng cấp ngay', false)}
-            </div>
-          </ScrollReveal>
         </div>
 
         <p className="text-xs text-slate-500 mb-16 max-w-xl text-center">
-          * Gói lẻ theo từng dự án (Ghim 59k · Tuyển gấp 99k · Trọng tài Code 59k) chỉ bán lúc đăng
-          việc, không bán tại trang này.
+          * Gói lẻ theo từng dự án (Nổi bật 59k · Gợi ý freelancer 99k) được chọn khi đăng dự án.
+          Checklist hỗ trợ nghiệm thu vẫn có cho mọi dự án.
         </p>
 
         {/* Section Stats (4 cột kỹ thuật) */}
