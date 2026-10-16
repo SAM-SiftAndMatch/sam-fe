@@ -1,6 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { chatApi } from '../api/chat';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import {
   PATH_CLIENT_AI_BRIEF,
@@ -14,16 +16,19 @@ import {
   PATH_FREELANCER_APPLICATIONS,
   PATH_FREELANCER_CREATE_PROFILE,
   PATH_FREELANCER_EARNINGS,
+  PATH_FREELANCER_INVITATIONS,
   PATH_FREELANCER_JOBS,
   PATH_FREELANCER_PROJECTS,
   PATH_HOME,
   PATH_JOB_DETAIL,
   PATH_LOGIN,
+  PATH_NOTIFICATIONS,
   PATH_REGISTER,
   PATH_WORKSPACE,
   PATH_WORKSPACES,
 } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
+import SamBrandLogo from './SamBrandLogo';
 import ThemeToggle from './ThemeToggle';
 
 type NavItem = { label: string; path: string; state?: { role: 'client' | 'freelancer' } };
@@ -32,14 +37,22 @@ const AppHeader: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { notifications, unreadCount, clear } = useInviteNotifications();
+  const { notifications, unreadCount, markRead, clear } = useInviteNotifications();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const isClient = user?.role === 'CLIENT';
+  const chatUnread = useQuery({
+    queryKey: ['chat-unread-count', user?.userId],
+    queryFn: chatApi.unreadCount,
+    enabled: Boolean(isAuthenticated && user?.userId),
+    staleTime: 10_000,
+  });
 
   const navItems: NavItem[] = isClient
     ? [
@@ -50,6 +63,7 @@ const AppHeader: React.FC = () => {
     : [
         { label: 'Tìm việc', path: PATH_FREELANCER_JOBS },
         { label: 'Ứng tuyển', path: PATH_FREELANCER_APPLICATIONS },
+        { label: 'Lời mời', path: PATH_FREELANCER_INVITATIONS },
         { label: 'Dự án của tôi', path: PATH_FREELANCER_PROJECTS },
         { label: 'Tin nhắn', path: PATH_WORKSPACES, state: { role: 'freelancer' } },
         { label: 'Thu nhập', path: PATH_FREELANCER_EARNINGS },
@@ -74,6 +88,35 @@ const AppHeader: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!mobileMenuRef.current?.contains(target) && !mobileButtonRef.current?.contains(target))
+        setMobileOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setMobileOpen(false);
+      mobileButtonRef.current?.focus();
+    };
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1280px)');
+    const closeOnDesktop = () => {
+      if (desktop.matches) setMobileOpen(false);
+    };
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => desktop.removeEventListener('change', closeOnDesktop);
   }, []);
 
   useEffect(() => {
@@ -108,6 +151,7 @@ const AppHeader: React.FC = () => {
   const openNotification = (jobId?: string | null, roomId?: string | null, type?: string) => {
     setNotificationsOpen(false);
     if (roomId) return navigate(PATH_WORKSPACE.replace(':projectId', roomId));
+    if (!isClient && type?.startsWith('JOB_INVITE')) return navigate(PATH_FREELANCER_INVITATIONS);
     if (!jobId) return;
     navigate(
       isClient && type !== '1_TOUCH_INVITE'
@@ -124,7 +168,14 @@ const AppHeader: React.FC = () => {
         onClick={() => go(item)}
         className={`${navClass(item.path)} ${mobile ? 'w-full text-left text-sm' : ''}`}
       >
-        {item.label}
+        <span className="inline-flex items-center gap-1.5">
+          {item.label}
+          {item.label === 'Tin nhắn' && (chatUnread.data ?? 0) > 0 && (
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">
+              {(chatUnread.data ?? 0) > 99 ? '99+' : chatUnread.data}
+            </span>
+          )}
+        </span>
       </button>
     ));
 
@@ -140,28 +191,14 @@ const AppHeader: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate(isAuthenticated ? homePath : PATH_HOME)}
-          className="flex shrink-0 cursor-pointer items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8]"
+          className="group flex shrink-0 cursor-pointer items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8]"
           aria-label="Về trang chính SAM"
         >
-          <span
-            className={`bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] bg-clip-text font-black leading-none tracking-tighter text-transparent transition-all duration-300 ${
-              isScrolled ? 'text-2xl sm:text-[28px]' : 'text-3xl sm:text-[38px]'
-            }`}
-            style={{ fontFamily: "'Quedora', sans-serif" }}
-          >
-            SAM
-          </span>
-          <span
-            className={`hidden border-l border-slate-200 pl-2 font-mono text-[10px] font-medium uppercase tracking-widest text-slate-500 transition-opacity duration-200 xl:inline ${
-              isScrolled ? 'opacity-80' : 'opacity-100'
-            }`}
-          >
-            Sift &amp; Match
-          </span>
+          <SamBrandLogo isScrolled={isScrolled} />
         </button>
 
         <nav
-          className={`hidden min-w-0 flex-1 items-center justify-center lg:flex ${isScrolled ? 'gap-2' : 'gap-1'}`}
+          className={`hidden min-w-0 flex-1 items-center justify-center xl:flex ${isScrolled ? 'gap-2' : 'gap-1'}`}
           aria-label="Điều hướng chính"
         >
           {isAuthenticated ? (
@@ -202,7 +239,7 @@ const AppHeader: React.FC = () => {
               {isClient && (
                 <button
                   type="button"
-                  onClick={() => navigate(PATH_CLIENT_AI_BRIEF)}
+                  onClick={() => navigate(PATH_CLIENT_AI_BRIEF, { state: { resetBrief: true } })}
                   className="hidden rounded-full bg-[#1D4ED8] px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#153bb5] xl:inline-flex"
                 >
                   Đăng dự án
@@ -211,7 +248,11 @@ const AppHeader: React.FC = () => {
               <div className="relative" ref={notificationsRef}>
                 <button
                   type="button"
-                  onClick={() => setNotificationsOpen((value) => !value)}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setAccountOpen(false);
+                    setNotificationsOpen((value) => !value);
+                  }}
                   className="relative rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#1D4ED8]"
                   aria-label="Mở thông báo"
                   aria-expanded={notificationsOpen}
@@ -240,13 +281,13 @@ const AppHeader: React.FC = () => {
                   <div className="absolute right-0 mt-2 max-h-96 w-80 overflow-y-auto rounded-xl border border-slate-200 bg-white py-2 shadow-xl">
                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2">
                       <p className="text-xs font-bold text-slate-800">Thông báo</p>
-                      {notifications.length > 0 && (
+                      {unreadCount > 0 && (
                         <button
                           type="button"
                           onClick={clear}
                           className="text-[11px] font-semibold text-slate-500 hover:text-[#1D4ED8]"
                         >
-                          Xóa hết
+                          Đánh dấu đã đọc
                         </button>
                       )}
                     </div>
@@ -255,52 +296,85 @@ const AppHeader: React.FC = () => {
                         Chưa có thông báo nào.
                       </p>
                     ) : (
-                      notifications.map((notification, index) => (
+                      notifications.map((notification) => (
                         <button
-                          key={`${notification.jobId}-${notification.timestamp}-${index}`}
+                          key={notification.id}
                           type="button"
-                          onClick={() =>
+                          onClick={() => {
+                            void markRead(notification.id);
                             openNotification(
                               notification.jobId,
                               notification.roomId,
                               notification.type
-                            )
-                          }
-                          className="w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50"
+                            );
+                          }}
+                          className={`w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50 ${notification.readAt ? '' : 'bg-blue-50/50'}`}
                         >
                           <p className="text-xs font-bold text-slate-800">
                             {notification.type === '1_TOUCH_INVITE'
                               ? '🔥 Lời mời tuyển gấp'
-                              : notification.type === 'DEV_CLAIM'
-                                ? '🙋 Dev muốn chat'
-                                : notification.type === 'CHAT_OPENED'
-                                  ? '💬 Đã mở phòng chat'
-                                  : notification.type === 'PROPOSAL_RECEIVED'
-                                    ? '📨 Hồ sơ ứng tuyển mới'
-                                    : notification.type === 'PROPOSAL_INVITE'
-                                      ? '🤝 Client mời hợp tác'
-                                      : notification.type === 'PROPOSAL_ACCEPTED'
-                                        ? '✅ Dev đã đồng ý hợp tác'
-                                        : notification.type === 'PROPOSAL_REJECTED'
-                                          ? '🚫 Hồ sơ bị từ chối'
-                                          : 'Có cập nhật mới'}
+                              : notification.type === 'JOB_INVITE'
+                                ? 'Lời mời làm việc mới'
+                                : notification.type === 'JOB_INVITE_ACCEPTED'
+                                  ? 'Freelancer đã đồng ý lời mời'
+                                  : notification.type === 'JOB_INVITE_DECLINED'
+                                    ? 'Freelancer đã từ chối lời mời'
+                                    : notification.type === 'JOB_INVITE_WITHDRAWN'
+                                      ? 'Lời mời đã được thu hồi'
+                                      : notification.type === 'JOB_INVITE_SELECTED'
+                                        ? 'Bạn được chọn cho dự án'
+                                        : notification.type === 'JOB_INVITE_NOT_SELECTED'
+                                          ? 'Dự án đã chọn freelancer khác'
+                                          : notification.type === 'CHAT_MESSAGE'
+                                            ? 'Tin nhắn mới'
+                                            : notification.type === 'DEV_CLAIM'
+                                              ? '🙋 Dev muốn chat'
+                                              : notification.type === 'CHAT_OPENED'
+                                                ? '💬 Đã mở phòng chat'
+                                                : notification.type === 'PROPOSAL_RECEIVED'
+                                                  ? '📨 Hồ sơ ứng tuyển mới'
+                                                  : notification.type === 'PROPOSAL_INVITE'
+                                                    ? '🤝 Client mời hợp tác'
+                                                    : notification.type === 'PROPOSAL_ACCEPTED'
+                                                      ? '✅ Dev đã đồng ý hợp tác'
+                                                      : notification.type === 'PROPOSAL_REJECTED'
+                                                        ? '🚫 Hồ sơ bị từ chối'
+                                                        : 'Có cập nhật mới'}
                           </p>
                           <p className="mt-1 line-clamp-2 text-xs text-slate-600">
-                            {notification.jobTitle ||
-                              notification.message ||
-                              'Có cập nhật mới cho dự án'}
+                            {notification.type === 'CHAT_MESSAGE'
+                              ? `${notification.actorName || 'Người dùng'} • ${notification.unreadCount} tin nhắn mới${notification.jobTitle ? ` • ${notification.jobTitle}` : ''}`
+                              : notification.actorName
+                                ? `${notification.actorName} • ${notification.jobTitle || notification.message || 'Có cập nhật mới cho dự án'}`
+                                : notification.jobTitle ||
+                                  notification.message ||
+                                  'Có cập nhật mới cho dự án'}
                           </p>
                         </button>
                       ))
                     )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNotificationsOpen(false);
+                        navigate(PATH_NOTIFICATIONS);
+                      }}
+                      className="w-full px-4 py-3 text-center text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                    >
+                      Xem tất cả thông báo
+                    </button>
                   </div>
                 )}
               </div>
-              <div className="relative hidden sm:block" ref={accountRef}>
+              <div className="relative" ref={accountRef}>
                 <button
                   type="button"
-                  onClick={() => setAccountOpen((value) => !value)}
-                  className="flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 transition-colors hover:bg-slate-100"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setNotificationsOpen(false);
+                    setAccountOpen((value) => !value);
+                  }}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 p-0 transition-colors hover:bg-slate-100 sm:w-auto sm:gap-2 sm:px-3"
                   aria-label="Mở menu tài khoản"
                   aria-expanded={accountOpen}
                 >
@@ -311,7 +385,7 @@ const AppHeader: React.FC = () => {
                     {user?.fullName || user?.email}
                   </span>
                   <svg
-                    className="h-3.5 w-3.5 text-slate-400"
+                    className="hidden h-3.5 w-3.5 text-slate-400 sm:block"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -372,11 +446,17 @@ const AppHeader: React.FC = () => {
             </div>
           )}
           <button
+            ref={mobileButtonRef}
             type="button"
-            onClick={() => setMobileOpen((value) => !value)}
-            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:hidden"
-            aria-label="Mở điều hướng"
+            onClick={() => {
+              setAccountOpen(false);
+              setNotificationsOpen(false);
+              setMobileOpen((value) => !value);
+            }}
+            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 xl:hidden"
+            aria-label={mobileOpen ? 'Đóng điều hướng' : 'Mở điều hướng'}
             aria-expanded={mobileOpen}
+            aria-controls="app-header-mobile-menu"
           >
             <svg
               className="h-5 w-5"
@@ -394,19 +474,18 @@ const AppHeader: React.FC = () => {
             </svg>
           </button>
         </div>
-      </div>
 
-      {mobileOpen && (
-        <div className="pointer-events-auto border-t border-slate-200 bg-white px-4 py-4 shadow-lg lg:hidden">
-          <div className="mx-auto flex max-w-[1440px] flex-col gap-1">
-            {isAuthenticated && (
-              <div className="mb-2 border-b border-slate-100 px-3 pb-3">
-                <p className="text-sm font-bold text-slate-800">{user?.fullName || user?.email}</p>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  {isClient ? 'Tài khoản khách hàng' : 'Tài khoản freelancer'}
-                </p>
-              </div>
-            )}
+        <div
+          id="app-header-mobile-menu"
+          ref={mobileMenuRef}
+          aria-hidden={!mobileOpen}
+          className={`absolute right-0 top-[calc(100%+8px)] z-50 w-64 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-5rem)] origin-top-right overflow-y-auto rounded-xl border border-slate-200 bg-white/95 p-2 shadow-xl backdrop-blur-md transition-[opacity,transform,visibility] duration-200 ease-out motion-reduce:transition-none xl:hidden ${
+            mobileOpen
+              ? 'visible pointer-events-auto translate-y-0 scale-100 opacity-100'
+              : 'invisible pointer-events-none -translate-y-2 scale-[0.98] opacity-0'
+          }`}
+        >
+          <nav className="flex flex-col gap-1" aria-label="Điều hướng thu gọn">
             {isAuthenticated ? (
               renderNav(true)
             ) : (
@@ -434,67 +513,45 @@ const AppHeader: React.FC = () => {
                 </button>
               </>
             )}
-            {isClient && (
+            {isAuthenticated && isClient && (
               <button
                 type="button"
                 onClick={() => {
                   closeMenus();
-                  navigate(PATH_CLIENT_AI_BRIEF);
+                  navigate(PATH_CLIENT_AI_BRIEF, { state: { resetBrief: true } });
                 }}
                 className="mt-2 rounded-lg bg-[#1D4ED8] px-4 py-3 text-left text-sm font-bold text-white hover:bg-[#153bb5]"
               >
                 Đăng dự án
               </button>
             )}
-            <div className="mt-2 border-t border-slate-100 pt-2">
-              {isAuthenticated ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenus();
-                      navigate(profilePath);
-                    }}
-                    className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    {profileLabel}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={logoutAndRedirect}
-                    className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-rose-600 hover:bg-rose-50"
-                  >
-                    Đăng xuất
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenus();
-                      navigate(PATH_LOGIN);
-                    }}
-                    className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    Đăng nhập
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenus();
-                      navigate(PATH_REGISTER);
-                    }}
-                    className="mt-1 w-full rounded-lg bg-[#1D4ED8] px-3 py-2 text-left text-sm font-bold text-white hover:bg-[#153bb5]"
-                  >
-                    Bắt đầu ngay
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+            {!isAuthenticated && (
+              <div className="mt-2 border-t border-slate-100 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenus();
+                    navigate(PATH_LOGIN);
+                  }}
+                  className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Đăng nhập
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenus();
+                    navigate(PATH_REGISTER);
+                  }}
+                  className="mt-1 w-full rounded-lg bg-[#1D4ED8] px-3 py-2 text-left text-sm font-bold text-white hover:bg-[#153bb5]"
+                >
+                  Bắt đầu ngay
+                </button>
+              </div>
+            )}
+          </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 };

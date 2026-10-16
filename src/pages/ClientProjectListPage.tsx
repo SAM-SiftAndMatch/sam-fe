@@ -1,10 +1,13 @@
+import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import AppHeader from '../components/AppHeader';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
+import JobStatusBadge from '../components/JobStatusBadge';
 import PaginationNav from '../components/PaginationNav';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_CLIENT_PROJECT_DETAIL } from '../routes/paths';
@@ -24,6 +27,7 @@ type FilterKey =
 
 const ClientProjectListPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
   const [filter, setFilter] = useState<FilterKey>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,8 +38,13 @@ const ClientProjectListPage: React.FC = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<JobResponse | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const loadRequestId = useRef(0);
+  const backgroundAfterPageChange = useRef(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(searchQuery), 300);
@@ -52,49 +61,87 @@ const ClientProjectListPage: React.FC = () => {
     setPage(0, true);
   }, [filter, debouncedSearch, setPage]);
 
-  const loadJobs = useCallback(async () => {
-    if (!isAuthenticated) return;
-    setIsLoading(true);
-    setServerError(null);
-    try {
-      const result: PageResult<JobResponse> = await jobApi.getMyJobsPage({
-        page,
-        size: 10,
-        status: filter === 'all' ? undefined : filter,
-        search: debouncedSearch.trim() || undefined,
-      });
-      setJobs(result.items);
-      setTotalPages(result.totalPages);
-      setTotalElements(result.totalElements);
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        const data = e.response?.data as { message?: string } | undefined;
-        setServerError(data?.message || 'Không tải được danh sách dự án');
+  const loadJobs = useCallback(
+    async ({ background = false }: { background?: boolean } = {}) => {
+      if (!isAuthenticated) return;
+      const requestId = ++loadRequestId.current;
+      if (background) {
+        setIsLoading(false);
+        setIsRefreshing(true);
       } else {
-        setServerError('Không tải được danh sách dự án');
+        setIsLoading(true);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated, page, filter, debouncedSearch]);
+      setServerError(null);
+      try {
+        const result: PageResult<JobResponse> = await jobApi.getMyJobsPage({
+          page,
+          size: 10,
+          status: filter === 'all' ? undefined : filter,
+          search: debouncedSearch.trim() || undefined,
+        });
+        if (requestId !== loadRequestId.current) return;
+        setJobs(result.items);
+        setTotalPages(result.totalPages);
+        setTotalElements(result.totalElements);
+      } catch (e) {
+        if (requestId !== loadRequestId.current) return;
+        if (axios.isAxiosError(e)) {
+          const data = e.response?.data as { message?: string } | undefined;
+          setServerError(data?.message || 'Không tải được danh sách dự án');
+        } else {
+          setServerError('Không tải được danh sách dự án');
+        }
+      } finally {
+        if (requestId === loadRequestId.current) {
+          setIsLoading(false);
+          setIsRefreshing(false);
+        }
+      }
+    },
+    [isAuthenticated, page, filter, debouncedSearch]
+  );
 
   useEffect(() => {
-    void loadJobs();
+    const background = backgroundAfterPageChange.current;
+    backgroundAfterPageChange.current = false;
+    void loadJobs({ background });
   }, [loadJobs]);
 
-  const handleCancel = async (e: React.MouseEvent, jobId: string) => {
-    e.stopPropagation();
-    if (!window.confirm('Hủy dự án này? Chỉ dự án đang mở mới hủy được.')) return;
+  const handleCancel = async () => {
+    if (!cancelTarget || cancellingId) return;
+    const jobId = cancelTarget.id;
     setCancellingId(jobId);
+    setCancelError(null);
     try {
-      await jobApi.cancelJob(jobId);
-      await loadJobs();
+      const cancelledJob = await jobApi.cancelJob(jobId);
+      loadRequestId.current += 1;
+      setIsLoading(false);
+      setIsRefreshing(false);
+      setServerError(null);
+      queryClient.setQueryData(['job', jobId], cancelledJob);
+      setCancelTarget(null);
+      if (filter === 'OPEN') {
+        const nextTotal = Math.max(0, totalElements - 1);
+        const nextTotalPages = Math.ceil(nextTotal / 10);
+        setJobs((current) => current.filter((job) => job.id !== jobId));
+        setTotalElements(nextTotal);
+        setTotalPages(nextTotalPages);
+        setIsRefreshing(true);
+        if (page > Math.max(0, nextTotalPages - 1)) {
+          backgroundAfterPageChange.current = true;
+          setPage(Math.max(0, nextTotalPages - 1), true);
+        } else {
+          void loadJobs({ background: true });
+        }
+      } else {
+        setJobs((current) => current.map((job) => (job.id === jobId ? cancelledJob : job)));
+      }
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const data = err.response?.data as { message?: string } | undefined;
-        setServerError(data?.message || 'Hủy dự án thất bại');
+        setCancelError(data?.message || 'Hủy dự án thất bại');
       } else {
-        setServerError('Hủy dự án thất bại');
+        setCancelError('Hủy dự án thất bại');
       }
     } finally {
       setCancellingId(null);
@@ -102,55 +149,6 @@ const ClientProjectListPage: React.FC = () => {
   };
 
   const filteredProjects = jobs;
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'OPEN':
-        return (
-          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-            Đang chờ đề xuất
-          </span>
-        );
-      case 'NEGOTIATING':
-        return (
-          <span className="px-3 py-1 bg-yellow-50 text-yellow-600 rounded-full text-xs font-bold border border-yellow-100 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
-            Đang thương lượng
-          </span>
-        );
-      case 'AWAITING_PAYMENT':
-        return (
-          <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-            Chờ nạp tiền
-          </span>
-        );
-      case 'IN_PROGRESS':
-        return (
-          <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-xs font-bold border border-orange-100 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-            Đang thực hiện
-          </span>
-        );
-      case 'COMPLETED':
-        return (
-          <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-            Đã hoàn thành
-          </span>
-        );
-      case 'CANCELLED':
-        return (
-          <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-bold border border-red-100 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-            Đã hủy
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
 
   return (
     <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
@@ -234,7 +232,10 @@ const ClientProjectListPage: React.FC = () => {
           </div>
         )}
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-gray-500">Tổng {totalElements} dự án</p>
+          <p className="text-sm text-gray-500">
+            Tổng {totalElements} dự án
+            {isRefreshing && <span className="ml-2">Đang đồng bộ...</span>}
+          </p>
           {isLoading ? (
             <p className="text-sm text-gray-500 text-center py-10">Đang tải dự án...</p>
           ) : (
@@ -249,7 +250,7 @@ const ClientProjectListPage: React.FC = () => {
                 {/* Cột trái: Tên & Trạng thái */}
                 <div className="flex-1 flex flex-col items-start gap-3">
                   <div className="flex items-center justify-between w-full md:w-auto md:justify-start gap-4">
-                    {getStatusBadge(project.status)}
+                    <JobStatusBadge status={project.status} />
                     <span className="text-xs font-semibold text-gray-400 md:hidden">
                       {formatDate(project.createdAt)}
                     </span>
@@ -285,7 +286,11 @@ const ClientProjectListPage: React.FC = () => {
                   {project.status === 'OPEN' && (
                     <button
                       type="button"
-                      onClick={(e) => void handleCancel(e, project.id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setCancelError(null);
+                        setCancelTarget(project);
+                      }}
                       disabled={cancellingId === project.id}
                       className="text-xs font-bold text-red-500 hover:text-red-700 cursor-pointer bg-transparent border-0 disabled:opacity-60 shrink-0"
                     >
@@ -296,7 +301,7 @@ const ClientProjectListPage: React.FC = () => {
               </div>
             ))
           )}
-          {!isLoading && filteredProjects.length === 0 && (
+          {!isLoading && !isRefreshing && filteredProjects.length === 0 && (
             <div className="col-span-1 md:col-span-2 py-20 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-dashed border-gray-200">
               <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-400">
                 <svg
@@ -329,6 +334,20 @@ const ClientProjectListPage: React.FC = () => {
       </main>
 
       <Footer />
+      <ConfirmDeleteModal
+        isOpen={cancelTarget !== null}
+        title="Xác nhận hủy dự án"
+        message={`Bạn có chắc muốn hủy “${cancelTarget?.title ?? ''}”? Chỉ dự án đang mở mới có thể hủy.`}
+        confirmText={cancellingId ? 'Đang hủy...' : 'Hủy dự án'}
+        cancelText="Giữ dự án"
+        error={cancelError}
+        isPending={cancellingId !== null}
+        onConfirm={() => void handleCancel()}
+        onCancel={() => {
+          setCancelTarget(null);
+          setCancelError(null);
+        }}
+      />
     </div>
   );
 };

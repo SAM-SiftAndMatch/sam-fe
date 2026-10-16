@@ -106,10 +106,8 @@ const VnpayReturnPage: React.FC = () => {
 
           {amountVnd !== null && !Number.isNaN(amountVnd) && (
             <div className="mb-8 p-3 rounded-lg bg-slate-50 border border-slate-100">
-              <span className="text-xs font-mono text-slate-500 block mb-0.5">
-                SỐ TIỀN GIAO DỊCH
-              </span>
-              <p className="text-2xl font-bold font-mono text-[#1D4ED8]">
+              <span className="text-xs text-slate-500 block mb-0.5">SỐ TIỀN GIAO DỊCH</span>
+              <p className="text-2xl font-bold text-[#1D4ED8]">
                 {new Intl.NumberFormat('vi-VN').format(amountVnd)} VND
               </p>
             </div>

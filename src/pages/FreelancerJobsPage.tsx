@@ -77,16 +77,16 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApply, onDetail }) => (
     <div className="min-w-0 flex-1">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {job.isUrgentHiring && (
-          <span className="rounded-[4px] bg-red-500 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide text-white">
+          <span className="rounded-[4px] bg-red-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
             Tuyển gấp
           </span>
         )}
         {job.isFeatured && (
-          <span className="rounded-[4px] bg-amber-100 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide text-amber-700">
+          <span className="rounded-[4px] bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
             Nổi bật
           </span>
         )}
-        <span className="font-mono text-[10px] font-medium uppercase tracking-wide text-slate-400">
+        <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
           Đăng {timeAgo(job.createdAt)}
         </span>
       </div>
@@ -101,13 +101,13 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApply, onDetail }) => (
           {job.skills.slice(0, 5).map((skill) => (
             <span
               key={skill.id}
-              className="rounded-[4px] bg-slate-100 px-2 py-1 font-mono text-[10px] text-slate-600 transition-colors group-hover:bg-[#1D4ED8]/[0.05] group-hover:text-[#1D4ED8]"
+              className="rounded-[4px] bg-slate-100 px-2 py-1 text-[10px] text-slate-600 transition-colors group-hover:bg-[#1D4ED8]/[0.05] group-hover:text-[#1D4ED8]"
             >
               {skill.name}
             </span>
           ))}
           {job.skills.length > 5 && (
-            <span className="rounded-[4px] bg-slate-50 px-2 py-1 font-mono text-[10px] text-slate-400">
+            <span className="rounded-[4px] bg-slate-50 px-2 py-1 text-[10px] text-slate-400">
               +{job.skills.length - 5}
             </span>
           )}
@@ -117,16 +117,14 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApply, onDetail }) => (
 
     <div className="flex shrink-0 flex-col justify-between gap-5 border-t border-slate-100 pt-5 md:w-52 md:items-end md:border-t-0 md:border-l md:pl-6 md:pt-0">
       <div className="text-left md:text-right">
-        <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
           Ngân sách
         </p>
         <p className="text-sm font-bold leading-snug text-slate-900">
           {formatBudget(job.budgetMin, job.budgetMax)}
         </p>
         {job.estimatedDurationMonths && (
-          <p className="mt-1 font-mono text-[10px] text-slate-400">
-            ~{job.estimatedDurationMonths} tháng
-          </p>
+          <p className="mt-1 text-[10px] text-slate-400">~{job.estimatedDurationMonths} tháng</p>
         )}
       </div>
 
@@ -283,9 +281,6 @@ const FreelancerJobsPage: React.FC = () => {
         <div className="pointer-events-none absolute right-0 top-0 h-80 w-80 -translate-y-1/2 translate-x-1/3 rounded-full bg-[#1D4ED8]/[0.04]" />
 
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#1D4ED8]">
-            Thị trường việc làm {'//'} Realtime jobs
-          </p>
           <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
             Tìm dự án phù hợp với <span className="text-[#1D4ED8]">kỹ năng</span> của bạn
           </h1>
@@ -351,11 +346,11 @@ const FreelancerJobsPage: React.FC = () => {
             </div>
 
             <div className="border-b border-slate-100 pb-5">
-              <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                 Kỹ năng / công nghệ
               </p>
               <div>
-                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Chọn một hoặc nhiều kỹ năng
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -420,7 +415,7 @@ const FreelancerJobsPage: React.FC = () => {
             </div>
 
             <fieldset className="pt-5">
-              <legend className="mb-3 font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <legend className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                 Ngân sách dự án
               </legend>
               <div className="space-y-1">

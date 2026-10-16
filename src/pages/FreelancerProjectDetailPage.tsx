@@ -233,8 +233,8 @@ const FreelancerProjectDetailPage: React.FC = () => {
     switch (status) {
       case 'in_progress':
         return (
-          <span className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+          <span className="px-3 py-1.5 bg-orange-50 text-orange-700 rounded-full text-xs font-bold border border-orange-200 flex items-center gap-1.5 w-fit">
+            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
             Đang thực hiện
           </span>
         );
@@ -717,7 +717,7 @@ const FreelancerProjectDetailPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-gray-900">Thực nhận</span>
-                  <span className="text-sm font-black text-emerald-600">
+                  <span className="text-sm font-extrabold text-emerald-600">
                     {formatCurrency(netAmount)}
                   </span>
                 </div>
@@ -803,7 +803,7 @@ const FreelancerProjectDetailPage: React.FC = () => {
                   <hr className="border-gray-200" />
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-bold text-gray-900">Số tiền thực nhận</span>
-                    <span className="text-lg font-black text-emerald-600">
+                    <span className="text-lg font-extrabold text-emerald-600">
                       {formatCurrency(netAmount)}
                     </span>
                   </div>

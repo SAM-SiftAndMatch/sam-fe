@@ -24,7 +24,7 @@ type LocationState = {
   description?: string;
   category?: string;
   budgetAmount?: number;
-  upgrades?: { featured: boolean; urgent: boolean; warranty: boolean };
+  upgrades?: { featured: boolean; urgent: boolean };
   selectedSkills?: string[];
   selectedTags?: string[];
   srsDocumentUrl?: string;
@@ -46,9 +46,10 @@ const ConfirmProjectPage: React.FC = () => {
   const [title, setTitle] = useState(state.projectName || '');
   const [category, setCategory] = useState(state.category || '');
   const [customCategory, setCustomCategory] = useState('');
-  const [upgrades, setUpgrades] = useState(
-    state.upgrades || { featured: false, urgent: false, warranty: false }
-  );
+  const [upgrades, setUpgrades] = useState({
+    featured: state.upgrades?.featured ?? false,
+    urgent: state.upgrades?.urgent ?? false,
+  });
   const defaultDeadline = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
     .toISOString()
     .split('T')[0];
@@ -58,11 +59,7 @@ const ConfirmProjectPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const totalUpgradesCost = useMemo(() => {
-    return (
-      (upgrades.featured ? 59000 : 0) +
-      (upgrades.urgent ? 99000 : 0) +
-      (upgrades.warranty ? 59000 : 0)
-    );
+    return (upgrades.featured ? 59000 : 0) + (upgrades.urgent ? 99000 : 0);
   }, [upgrades]);
 
   const handleConfirm = async () => {
@@ -102,10 +99,11 @@ const ConfirmProjectPage: React.FC = () => {
         estimatedDurationMonths: durationMonths,
         srsDocumentUrl: state.srsDocumentUrl || '',
         srsContent: state.srsContent || '',
-        deadline: deadline ? new Date(deadline).toISOString() : undefined,
+        // Hạn đăng theo ngày: còn nhận hồ sơ đến hết ngày client đã chọn.
+        deadline: deadline ? `${deadline.slice(0, 10)}T23:59:59` : undefined,
         isFeatured: upgrades.featured,
         isUrgentHiring: upgrades.urgent,
-        requiresAiQa: upgrades.warranty,
+        requiresAiQa: false,
       };
 
       const createdJob = await jobApi.createJob(jobPayload);
@@ -149,13 +147,10 @@ const ConfirmProjectPage: React.FC = () => {
           {isFromAi && (
             <div className="space-y-6 mb-8">
               {/* Thông tin chốt từ AI */}
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 text-white shadow-xs">
+              <div className="bg-white border border-slate-200 rounded-xl p-6 text-slate-900 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h4 className="text-[10px] font-mono font-bold uppercase tracking-widest text-blue-400 mb-1">
-                      {'//'} HỢP ĐỒNG AI ĐÃ CHỐT
-                    </h4>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-600">
                       Dữ liệu chính xác từ tài liệu SRS sau đàm phán
                     </p>
                   </div>
@@ -165,7 +160,7 @@ const ConfirmProjectPage: React.FC = () => {
                       href={state.srsDocumentUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/20 rounded-xl px-3.5 py-2 text-xs font-bold transition-colors shrink-0"
+                      className="inline-flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 rounded-xl px-3.5 py-2 text-xs font-bold transition-colors shrink-0"
                     >
                       <svg
                         className="w-3.5 h-3.5"
@@ -183,7 +178,7 @@ const ConfirmProjectPage: React.FC = () => {
                       Xem tài liệu SRS
                     </a>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 rounded-xl px-3.5 py-2 text-xs font-bold text-blue-100 cursor-not-allowed">
+                    <span className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-500 cursor-not-allowed">
                       <svg
                         className="w-3.5 h-3.5"
                         fill="none"
@@ -209,29 +204,29 @@ const ConfirmProjectPage: React.FC = () => {
 
                 {/* Ngân sách + Thời gian */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-white/10 border border-white/15 rounded-2xl p-4">
-                    <div className="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1">
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 text-slate-900 shadow-sm">
+                    <div className="text-[10px] font-bold text-blue-700 uppercase tracking-widest mb-1">
                       Ngân sách dự án
                     </div>
-                    <div className="text-2xl font-black leading-tight">
+                    <div className="text-2xl font-extrabold leading-tight">
                       {new Intl.NumberFormat('vi-VN').format(
                         state.exactBudgetVnd || state.budgetAmount || 0
                       )}{' '}
-                      <span className="text-sm font-bold text-blue-100">VNĐ</span>
+                      <span className="text-sm font-bold text-slate-600">VNĐ</span>
                     </div>
-                    <div className="text-[11px] text-blue-200 mt-1">
+                    <div className="text-[11px] text-slate-500 mt-1">
                       Giá trị chính xác đã chốt với AI
                     </div>
                   </div>
-                  <div className="bg-white/10 border border-white/15 rounded-2xl p-4">
-                    <div className="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-1">
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 text-slate-900 shadow-sm">
+                    <div className="text-[10px] font-bold text-blue-700 uppercase tracking-widest mb-1">
                       Thời gian thực hiện dự án
                     </div>
-                    <div className="text-2xl font-black leading-tight">
+                    <div className="text-2xl font-extrabold leading-tight">
                       {state.durationMonths}{' '}
-                      <span className="text-sm font-bold text-blue-100">tháng</span>
+                      <span className="text-sm font-bold text-slate-600">tháng</span>
                     </div>
-                    <div className="text-[11px] text-blue-200 mt-1">
+                    <div className="text-[11px] text-slate-500 mt-1">
                       Thời gian hoàn thành dự kiến
                     </div>
                   </div>
@@ -326,7 +321,7 @@ const ConfirmProjectPage: React.FC = () => {
                 />
                 <div className="flex-1">
                   <div className="font-bold text-sm text-gray-900">Gói Nổi Bật</div>
-                  <div className="text-xs text-gray-500">Ghim dự án lên top tìm kiếm</div>
+                  <div className="text-xs text-gray-500">Ưu tiên đến khi hết hạn đăng dự án</div>
                 </div>
                 <div className="font-bold text-blue-600 text-sm">+59.000 đ</div>
               </label>
@@ -339,35 +334,19 @@ const ConfirmProjectPage: React.FC = () => {
                   className="w-5 h-5 text-blue-600 rounded border-gray-300"
                 />
                 <div className="flex-1">
-                  <div className="font-bold text-sm text-gray-900">Gói Tuyển Gấp AI</div>
+                  <div className="font-bold text-sm text-gray-900">Gợi ý freelancer</div>
                   <div className="text-xs text-gray-500">
                     Hệ thống gửi thông báo trực tiếp đến Top 5 chuyên gia
                   </div>
                 </div>
                 <div className="font-bold text-blue-600 text-sm">+99.000 đ</div>
               </label>
-
-              <label className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={upgrades.warranty}
-                  onChange={(e) => setUpgrades({ ...upgrades, warranty: e.target.checked })}
-                  className="w-5 h-5 text-blue-600 rounded border-gray-300"
-                />
-                <div className="flex-1">
-                  <div className="font-bold text-sm text-gray-900">Trọng tài Code QA</div>
-                  <div className="text-xs text-gray-500">
-                    Bảo vệ source code an toàn trước khi nghiệm thu
-                  </div>
-                </div>
-                <div className="font-bold text-blue-600 text-sm">+59.000 đ</div>
-              </label>
             </div>
 
             {totalUpgradesCost > 0 && (
               <div className="mt-4 p-4 bg-gray-50 rounded-xl flex justify-between items-center border border-gray-100">
-                <span className="text-sm font-medium text-gray-600">Tổng phí nâng cấp:</span>
-                <span className="text-lg font-black text-blue-700">
+                <span className="text-sm font-medium text-gray-600">Phí nâng cấp dự kiến:</span>
+                <span className="text-lg font-extrabold text-blue-700">
                   {new Intl.NumberFormat('vi-VN').format(totalUpgradesCost)} đ
                 </span>
               </div>
@@ -412,10 +391,8 @@ const ConfirmProjectPage: React.FC = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  <span>AI đang thiết lập dự án... (vui lòng chờ)</span>
+                  <span>Đang đăng dự án...</span>
                 </>
-              ) : totalUpgradesCost > 0 ? (
-                'Thanh toán & Đăng dự án'
               ) : (
                 'Xác nhận đăng dự án'
               )}

@@ -7,9 +7,12 @@ import { jobApi } from '../api/job';
 import { proposalApi } from '../api/proposal';
 import { storageApi } from '../api/storage';
 import AppHeader from '../components/AppHeader';
+import ClientJobInvitations from '../components/ClientJobInvitations';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
+import JobStatusBadge from '../components/JobStatusBadge';
 import PaginationNav from '../components/PaginationNav';
+import ProposalStatusBadge from '../components/ProposalStatusBadge';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_PROJECTS, PATH_WORKSPACE } from '../routes/paths';
@@ -219,59 +222,9 @@ const ClientProjectDetailPage: React.FC = () => {
         upgrades: {
           featured: project.isFeatured,
           urgent: project.isUrgentHiring,
-          warranty: project.requiresAiQa,
         },
       },
     });
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'OPEN':
-        return (
-          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-            Đang chờ đề xuất
-          </span>
-        );
-      case 'NEGOTIATING':
-        return (
-          <span className="px-3 py-1 bg-yellow-50 text-yellow-600 rounded-full text-xs font-bold border border-yellow-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
-            Đang thương lượng
-          </span>
-        );
-      case 'AWAITING_PAYMENT':
-        return (
-          <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-200 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-            Chờ nạp tiền khởi động
-          </span>
-        );
-      case 'IN_PROGRESS':
-        return (
-          <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-xs font-bold border border-orange-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
-            Đang thực hiện
-          </span>
-        );
-      case 'COMPLETED':
-        return (
-          <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-            Đã hoàn thành
-          </span>
-        );
-      case 'CANCELLED':
-        return (
-          <span className="px-3 py-1 bg-red-50 text-red-600 rounded-full text-xs font-bold border border-red-100 flex items-center gap-1.5 w-fit">
-            <span className="w-1.5 h-1.5 bg-red-500 rounded-full" />
-            Đã hủy
-          </span>
-        );
-      default:
-        return null;
-    }
   };
 
   const getRecStatusBadge = (status: string) => {
@@ -292,37 +245,6 @@ const ClientProjectDetailPage: React.FC = () => {
         return (
           <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-bold border border-purple-100 w-fit">
             Dev yêu cầu Chat
-          </span>
-        );
-      case 'ACCEPTED':
-        return (
-          <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold border border-green-100 w-fit">
-            Đã nhận việc
-          </span>
-        );
-      case 'REJECTED':
-        return (
-          <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold border border-gray-200 w-fit">
-            Đã từ chối
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const getProposalStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return (
-          <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold border border-blue-100 w-fit">
-            Chờ duyệt
-          </span>
-        );
-      case 'INVITED':
-        return (
-          <span className="px-3 py-1 bg-yellow-50 text-yellow-600 rounded-full text-xs font-bold border border-yellow-100 w-fit">
-            Đã mời — chờ dev đồng ý
           </span>
         );
       case 'ACCEPTED':
@@ -390,7 +312,7 @@ const ClientProjectDetailPage: React.FC = () => {
               <div className="flex flex-col gap-6">
                 <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
                   <div className="flex justify-between items-start mb-4">
-                    {getStatusBadge(project.status)}
+                    <JobStatusBadge status={project.status} />
                     <span className="text-xs font-semibold text-gray-400">
                       {formatDate(project.createdAt)}
                     </span>
@@ -443,7 +365,7 @@ const ClientProjectDetailPage: React.FC = () => {
                       >
                         {skill.name}
                         {skill.yearsOfExperience != null && (
-                          <span className="text-[10px] text-[#1D4ED8] font-black">
+                          <span className="text-[10px] text-[#1D4ED8] font-extrabold">
                             {skill.yearsOfExperience} năm
                           </span>
                         )}
@@ -526,6 +448,17 @@ const ClientProjectDetailPage: React.FC = () => {
                   )}
                 </div>
 
+                <ClientJobInvitations
+                  jobId={project.id}
+                  isOpen={project.status === 'OPEN'}
+                  onSelected={() => {
+                    setProject((current) =>
+                      current ? { ...current, status: 'NEGOTIATING' } : current
+                    );
+                    setRecommendations([]);
+                  }}
+                />
+
                 {/* Danh sách ứng viên AI đề xuất */}
                 {project.status === 'OPEN' && (
                   <div>
@@ -543,7 +476,7 @@ const ClientProjectDetailPage: React.FC = () => {
                         >
                           {/* Info Freelancer */}
                           <div className="flex flex-col items-center text-center md:w-1/4">
-                            <div className="w-16 h-16 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-black text-xl mb-3">
+                            <div className="w-16 h-16 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-extrabold text-xl mb-3">
                               {rec.fullName.charAt(0)}
                             </div>
                             <h4 className="font-bold text-gray-900 text-sm mb-1">{rec.fullName}</h4>
@@ -627,7 +560,7 @@ const ClientProjectDetailPage: React.FC = () => {
                         className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] flex flex-col md:flex-row gap-6"
                       >
                         <div className="flex flex-col items-center text-center md:w-1/4">
-                          <div className="w-16 h-16 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-black text-xl mb-3">
+                          <div className="w-16 h-16 rounded-full bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center font-extrabold text-xl mb-3">
                             {p.freelancerName.charAt(0)}
                           </div>
                           <h4 className="font-bold text-gray-900 text-sm mb-1">
@@ -647,7 +580,7 @@ const ClientProjectDetailPage: React.FC = () => {
                         <div className="md:w-3/4 flex flex-col">
                           <div className="flex justify-between items-start mb-3">
                             <div className="flex flex-col gap-1">
-                              {getProposalStatusBadge(p.status)}
+                              <ProposalStatusBadge status={p.status} audience="client" />
                             </div>
                             {p.attachmentUrl && (
                               <button
@@ -755,7 +688,7 @@ const ClientProjectDetailPage: React.FC = () => {
               <div className="flex flex-col gap-6">
                 <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
                   <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">
-                    Gói nâng cấp đã mua
+                    Tùy chọn dự án
                   </h3>
                   <div className="flex flex-col gap-3">
                     {project.isFeatured && (
@@ -771,7 +704,9 @@ const ClientProjectDetailPage: React.FC = () => {
                         </div>
                         <div>
                           <div className="font-bold text-sm text-yellow-700">Dự án Nổi bật</div>
-                          <div className="text-xs text-yellow-600">Được ưu tiên hiển thị</div>
+                          <div className="text-xs text-yellow-600">
+                            Ưu tiên khi còn tuyển, đến hết hạn nhận hồ sơ
+                          </div>
                         </div>
                       </div>
                     )}
@@ -793,41 +728,18 @@ const ClientProjectDetailPage: React.FC = () => {
                           </svg>
                         </div>
                         <div>
-                          <div className="font-bold text-sm text-red-700">Tuyển gấp</div>
+                          <div className="font-bold text-sm text-red-700">Gợi ý freelancer</div>
                           <div className="text-xs text-red-600">Thông báo đẩy tới Freelancers</div>
                         </div>
                       </div>
                     )}
-                    {project.requiresAiQa && (
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                            />
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="font-bold text-sm text-blue-700">Gói Bảo Hành</div>
-                          <div className="text-xs text-blue-600">Đảm bảo hoàn tiền 100%</div>
-                        </div>
-                      </div>
-                    )}
-                    {!project.isFeatured && !project.isUrgentHiring && !project.requiresAiQa && (
-                      <p className="text-xs text-gray-500">Chưa mua gói nâng cấp nào.</p>
+                    {!project.isFeatured && !project.isUrgentHiring && (
+                      <p className="text-xs text-gray-500">Chưa bật tùy chọn nào.</p>
                     )}
                   </div>
                 </div>
 
-                {/* Gói lẻ (Ghim/Tuyển gấp/QA) chỉ bán lúc đăng việc — xem các gói đã mua ở Hồ sơ → Gói của tôi */}
+                {/* Lịch sử gói đã mua được hiển thị trong Hồ sơ → Gói của tôi. */}
 
                 <div className="bg-[#EEF2FF] rounded-[24px] p-6 border border-[#DCE4FF] text-center flex flex-col items-center">
                   <div className="w-12 h-12 bg-[#1D4ED8] rounded-full text-white flex items-center justify-center mb-4">
@@ -893,6 +805,8 @@ const ClientProjectDetailPage: React.FC = () => {
         title="Hủy dự án"
         message="Bạn có chắc chắn muốn hủy dự án này? Chỉ dự án đang mở mới hủy được."
         confirmText={isCancelling ? 'Đang hủy...' : 'Hủy dự án'}
+        cancelText="Giữ dự án"
+        isPending={isCancelling}
       />
     </div>
   );

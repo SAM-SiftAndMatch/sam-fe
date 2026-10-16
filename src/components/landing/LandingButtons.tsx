@@ -45,7 +45,7 @@ export const PrimaryButton: React.FC<ButtonProps> = ({
       <span>{children}</span>
       {withArrow && (
         <span
-          className="inline-block transition-transform duration-200 group-hover:translate-x-1 font-mono text-sm"
+          className="inline-block transition-transform duration-200 group-hover:translate-x-1 text-sm"
           aria-hidden="true"
         >
           →
@@ -108,7 +108,7 @@ export const SecondaryButton: React.FC<ButtonProps> = ({
       <span>{children}</span>
       {withArrow && (
         <span
-          className="inline-block transition-transform duration-200 group-hover:translate-x-1 font-mono text-sm"
+          className="inline-block transition-transform duration-200 group-hover:translate-x-1 text-sm"
           aria-hidden="true"
         >
           →

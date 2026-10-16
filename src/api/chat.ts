@@ -36,6 +36,13 @@ export interface ChatMessage {
 }
 
 export const chatApi = {
+  unreadCount: async (): Promise<number> => {
+    const res = await apiClient.get<ApiResponse<number>>('/chat/unread-count');
+    return requireApiResult(res.data, 'Failed to fetch unread message count');
+  },
+  markRoomRead: async (roomId: string): Promise<void> => {
+    await apiClient.post<ApiResponse<void>>(`/chat/rooms/${roomId}/read`);
+  },
   getMyRoomsPage: async (
     params: { page?: number; size?: number; search?: string } = {}
   ): Promise<PageResult<ChatRoom>> => {

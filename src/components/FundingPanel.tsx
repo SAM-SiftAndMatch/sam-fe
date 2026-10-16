@@ -128,7 +128,7 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
     <div className="bg-white rounded-[28px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.05)] overflow-hidden">
       <div className="px-6 md:px-8 py-5 border-b border-gray-100 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-black text-gray-900">Nạp tiền khởi động</h2>
+          <h2 className="text-base font-extrabold text-gray-900">Nạp tiền khởi động</h2>
           <p className="text-xs text-gray-400 mt-0.5">
             Đủ tiền 2 bên mới cho dự án chạy — cuối dự án freelancer nhận 90%, sàn giữ 10%
           </p>
@@ -184,7 +184,7 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                   Bên A — Client nạp 100%
                 </p>
-                <p className="text-xl font-black text-[#1D4ED8]">
+                <p className="text-xl font-extrabold text-[#1D4ED8]">
                   {formatMoney(Number(funding.clientAmount))} đ
                 </p>
                 <div className="mt-2">{paidBadge(funding.fundPaid)}</div>
@@ -207,7 +207,7 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                   Bên B — Freelancer cọc cam kết 2%
                 </p>
-                <p className="text-xl font-black text-gray-900">
+                <p className="text-xl font-extrabold text-gray-900">
                   {formatMoney(Number(funding.depositAmount))} đ
                 </p>
                 <p className="text-[11px] text-gray-400 mt-0.5">

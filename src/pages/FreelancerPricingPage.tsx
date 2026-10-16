@@ -56,12 +56,12 @@ const FreelancerPricingPage: React.FC = () => {
       <main className="flex-1 w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 flex flex-col items-center relative z-10">
         {/* Alerts */}
         {error && (
-          <div className="w-full max-w-3xl mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-[8px] font-mono">
+          <div className="w-full max-w-3xl mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-[8px]">
             {error}
           </div>
         )}
         {successMessage && (
-          <div className="w-full max-w-3xl mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-[8px] font-mono">
+          <div className="w-full max-w-3xl mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-[8px]">
             {successMessage}
           </div>
         )}
@@ -84,29 +84,29 @@ const FreelancerPricingPage: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">MIỄN PHÍ</span>
+                  <span className="text-xs text-slate-400">MIỄN PHÍ</span>
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900 mb-1">Basic</h2>
                 <p className="text-xs text-slate-500 mb-6">Dành cho cá nhân khởi đầu</p>
 
                 <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-slate-100">
-                  <span className="font-mono text-4xl sm:text-5xl font-black text-slate-900 leading-none">
+                  <span className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-none">
                     0đ
                   </span>
-                  <span className="text-xs text-slate-500 font-mono">/tháng</span>
+                  <span className="text-xs text-slate-500">/tháng</span>
                 </div>
 
                 <ul className="space-y-3 mb-8 text-xs sm:text-sm text-slate-700">
                   <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
+                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
                     <span>Đăng dự án không giới hạn</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
+                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
                     <span>Phí dịch vụ 5%</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
+                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
                     <span>Hỗ trợ email</span>
                   </li>
                 </ul>
@@ -125,14 +125,14 @@ const FreelancerPricingPage: React.FC = () => {
           <ScrollReveal delayMs={100} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border-2 border-[#1D4ED8] shadow-[0_4px_20px_rgba(29,78,216,0.08)] hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between relative">
               <div className="absolute -top-3.5 right-6">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-[#1D4ED8] text-white px-3 py-1 rounded-[6px] shadow-sm">
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-[#1D4ED8] text-white px-3 py-1 rounded-[6px] shadow-sm">
                   ĐẶC QUYỀN AI
                 </span>
               </div>
 
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-[#1D4ED8] font-bold">KHUYÊN DÙNG</span>
+                  <span className="text-xs text-[#1D4ED8] font-bold">KHUYÊN DÙNG</span>
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900 mb-1">PRO DEV</h2>
                 <p className="text-xs text-slate-500 mb-6">
@@ -140,27 +140,27 @@ const FreelancerPricingPage: React.FC = () => {
                 </p>
 
                 <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-slate-100">
-                  <span className="font-mono text-4xl sm:text-5xl font-black text-[#1D4ED8] leading-none">
+                  <span className="text-4xl sm:text-5xl font-extrabold text-[#1D4ED8] leading-none">
                     149.000đ
                   </span>
-                  <span className="text-xs text-slate-500 font-mono">/tháng</span>
+                  <span className="text-xs text-slate-500">/tháng</span>
                 </div>
 
                 <ul className="space-y-3 mb-8 text-xs sm:text-sm text-slate-800">
                   <li className="flex items-start gap-2.5 font-medium">
-                    <span className="text-[#1D4ED8] font-mono text-xs mt-0.5 font-bold">✓</span>
+                    <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
                     <span>Nhận việc 1 chạm, không cần đấu thầu</span>
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
-                    <span className="text-[#1D4ED8] font-mono text-xs mt-0.5 font-bold">✓</span>
+                    <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
                     <span>Thông báo độc quyền trước 5 phút</span>
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
-                    <span className="text-[#1D4ED8] font-mono text-xs mt-0.5 font-bold">✓</span>
+                    <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
                     <span>Lá chắn yêu cầu tự động (Scope Shield)</span>
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
-                    <span className="text-[#1D4ED8] font-mono text-xs mt-0.5 font-bold">✓</span>
+                    <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
                     <span>Hỗ trợ 24/7 qua Hotline</span>
                   </li>
                 </ul>

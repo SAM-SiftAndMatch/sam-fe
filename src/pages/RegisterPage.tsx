@@ -73,7 +73,7 @@ const RegisterPage: React.FC = () => {
       <div className="w-full max-w-[540px] flex justify-start items-center z-10 mb-4">
         <Link
           to={paths.PATH_HOME}
-          className="text-xs font-mono font-medium text-slate-600 hover:text-[#1D4ED8] transition-colors flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3.5 py-2 rounded-lg shadow-xs border border-slate-200 hover:border-slate-300"
+          className="text-xs font-medium text-slate-600 hover:text-[#1D4ED8] transition-colors flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3.5 py-2 rounded-lg shadow-xs border border-slate-200 hover:border-slate-300"
         >
           <svg
             className="w-4 h-4"
@@ -94,10 +94,7 @@ const RegisterPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center items-center gap-2 mb-3">
-            <span
-              className="text-3xl sm:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] leading-none"
-              style={{ fontFamily: "'Quedora', sans-serif" }}
-            >
+            <span className="text-3xl sm:text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] leading-none">
               SAM
             </span>
           </div>
@@ -378,7 +375,7 @@ const RegisterPage: React.FC = () => {
         {/* Divider */}
         <div className="flex items-center my-6">
           <div className="flex-grow border-t border-slate-200" />
-          <span className="mx-3 text-[11px] font-mono text-slate-400 uppercase tracking-wider">
+          <span className="mx-3 text-[11px] text-slate-400 uppercase tracking-wider">
             HOẶC ĐĂNG KÝ BẰNG
           </span>
           <div className="flex-grow border-t border-slate-200" />
@@ -447,9 +444,9 @@ const RegisterPage: React.FC = () => {
       {/* Trust Badges & Copyright Footer */}
       <div className="mt-8 flex flex-col items-center gap-3 w-full max-w-[540px] z-10 text-xs text-slate-400">
         <div className="flex items-center gap-4">
-          <span className="font-mono text-[11px]">ĐƯỢC TIN DÙNG BỞI HÀNG TRĂM DOANH NGHIỆP</span>
+          <span className="text-[11px]">ĐƯỢC TIN DÙNG BỞI HÀNG TRĂM DOANH NGHIỆP</span>
         </div>
-        <p className="text-[11px] font-mono text-slate-400">
+        <p className="text-[11px] text-slate-400">
           © 2026 SAM AI Matching. Công nghệ kết nối nhân tài tương lai.
         </p>
       </div>

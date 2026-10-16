@@ -23,6 +23,7 @@ export const PATH_FREELANCER_PRICING = '/freelancer/pricing';
 export const PATH_FREELANCER_JOBS = '/freelancer/jobs';
 export const PATH_FREELANCER_CREATE_PROFILE = '/freelancer/profile/create';
 export const PATH_FREELANCER_APPLICATIONS = '/freelancer/applications';
+export const PATH_FREELANCER_INVITATIONS = '/freelancer/invitations';
 export const PATH_FREELANCER_PROJECTS = '/freelancer/projects';
 export const PATH_FREELANCER_PROJECT_DETAIL = '/freelancer/projects/:id';
 export const PATH_FREELANCER_EARNINGS = '/freelancer/earnings';
@@ -32,6 +33,7 @@ export const PATH_JOB_APPLY = '/jobs/:id/apply';
 export const PATH_JOB_APPLY_SUCCESS = '/jobs/:id/apply/success';
 
 export const PATH_WORKSPACES = '/workspaces';
+export const PATH_NOTIFICATIONS = '/notifications';
 export const PATH_WORKSPACE = '/workspace/:projectId';
 export const PATH_WORKSPACE_TIMELINE = '/workspace/:projectId/timeline';
 export const PATH_WORKSPACE_CONTRACT = '/workspace/:projectId/contract';

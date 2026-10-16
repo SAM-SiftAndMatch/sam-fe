@@ -20,58 +20,51 @@ export const FeaturesBento: React.FC = () => {
 
       {/* Bento Grid: 1 large, 2 medium, 3 small */}
       <div className="grid grid-cols-12 gap-6">
-        {/* ================= TILE 1: LARGE (8 cols on lg) - CODE SCAN RESULT ================= */}
+        {/* ================= TILE 1: LARGE (8 cols on lg) - ACCEPTANCE CHECKLIST ================= */}
         <div className="col-span-12 lg:col-span-8">
           <ScrollReveal delayMs={0} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">CORE SENTINEL</span>
+                  <span className="text-xs text-slate-400">CORE SENTINEL</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
-                  AI Trọng tài QC & Quét mã nguồn tự động
+                  Checklist hỗ trợ nghiệm thu
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl mb-6">
-                  Loại bỏ nguy cơ nhận về mã nguồn rác, lỗi tiềm ẩn hay thiếu kiểm thử. Hệ thống tự
-                  động kiểm tra cú pháp, quét lỗ hổng bảo mật và đối soát chất lượng trước khi
-                  nghiệm thu.
+                  Khi freelancer bàn giao, hệ thống gợi ý các bước kiểm tra từ SRS và tiến độ dự án.
+                  Client truy cập sản phẩm, đối chiếu báo cáo rồi tự xác nhận nghiệm thu hoặc yêu
+                  cầu chỉnh sửa.
                 </p>
               </div>
 
-              {/* Tiny live-looking UI mockup: Terminal Code Scan Result */}
-              <div className="rounded-[8px] bg-slate-900 text-slate-200 p-4 font-mono text-[11px] space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 shadow-inner">
+              {/* Tiny mockup: manual acceptance checklist */}
+              <div className="font-mono rounded-[8px] bg-slate-900 text-slate-200 p-4 text-[11px] space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 shadow-inner">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-2 text-slate-400 text-[10px]">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-slate-700 inline-block" />
                     <span className="w-2.5 h-2.5 rounded-full bg-slate-700 inline-block" />
                     <span className="w-2.5 h-2.5 rounded-full bg-slate-700 inline-block" />
-                    <span className="ml-1 text-slate-400">sam-qc --inspect delivery-v2.4</span>
+                    <span className="ml-1 text-slate-400">Checklist bàn giao dự án</span>
                   </div>
-                  <span className="text-emerald-400 font-semibold">STATUS: PASSED</span>
+                  <span className="text-blue-400 font-semibold">CHỜ NGHIỆM THU</span>
                 </div>
 
                 <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-300">✓ Syntax & Code Smell Analysis</span>
-                  <span className="text-emerald-400 font-bold">
-                    <AnimatedNumber value={0} /> BUGS / 0 WARNINGS
-                  </span>
+                  <span className="text-slate-300">Đối chiếu chức năng chính với SRS</span>
+                  <span className="text-blue-400 font-bold">CẦN KIỂM TRA</span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-300">✓ Security Audit (OWASP Top 10)</span>
-                  <span className="text-emerald-400 font-bold">CLEAN & SECURE</span>
+                  <span className="text-slate-300">Truy cập URL sản phẩm bàn giao</span>
+                  <span className="text-blue-400 font-bold">CẦN KIỂM TRA</span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-300">✓ Automated Unit Test Suite</span>
-                  <span className="text-blue-400 font-bold">
-                    <AnimatedNumber value={48} suffix="/48" /> PASSED (
-                    <AnimatedNumber value={100} suffix="%" />)
-                  </span>
+                  <span className="text-slate-300">Xem báo cáo và yêu cầu chỉnh sửa nếu cần</span>
+                  <span className="text-blue-400 font-bold">CLIENT QUYẾT ĐỊNH</span>
                 </div>
                 <div className="flex items-center justify-between py-1 border-t border-slate-800/80 pt-2 text-[10px] text-slate-400">
-                  <span>Execution Time: 1.42s</span>
-                  <span className="text-slate-300 font-semibold">
-                    QA Verdict: ĐẠT TIÊU CHUẨN BÀN GIAO
-                  </span>
+                  <span>Áp dụng cho mọi dự án</span>
+                  <span className="text-slate-300 font-semibold">Nghiệm thu thủ công</span>
                 </div>
               </div>
             </div>
@@ -84,7 +77,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">99% PRECISION</span>
+                  <span className="text-xs text-slate-400">99% PRECISION</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
                   AI Matching Score
@@ -98,8 +91,8 @@ export const FeaturesBento: React.FC = () => {
               {/* Live Mockup: Match Score Card */}
               <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-4 space-y-3 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-xs font-mono text-slate-500 uppercase">Match Score</span>
-                  <div className="text-2xl sm:text-3xl font-black text-[#1D4ED8]">
+                  <span className="text-xs text-slate-500 uppercase">Match Score</span>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-[#1D4ED8]">
                     <AnimatedNumber value={98.4} decimals={1} suffix="%" />
                   </div>
                 </div>
@@ -108,7 +101,7 @@ export const FeaturesBento: React.FC = () => {
                   <div className="bg-[#1D4ED8] h-full rounded-full w-[98.4%]" />
                 </div>
 
-                <div className="font-mono text-[10.5px] space-y-1.5 text-slate-600 pt-1">
+                <div className="text-[10.5px] space-y-1.5 text-slate-600 pt-1">
                   <div className="flex justify-between">
                     <span>Độ khớp kỹ năng:</span>
                     <span className="font-semibold text-slate-900">99.2%</span>
@@ -133,7 +126,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">VERIFIED ORIGINAL</span>
+                  <span className="text-xs text-slate-400">VERIFIED ORIGINAL</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
                   Kiểm tra chống đạo văn & Bản quyền
@@ -145,7 +138,7 @@ export const FeaturesBento: React.FC = () => {
               </div>
 
               {/* Live Mockup: Plagiarism Percentage */}
-              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-4 space-y-3 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 font-mono">
+              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-4 space-y-3 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-slate-500 uppercase">Tỷ lệ trùng lặp:</span>
                   <span className="text-lg font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-[4px] border border-emerald-200">
@@ -178,7 +171,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">ANTI-CREEP</span>
+                  <span className="text-xs text-slate-400">ANTI-CREEP</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
                   Lá chắn yêu cầu tự động (Scope Shield)
@@ -190,7 +183,7 @@ export const FeaturesBento: React.FC = () => {
               </div>
 
               {/* Live Mockup: Scope Shield Sentinel */}
-              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3.5 space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 font-mono text-[11px]">
+              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3.5 space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 text-[11px]">
                 <div className="flex items-center justify-between bg-white border border-slate-200/80 p-2 rounded-[6px]">
                   <span className="text-slate-600">Phạm vi gốc (SRS):</span>
                   <span className="text-slate-900 font-bold">5 modules [ĐÃ KHÓA]</span>
@@ -213,7 +206,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">100% AN TOÀN</span>
+                  <span className="text-xs text-slate-400">100% AN TOÀN</span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">
                   Ký quỹ Escrow theo từng cột mốc
@@ -225,7 +218,7 @@ export const FeaturesBento: React.FC = () => {
               </div>
 
               {/* Live Mockup: Milestone Tracker */}
-              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3 space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 font-mono text-[10.5px]">
+              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3 space-y-2 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 text-[10.5px]">
                 <div className="flex items-center justify-between bg-white border border-slate-200 px-2.5 py-1.5 rounded-[5px]">
                   <span className="text-slate-700">Mốc 1: Giao diện UI & Specs</span>
                   <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded text-[10px]">
@@ -249,7 +242,7 @@ export const FeaturesBento: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">CHỈ 30 GIÂY</span>
+                  <span className="text-xs text-slate-400">CHỈ 30 GIÂY</span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">
                   AI PM Phỏng vấn & Lập đặc tả
@@ -261,7 +254,7 @@ export const FeaturesBento: React.FC = () => {
               </div>
 
               {/* Live Mockup: Prompt to SRS breakdown */}
-              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3 space-y-1.5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 font-mono text-[10.5px]">
+              <div className="rounded-[8px] bg-slate-50 border border-slate-200/80 p-3 space-y-1.5 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform duration-200 text-[10.5px]">
                 <div className="text-slate-500 text-[10px]">ĐẦU VÀO Ý TƯỞNG THÔ:</div>
                 <div className="text-slate-800 bg-white border border-slate-200 px-2 py-1 rounded">
                   "Website bán khóa học online có thi trắc nghiệm"

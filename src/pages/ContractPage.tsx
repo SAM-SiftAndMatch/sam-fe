@@ -1,7 +1,8 @@
 import { Client } from '@stomp/stompjs';
+import { useQueryClient } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import { type ChatRoom, chatApi } from '../api/chat';
 import {
@@ -24,9 +25,28 @@ import { formatMoney } from '../utils/format';
 const ContractPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const pageFromWorkspace = (location.state as { workspacesPage?: unknown } | null)?.workspacesPage;
+  const workspacesPage =
+    typeof pageFromWorkspace === 'number' &&
+    Number.isSafeInteger(pageFromWorkspace) &&
+    pageFromWorkspace > 0
+      ? pageFromWorkspace
+      : 1;
   const { user } = useAuthStore();
   const role = user?.role === 'FREELANCER' ? 'freelancer' : 'client';
   const myId = user?.userId;
+  const queryClient = useQueryClient();
+
+  // ContractPage nằm ngoài layout workspace. Khi rời trang, buộc header và hợp đồng
+  // đối chiếu lại với BE (kể cả trường hợp WebSocket bị rớt trong lúc ký/nạp tiền).
+  useEffect(
+    () => () => {
+      if (!myId) return;
+      void queryClient.invalidateQueries({ queryKey: ['workspace', 'summary', myId] });
+    },
+    [myId, queryClient]
+  );
 
   const [room, setRoom] = useState<ChatRoom | null>(null);
   const [roomError, setRoomError] = useState<string | null>(null);
@@ -280,7 +300,9 @@ const ContractPage: React.FC = () => {
     }, 2500);
     // Mình là người ký thứ 2 (bên kia đã ký) → ra phòng chat đợi AI thẩm định
     if (agreed && otherAgreed && room?.id) {
-      navigate(`/workspace/${room.id}`, { state: { awaitingReview: true } });
+      navigate(`/workspace/${room.id}`, {
+        state: { awaitingReview: true, workspacesPage },
+      });
     }
   };
 
@@ -307,7 +329,9 @@ const ContractPage: React.FC = () => {
     }, 2500);
     // Mình là người chốt đôi (bên kia đã giữ nguyên) → ra phòng chat đợi kết quả
     if (agreed && otherKeep && room?.id) {
-      navigate(`/workspace/${room.id}`, { state: { awaitingReview: true } });
+      navigate(`/workspace/${room.id}`, {
+        state: { awaitingReview: true, workspacesPage },
+      });
     }
   };
 
@@ -508,7 +532,7 @@ const ContractPage: React.FC = () => {
         </button>
         <button
           type="button"
-          onClick={() => room && navigate(`/workspace/${room.id}`)}
+          onClick={() => room && navigate(`/workspace/${room.id}`, { state: { workspacesPage } })}
           className="flex-1 py-3 rounded-xl bg-white border-2 border-violet-300 text-violet-700 font-bold text-sm hover:bg-violet-50 transition-colors cursor-pointer"
         >
           Sang phòng chat đọc AI nhắn
@@ -543,22 +567,25 @@ const ContractPage: React.FC = () => {
       <AppHeader />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8">
-        <button
-          type="button"
-          onClick={() => navigate(room ? `/workspace/${room.id}` : '/workspaces')}
-          className="flex items-center gap-2 text-gray-500 hover:text-gray-900 font-medium transition-colors cursor-pointer bg-transparent border-0 mb-6"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
+        {room && (
+          <button
+            type="button"
+            onClick={() => navigate(`/workspace/${room.id}`, { state: { workspacesPage } })}
+            className="mb-6 flex items-center gap-2 text-gray-500 hover:text-gray-900 font-medium transition-colors cursor-pointer bg-transparent border-0"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Về phòng chat
-        </button>
+            <svg
+              aria-hidden="true"
+              className="h-5 w-5 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5m7 7-7-7 7-7" />
+            </svg>
+            Quay lại phòng chat
+          </button>
+        )}
 
         {loading ? (
           <p className="text-sm text-gray-500 text-center py-20">Đang tải hợp đồng...</p>
@@ -569,7 +596,7 @@ const ContractPage: React.FC = () => {
             </p>
             <button
               type="button"
-              onClick={() => navigate('/workspaces')}
+              onClick={() => navigate(`/workspaces?page=${workspacesPage}`)}
               className="text-sm font-bold text-blue-600 hover:underline bg-transparent border-0 cursor-pointer"
             >
               Về danh sách tin nhắn
@@ -577,7 +604,7 @@ const ContractPage: React.FC = () => {
           </div>
         ) : !contract ? (
           <div className="bg-white rounded-[28px] p-10 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.05)] text-center">
-            <h1 className="text-2xl font-black text-gray-900 mb-2">Chưa có hợp đồng</h1>
+            <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Chưa có hợp đồng</h1>
             <p className="text-sm text-gray-500 leading-relaxed max-w-md mx-auto mb-6">
               Dự án <span className="font-bold text-gray-800">{room.jobTitle}</span> chưa có hợp
               đồng.
@@ -610,7 +637,7 @@ const ContractPage: React.FC = () => {
               <p className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.25em] mb-2">
                 Cộng hòa xã hội chủ nghĩa Việt Nam
               </p>
-              <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-3">
+              <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-3">
                 Hợp đồng dịch vụ Freelance
               </h1>
               <div className="flex items-center justify-center gap-3">
@@ -771,7 +798,7 @@ const ContractPage: React.FC = () => {
                 <article className="bg-white rounded-[28px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.05)] overflow-hidden">
                   {/* Điều 1: Các bên */}
                   <section className="p-6 md:p-8 border-b border-gray-100">
-                    <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-4">
+                    <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-widest mb-4">
                       Điều 1 — Các bên tham gia
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -814,7 +841,7 @@ const ContractPage: React.FC = () => {
 
                   {/* Điều 2: Giá trị */}
                   <section className="p-6 md:p-8 border-b border-gray-100">
-                    <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-4">
+                    <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-widest mb-4">
                       Điều 2 — Giá trị hợp đồng
                     </h2>
                     <div className="rounded-2xl p-5 bg-gradient-to-br from-[#1D4ED8] to-[#0AAAD7] text-white">
@@ -828,10 +855,10 @@ const ContractPage: React.FC = () => {
                           value={editAmount}
                           onChange={(e) => onAmountChange(e.target.value)}
                           placeholder="VD: 15000000"
-                          className="w-full bg-white/15 border border-white/30 rounded-lg px-3 py-2 text-lg font-black text-white placeholder:text-white/50 outline-none focus:bg-white/20"
+                          className="w-full bg-white/15 border border-white/30 rounded-lg px-3 py-2 text-lg font-extrabold text-white placeholder:text-white/50 outline-none focus:bg-white/20"
                         />
                       ) : (
-                        <p className="text-2xl font-black">
+                        <p className="text-2xl font-extrabold">
                           {formatMoney(Number(contract.agreedAmount))} đ
                         </p>
                       )}
@@ -840,7 +867,7 @@ const ContractPage: React.FC = () => {
 
                   {/* Điều 3: Điều khoản — sửa thì chia đôi: trái gõ + toolbar, phải xem đẹp live */}
                   <section className="p-6 md:p-8">
-                    <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-4">
+                    <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-widest mb-4">
                       Điều 3 — Điều khoản chi tiết
                     </h2>
                     {isEditing ? (
@@ -899,7 +926,7 @@ const ContractPage: React.FC = () => {
                             onChange={(e) => onTermsChange(e.target.value)}
                             rows={18}
                             placeholder="Gõ nội dung... dùng nút định dạng ở trên để in đậm, tiêu đề, danh sách"
-                            className="w-full bg-[#F8FAFC] border border-gray-200 rounded-2xl p-5 font-mono text-[13px] text-gray-800 leading-relaxed outline-none focus:border-[#1D4ED8] resize-y min-h-[320px]"
+                            className="w-full bg-[#F8FAFC] border border-gray-200 rounded-2xl p-5 text-[13px] text-gray-800 leading-relaxed outline-none focus:border-[#1D4ED8] resize-y min-h-[320px]"
                           />
                           <div className="bg-[#F8FAFC] border border-blue-100 rounded-2xl p-6 overflow-y-auto max-h-[520px]">
                             <p className="text-[10px] font-bold text-[#1D4ED8] uppercase tracking-widest mb-3">
