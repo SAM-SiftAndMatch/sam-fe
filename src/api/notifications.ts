@@ -22,6 +22,7 @@ export interface UserNotification {
   message: string | null;
   createdAt: string;
   readAt: string | null;
+  resolvedAt: string | null;
   unreadCount: number;
 }
 

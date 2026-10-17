@@ -1,5 +1,7 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { jobApi } from '../api/job';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import JobStatusBadge from '../components/JobStatusBadge';
@@ -10,14 +12,32 @@ import type { JobResponse } from '../types/job';
 type LocationState = {
   newProjectId?: string;
   jobData?: JobResponse;
+  addonPending?: boolean;
+  paymentConfirmed?: boolean;
+  businessIncluded?: boolean;
 };
 
 const SuccessProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const state = (location.state as LocationState) || {};
-  const jobData = state.jobData;
-  const jobId = state.newProjectId || jobData?.id || '1';
+  const jobId = state.newProjectId || state.jobData?.id || searchParams.get('jobId') || '';
+  const project = useQuery({
+    queryKey: ['job-detail', jobId],
+    queryFn: () => jobApi.getJobById(jobId),
+    enabled: Boolean(jobId),
+    initialData: state.jobData,
+  });
+  const addons = useQuery({
+    queryKey: ['job-addons', jobId],
+    queryFn: () => jobApi.getAddonSummary(jobId),
+    enabled: Boolean(jobId),
+  });
+  const jobData = project.data;
+  const paymentConfirmed = state.paymentConfirmed || addons.data?.orderStatus === 'PAID';
+  const addonPending =
+    !paymentConfirmed && (state.addonPending || addons.data?.orderStatus === 'PENDING');
 
   // Format ngày tạo
   const createdDate = jobData?.createdAt
@@ -51,6 +71,22 @@ const SuccessProjectPage: React.FC = () => {
           <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
             Freelancer sẽ sớm gửi đề xuất cho dự án của bạn
           </p>
+          {paymentConfirmed && (
+            <p className="mb-6 w-full rounded-xl border border-green-200 bg-green-50 p-4 text-sm font-semibold text-green-800">
+              Đã thanh toán và kích hoạt các tính năng đã chọn cho dự án.
+            </p>
+          )}
+          {addonPending && (
+            <p className="mb-6 w-full rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              Dự án đã đăng bình thường. Các tính năng đã chọn chưa được kích hoạt vì chưa thanh
+              toán; bạn có thể thanh toán tại trang chi tiết dự án.
+            </p>
+          )}
+          {state.businessIncluded && !addonPending && !paymentConfirmed && (
+            <p className="mb-6 text-sm text-blue-700">
+              Các tính năng đã chọn được kích hoạt theo gói Business của bạn.
+            </p>
+          )}
 
           {/* Tóm tắt dự án: Ngân sách + Thời gian + Kỹ năng */}
           {jobData && (

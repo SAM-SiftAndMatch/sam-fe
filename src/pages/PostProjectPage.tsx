@@ -1,6 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import jobApi from '../api/job';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { PATH_CLIENT_CONFIRM_PROJECT } from '../routes/paths';
@@ -163,8 +165,12 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
   }, [currentStep, aiPricingState, description, selectedTags]);
 
   const [upgrades, setUpgrades] = useState(initialUpgrades);
+  const addonPrices = useQuery({ queryKey: ['job-addon-prices'], queryFn: jobApi.getAddonPrices });
+  const featuredFee = addonPrices.data?.featuredFee ?? 59000;
+  const urgentFee = addonPrices.data?.urgentFee ?? 99000;
 
-  const totalUpgradesCost = (upgrades.featured ? 59000 : 0) + (upgrades.urgent ? 99000 : 0);
+  const totalUpgradesCost =
+    (upgrades.featured ? featuredFee : 0) + (upgrades.urgent ? urgentFee : 0);
   const totalPrice = budgetAmount + totalUpgradesCost;
 
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
@@ -936,7 +942,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 <p className="text-[11px] text-gray-500 mb-6">
                   Ưu tiên hiển thị đến khi hết hạn đăng dự án hoặc dự án ngừng tuyển.
                 </p>
-                <div className="text-sm font-bold text-[#1D4ED8]">59.000 VNĐ</div>
+                <div className="text-sm font-bold text-[#1D4ED8]">
+                  {new Intl.NumberFormat('vi-VN').format(featuredFee)} VNĐ
+                </div>
               </button>
 
               {/* Option 2 */}
@@ -983,7 +991,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 <p className="text-[11px] text-gray-500 mb-6">
                   AI gợi ý tối đa 5 freelancer phù hợp và gửi thông báo tuyển gấp.
                 </p>
-                <div className="text-sm font-bold text-[#1D4ED8]">99.000 VNĐ</div>
+                <div className="text-sm font-bold text-[#1D4ED8]">
+                  {new Intl.NumberFormat('vi-VN').format(urgentFee)} VNĐ
+                </div>
               </button>
             </div>
 
@@ -1263,7 +1273,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     <div>
                       <h4 className="text-xs font-bold text-gray-900 mb-0.5">
                         Nổi bật (Featured)
-                        <span className="text-[#1D4ED8] ml-1.5">+59.000đ</span>
+                        <span className="text-[#1D4ED8] ml-1.5">
+                          +{new Intl.NumberFormat('vi-VN').format(featuredFee)}đ
+                        </span>
                       </h4>
                       <p className="text-[10px] text-gray-500">Ghim dự án lên đầu trang</p>
                     </div>
@@ -1305,7 +1317,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     <div>
                       <h4 className="text-xs font-bold text-gray-900 mb-0.5">
                         Gợi ý freelancer
-                        <span className="text-[#1D4ED8] ml-1.5">+99.000đ</span>
+                        <span className="text-[#1D4ED8] ml-1.5">
+                          +{new Intl.NumberFormat('vi-VN').format(urgentFee)}đ
+                        </span>
                       </h4>
                       <p className="text-[10px] text-gray-500">
                         AI gợi ý tối đa 5 ứng viên phù hợp

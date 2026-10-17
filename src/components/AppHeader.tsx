@@ -311,44 +311,54 @@ const AppHeader: React.FC = () => {
                           className={`w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50 ${notification.readAt ? '' : 'bg-blue-50/50'}`}
                         >
                           <p className="text-xs font-bold text-slate-800">
-                            {notification.type === '1_TOUCH_INVITE'
-                              ? '🔥 Lời mời tuyển gấp'
-                              : notification.type === 'JOB_INVITE'
-                                ? 'Lời mời làm việc mới'
-                                : notification.type === 'JOB_INVITE_ACCEPTED'
-                                  ? 'Freelancer đã đồng ý lời mời'
-                                  : notification.type === 'JOB_INVITE_DECLINED'
-                                    ? 'Freelancer đã từ chối lời mời'
-                                    : notification.type === 'JOB_INVITE_WITHDRAWN'
-                                      ? 'Lời mời đã được thu hồi'
-                                      : notification.type === 'JOB_INVITE_SELECTED'
-                                        ? 'Bạn được chọn cho dự án'
-                                        : notification.type === 'JOB_INVITE_NOT_SELECTED'
-                                          ? 'Dự án đã chọn freelancer khác'
-                                          : notification.type === 'CHAT_MESSAGE'
-                                            ? 'Tin nhắn mới'
-                                            : notification.type === 'DEV_CLAIM'
-                                              ? '🙋 Dev muốn chat'
-                                              : notification.type === 'CHAT_OPENED'
-                                                ? '💬 Đã mở phòng chat'
-                                                : notification.type === 'PROPOSAL_RECEIVED'
-                                                  ? '📨 Hồ sơ ứng tuyển mới'
-                                                  : notification.type === 'PROPOSAL_INVITE'
-                                                    ? '🤝 Client mời hợp tác'
-                                                    : notification.type === 'PROPOSAL_ACCEPTED'
-                                                      ? '✅ Dev đã đồng ý hợp tác'
-                                                      : notification.type === 'PROPOSAL_REJECTED'
-                                                        ? '🚫 Hồ sơ bị từ chối'
-                                                        : 'Có cập nhật mới'}
+                            {notification.type === 'PROJECT_ADDON_PAYMENT_PENDING'
+                              ? 'Chưa thanh toán tính năng dự án'
+                              : notification.type === 'PROJECT_ADDON_PAYMENT_PAID'
+                                ? 'Đã kích hoạt tính năng dự án'
+                                : notification.type === 'PROJECT_ADDON_PAYMENT_REVIEW'
+                                  ? 'Thanh toán tính năng cần hỗ trợ'
+                                  : notification.type === '1_TOUCH_INVITE'
+                                    ? '🔥 Lời mời tuyển gấp'
+                                    : notification.type === 'JOB_INVITE'
+                                      ? 'Lời mời làm việc mới'
+                                      : notification.type === 'JOB_INVITE_ACCEPTED'
+                                        ? 'Freelancer đã đồng ý lời mời'
+                                        : notification.type === 'JOB_INVITE_DECLINED'
+                                          ? 'Freelancer đã từ chối lời mời'
+                                          : notification.type === 'JOB_INVITE_WITHDRAWN'
+                                            ? 'Lời mời đã được thu hồi'
+                                            : notification.type === 'JOB_INVITE_SELECTED'
+                                              ? 'Bạn được chọn cho dự án'
+                                              : notification.type === 'JOB_INVITE_NOT_SELECTED'
+                                                ? 'Dự án đã chọn freelancer khác'
+                                                : notification.type === 'CHAT_MESSAGE'
+                                                  ? 'Tin nhắn mới'
+                                                  : notification.type === 'DEV_CLAIM'
+                                                    ? '🙋 Dev muốn chat'
+                                                    : notification.type === 'CHAT_OPENED'
+                                                      ? '💬 Đã mở phòng chat'
+                                                      : notification.type === 'PROPOSAL_RECEIVED'
+                                                        ? '📨 Hồ sơ ứng tuyển mới'
+                                                        : notification.type === 'PROPOSAL_INVITE'
+                                                          ? '🤝 Client mời hợp tác'
+                                                          : notification.type ===
+                                                              'PROPOSAL_ACCEPTED'
+                                                            ? '✅ Dev đã đồng ý hợp tác'
+                                                            : notification.type ===
+                                                                'PROPOSAL_REJECTED'
+                                                              ? '🚫 Hồ sơ bị từ chối'
+                                                              : 'Có cập nhật mới'}
                           </p>
                           <p className="mt-1 line-clamp-2 text-xs text-slate-600">
-                            {notification.type === 'CHAT_MESSAGE'
-                              ? `${notification.actorName || 'Người dùng'} • ${notification.unreadCount} tin nhắn mới${notification.jobTitle ? ` • ${notification.jobTitle}` : ''}`
-                              : notification.actorName
-                                ? `${notification.actorName} • ${notification.jobTitle || notification.message || 'Có cập nhật mới cho dự án'}`
-                                : notification.jobTitle ||
-                                  notification.message ||
-                                  'Có cập nhật mới cho dự án'}
+                            {notification.type.startsWith('PROJECT_ADDON_')
+                              ? notification.message || notification.jobTitle
+                              : notification.type === 'CHAT_MESSAGE'
+                                ? `${notification.actorName || 'Người dùng'} • ${notification.unreadCount} tin nhắn mới${notification.jobTitle ? ` • ${notification.jobTitle}` : ''}`
+                                : notification.actorName
+                                  ? `${notification.actorName} • ${notification.jobTitle || notification.message || 'Có cập nhật mới cho dự án'}`
+                                  : notification.jobTitle ||
+                                    notification.message ||
+                                    'Có cập nhật mới cho dự án'}
                           </p>
                         </button>
                       ))

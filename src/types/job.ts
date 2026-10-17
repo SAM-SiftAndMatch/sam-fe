@@ -50,6 +50,31 @@ export interface JobCreateRequest {
   isFeatured?: boolean;
   isUrgentHiring?: boolean;
   requiresAiQa?: boolean;
+  clientRequestId?: string;
+}
+
+export interface JobAddonPrices {
+  featuredFee: number;
+  urgentFee: number;
+  businessIncluded: boolean;
+}
+
+export interface JobAddonSummary {
+  orderId: string | null;
+  orderStatus: 'PENDING' | 'PAID' | 'PAID_UNAPPLIED' | 'CANCELLED' | null;
+  featuredActive: boolean;
+  urgentActive: boolean;
+  featuredPending: boolean;
+  urgentPending: boolean;
+  featuredFee: number;
+  urgentFee: number;
+  totalDue: number;
+  businessIncluded: boolean;
+}
+
+export interface JobAddonCheckout {
+  orderId: string;
+  vnpayUrl: string;
 }
 
 // Khớp BE: AiRecommendationResponse.java + SkillExperienceDto.java

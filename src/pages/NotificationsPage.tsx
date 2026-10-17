@@ -25,6 +25,9 @@ const notificationTitles: Record<string, string> = {
   PROPOSAL_INVITE: 'Lời mời hợp tác mới',
   PROPOSAL_ACCEPTED: 'Lời mời hợp tác đã được chấp nhận',
   PROPOSAL_REJECTED: 'Hồ sơ ứng tuyển đã bị từ chối',
+  PROJECT_ADDON_PAYMENT_PENDING: 'Chưa thanh toán tính năng dự án',
+  PROJECT_ADDON_PAYMENT_PAID: 'Đã kích hoạt tính năng dự án',
+  PROJECT_ADDON_PAYMENT_REVIEW: 'Thanh toán tính năng cần hỗ trợ',
 };
 
 const titleFor = (type: string) => notificationTitles[type] ?? 'Cập nhật mới';
@@ -91,10 +94,10 @@ export default function NotificationsPage() {
                   <p className="mt-1 text-sm text-gray-700">
                     {notification.type === 'CHAT_MESSAGE'
                       ? `${notification.actorName || 'Người dùng'} đã gửi ${notification.unreadCount} tin nhắn mới${notification.jobTitle ? ` trong dự án “${notification.jobTitle}”` : ''}.`
-                      : `${notification.actorName ? `${notification.actorName} · ` : ''}${notification.jobTitle || notification.message || 'Có cập nhật mới.'}`}
+                      : `${notification.actorName ? `${notification.actorName} · ` : ''}${notification.message || notification.jobTitle || 'Có cập nhật mới.'}`}
                   </p>
                 </div>
-                {!notification.readAt && (
+                {!notification.readAt && !notification.resolvedAt && (
                   <span
                     className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600"
                     aria-label="Chưa đọc"
