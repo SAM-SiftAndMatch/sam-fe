@@ -37,6 +37,23 @@ export interface JobResponse {
   updatedAt: string;
 }
 
+export interface ClientDashboardProject {
+  id: string;
+  title: string;
+  status: JobStatus;
+  budgetMin: number | null;
+  budgetMax: number | null;
+  updatedAt: string;
+  freelancerName: string | null;
+}
+
+export interface ClientDashboardOverview {
+  totalPosted: number;
+  inProgress: number;
+  completed: number;
+  recentProjects: ClientDashboardProject[];
+}
+
 export interface JobCreateRequest {
   title: string;
   description: string;

@@ -14,6 +14,7 @@ import Footer from '../components/Footer';
 import JobStatusBadge from '../components/JobStatusBadge';
 import PaginationNav from '../components/PaginationNav';
 import ProposalStatusBadge from '../components/ProposalStatusBadge';
+import SrsPdfActions from '../components/SrsPdfActions';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_PROJECTS, PATH_WORKSPACE } from '../routes/paths';
@@ -324,10 +325,10 @@ const ClientProjectDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="client-route client-project-detail-page min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6">
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8 flex flex-col gap-6">
         {/* Breadcrumb & Nút quay lại */}
         <div className="flex items-center justify-between">
           <button
@@ -366,10 +367,10 @@ const ClientProjectDetailPage: React.FC = () => {
         ) : (
           <>
             {/* Cột chính */}
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_296px]">
               {/* Thông tin dự án */}
-              <div className="flex flex-col gap-6">
-                <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
+              <div className="flex min-w-0 flex-col gap-6">
+                <div className="bg-white rounded-[24px] p-5 sm:p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
                   <div className="flex justify-between items-start mb-4">
                     <JobStatusBadge status={project.status} />
                     <span className="text-xs font-semibold text-gray-400">
@@ -377,7 +378,7 @@ const ClientProjectDetailPage: React.FC = () => {
                     </span>
                   </div>
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">{project.title}</h1>
-                  <div className="flex items-center gap-4 text-sm font-semibold text-gray-500 mb-6">
+                  <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-gray-500 mb-6">
                     <span>
                       Mã DA:{' '}
                       <span className="text-gray-900">
@@ -463,6 +464,7 @@ const ClientProjectDetailPage: React.FC = () => {
                           </a>
                         )}
                       </div>
+                      <SrsPdfActions jobId={project.id} />
                       <div className="prose prose-sm max-w-none bg-[#F8FAFC] border border-gray-100 rounded-2xl p-6 text-gray-700">
                         <ReactMarkdown
                           components={{
@@ -529,7 +531,7 @@ const ClientProjectDetailPage: React.FC = () => {
 
                     <div className="flex flex-col gap-4">
                       {!project.isUrgentHiring && !addons.data?.urgentPending && (
-                        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                        <div className="project-detail-blue-notice rounded-2xl border border-blue-200 bg-blue-50 p-5">
                           <p className="mb-3 text-sm text-blue-900">
                             Bạn có thể kích hoạt gợi ý freelancer phù hợp cho dự án đang tuyển.
                           </p>
@@ -543,7 +545,7 @@ const ClientProjectDetailPage: React.FC = () => {
                         </div>
                       )}
                       {addons.data?.urgentPending && (
-                        <p className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+                        <p className="project-detail-amber-notice rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
                           Gợi ý freelancer đã được chọn nhưng chưa thanh toán. Thanh toán tại mục
                           Tùy chọn dự án để kích hoạt.
                         </p>
@@ -812,7 +814,7 @@ const ClientProjectDetailPage: React.FC = () => {
                       </div>
                     )}
                     {addons.data?.orderStatus === 'PENDING' && (
-                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                      <div className="project-detail-amber-notice rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                         <p className="font-bold">Tính năng đã chọn, chờ thanh toán</p>
                         <p className="mt-1">
                           {[
@@ -842,7 +844,7 @@ const ClientProjectDetailPage: React.FC = () => {
                       </div>
                     )}
                     {addons.data?.orderStatus === 'PAID_UNAPPLIED' && (
-                      <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+                      <p className="project-detail-red-notice rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
                         Đã ghi nhận thanh toán nhưng dự án không còn tuyển, nên tính năng chưa được
                         kích hoạt. Vui lòng liên hệ hỗ trợ để xử lý khoản tiền.
                       </p>
@@ -869,7 +871,7 @@ const ClientProjectDetailPage: React.FC = () => {
 
                 {/* Lịch sử gói đã mua được hiển thị trong Hồ sơ → Gói của tôi. */}
 
-                <div className="bg-[#EEF2FF] rounded-[24px] p-6 border border-[#DCE4FF] text-center flex flex-col items-center">
+                <div className="project-detail-help-card bg-[#EEF2FF] rounded-[24px] p-6 border border-[#DCE4FF] text-center flex flex-col items-center">
                   <div className="w-12 h-12 bg-[#1D4ED8] rounded-full text-white flex items-center justify-center mb-4">
                     <svg
                       className="w-6 h-6"

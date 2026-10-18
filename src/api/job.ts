@@ -3,6 +3,7 @@ import apiClient from '../lib/axios';
 import type { ApiResponse, PageResult } from '../types/api';
 import type {
   AcceptInvitationResponse,
+  ClientDashboardOverview,
   JobAddonCheckout,
   JobAddonPrices,
   JobAddonSummary,
@@ -12,6 +13,41 @@ import type {
 } from '../types/job';
 
 export const jobApi = {
+  getClientDashboardOverview: async (): Promise<ClientDashboardOverview> =>
+    requireApiResult(
+      (await apiClient.get<ApiResponse<ClientDashboardOverview>>('/jobs/client/me/overview')).data,
+      'Không tải được tổng quan dự án'
+    ),
+  getSrsPdfStatus: async (
+    jobId: string
+  ): Promise<{
+    status: 'NONE' | 'PENDING' | 'GENERATING' | 'READY' | 'FAILED';
+    attempts: number;
+  }> =>
+    requireApiResult(
+      (
+        await apiClient.get<
+          ApiResponse<{
+            status: 'NONE' | 'PENDING' | 'GENERATING' | 'READY' | 'FAILED';
+            attempts: number;
+          }>
+        >(`/jobs/${jobId}/srs-pdf/status`)
+      ).data,
+      'Không tải được trạng thái PDF SRS'
+    ),
+  getSrsPdf: async (jobId: string, download = false): Promise<Blob> =>
+    (
+      await apiClient.get<Blob>(`/jobs/${jobId}/srs-pdf`, {
+        params: { download },
+        responseType: 'blob',
+      })
+    ).data,
+  retrySrsPdf: async (jobId: string): Promise<void> => {
+    assertApiSuccess(
+      (await apiClient.post<ApiResponse<unknown>>(`/jobs/${jobId}/srs-pdf/retry`)).data,
+      'Không tạo lại được PDF SRS'
+    );
+  },
   getAddonPrices: async (): Promise<JobAddonPrices> =>
     requireApiResult(
       (await apiClient.get<ApiResponse<JobAddonPrices>>('/jobs/addon-prices')).data,

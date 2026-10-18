@@ -62,7 +62,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+    <div className="notifications-page min-h-screen bg-[#F8FAFC] flex flex-col">
       <AppHeader />
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 md:px-6 py-10">
         <h1 className="text-3xl font-bold text-gray-900">Tất cả thông báo</h1>
@@ -86,7 +86,7 @@ export default function NotificationsPage() {
               key={notification.id}
               type="button"
               onClick={() => void open(notification)}
-              className={`w-full rounded-2xl border p-5 text-left transition-colors hover:border-blue-300 hover:bg-blue-50/40 ${notification.readAt ? 'border-gray-200 bg-white' : 'border-blue-200 bg-blue-50/50'}`}
+              className={`notification-page-item w-full rounded-2xl border p-5 text-left transition-colors hover:border-blue-300 hover:bg-blue-50/40 ${notification.readAt ? 'border-gray-200 bg-white' : 'notification-page-item--unread border-blue-200 bg-blue-50/50'}`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div>

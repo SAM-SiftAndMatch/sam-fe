@@ -156,7 +156,7 @@ const ConfirmProjectPage: React.FC = () => {
   };
 
   return (
-    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="client-route project-confirm-page min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
       <main className="flex-1 flex items-center justify-center py-12 px-4">
@@ -346,7 +346,7 @@ const ConfirmProjectPage: React.FC = () => {
               Các gói dịch vụ nâng cấp (Tùy chọn)
             </h3>
             <div className="space-y-3">
-              <label className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <label className="project-confirm-addon-option flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={upgrades.featured}
@@ -362,7 +362,7 @@ const ConfirmProjectPage: React.FC = () => {
                 </div>
               </label>
 
-              <label className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <label className="project-confirm-addon-option flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={upgrades.urgent}

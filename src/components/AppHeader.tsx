@@ -278,7 +278,7 @@ const AppHeader: React.FC = () => {
                   )}
                 </button>
                 {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 max-h-96 w-80 overflow-y-auto rounded-xl border border-slate-200 bg-white py-2 shadow-xl">
+                  <div className="app-notification-menu absolute right-0 mt-2 max-h-96 w-80 overflow-y-auto rounded-xl border border-slate-200 bg-white py-2 shadow-xl">
                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2">
                       <p className="text-xs font-bold text-slate-800">Thông báo</p>
                       {unreadCount > 0 && (
@@ -308,7 +308,7 @@ const AppHeader: React.FC = () => {
                               notification.type
                             );
                           }}
-                          className={`w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50 ${notification.readAt ? '' : 'bg-blue-50/50'}`}
+                          className={`app-notification-item w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50 ${notification.readAt ? '' : 'app-notification-item--unread bg-blue-50/50'}`}
                         >
                           <p className="text-xs font-bold text-slate-800">
                             {notification.type === 'PROJECT_ADDON_PAYMENT_PENDING'

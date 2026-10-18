@@ -109,7 +109,10 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
         };
         const hasOpts = (q.options || []).length > 0;
         return (
-          <div key={q.id} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+          <div
+            key={q.id}
+            className="ai-question-panel bg-gray-50 border border-gray-200 rounded-xl p-4"
+          >
             {/* Hint badge */}
             {q.hint && (
               <span className="inline-block text-[9px] font-bold text-blue-500 uppercase tracking-widest bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full mb-1.5">
@@ -132,9 +135,9 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
                       type="button"
                       disabled={disabled}
                       onClick={() => toggleOption(q.id, opt)}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-all cursor-pointer font-medium ${
+                      className={`ai-question-option text-xs px-3 py-1.5 rounded-full border transition-all cursor-pointer font-medium ${
                         isSelected
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                          ? 'ai-question-option--selected bg-blue-600 text-white border-blue-600 shadow-sm'
                           : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
                       }`}
                     >
@@ -148,7 +151,7 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
                     type="button"
                     disabled={disabled}
                     onClick={() => toggleShowCustom(q.id)}
-                    className="text-xs px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-gray-400 bg-white hover:border-gray-400 hover:text-gray-600 transition-all cursor-pointer font-medium"
+                    className="ai-question-option text-xs px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-gray-400 bg-white hover:border-gray-400 hover:text-gray-600 transition-all cursor-pointer font-medium"
                   >
                     Khác...
                   </button>
@@ -545,6 +548,14 @@ const SrsModal: React.FC<SrsModalProps> = ({ isOpen, onClose, srsContent }) => {
 // Main Page Component
 // =============================================================================
 type PageState = 'brief' | 'ba-chat' | 'srs-review' | 'risk-chat' | 'completed';
+const PHASE_ORDER: PageState[] = ['brief', 'ba-chat', 'srs-review', 'risk-chat', 'completed'];
+const PHASE_LABELS = [
+  'Mô tả dự án',
+  'Làm rõ yêu cầu',
+  'Duyệt SRS',
+  'Đánh giá rủi ro',
+  'Hoàn thành',
+];
 
 const AIBriefPage: React.FC = () => {
   const navigate = useNavigate();
@@ -666,6 +677,15 @@ const AIBriefPage: React.FC = () => {
       return;
     }
 
+    // Starting again from the brief must create a fresh AI conversation.
+    sessionId.current = generateSessionId();
+    riskRequestId.current += 1;
+    setRiskMessages([]);
+    setRiskInput('');
+    setLatestSrsContent(null);
+    setLatestSrsUrl(null);
+    setExactBudgetVnd(null);
+    setDurationMonths(null);
     const requestId = ++baRequestId.current;
     setBaMessages([
       { id: `msg-${Date.now()}`, role: 'user', content: userMessage, timestamp: new Date() },
@@ -711,6 +731,17 @@ const AIBriefPage: React.FC = () => {
         timestamp: new Date(),
       };
       setBaMessages((prev) => [...prev, userMsg]);
+      if (latestSrsContent) {
+        setLatestSrsContent(null);
+        setLatestSrsUrl(null);
+      }
+      // A revised brief invalidates any risk analysis produced from the previous SRS.
+      if (riskMessages.length > 0) {
+        setRiskMessages([]);
+        setRiskInput('');
+        setExactBudgetVnd(null);
+        setDurationMonths(null);
+      }
       setBaInput('');
       setIsBaSending(true);
       setError(null);
@@ -735,8 +766,15 @@ const AIBriefPage: React.FC = () => {
         if (requestId === baRequestId.current) setIsBaSending(false);
       }
     },
-    [baInput, isBaSending, handleBaResponse, latestSrsContent]
+    [baInput, isBaSending, handleBaResponse, latestSrsContent, riskMessages.length]
   );
+
+  const goToPreviousPhase = (target: PageState) => {
+    if (isBaSending || isRiskSending || isSavingSrs) return;
+    if (PHASE_ORDER.indexOf(target) >= PHASE_ORDER.indexOf(pageState)) return;
+    setError(null);
+    setPageState(target);
+  };
 
   // =========================================
   // Bắt đầu Risk Chat
@@ -935,57 +973,76 @@ const AIBriefPage: React.FC = () => {
   // Render
   // =========================================
   return (
-    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="client-route ai-brief-page min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-6 flex flex-col">
         {/* Progress bar */}
-        <div className="relative grid grid-cols-5 mb-6">
-          {(['brief', 'ba-chat', 'srs-review', 'risk-chat', 'completed'] as const).map(
-            (step, idx) => {
-              const stepLabels = [
-                'Mô tả dự án',
-                'Làm rõ yêu cầu',
-                'Duyệt SRS',
-                'Đánh giá rủi ro',
-                'Hoàn thành',
-              ];
-              const stepOrder = ['brief', 'ba-chat', 'srs-review', 'risk-chat', 'completed'];
-              const currentIndex = stepOrder.indexOf(pageState);
-              const stepIndex = stepOrder.indexOf(step);
-              const isActive = pageState === step;
-              const isDone = currentIndex > stepIndex;
-              return (
-                <div key={step} className="relative flex min-w-0 flex-col items-center gap-2">
-                  {idx < stepOrder.length - 1 && (
-                    <div
-                      aria-hidden="true"
-                      className="absolute left-[calc(50%+18px)] top-[13px] h-0.5 w-[calc(100%-36px)] bg-gray-200"
-                    />
-                  )}
+        <div
+          className="project-flow-stepper relative grid grid-cols-5 mb-6"
+          aria-label="Tiến độ làm rõ dự án"
+        >
+          {PHASE_ORDER.map((step, idx) => {
+            const currentIndex = PHASE_ORDER.indexOf(pageState);
+            const stepIndex = idx;
+            const isActive = pageState === step;
+            const isDone = currentIndex > stepIndex;
+            return (
+              <div key={step} className="relative flex min-w-0 flex-col items-center">
+                {idx < PHASE_ORDER.length - 1 && (
                   <div
-                    className={`relative z-10 flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0 transition-all ${
+                    aria-hidden="true"
+                    className={`project-flow-line absolute left-[calc(50%+18px)] top-[13px] h-0.5 w-[calc(100%-36px)] ${isDone ? 'project-flow-line--done' : ''}`}
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => goToPreviousPhase(step)}
+                  disabled={!isDone || isBaSending || isRiskSending || isSavingSrs}
+                  aria-current={isActive ? 'step' : undefined}
+                  aria-label={`${PHASE_LABELS[idx]}${isDone ? ' – quay lại bước này' : ''}`}
+                  className={`project-flow-node flex min-w-0 flex-col items-center gap-2 rounded-lg px-1 text-center ${
+                    isDone ? 'project-flow-node--back' : ''
+                  }`}
+                >
+                  <span
+                    className={`project-flow-circle relative z-10 flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0 transition-all ${
                       isDone
-                        ? 'bg-green-500 text-white'
+                        ? 'project-flow-circle--done'
                         : isActive
-                          ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                          : 'bg-gray-200 text-gray-500'
+                          ? 'project-flow-circle--active'
+                          : 'project-flow-circle--upcoming'
                     }`}
                   >
                     {isDone ? '✓' : idx + 1}
-                  </div>
+                  </span>
                   <span
-                    className={`hidden text-center text-xs font-semibold leading-tight sm:block ${
-                      isActive ? 'text-blue-600' : isDone ? 'text-green-600' : 'text-gray-400'
+                    className={`project-flow-label hidden text-xs font-semibold leading-tight sm:block ${
+                      isActive
+                        ? 'project-flow-label--active'
+                        : isDone
+                          ? 'project-flow-label--done'
+                          : ''
                     }`}
                   >
-                    {stepLabels[idx]}
+                    {PHASE_LABELS[idx]}
                   </span>
-                </div>
-              );
-            }
-          )}
+                </button>
+              </div>
+            );
+          })}
         </div>
+
+        {pageState !== 'brief' && (
+          <button
+            type="button"
+            onClick={() => goToPreviousPhase(PHASE_ORDER[PHASE_ORDER.indexOf(pageState) - 1])}
+            disabled={isBaSending || isRiskSending || isSavingSrs}
+            className="mb-4 self-start rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Quay lại bước trước
+          </button>
+        )}
 
         {/* Main card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
@@ -1184,9 +1241,9 @@ const AIBriefPage: React.FC = () => {
 
           {/* === PHASE: Review generated SRS before starting risk assessment === */}
           {pageState === 'srs-review' && (
-            <div className="p-6 bg-slate-50">
+            <div className="ai-srs-review p-6 bg-slate-50">
               <div className="max-w-3xl mx-auto space-y-4">
-                <div className="flex items-start gap-3 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl">
+                <div className="ai-srs-banner flex items-start gap-3 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl">
                   <div className="text-lg leading-none">✨</div>
                   <div>
                     <h2 className="text-sm font-bold text-blue-900">SRS nháp đã sẵn sàng</h2>
@@ -1215,7 +1272,7 @@ const AIBriefPage: React.FC = () => {
                     type="button"
                     onClick={handleContinueToRisk}
                     disabled={!latestSrsContent}
-                    className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md shadow-amber-200 transition-all cursor-pointer border-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="ai-brief-risk-continue bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md shadow-amber-200 transition-all cursor-pointer border-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     SRS ổn, đánh giá rủi ro
                     <svg
@@ -1345,7 +1402,7 @@ const AIBriefPage: React.FC = () => {
           {/* === PHASE: Completed === */}
           {pageState === 'completed' && (
             <div className="flex flex-col items-center justify-center gap-6 px-6 py-10 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
+              <div className="ai-brief-complete-mark w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
                 <svg
                   className="w-8 h-8 text-white"
                   fill="none"
@@ -1370,7 +1427,7 @@ const AIBriefPage: React.FC = () => {
                   onClick={() => setIsSrsModalOpen(true)}
                   className="text-sm text-blue-600 hover:text-blue-800 font-semibold cursor-pointer bg-transparent border-0 flex items-center gap-2 underline underline-offset-2"
                 >
-                  📄 Xem tài liệu SRS đã tạo
+                  Xem tài liệu SRS đã tạo
                 </button>
               )}
 

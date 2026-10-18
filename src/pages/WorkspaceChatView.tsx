@@ -80,7 +80,7 @@ const ChatBubble = memo(function ChatBubble({
   if (message.system) {
     return (
       <div className="flex justify-center">
-        <div className="max-w-[90%] bg-gradient-to-br from-violet-600 via-[#6D28D9] to-[#1D4ED8] text-white rounded-3xl px-5 py-4 shadow-lg">
+        <div className="workspace-system-message max-w-[90%] bg-gradient-to-br from-violet-600 via-[#6D28D9] to-[#1D4ED8] text-white rounded-3xl px-5 py-4 shadow-lg">
           <p className="text-[11px] font-extrabold uppercase tracking-widest text-white/80 mb-1.5">
             SAM AI hệ thống
           </p>
@@ -331,7 +331,7 @@ export default function WorkspaceChatView() {
           )}
         </div>
         {awaitingReview && (
-          <div className="mx-6 mt-4 rounded-2xl px-5 py-4 bg-gradient-to-r from-violet-600 to-[#1D4ED8] text-white shadow-lg">
+          <div className="workspace-system-message mx-6 mt-4 rounded-2xl px-5 py-4 bg-gradient-to-r from-violet-600 to-[#1D4ED8] text-white shadow-lg">
             <p className="text-sm font-bold">Đã đủ 2 chữ ký! AI đang thẩm định hợp đồng...</p>
             <p className="text-xs text-white/75">Kết quả sẽ hiện dưới dạng tin nhắn hệ thống.</p>
           </div>
