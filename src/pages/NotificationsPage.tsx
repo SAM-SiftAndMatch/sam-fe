@@ -25,6 +25,9 @@ const notificationTitles: Record<string, string> = {
   PROPOSAL_INVITE: 'Lời mời hợp tác mới',
   PROPOSAL_ACCEPTED: 'Lời mời hợp tác đã được chấp nhận',
   PROPOSAL_REJECTED: 'Hồ sơ ứng tuyển đã bị từ chối',
+  PROJECT_ADDON_PAYMENT_PENDING: 'Chưa thanh toán tính năng dự án',
+  PROJECT_ADDON_PAYMENT_PAID: 'Đã kích hoạt tính năng dự án',
+  PROJECT_ADDON_PAYMENT_REVIEW: 'Thanh toán tính năng cần hỗ trợ',
 };
 
 const titleFor = (type: string) => notificationTitles[type] ?? 'Cập nhật mới';
@@ -59,7 +62,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+    <div className="notifications-page min-h-screen bg-[#F8FAFC] flex flex-col">
       <AppHeader />
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 md:px-6 py-10">
         <h1 className="text-3xl font-bold text-gray-900">Tất cả thông báo</h1>
@@ -83,7 +86,7 @@ export default function NotificationsPage() {
               key={notification.id}
               type="button"
               onClick={() => void open(notification)}
-              className={`w-full rounded-2xl border p-5 text-left transition-colors hover:border-blue-300 hover:bg-blue-50/40 ${notification.readAt ? 'border-gray-200 bg-white' : 'border-blue-200 bg-blue-50/50'}`}
+              className={`notification-page-item w-full rounded-2xl border p-5 text-left transition-colors hover:border-blue-300 hover:bg-blue-50/40 ${notification.readAt ? 'border-gray-200 bg-white' : 'notification-page-item--unread border-blue-200 bg-blue-50/50'}`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -91,10 +94,10 @@ export default function NotificationsPage() {
                   <p className="mt-1 text-sm text-gray-700">
                     {notification.type === 'CHAT_MESSAGE'
                       ? `${notification.actorName || 'Người dùng'} đã gửi ${notification.unreadCount} tin nhắn mới${notification.jobTitle ? ` trong dự án “${notification.jobTitle}”` : ''}.`
-                      : `${notification.actorName ? `${notification.actorName} · ` : ''}${notification.jobTitle || notification.message || 'Có cập nhật mới.'}`}
+                      : `${notification.actorName ? `${notification.actorName} · ` : ''}${notification.message || notification.jobTitle || 'Có cập nhật mới.'}`}
                   </p>
                 </div>
-                {!notification.readAt && (
+                {!notification.readAt && !notification.resolvedAt && (
                   <span
                     className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600"
                     aria-label="Chưa đọc"

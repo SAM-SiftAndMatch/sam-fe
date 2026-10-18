@@ -25,6 +25,7 @@ import ClientProfilePage from '../pages/ClientProfilePage';
 import ClientProjectDetailPage from '../pages/ClientProjectDetailPage';
 import ClientProjectListPage from '../pages/ClientProjectListPage';
 import ConfirmProjectPage from '../pages/ConfirmProjectPage';
+import JobAddonReturnPage from '../pages/JobAddonReturnPage';
 import PostProjectPage from '../pages/PostProjectPage';
 import SuccessProjectPage from '../pages/SuccessProjectPage';
 import VnpayReturnPage from '../pages/VnpayReturnPage';
@@ -97,6 +98,7 @@ const AppRoutes = () => {
         <Route path={paths.PATH_CLIENT_SUCCESS_PROJECT} element={<SuccessProjectPage />} />
         <Route path={paths.PATH_CLIENT_PROJECTS} element={<ClientProjectListPage />} />
         <Route path={paths.PATH_CLIENT_PROJECT_DETAIL} element={<ClientProjectDetailPage />} />
+        <Route path={paths.PATH_CLIENT_ADDON_RETURN} element={<JobAddonReturnPage />} />
         <Route path={paths.PATH_CLIENT_PAYMENT} element={<ClientPaymentPage />} />
         <Route path={paths.PATH_CLIENT_PAYMENT_RETURN} element={<VnpayReturnPage />} />
         <Route path={paths.PATH_CLIENT_FIND_FREELANCER} element={<FindFreelancerPage />} />

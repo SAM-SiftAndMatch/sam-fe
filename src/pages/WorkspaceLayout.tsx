@@ -194,12 +194,12 @@ export default function WorkspaceLayout() {
   );
 
   return (
-    <div className="h-screen bg-[#F8FAFC] font-sans flex flex-col overflow-hidden">
+    <div className="workspace-route h-screen bg-[#F8FAFC] font-sans flex flex-col overflow-hidden">
       <AppHeader />
       <div className="w-full max-w-[1600px] mx-auto px-4 pt-3 md:px-6">
         <Link
           to={`/workspaces?page=${workspacesPage}`}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-black hover:underline"
+          className="workspace-back-link inline-flex items-center gap-2 text-sm font-semibold text-black hover:underline"
         >
           <svg
             aria-hidden="true"
@@ -236,7 +236,7 @@ export default function WorkspaceLayout() {
               end
               to={`/workspace/${roomId ?? projectId}`}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${isActive ? 'bg-[#1D4ED8] text-white font-semibold' : 'text-gray-600 hover:bg-white'}`
+                `workspace-nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${isActive ? 'workspace-nav-link--active bg-[#1D4ED8] text-white font-semibold' : 'text-gray-600 hover:bg-white'}`
               }
             >
               Tin nhắn
@@ -244,7 +244,7 @@ export default function WorkspaceLayout() {
             <NavLink
               to={`/workspace/${roomId ?? projectId}/timeline`}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${isActive ? 'bg-[#1D4ED8] text-white font-semibold' : 'text-gray-600 hover:bg-white'}`
+                `workspace-nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${isActive ? 'workspace-nav-link--active bg-[#1D4ED8] text-white font-semibold' : 'text-gray-600 hover:bg-white'}`
               }
             >
               Tiến độ dự án

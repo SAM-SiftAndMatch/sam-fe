@@ -1,6 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import jobApi from '../api/job';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { PATH_CLIENT_CONFIRM_PROJECT } from '../routes/paths';
@@ -163,8 +165,12 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
   }, [currentStep, aiPricingState, description, selectedTags]);
 
   const [upgrades, setUpgrades] = useState(initialUpgrades);
+  const addonPrices = useQuery({ queryKey: ['job-addon-prices'], queryFn: jobApi.getAddonPrices });
+  const featuredFee = addonPrices.data?.featuredFee ?? 59000;
+  const urgentFee = addonPrices.data?.urgentFee ?? 99000;
 
-  const totalUpgradesCost = (upgrades.featured ? 59000 : 0) + (upgrades.urgent ? 99000 : 0);
+  const totalUpgradesCost =
+    (upgrades.featured ? featuredFee : 0) + (upgrades.urgent ? urgentFee : 0);
   const totalPrice = budgetAmount + totalUpgradesCost;
 
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
@@ -204,67 +210,62 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
     ];
 
     return (
-      <div className="w-full max-w-3xl mx-auto mb-12 relative">
-        {/* Container cho đường gạch ngang, căn chuẩn từ tâm step 1 đến tâm step 4 */}
-        <div className="absolute top-5 left-[40px] right-[40px] h-[2px] bg-gray-400 z-0">
-          {/* Đường gạch ngang xanh thể hiện tiến độ */}
-          <div
-            className="h-full bg-green-500 transition-all duration-500"
-            style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
-          />
-        </div>
+      <div
+        className="project-flow-stepper project-flow-stepper--post relative mx-auto mb-12 grid w-full max-w-3xl grid-cols-4"
+        aria-label="Tiến độ đăng dự án"
+      >
+        {steps.map((step) => {
+          const isCompleted = step.id < currentStep;
+          const isActive = step.id === currentStep;
 
-        <div className="flex justify-between items-start">
-          {steps.map((step) => {
-            const isCompleted = step.id < currentStep;
-            const isActive = step.id === currentStep;
-
-            return (
-              <div
-                key={step.id}
-                onClick={() => {
-                  if (step.id <= highestStep) goToStep(step.id);
-                }}
-                className={`flex flex-col items-center gap-2 relative z-10 bg-[#F8FAFC] px-1 md:px-2 w-14 md:w-20 text-center shrink-0 ${step.id <= highestStep ? 'cursor-pointer hover:-translate-y-0.5 transition-transform' : 'cursor-not-allowed'}`}
-              >
-                {isCompleted ? (
-                  <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow-md">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                      role="img"
-                      aria-label="Completed"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                ) : isActive ? (
-                  <div className="w-10 h-10 rounded-full bg-[#1D4ED8] text-white flex items-center justify-center font-bold text-sm shadow-md">
-                    {step.id}
-                  </div>
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-200 text-gray-400 flex items-center justify-center font-bold text-sm">
-                    {step.id}
-                  </div>
-                )}
+          return (
+            <div key={step.id} className="relative flex min-w-0 flex-col items-center">
+              {step.id < steps.length && (
                 <span
-                  className={`text-[11px] md:text-xs font-bold whitespace-nowrap ${isActive || isCompleted ? (isCompleted ? 'text-green-500' : 'text-[#1D4ED8]') : 'text-gray-400'}`}
+                  aria-hidden="true"
+                  className={`project-flow-line absolute left-[calc(50%+25px)] top-[19px] h-0.5 w-[calc(100%-50px)] ${isCompleted ? 'project-flow-line--done' : ''}`}
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => goToStep(step.id)}
+                disabled={step.id > highestStep || isActive}
+                aria-current={isActive ? 'step' : undefined}
+                aria-label={`${step.label}${isCompleted ? ' – quay lại bước này' : ''}`}
+                className={`project-flow-node flex min-w-0 flex-col items-center gap-2 rounded-lg px-1 text-center ${step.id <= highestStep && !isActive ? 'project-flow-node--back' : ''}`}
+              >
+                <span
+                  className={`project-flow-circle relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                    isCompleted
+                      ? 'project-flow-circle--done'
+                      : isActive
+                        ? 'project-flow-circle--active'
+                        : 'project-flow-circle--upcoming'
+                  }`}
+                >
+                  {isCompleted ? '✓' : step.id}
+                </span>
+                <span
+                  className={`project-flow-label text-[11px] font-bold md:text-xs ${
+                    isActive
+                      ? 'project-flow-label--active'
+                      : isCompleted
+                        ? 'project-flow-label--done'
+                        : ''
+                  }`}
                 >
                   {step.label}
                 </span>
-              </div>
-            );
-          })}
-        </div>
+              </button>
+            </div>
+          );
+        })}
       </div>
     );
   };
 
   return (
-    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="client-route project-post-page min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-12 flex flex-col">
@@ -936,7 +937,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 <p className="text-[11px] text-gray-500 mb-6">
                   Ưu tiên hiển thị đến khi hết hạn đăng dự án hoặc dự án ngừng tuyển.
                 </p>
-                <div className="text-sm font-bold text-[#1D4ED8]">59.000 VNĐ</div>
+                <div className="text-sm font-bold text-[#1D4ED8]">
+                  {new Intl.NumberFormat('vi-VN').format(featuredFee)} VNĐ
+                </div>
               </button>
 
               {/* Option 2 */}
@@ -983,7 +986,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 <p className="text-[11px] text-gray-500 mb-6">
                   AI gợi ý tối đa 5 freelancer phù hợp và gửi thông báo tuyển gấp.
                 </p>
-                <div className="text-sm font-bold text-[#1D4ED8]">99.000 VNĐ</div>
+                <div className="text-sm font-bold text-[#1D4ED8]">
+                  {new Intl.NumberFormat('vi-VN').format(urgentFee)} VNĐ
+                </div>
               </button>
             </div>
 
@@ -1263,7 +1268,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     <div>
                       <h4 className="text-xs font-bold text-gray-900 mb-0.5">
                         Nổi bật (Featured)
-                        <span className="text-[#1D4ED8] ml-1.5">+59.000đ</span>
+                        <span className="text-[#1D4ED8] ml-1.5">
+                          +{new Intl.NumberFormat('vi-VN').format(featuredFee)}đ
+                        </span>
                       </h4>
                       <p className="text-[10px] text-gray-500">Ghim dự án lên đầu trang</p>
                     </div>
@@ -1305,7 +1312,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     <div>
                       <h4 className="text-xs font-bold text-gray-900 mb-0.5">
                         Gợi ý freelancer
-                        <span className="text-[#1D4ED8] ml-1.5">+99.000đ</span>
+                        <span className="text-[#1D4ED8] ml-1.5">
+                          +{new Intl.NumberFormat('vi-VN').format(urgentFee)}đ
+                        </span>
                       </h4>
                       <p className="text-[10px] text-gray-500">
                         AI gợi ý tối đa 5 ứng viên phù hợp

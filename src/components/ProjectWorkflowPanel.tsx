@@ -359,7 +359,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
       <div className={`flex flex-col gap-4 ${layout === 'expanded' ? 'md:gap-5' : ''}`}>
         {weeks.map(([weekNumber, tasks]) => (
           <section key={weekNumber} className="relative pl-5 border-l-2 border-slate-200">
-            <span className="absolute -left-[7px] top-0 w-3 h-3 rounded-full bg-blue-600 border-2 border-white" />
+            <span className="workspace-week-dot absolute -left-[7px] top-0 w-3 h-3 rounded-full bg-blue-600 border-2 border-white" />
             <p className="text-xs font-extrabold text-gray-900 mb-2">Tuần {weekNumber}</p>
             <div className="flex flex-col gap-2">
               {tasks.map((task) => {
@@ -372,7 +372,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                     <p className="text-xs font-bold text-gray-800 leading-relaxed">{task.title}</p>
                     <div className="flex items-center justify-between gap-2 mt-2">
                       <span
-                        className={`text-[10px] font-bold px-2 py-1 rounded-full ${statusClass[task.status]}`}
+                        className={`workspace-task-status text-[10px] font-bold px-2 py-1 rounded-full ${statusClass[task.status]}`}
                       >
                         {statusLabel[task.status]}
                       </span>

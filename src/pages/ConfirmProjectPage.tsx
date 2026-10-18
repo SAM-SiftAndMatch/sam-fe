@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -56,11 +57,18 @@ const ConfirmProjectPage: React.FC = () => {
   const [deadline, setDeadline] = useState(state.deadline || defaultDeadline);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPaymentChoice, setShowPaymentChoice] = useState(false);
+  const [createdJobId, setCreatedJobId] = useState<string | null>(null);
+  const [clientRequestId] = useState(() => crypto.randomUUID());
   const [error, setError] = useState<string | null>(null);
+  const prices = useQuery({ queryKey: ['job-addon-prices'], queryFn: jobApi.getAddonPrices });
 
   const totalUpgradesCost = useMemo(() => {
-    return (upgrades.featured ? 59000 : 0) + (upgrades.urgent ? 99000 : 0);
-  }, [upgrades]);
+    return (
+      (upgrades.featured ? (prices.data?.featuredFee ?? 59000) : 0) +
+      (upgrades.urgent ? (prices.data?.urgentFee ?? 99000) : 0)
+    );
+  }, [upgrades, prices.data]);
 
   const handleConfirm = async () => {
     if (isFromAi) {
@@ -78,6 +86,19 @@ const ConfirmProjectPage: React.FC = () => {
       }
     }
 
+    if ((upgrades.featured || upgrades.urgent) && !prices.data) {
+      setError('Chưa tải được giá tính năng. Vui lòng thử lại trước khi đăng dự án.');
+      return;
+    }
+    if ((upgrades.featured || upgrades.urgent) && !prices.data?.businessIncluded) {
+      setShowPaymentChoice(true);
+      return;
+    }
+    await publishProject(false);
+  };
+
+  const publishProject = async (payNow: boolean) => {
+    setShowPaymentChoice(false);
     setIsSubmitting(true);
     setError(null);
 
@@ -104,25 +125,38 @@ const ConfirmProjectPage: React.FC = () => {
         isFeatured: upgrades.featured,
         isUrgentHiring: upgrades.urgent,
         requiresAiQa: false,
+        clientRequestId,
       };
 
-      const createdJob = await jobApi.createJob(jobPayload);
+      const createdJob = createdJobId
+        ? await jobApi.getJobById(createdJobId)
+        : await jobApi.createJob(jobPayload);
+      setCreatedJobId(createdJob.id);
+      const addonSummary =
+        upgrades.featured || upgrades.urgent ? await jobApi.getAddonSummary(createdJob.id) : null;
+      if (payNow && addonSummary?.orderStatus === 'PENDING') {
+        const checkout = await jobApi.checkoutAddons(createdJob.id);
+        window.location.assign(checkout.vnpayUrl);
+        return;
+      }
 
-      navigate(PATH_CLIENT_SUCCESS_PROJECT, {
+      navigate(`${PATH_CLIENT_SUCCESS_PROJECT}?jobId=${createdJob.id}`, {
         state: {
           newProjectId: createdJob.id,
           jobData: createdJob,
+          addonPending: addonSummary?.orderStatus === 'PENDING',
+          businessIncluded: addonSummary?.businessIncluded,
         },
       });
     } catch (err: any) {
       console.error('Failed to create job:', err);
-      setError(err?.message || 'Không thể tạo dự án. Vui lòng thử lại.');
+      setError(err?.message || 'Không thể đăng dự án hoặc bắt đầu thanh toán. Vui lòng thử lại.');
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="client-route project-confirm-page min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
       <main className="flex-1 flex items-center justify-center py-12 px-4">
@@ -312,7 +346,7 @@ const ConfirmProjectPage: React.FC = () => {
               Các gói dịch vụ nâng cấp (Tùy chọn)
             </h3>
             <div className="space-y-3">
-              <label className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <label className="project-confirm-addon-option flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={upgrades.featured}
@@ -323,10 +357,12 @@ const ConfirmProjectPage: React.FC = () => {
                   <div className="font-bold text-sm text-gray-900">Gói Nổi Bật</div>
                   <div className="text-xs text-gray-500">Ưu tiên đến khi hết hạn đăng dự án</div>
                 </div>
-                <div className="font-bold text-blue-600 text-sm">+59.000 đ</div>
+                <div className="font-bold text-blue-600 text-sm">
+                  +{new Intl.NumberFormat('vi-VN').format(prices.data?.featuredFee ?? 59000)} đ
+                </div>
               </label>
 
-              <label className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <label className="project-confirm-addon-option flex items-center gap-4 p-4 border border-gray-200 rounded-xl cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={upgrades.urgent}
@@ -339,7 +375,9 @@ const ConfirmProjectPage: React.FC = () => {
                     Hệ thống gửi thông báo trực tiếp đến Top 5 chuyên gia
                   </div>
                 </div>
-                <div className="font-bold text-blue-600 text-sm">+99.000 đ</div>
+                <div className="font-bold text-blue-600 text-sm">
+                  +{new Intl.NumberFormat('vi-VN').format(prices.data?.urgentFee ?? 99000)} đ
+                </div>
               </label>
             </div>
 
@@ -352,6 +390,16 @@ const ConfirmProjectPage: React.FC = () => {
               </div>
             )}
           </div>
+
+          {createdJobId && error && (
+            <button
+              type="button"
+              className="mb-4 text-sm font-semibold text-blue-700 underline cursor-pointer"
+              onClick={() => navigate(`/client/projects/${createdJobId}`)}
+            >
+              Dự án đã được đăng. Xem dự án và thanh toán tính năng tại đây.
+            </button>
+          )}
 
           {/* Actions */}
           <div className="flex items-center justify-center gap-4 w-full border-t border-gray-100 pt-6">
@@ -400,6 +448,53 @@ const ConfirmProjectPage: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {showPaymentChoice && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setShowPaymentChoice(false);
+          }}
+        >
+          <dialog
+            open
+            aria-label="Xác nhận thanh toán tính năng"
+            className="relative m-0 w-full max-w-md rounded-2xl border-0 bg-white p-6 text-gray-900 shadow-2xl"
+          >
+            <h2 className="text-xl font-bold">Bạn chưa thanh toán tính năng</h2>
+            <p className="mt-3 text-sm text-gray-600">
+              Dự án vẫn được đăng nếu bạn để sau, nhưng các tính năng đã chọn chỉ kích hoạt sau khi
+              thanh toán thành công.
+            </p>
+            <div className="mt-4 rounded-xl bg-blue-50 p-4 text-sm">
+              <div className="flex justify-between gap-3 font-semibold">
+                <span>Phí tính năng cần thanh toán</span>
+                <span>{new Intl.NumberFormat('vi-VN').format(totalUpgradesCost)} đ</span>
+              </div>
+              <p className="mt-1 text-xs text-gray-600">
+                Ngân sách dự án không thanh toán ở bước này.
+              </p>
+            </div>
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => void publishProject(false)}
+                className="h-11 flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white font-semibold text-gray-800 hover:bg-gray-50"
+              >
+                Để sau
+              </button>
+              <button
+                type="button"
+                onClick={() => void publishProject(true)}
+                className="h-11 flex-1 cursor-pointer rounded-lg bg-blue-700 font-semibold text-white hover:bg-blue-800"
+              >
+                Thanh toán
+              </button>
+            </div>
+          </dialog>
+        </div>
+      )}
 
       <Footer />
     </div>

@@ -1,3 +1,4 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
@@ -13,6 +14,7 @@ import Footer from '../components/Footer';
 import JobStatusBadge from '../components/JobStatusBadge';
 import PaginationNav from '../components/PaginationNav';
 import ProposalStatusBadge from '../components/ProposalStatusBadge';
+import SrsPdfActions from '../components/SrsPdfActions';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_PROJECTS, PATH_WORKSPACE } from '../routes/paths';
@@ -48,6 +50,63 @@ const ClientProjectDetailPage: React.FC = () => {
   const [invitingId, setInvitingId] = useState<string | null>(null);
   const [proposalInvitingId, setProposalInvitingId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [addonModalOpen, setAddonModalOpen] = useState(false);
+  const [addonSelection, setAddonSelection] = useState({ featured: false, urgent: false });
+  const [addonSubmitting, setAddonSubmitting] = useState(false);
+  const queryClient = useQueryClient();
+  const addonPrices = useQuery({ queryKey: ['job-addon-prices'], queryFn: jobApi.getAddonPrices });
+  const addons = useQuery({
+    queryKey: ['job-addons', id],
+    queryFn: () => jobApi.getAddonSummary(id!),
+    enabled: Boolean(id && isAuthenticated),
+  });
+
+  const openAddonChoice = (urgent = false) => {
+    setAddonSelection({ featured: false, urgent });
+    setAddonModalOpen(true);
+  };
+
+  const startAddonCheckout = async () => {
+    if (!id) return;
+    setAddonSubmitting(true);
+    setServerError(null);
+    try {
+      const checkout = await jobApi.checkoutAddons(id);
+      window.location.assign(checkout.vnpayUrl);
+    } catch (error) {
+      setServerError(
+        error instanceof Error ? error.message : 'Không bắt đầu được thanh toán tính năng.'
+      );
+      setAddonSubmitting(false);
+    }
+  };
+
+  const saveAddonChoice = async (payNow: boolean) => {
+    if (!id || (!addonSelection.featured && !addonSelection.urgent)) return;
+    setAddonSubmitting(true);
+    setServerError(null);
+    try {
+      const result = await jobApi.selectAddons(id, addonSelection.featured, addonSelection.urgent);
+      await queryClient.invalidateQueries({ queryKey: ['job-addons', id] });
+      setAddonModalOpen(false);
+      if (payNow && result.orderStatus === 'PENDING') {
+        await startAddonCheckout();
+        return;
+      }
+      if (result.orderStatus === 'PENDING') {
+        setSuccessMessage(
+          'Đã lưu tính năng. Dự án vẫn đang tuyển; tính năng sẽ kích hoạt sau khi thanh toán.'
+        );
+      } else {
+        setSuccessMessage('Đã kích hoạt tính năng theo gói Business.');
+        await loadData();
+      }
+    } catch (error) {
+      setServerError(error instanceof Error ? error.message : 'Không lưu được lựa chọn tính năng.');
+    } finally {
+      setAddonSubmitting(false);
+    }
+  };
 
   const handleDownloadProposal = async (proposal: ProposalResponse) => {
     if (!proposal.attachmentUrl) return;
@@ -68,7 +127,7 @@ const ClientProjectDetailPage: React.FC = () => {
     try {
       const job = await jobApi.getJobById(id);
       setProject(job);
-      if (job.status === 'OPEN') {
+      if (job.status === 'OPEN' && job.isUrgentHiring) {
         setRecommendations(await jobApi.getRecommendations(id));
       } else {
         setRecommendations([]);
@@ -106,7 +165,8 @@ const ClientProjectDetailPage: React.FC = () => {
         n.type === 'CHAT_OPENED' ||
         n.type === 'PROPOSAL_RECEIVED' ||
         n.type === 'PROPOSAL_ACCEPTED' ||
-        n.type === 'PROPOSAL_REJECTED')
+        n.type === 'PROPOSAL_REJECTED' ||
+        n.type === 'PROJECT_ADDON_PAYMENT_PAID')
     ) {
       void loadData();
     }
@@ -265,10 +325,10 @@ const ClientProjectDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="client-route client-project-detail-page min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6">
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8 flex flex-col gap-6">
         {/* Breadcrumb & Nút quay lại */}
         <div className="flex items-center justify-between">
           <button
@@ -307,10 +367,10 @@ const ClientProjectDetailPage: React.FC = () => {
         ) : (
           <>
             {/* Cột chính */}
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_296px]">
               {/* Thông tin dự án */}
-              <div className="flex flex-col gap-6">
-                <div className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
+              <div className="flex min-w-0 flex-col gap-6">
+                <div className="bg-white rounded-[24px] p-5 sm:p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)]">
                   <div className="flex justify-between items-start mb-4">
                     <JobStatusBadge status={project.status} />
                     <span className="text-xs font-semibold text-gray-400">
@@ -318,7 +378,7 @@ const ClientProjectDetailPage: React.FC = () => {
                     </span>
                   </div>
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">{project.title}</h1>
-                  <div className="flex items-center gap-4 text-sm font-semibold text-gray-500 mb-6">
+                  <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-gray-500 mb-6">
                     <span>
                       Mã DA:{' '}
                       <span className="text-gray-900">
@@ -404,6 +464,7 @@ const ClientProjectDetailPage: React.FC = () => {
                           </a>
                         )}
                       </div>
+                      <SrsPdfActions jobId={project.id} />
                       <div className="prose prose-sm max-w-none bg-[#F8FAFC] border border-gray-100 rounded-2xl p-6 text-gray-700">
                         <ReactMarkdown
                           components={{
@@ -469,6 +530,26 @@ const ClientProjectDetailPage: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col gap-4">
+                      {!project.isUrgentHiring && !addons.data?.urgentPending && (
+                        <div className="project-detail-blue-notice rounded-2xl border border-blue-200 bg-blue-50 p-5">
+                          <p className="mb-3 text-sm text-blue-900">
+                            Bạn có thể kích hoạt gợi ý freelancer phù hợp cho dự án đang tuyển.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => openAddonChoice(true)}
+                            className="cursor-pointer rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800"
+                          >
+                            Gợi ý freelancer
+                          </button>
+                        </div>
+                      )}
+                      {addons.data?.urgentPending && (
+                        <p className="project-detail-amber-notice rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+                          Gợi ý freelancer đã được chọn nhưng chưa thanh toán. Thanh toán tại mục
+                          Tùy chọn dự án để kích hoạt.
+                        </p>
+                      )}
                       {recommendations.map((rec) => (
                         <div
                           key={rec.id}
@@ -535,10 +616,9 @@ const ClientProjectDetailPage: React.FC = () => {
                           </div>
                         </div>
                       ))}
-                      {recommendations.length === 0 && (
+                      {project.isUrgentHiring && recommendations.length === 0 && (
                         <p className="text-sm text-gray-500">
-                          Chưa có đề xuất nào cho dự án này (AI Headhunter chỉ chạy với job Tuyển
-                          gấp).
+                          Chưa tìm thấy freelancer gợi ý phù hợp cho dự án này.
                         </p>
                       )}
                     </div>
@@ -733,15 +813,65 @@ const ClientProjectDetailPage: React.FC = () => {
                         </div>
                       </div>
                     )}
-                    {!project.isFeatured && !project.isUrgentHiring && (
-                      <p className="text-xs text-gray-500">Chưa bật tùy chọn nào.</p>
+                    {addons.data?.orderStatus === 'PENDING' && (
+                      <div className="project-detail-amber-notice rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                        <p className="font-bold">Tính năng đã chọn, chờ thanh toán</p>
+                        <p className="mt-1">
+                          {[
+                            addons.data.featuredPending && 'Nổi bật',
+                            addons.data.urgentPending && 'Gợi ý freelancer',
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                        <p className="mt-2 font-semibold">
+                          Tổng phí: {new Intl.NumberFormat('vi-VN').format(addons.data.totalDue)} đ
+                        </p>
+                        {project.status === 'OPEN' ? (
+                          <button
+                            type="button"
+                            onClick={() => void startAddonCheckout()}
+                            disabled={addonSubmitting}
+                            className="mt-3 w-full cursor-pointer rounded-lg bg-blue-700 px-4 py-2.5 font-semibold text-white hover:bg-blue-800 disabled:opacity-60"
+                          >
+                            {addonSubmitting ? 'Đang mở thanh toán...' : 'Thanh toán tính năng'}
+                          </button>
+                        ) : (
+                          <p className="mt-2">
+                            Dự án không còn tuyển nên không thể tiếp tục thanh toán tính năng.
+                          </p>
+                        )}
+                      </div>
                     )}
+                    {addons.data?.orderStatus === 'PAID_UNAPPLIED' && (
+                      <p className="project-detail-red-notice rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+                        Đã ghi nhận thanh toán nhưng dự án không còn tuyển, nên tính năng chưa được
+                        kích hoạt. Vui lòng liên hệ hỗ trợ để xử lý khoản tiền.
+                      </p>
+                    )}
+                    {project.status === 'OPEN' &&
+                      addons.data?.orderStatus !== 'PENDING' &&
+                      (!project.isFeatured || !project.isUrgentHiring) && (
+                        <button
+                          type="button"
+                          onClick={() => openAddonChoice()}
+                          className="w-full cursor-pointer rounded-xl border border-blue-200 bg-blue-50 p-3 text-left text-sm font-semibold text-blue-700 hover:bg-blue-100"
+                        >
+                          Tăng hiệu quả tuyển dụng
+                        </button>
+                      )}
+                    {!project.isFeatured &&
+                      !project.isUrgentHiring &&
+                      !addons.data?.orderId &&
+                      project.status !== 'OPEN' && (
+                        <p className="text-xs text-gray-500">Chưa bật tùy chọn nào.</p>
+                      )}
                   </div>
                 </div>
 
                 {/* Lịch sử gói đã mua được hiển thị trong Hồ sơ → Gói của tôi. */}
 
-                <div className="bg-[#EEF2FF] rounded-[24px] p-6 border border-[#DCE4FF] text-center flex flex-col items-center">
+                <div className="project-detail-help-card bg-[#EEF2FF] rounded-[24px] p-6 border border-[#DCE4FF] text-center flex flex-col items-center">
                   <div className="w-12 h-12 bg-[#1D4ED8] rounded-full text-white flex items-center justify-center mb-4">
                     <svg
                       className="w-6 h-6"
@@ -808,6 +938,105 @@ const ClientProjectDetailPage: React.FC = () => {
         cancelText="Giữ dự án"
         isPending={isCancelling}
       />
+
+      {addonModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !addonSubmitting) setAddonModalOpen(false);
+          }}
+        >
+          <dialog
+            open
+            aria-label="Chọn tính năng cho dự án"
+            className="relative m-0 w-full max-w-md rounded-2xl border-0 bg-white p-6 text-gray-900 shadow-2xl"
+          >
+            <h2 className="text-xl font-bold">Tăng hiệu quả tuyển dụng</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Chọn tính năng muốn kích hoạt cho dự án đang tuyển.
+            </p>
+            {addonPrices.isError && (
+              <p className="mt-3 text-sm text-red-700">
+                Chưa tải được giá tính năng. Vui lòng thử lại.
+              </p>
+            )}
+            <div className="mt-5 space-y-3">
+              {!project?.isFeatured && (
+                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-200 p-4">
+                  <span>
+                    <input
+                      type="checkbox"
+                      checked={addonSelection.featured}
+                      onChange={(event) =>
+                        setAddonSelection((value) => ({ ...value, featured: event.target.checked }))
+                      }
+                      className="mr-3"
+                    />
+                    Nổi bật đến hết hạn đăng dự án
+                  </span>
+                  <span className="font-semibold">
+                    {new Intl.NumberFormat('vi-VN').format(addonPrices.data?.featuredFee ?? 59000)}{' '}
+                    đ
+                  </span>
+                </label>
+              )}
+              {!project?.isUrgentHiring && (
+                <label className="flex cursor-pointer items-center justify-between rounded-xl border border-gray-200 p-4">
+                  <span>
+                    <input
+                      type="checkbox"
+                      checked={addonSelection.urgent}
+                      onChange={(event) =>
+                        setAddonSelection((value) => ({ ...value, urgent: event.target.checked }))
+                      }
+                      className="mr-3"
+                    />
+                    Gợi ý freelancer
+                  </span>
+                  <span className="font-semibold">
+                    {new Intl.NumberFormat('vi-VN').format(addonPrices.data?.urgentFee ?? 99000)} đ
+                  </span>
+                </label>
+              )}
+            </div>
+            <p className="mt-4 text-sm font-bold">
+              Tổng phí:{' '}
+              {new Intl.NumberFormat('vi-VN').format(
+                (addonSelection.featured ? (addonPrices.data?.featuredFee ?? 59000) : 0) +
+                  (addonSelection.urgent ? (addonPrices.data?.urgentFee ?? 99000) : 0)
+              )}{' '}
+              đ
+            </p>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => void saveAddonChoice(false)}
+                disabled={
+                  addonSubmitting ||
+                  !addonPrices.data ||
+                  (!addonSelection.featured && !addonSelection.urgent)
+                }
+                className="h-11 flex-1 cursor-pointer rounded-lg border border-gray-300 font-semibold hover:bg-gray-50 disabled:opacity-50"
+              >
+                Để sau
+              </button>
+              <button
+                type="button"
+                onClick={() => void saveAddonChoice(true)}
+                disabled={
+                  addonSubmitting ||
+                  !addonPrices.data ||
+                  (!addonSelection.featured && !addonSelection.urgent)
+                }
+                className="h-11 flex-1 cursor-pointer rounded-lg bg-blue-700 font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
+              >
+                Thanh toán
+              </button>
+            </div>
+          </dialog>
+        </div>
+      )}
     </div>
   );
 };

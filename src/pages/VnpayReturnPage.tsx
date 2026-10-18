@@ -1,7 +1,5 @@
 import type React from 'react';
-import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { subscriptionApi } from '../api/subscription';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
@@ -21,24 +19,6 @@ const VnpayReturnPage: React.FC = () => {
   const amountParam = searchParams.get('vnp_Amount');
   const success = responseCode === '00';
   const amountVnd = amountParam ? Number.parseInt(amountParam, 10) / 100 : null;
-
-  // Auto-confirm subscription if payment successful
-  useEffect(() => {
-    if (success) {
-      const subscriptionId = localStorage.getItem(PENDING_SUBSCRIPTION_KEY);
-      if (subscriptionId) {
-        subscriptionApi
-          .confirmPayment(subscriptionId)
-          .then(() => {
-            // Subscription activated successfully
-          })
-          .catch((e) => {
-            console.error('Failed to confirm subscription:', e);
-            // Still show success page even if confirm fails
-          });
-      }
-    }
-  }, [success]);
 
   const handleBack = () => {
     const contractId = localStorage.getItem(PENDING_CONTRACT_KEY);
@@ -96,11 +76,11 @@ const VnpayReturnPage: React.FC = () => {
           </div>
 
           <h1 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">
-            {success ? 'Thanh toán thành công' : 'Thanh toán chưa hoàn tất'}
+            {success ? 'Đang xác nhận thanh toán' : 'Thanh toán chưa hoàn tất'}
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mb-6 leading-relaxed">
             {success
-              ? 'VNPay đã ghi nhận giao dịch. Kích hoạt gói / vào ký quỹ khi IPN về, trạng thái tự cập nhật.'
+              ? 'VNPay đã trả về kết quả giao dịch. Gói chỉ được kích hoạt sau khi backend xác nhận callback thanh toán.'
               : `Mã phản hồi VNPay: ${responseCode || 'không xác định'}. Bạn có thể thử lại.`}
           </p>
 

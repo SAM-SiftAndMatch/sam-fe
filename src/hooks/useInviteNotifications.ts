@@ -54,7 +54,10 @@ export function useInviteNotifications(onEvent?: (n: InviteNotification) => void
             payload.type !== 'JOB_INVITE_WITHDRAWN' &&
             payload.type !== 'JOB_INVITE_SELECTED' &&
             payload.type !== 'JOB_INVITE_NOT_SELECTED' &&
-            payload.type !== 'CHAT_MESSAGE'
+            payload.type !== 'CHAT_MESSAGE' &&
+            payload.type !== 'PROJECT_ADDON_PAYMENT_PENDING' &&
+            payload.type !== 'PROJECT_ADDON_PAYMENT_PAID' &&
+            payload.type !== 'PROJECT_ADDON_PAYMENT_REVIEW'
           ) {
             return;
           }
@@ -64,6 +67,10 @@ export function useInviteNotifications(onEvent?: (n: InviteNotification) => void
           void queryClient.invalidateQueries({ queryKey: ['my-job-invitations'] });
           if (payload.jobId) {
             void queryClient.invalidateQueries({ queryKey: ['job-invitations', payload.jobId] });
+            if (payload.type.startsWith('PROJECT_ADDON_')) {
+              void queryClient.invalidateQueries({ queryKey: ['job-addons', payload.jobId] });
+              void queryClient.invalidateQueries({ queryKey: ['job-detail', payload.jobId] });
+            }
           }
           handlerRef.current?.(payload);
         } catch {
