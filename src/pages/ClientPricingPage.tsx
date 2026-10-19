@@ -1,5 +1,4 @@
 import {
-  PACKAGE_AI_QA_ADVANCED_ID,
   PACKAGE_BUSINESS_ID,
   useMySubscriptions,
   usePurchasePackage,
@@ -97,53 +96,53 @@ const ClientPricingPage: React.FC = () => {
             Nâng tầm dự án với <span className="text-[#1D4ED8]">Công nghệ AI</span>
           </h1>
           <p className="text-sm sm:text-base text-slate-600 max-w-xl leading-relaxed">
-            Chọn gói dịch vụ phù hợp để kết nối với những tài năng hàng đầu và đảm bảo chất lượng kỹ
-            thuật tối ưu qua hệ thống kiểm định AI QC.
+            Chọn gói phù hợp để dự án được chú ý hơn và kết nối với freelancer. Khi bàn giao, mọi dự
+            án đều có checklist hỗ trợ bạn nghiệm thu.
           </p>
         </ScrollReveal>
 
         {/* Feedback Alerts */}
         {error && (
-          <div className="w-full max-w-5xl mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-[8px] font-mono">
+          <div className="w-full max-w-5xl mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-[8px]">
             {error}
           </div>
         )}
         {successMessage && (
-          <div className="w-full max-w-5xl mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-[8px] font-mono">
+          <div className="w-full max-w-5xl mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-[8px]">
             {successMessage}
           </div>
         )}
 
-        {/* Pricing Grid (3 Cột Đồng Nhất) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 w-full items-stretch mb-16">
+        {/* Pricing Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 w-full items-stretch mb-16">
           {/* Gói 1: Basic */}
           <ScrollReveal delayMs={0} className="h-full">
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">KHỞI ĐẦU</span>
+                  <span className="text-xs text-slate-400">KHỞI ĐẦU</span>
                 </div>
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Basic</h2>
                 <p className="text-xs text-slate-500 mb-6">Dành cho cá nhân khởi đầu</p>
 
                 <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-slate-100">
-                  <span className="font-mono text-4xl sm:text-5xl font-black text-slate-900 leading-none">
+                  <span className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-none">
                     0đ
                   </span>
-                  <span className="text-xs text-slate-500 font-mono">/tháng</span>
+                  <span className="text-xs text-slate-500">/tháng</span>
                 </div>
 
                 <ul className="space-y-3 mb-8 text-xs sm:text-sm text-slate-700">
                   <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
+                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
                     <span>Đăng dự án không giới hạn</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
+                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
                     <span>Phí dịch vụ 5%</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
+                    <span className="text-slate-400 text-xs mt-0.5">✓</span>
                     <span>Hỗ trợ email</span>
                   </li>
                 </ul>
@@ -163,14 +162,14 @@ const ClientPricingPage: React.FC = () => {
             <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border-2 border-[#1D4ED8] shadow-[0_4px_20px_rgba(29,78,216,0.08)] hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between relative">
               {/* Badge Phổ biến */}
               <div className="absolute -top-3.5 right-6">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-[#1D4ED8] text-white px-3 py-1 rounded-[6px] shadow-sm">
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-[#1D4ED8] text-white px-3 py-1 rounded-[6px] shadow-sm">
                   PHỔ BIẾN
                 </span>
               </div>
 
               <div>
                 <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-[#1D4ED8] font-bold">TỐI ƯU</span>
+                  <span className="text-xs text-[#1D4ED8] font-bold">TỐI ƯU</span>
                 </div>
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Business</h2>
                 <p className="text-xs text-slate-500 mb-6">
@@ -178,31 +177,31 @@ const ClientPricingPage: React.FC = () => {
                 </p>
 
                 <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-slate-100">
-                  <span className="font-mono text-4xl sm:text-5xl font-black text-[#1D4ED8] leading-none">
+                  <span className="text-4xl sm:text-5xl font-extrabold text-[#1D4ED8] leading-none">
                     249.000đ
                   </span>
-                  <span className="text-xs text-slate-500 font-mono">/tháng</span>
+                  <span className="text-xs text-slate-500">/tháng</span>
                 </div>
 
                 <ul className="space-y-3 mb-8 text-xs sm:text-sm text-slate-800">
                   <li className="flex items-start gap-2.5 font-medium">
-                    <span className="text-[#1D4ED8] font-mono text-xs mt-0.5 font-bold">✓</span>
+                    <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
                     <span>Ghim Nổi bật không giới hạn</span>
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
-                    <span className="text-[#1D4ED8] font-mono text-xs mt-0.5 font-bold">✓</span>
+                    <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
                     <span>Tuyển gấp AI Headhunter không giới hạn</span>
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
-                    <span className="text-[#1D4ED8] font-mono text-xs mt-0.5 font-bold">✓</span>
+                    <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
                     <span>Áp dụng mọi dự án trong 30 ngày</span>
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
-                    <span className="text-[#1D4ED8] font-mono text-xs mt-0.5 font-bold">✓</span>
+                    <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
                     <span>Không cần mua lẻ từng dự án nữa</span>
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
-                    <span className="text-[#1D4ED8] font-mono text-xs mt-0.5 font-bold">✓</span>
+                    <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
                     <span>Hỗ trợ 24/7 qua Hotline</span>
                   </li>
                 </ul>
@@ -211,88 +210,41 @@ const ClientPricingPage: React.FC = () => {
               {renderPackageButton(PACKAGE_BUSINESS_ID, 'Nâng cấp ngay', true)}
             </div>
           </ScrollReveal>
-
-          {/* Gói 3: Premium */}
-          <ScrollReveal delayMs={200} className="h-full">
-            <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-end mb-4">
-                  <span className="font-mono text-xs text-slate-400">BẢO HIỂM</span>
-                </div>
-                <h2 className="text-xl font-bold text-slate-900 mb-1">Premium</h2>
-                <p className="text-xs text-slate-500 mb-6">
-                  Bảo hành AI QA cho mọi dự án trong 30 ngày (bản tháng của gói lẻ 59k)
-                </p>
-
-                <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-slate-100">
-                  <span className="font-mono text-4xl sm:text-5xl font-black text-slate-900 leading-none">
-                    299.000đ
-                  </span>
-                  <span className="text-xs text-slate-500 font-mono">/tháng</span>
-                </div>
-
-                <ul className="space-y-3 mb-8 text-xs sm:text-sm text-slate-700">
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
-                    <span>Bảo hiểm chất lượng bàn giao</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
-                    <span>AI quét lỗi + bảo mật khi bàn giao, mọi dự án</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
-                    <span>Bản tháng của gói lẻ Trọng tài Code 59k</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
-                    <span>Chống nhận về mã nguồn rác</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-slate-400 font-mono text-xs mt-0.5">✓</span>
-                    <span>Hỗ trợ 24/7 qua Hotline</span>
-                  </li>
-                </ul>
-              </div>
-
-              {renderPackageButton(PACKAGE_AI_QA_ADVANCED_ID, 'Nâng cấp ngay', false)}
-            </div>
-          </ScrollReveal>
         </div>
 
-        <p className="font-mono text-xs text-slate-500 mb-16 max-w-xl text-center">
-          * Gói lẻ theo từng dự án (Ghim 59k · Tuyển gấp 99k · Trọng tài Code 59k) chỉ bán lúc đăng
-          việc, không bán tại trang này.
+        <p className="text-xs text-slate-500 mb-16 max-w-xl text-center">
+          * Gói lẻ theo từng dự án (Nổi bật 59k · Gợi ý freelancer 99k) được chọn khi đăng dự án.
+          Checklist hỗ trợ nghiệm thu vẫn có cho mọi dự án.
         </p>
 
         {/* Section Stats (4 cột kỹ thuật) */}
         <ScrollReveal className="w-full max-w-4xl pt-10 border-t border-slate-200/80">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-black text-[#1D4ED8]">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#1D4ED8]">
                 <AnimatedNumber value={50000} suffix="+" />
               </span>
-              <span className="font-mono text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
                 Freelancer AI
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-black text-[#1D4ED8]">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#1D4ED8]">
                 <AnimatedNumber value={98} suffix="%" />
               </span>
-              <span className="font-mono text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
                 Hài lòng từ khách hàng
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-black text-[#1D4ED8]">&lt; 24H</span>
-              <span className="font-mono text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#1D4ED8]">&lt; 24H</span>
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
                 Thời gian kết nối TB
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-black text-[#1D4ED8]">100%</span>
-              <span className="font-mono text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#1D4ED8]">100%</span>
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
                 Thanh toán an toàn
               </span>
             </div>

@@ -6,9 +6,10 @@ import { proposalApi } from '../api/proposal';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import PaginationNav from '../components/PaginationNav';
+import ProposalStatusBadge from '../components/ProposalStatusBadge';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import * as paths from '../routes/paths';
-import type { ProposalResponse, ProposalStatus } from '../types/proposal';
+import type { ProposalResponse } from '../types/proposal';
 
 const TABS = [
   { id: 'all', label: 'Tất cả' },
@@ -35,35 +36,6 @@ const FreelancerApplicationsPage: React.FC = () => {
 
   const filteredApps = proposalPage?.items ?? [];
 
-  const getStatusBadge = (status: ProposalStatus) => {
-    switch (status) {
-      case 'ACCEPTED':
-        return (
-          <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
-            Đã nhận việc
-          </span>
-        );
-      case 'REJECTED':
-        return (
-          <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">
-            Từ chối
-          </span>
-        );
-      case 'INVITED':
-        return (
-          <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
-            Được mời hợp tác
-          </span>
-        );
-      default:
-        return (
-          <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">
-            Đang chờ
-          </span>
-        );
-    }
-  };
-
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return '—';
     const date = new Date(dateStr);
@@ -81,7 +53,7 @@ const FreelancerApplicationsPage: React.FC = () => {
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-10 py-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
           <div>
-            <h1 className="text-3xl font-black text-gray-900 mb-2">Hồ sơ ứng tuyển</h1>
+            <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Hồ sơ ứng tuyển</h1>
             <p className="text-gray-500">
               Quản lý và theo dõi trạng thái các công việc bạn đã gửi hồ sơ
             </p>
@@ -155,7 +127,7 @@ const FreelancerApplicationsPage: React.FC = () => {
                   {/* Cột trái */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      {getStatusBadge(app.status)}
+                      <ProposalStatusBadge status={app.status} audience="freelancer" />
                       <span className="text-xs font-semibold text-gray-400">
                         Nộp ngày {formatDate(app.createdAt)}
                       </span>

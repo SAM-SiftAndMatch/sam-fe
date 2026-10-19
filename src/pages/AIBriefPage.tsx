@@ -1,11 +1,12 @@
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import aiApi from '../api/ai';
 import storageApi from '../api/storage';
 import AppHeader from '../components/AppHeader';
 import { PATH_CLIENT_CONFIRM_PROJECT, PATH_CLIENT_POST_PROJECT } from '../routes/paths';
+import { useAuthStore } from '../stores/useAuthStore';
 import type { AiChatResponse, AiQuestion, ChatMessage } from '../types/ai';
 
 // === Tạo session ID duy nhất cho mỗi phiên làm việc ===
@@ -13,79 +14,14 @@ function generateSessionId(): string {
   return `ba-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
-// (Phase type unused – kept for potential future use)
-// type Phase = 'BA' | 'RISK';
+type BriefRouteState = { initialQuery?: string; resetBrief?: boolean };
 
-// === Component hiển thị câu hỏi dạng card (base-questions) ===
-interface BaseQuestionCardProps {
-  question: AiQuestion;
-  selectedOptions: string[];
-  onToggleOption: (option: string) => void;
-  onCustomInput: (text: string) => void;
-  customInput: string;
-}
-
-const BaseQuestionCard: React.FC<BaseQuestionCardProps> = ({
-  question,
-  selectedOptions,
-  onToggleOption,
-  onCustomInput,
-  customInput,
-}) => {
-  return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
-      {question.hint && (
-        <span className="inline-block text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2 bg-blue-50 px-2 py-0.5 rounded-full">
-          {question.hint}
-        </span>
-      )}
-      <p className="text-sm font-semibold text-gray-800 mb-3 leading-snug">
-        {question.questionText}
-      </p>
-
-      {question.options && question.options.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {question.options.map((opt) => {
-            const isSelected = selectedOptions.includes(opt);
-            return (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => onToggleOption(opt)}
-                className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer border ${
-                  isSelected
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
-                }`}
-              >
-                {opt}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* TEXT hoặc không có options -> LUÔN hiện ô nhập (không phụ thuộc allowCustomInput) */}
-      {(question.type === 'TEXT' || !question.options || question.options.length === 0) &&
-        (question.type === 'TEXT' ? (
-          <textarea
-            value={customInput}
-            onChange={(e) => onCustomInput(e.target.value)}
-            placeholder="Nhập câu trả lời của bạn..."
-            rows={4}
-            className="w-full resize-y text-sm border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 text-gray-700 placeholder:text-gray-400 transition-all"
-          />
-        ) : (
-          <input
-            type="text"
-            value={customInput}
-            onChange={(e) => onCustomInput(e.target.value)}
-            placeholder="Nhập câu trả lời của bạn..."
-            className="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 text-gray-700 placeholder:text-gray-400 transition-all"
-          />
-        ))}
-    </div>
-  );
+const getDraft = (key: string): string => {
+  try {
+    return sessionStorage.getItem(key) ?? '';
+  } catch {
+    return '';
+  }
 };
 
 // === Component hiển thị câu hỏi follow-up từ AI dưới dạng panel ===
@@ -173,7 +109,10 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
         };
         const hasOpts = (q.options || []).length > 0;
         return (
-          <div key={q.id} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+          <div
+            key={q.id}
+            className="ai-question-panel bg-gray-50 border border-gray-200 rounded-xl p-4"
+          >
             {/* Hint badge */}
             {q.hint && (
               <span className="inline-block text-[9px] font-bold text-blue-500 uppercase tracking-widest bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full mb-1.5">
@@ -196,9 +135,9 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
                       type="button"
                       disabled={disabled}
                       onClick={() => toggleOption(q.id, opt)}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-all cursor-pointer font-medium ${
+                      className={`ai-question-option text-xs px-3 py-1.5 rounded-full border transition-all cursor-pointer font-medium ${
                         isSelected
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                          ? 'ai-question-option--selected bg-blue-600 text-white border-blue-600 shadow-sm'
                           : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
                       }`}
                     >
@@ -212,7 +151,7 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
                     type="button"
                     disabled={disabled}
                     onClick={() => toggleShowCustom(q.id)}
-                    className="text-xs px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-gray-400 bg-white hover:border-gray-400 hover:text-gray-600 transition-all cursor-pointer font-medium"
+                    className="ai-question-option text-xs px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-gray-400 bg-white hover:border-gray-400 hover:text-gray-600 transition-all cursor-pointer font-medium"
                   >
                     Khác...
                   </button>
@@ -320,7 +259,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onSubmitAnswers, isSen
               em: ({ children }) => <em className="italic">{children}</em>,
               code: ({ children }) => (
                 <code
-                  className={`px-1.5 py-0.5 rounded text-xs font-mono ${
+                  className={`font-mono px-1.5 py-0.5 rounded text-xs ${
                     isUser ? 'bg-blue-700 text-blue-100' : 'bg-gray-100 text-gray-800'
                   }`}
                 >
@@ -465,7 +404,7 @@ const SrsPreview: React.FC<SrsPreviewProps> = ({ srsContent, variant = 'full', o
               ),
               em: ({ children }) => <em className="italic text-gray-800">{children}</em>,
               code: ({ children }) => (
-                <code className="bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-[11px] font-mono">
+                <code className="font-mono bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-[11px]">
                   {children}
                 </code>
               ),
@@ -566,7 +505,7 @@ const SrsModal: React.FC<SrsModalProps> = ({ isOpen, onClose, srsContent }) => {
                   ),
                   em: ({ children }) => <em className="italic text-gray-800">{children}</em>,
                   code: ({ children }) => (
-                    <code className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-xs font-mono">
+                    <code className="font-mono bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-xs">
                       {children}
                     </code>
                   ),
@@ -608,30 +547,38 @@ const SrsModal: React.FC<SrsModalProps> = ({ isOpen, onClose, srsContent }) => {
 // =============================================================================
 // Main Page Component
 // =============================================================================
-type PageState =
-  | 'loading-questions'
-  | 'answering-base'
-  | 'ba-chat'
-  | 'srs-review'
-  | 'risk-chat'
-  | 'completed';
+type PageState = 'brief' | 'ba-chat' | 'srs-review' | 'risk-chat' | 'completed';
+const PHASE_ORDER: PageState[] = ['brief', 'ba-chat', 'srs-review', 'risk-chat', 'completed'];
+const PHASE_LABELS = [
+  'Mô tả dự án',
+  'Làm rõ yêu cầu',
+  'Duyệt SRS',
+  'Đánh giá rủi ro',
+  'Hoàn thành',
+];
 
 const AIBriefPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const userId = useAuthStore((state) => state.user?.userId);
+  const routeState = location.state as BriefRouteState | null;
+  const draftKey = `sam:ai-brief:description:${userId ?? 'client'}`;
 
   // --- Session ---
   const sessionId = useRef<string>(generateSessionId());
+  const baRequestId = useRef(0);
+  const riskRequestId = useRef(0);
 
   // --- Page state ---
-  const [pageState, setPageState] = useState<PageState>('loading-questions');
+  const [pageState, setPageState] = useState<PageState>('brief');
   const [error, setError] = useState<string | null>(null);
-
-  // --- Phase 1: Base questions ---
-  const [baseQuestions, setBaseQuestions] = useState<AiQuestion[]>([]);
-  // Map: questionId → { selectedOptions: string[], customInput: string }
-  const [baseAnswers, setBaseAnswers] = useState<
-    Record<string, { selectedOptions: string[]; customInput: string }>
-  >({});
+  const [projectBrief, setProjectBrief] = useState(() =>
+    routeState?.resetBrief
+      ? ''
+      : typeof routeState?.initialQuery === 'string'
+        ? routeState.initialQuery
+        : getDraft(draftKey)
+  );
 
   // --- Phase 2: BA Chat ---
   const [baMessages, setBaMessages] = useState<ChatMessage[]>([]);
@@ -653,6 +600,38 @@ const AIBriefPage: React.FC = () => {
 
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (!routeState?.resetBrief && typeof routeState?.initialQuery !== 'string') return;
+    baRequestId.current += 1;
+    riskRequestId.current += 1;
+    sessionId.current = generateSessionId();
+    setProjectBrief(routeState.resetBrief ? '' : (routeState.initialQuery ?? ''));
+    setPageState('brief');
+    setBaMessages([]);
+    setBaInput('');
+    setIsBaSending(false);
+    setLatestSrsContent(null);
+    setLatestSrsUrl(null);
+    setExactBudgetVnd(null);
+    setDurationMonths(null);
+    setRiskMessages([]);
+    setRiskInput('');
+    setIsRiskSending(false);
+    setIsSavingSrs(false);
+    setIsSrsModalOpen(false);
+    setError(null);
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
+  }, [location.key, location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    try {
+      if (projectBrief) sessionStorage.setItem(draftKey, projectBrief);
+      else sessionStorage.removeItem(draftKey);
+    } catch {
+      // Draft storage is optional; the form remains usable when browser storage is blocked.
+    }
+  }, [draftKey, projectBrief]);
+
   // Auto scroll xuống cuối chat
   const scrollToBottom = useCallback(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -661,116 +640,6 @@ const AIBriefPage: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [baMessages, riskMessages, isBaSending, isRiskSending, scrollToBottom]);
-
-  // =========================================
-  // Load base questions khi mount
-  // =========================================
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const questions = await aiApi.getBaseQuestions();
-        setBaseQuestions(questions);
-        // Khởi tạo trạng thái trả lời cho mỗi câu hỏi
-        const initialAnswers: Record<string, { selectedOptions: string[]; customInput: string }> =
-          {};
-        for (const q of questions) {
-          initialAnswers[q.id] = { selectedOptions: [], customInput: '' };
-        }
-        setBaseAnswers(initialAnswers);
-        setPageState('answering-base');
-      } catch (err) {
-        console.error('Failed to load base questions:', err);
-        setError('Không thể tải câu hỏi khởi động. Vui lòng thử lại.');
-        setPageState('answering-base'); // vẫn cho vào để user có thể bỏ qua
-      }
-    };
-
-    fetchQuestions();
-  }, []);
-
-  // =========================================
-  // Toggle option trong base question
-  // =========================================
-  const handleToggleOption = useCallback((questionId: string, option: string) => {
-    setBaseAnswers((prev) => {
-      const current = prev[questionId] || {
-        selectedOptions: [],
-        customInput: '',
-      };
-      const isSelected = current.selectedOptions.includes(option);
-      return {
-        ...prev,
-        [questionId]: {
-          ...current,
-          selectedOptions: isSelected
-            ? current.selectedOptions.filter((o) => o !== option)
-            : [...current.selectedOptions, option],
-        },
-      };
-    });
-  }, []);
-
-  const handleCustomInput = useCallback((questionId: string, text: string) => {
-    setBaseAnswers((prev) => ({
-      ...prev,
-      [questionId]: {
-        ...(prev[questionId] || { selectedOptions: [] }),
-        customInput: text,
-      },
-    }));
-  }, []);
-
-  // =========================================
-  // Bắt đầu BA Chat sau khi trả lời base questions
-  // =========================================
-  const handleStartBaChat = useCallback(async () => {
-    // Tổng hợp câu trả lời thành 1 message gửi lên
-    const summaryLines: string[] = [];
-    for (const q of baseQuestions) {
-      const answer = baseAnswers[q.id];
-      if (!answer) continue;
-      const parts: string[] = [];
-      if (answer.selectedOptions.length > 0) {
-        parts.push(answer.selectedOptions.join(', '));
-      }
-      if (answer.customInput.trim()) {
-        parts.push(answer.customInput.trim());
-      }
-      if (parts.length > 0) {
-        summaryLines.push(`- ${q.questionText}: ${parts.join('; ')}`);
-      }
-    }
-
-    const userMessage =
-      summaryLines.length > 0
-        ? `Đây là thông tin ban đầu về dự án của tôi:\n${summaryLines.join('\n')}`
-        : 'Tôi muốn bắt đầu phân tích yêu cầu dự án với AI.';
-
-    const userMsg: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      role: 'user',
-      content: userMessage,
-      timestamp: new Date(),
-    };
-    setBaMessages([userMsg]);
-    setPageState('ba-chat');
-    setIsBaSending(true);
-    setError(null);
-
-    try {
-      const response = await aiApi.chatWithAiBa({
-        sessionId: sessionId.current,
-        userMessage,
-      });
-
-      handleBaResponse(response);
-    } catch (err) {
-      console.error('BA chat error:', err);
-      setError('Không thể kết nối với AI BA. Vui lòng thử lại.');
-    } finally {
-      setIsBaSending(false);
-    }
-  }, [baseQuestions, baseAnswers]);
 
   // =========================================
   // Xử lý response từ BA chat
@@ -801,6 +670,52 @@ const AIBriefPage: React.FC = () => {
     }
   }, []);
 
+  const handleStartBaChat = useCallback(async () => {
+    const userMessage = projectBrief.trim();
+    if (!userMessage || isBaSending) {
+      if (!userMessage) setError('Vui lòng mô tả sơ bộ dự án trước khi tạo câu hỏi.');
+      return;
+    }
+
+    // Starting again from the brief must create a fresh AI conversation.
+    sessionId.current = generateSessionId();
+    riskRequestId.current += 1;
+    setRiskMessages([]);
+    setRiskInput('');
+    setLatestSrsContent(null);
+    setLatestSrsUrl(null);
+    setExactBudgetVnd(null);
+    setDurationMonths(null);
+    const requestId = ++baRequestId.current;
+    setBaMessages([
+      { id: `msg-${Date.now()}`, role: 'user', content: userMessage, timestamp: new Date() },
+    ]);
+    setPageState('ba-chat');
+    setIsBaSending(true);
+    setError(null);
+
+    try {
+      const response = await aiApi.chatWithAiBa({
+        sessionId: sessionId.current,
+        userMessage,
+      });
+      if (requestId !== baRequestId.current) return;
+      if (response.status !== 'ASKING' || !response.questions?.length) {
+        throw new Error('AI did not return clarification questions for the first turn');
+      }
+      handleBaResponse(response);
+    } catch (err) {
+      if (requestId !== baRequestId.current) return;
+      console.error('BA initial brief error:', err);
+      sessionId.current = generateSessionId();
+      setBaMessages([]);
+      setPageState('brief');
+      setError('Chưa tạo được câu hỏi. Mô tả của bạn vẫn được giữ lại, vui lòng thử lại.');
+    } finally {
+      if (requestId === baRequestId.current) setIsBaSending(false);
+    }
+  }, [projectBrief, isBaSending, handleBaResponse]);
+
   // =========================================
   // Gửi message trong BA Chat
   // =========================================
@@ -816,29 +731,50 @@ const AIBriefPage: React.FC = () => {
         timestamp: new Date(),
       };
       setBaMessages((prev) => [...prev, userMsg]);
+      if (latestSrsContent) {
+        setLatestSrsContent(null);
+        setLatestSrsUrl(null);
+      }
+      // A revised brief invalidates any risk analysis produced from the previous SRS.
+      if (riskMessages.length > 0) {
+        setRiskMessages([]);
+        setRiskInput('');
+        setExactBudgetVnd(null);
+        setDurationMonths(null);
+      }
       setBaInput('');
       setIsBaSending(true);
       setError(null);
+      const requestId = ++baRequestId.current;
 
       try {
         const response = await aiApi.chatWithAiBa({
           sessionId: sessionId.current,
           userMessage: msg,
         });
+        if (requestId !== baRequestId.current) return;
         handleBaResponse(response);
         // BA đã hoàn tất: đưa khách sang màn review SRS, không tự động vào Risk Chat.
         if (response.status === 'COMPLETED') {
           setPageState('srs-review');
         }
       } catch (err) {
+        if (requestId !== baRequestId.current) return;
         console.error('BA send error:', err);
         setError('Gửi tin nhắn thất bại. Vui lòng thử lại.');
       } finally {
-        setIsBaSending(false);
+        if (requestId === baRequestId.current) setIsBaSending(false);
       }
     },
-    [baInput, isBaSending, handleBaResponse, latestSrsContent]
+    [baInput, isBaSending, handleBaResponse, latestSrsContent, riskMessages.length]
   );
+
+  const goToPreviousPhase = (target: PageState) => {
+    if (isBaSending || isRiskSending || isSavingSrs) return;
+    if (PHASE_ORDER.indexOf(target) >= PHASE_ORDER.indexOf(pageState)) return;
+    setError(null);
+    setPageState(target);
+  };
 
   // =========================================
   // Bắt đầu Risk Chat
@@ -854,6 +790,7 @@ const AIBriefPage: React.FC = () => {
     setRiskMessages([userMsg]);
     setIsRiskSending(true);
     setError(null);
+    const requestId = ++riskRequestId.current;
 
     try {
       const response = await aiApi.chatWithAiRisk({
@@ -861,6 +798,7 @@ const AIBriefPage: React.FC = () => {
         userMessage,
         currentSrsContent: srsContent,
       });
+      if (requestId !== riskRequestId.current) return;
 
       const aiMsg: ChatMessage = {
         id: `msg-${Date.now()}`,
@@ -877,10 +815,11 @@ const AIBriefPage: React.FC = () => {
       if (response.durationMonths) setDurationMonths(response.durationMonths);
       if (response.status === 'FINALIZED') setPageState('completed');
     } catch (err) {
+      if (requestId !== riskRequestId.current) return;
       console.error('Risk init error:', err);
       setError('Không thể kết nối với AI Risk Assessor.');
     } finally {
-      setIsRiskSending(false);
+      if (requestId === riskRequestId.current) setIsRiskSending(false);
     }
   }, []);
 
@@ -902,6 +841,7 @@ const AIBriefPage: React.FC = () => {
       setRiskInput('');
       setIsRiskSending(true);
       setError(null);
+      const requestId = ++riskRequestId.current;
 
       try {
         const response = await aiApi.chatWithAiRisk({
@@ -914,6 +854,7 @@ const AIBriefPage: React.FC = () => {
             content: m.content,
           })),
         });
+        if (requestId !== riskRequestId.current) return;
 
         const aiMsg: ChatMessage = {
           id: `msg-${Date.now()}`,
@@ -934,10 +875,11 @@ const AIBriefPage: React.FC = () => {
           setPageState('completed');
         }
       } catch (err) {
+        if (requestId !== riskRequestId.current) return;
         console.error('Risk send error:', err);
         setError('Gửi tin nhắn thất bại. Vui lòng thử lại.');
       } finally {
-        setIsRiskSending(false);
+        if (requestId === riskRequestId.current) setIsRiskSending(false);
       }
     },
     // QUAN TRỌNG: phải có riskMessages trong deps, nếu không callback bị stale
@@ -972,6 +914,7 @@ const AIBriefPage: React.FC = () => {
 
     setIsSavingSrs(true);
     setError(null);
+    const activeSession = sessionId.current;
 
     try {
       // Lưu bản SRS cuối cùng sau khi Client đã hoàn tất đánh giá rủi ro.
@@ -980,6 +923,13 @@ const AIBriefPage: React.FC = () => {
         srsContent,
         `srs-${sessionId.current}-${Date.now()}`
       );
+      if (activeSession !== sessionId.current) return;
+
+      try {
+        sessionStorage.removeItem(draftKey);
+      } catch {
+        // The project is ready even if browser storage is unavailable.
+      }
 
       navigate(PATH_CLIENT_CONFIRM_PROJECT, {
         state: {
@@ -996,11 +946,11 @@ const AIBriefPage: React.FC = () => {
     } finally {
       setIsSavingSrs(false);
     }
-  }, [navigate, latestSrsContent, exactBudgetVnd, durationMonths, isSavingSrs]);
+  }, [navigate, latestSrsContent, exactBudgetVnd, durationMonths, isSavingSrs, draftKey]);
 
   const handleSkip = useCallback(() => {
-    navigate(PATH_CLIENT_POST_PROJECT);
-  }, [navigate]);
+    navigate(PATH_CLIENT_POST_PROJECT, { state: { description: projectBrief.trim() } });
+  }, [navigate, projectBrief]);
 
   // =========================================
   // Keyboard handler cho chat input
@@ -1023,65 +973,79 @@ const AIBriefPage: React.FC = () => {
   // Render
   // =========================================
   return (
-    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="client-route ai-brief-page min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-6 flex flex-col">
         {/* Progress bar */}
-        <div className="flex items-center gap-2 mb-6">
-          {(['answering-base', 'ba-chat', 'srs-review', 'risk-chat', 'completed'] as const).map(
-            (step, idx) => {
-              const stepLabels = [
-                'Câu hỏi khởi động',
-                'Phân tích BA',
-                'Duyệt SRS',
-                'Đánh giá rủi ro',
-                'Hoàn thành',
-              ];
-              const stepOrder = [
-                'answering-base',
-                'ba-chat',
-                'srs-review',
-                'risk-chat',
-                'completed',
-              ];
-              const currentIndex = stepOrder.indexOf(pageState);
-              const stepIndex = stepOrder.indexOf(step);
-              const isActive =
-                pageState === step ||
-                (pageState === 'loading-questions' && step === 'answering-base');
-              const isDone = currentIndex > stepIndex;
-              return (
-                <div key={step} className="flex items-center gap-2 flex-1 min-w-0">
+        <div
+          className="project-flow-stepper relative grid grid-cols-5 mb-6"
+          aria-label="Tiến độ làm rõ dự án"
+        >
+          {PHASE_ORDER.map((step, idx) => {
+            const currentIndex = PHASE_ORDER.indexOf(pageState);
+            const stepIndex = idx;
+            const isActive = pageState === step;
+            const isDone = currentIndex > stepIndex;
+            return (
+              <div key={step} className="relative flex min-w-0 flex-col items-center">
+                {idx < PHASE_ORDER.length - 1 && (
                   <div
-                    className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0 transition-all ${
+                    aria-hidden="true"
+                    className={`project-flow-line absolute left-[calc(50%+18px)] top-[13px] h-0.5 w-[calc(100%-36px)] ${isDone ? 'project-flow-line--done' : ''}`}
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => goToPreviousPhase(step)}
+                  disabled={!isDone || isBaSending || isRiskSending || isSavingSrs}
+                  aria-current={isActive ? 'step' : undefined}
+                  aria-label={`${PHASE_LABELS[idx]}${isDone ? ' – quay lại bước này' : ''}`}
+                  className={`project-flow-node flex min-w-0 flex-col items-center gap-2 rounded-lg px-1 text-center ${
+                    isDone ? 'project-flow-node--back' : ''
+                  }`}
+                >
+                  <span
+                    className={`project-flow-circle relative z-10 flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0 transition-all ${
                       isDone
-                        ? 'bg-green-500 text-white'
+                        ? 'project-flow-circle--done'
                         : isActive
-                          ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                          : 'bg-gray-200 text-gray-500'
+                          ? 'project-flow-circle--active'
+                          : 'project-flow-circle--upcoming'
                     }`}
                   >
                     {isDone ? '✓' : idx + 1}
-                  </div>
+                  </span>
                   <span
-                    className={`text-xs font-semibold truncate hidden sm:block ${
-                      isActive ? 'text-blue-600' : isDone ? 'text-green-600' : 'text-gray-400'
+                    className={`project-flow-label hidden text-xs font-semibold leading-tight sm:block ${
+                      isActive
+                        ? 'project-flow-label--active'
+                        : isDone
+                          ? 'project-flow-label--done'
+                          : ''
                     }`}
                   >
-                    {stepLabels[idx]}
+                    {PHASE_LABELS[idx]}
                   </span>
-                  {idx < stepOrder.length - 1 && (
-                    <div className="flex-1 h-0.5 bg-gray-200 hidden sm:block" />
-                  )}
-                </div>
-              );
-            }
-          )}
+                </button>
+              </div>
+            );
+          })}
         </div>
 
+        {pageState !== 'brief' && (
+          <button
+            type="button"
+            onClick={() => goToPreviousPhase(PHASE_ORDER[PHASE_ORDER.indexOf(pageState) - 1])}
+            disabled={isBaSending || isRiskSending || isSavingSrs}
+            className="mb-4 self-start rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Quay lại bước trước
+          </button>
+        )}
+
         {/* Main card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden flex-1">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
           {/* Header */}
           <div className="px-6 py-5 border-b border-gray-100">
             <div className="flex items-center gap-3">
@@ -1102,16 +1066,16 @@ const AIBriefPage: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-base font-bold text-gray-900">
-                  {pageState === 'loading-questions' && 'Đang tải câu hỏi...'}
-                  {pageState === 'answering-base' && 'Câu hỏi khởi động'}
+                  {pageState === 'brief' && 'Mô tả sơ bộ dự án'}
                   {pageState === 'ba-chat' && 'AI Business Analyst'}
                   {pageState === 'srs-review' && 'Duyệt tài liệu SRS'}
                   {pageState === 'risk-chat' && 'AI Risk Assessor'}
                   {pageState === 'completed' && 'Phân tích hoàn tất!'}
                 </h1>
                 <p className="text-xs text-gray-500">
-                  {pageState === 'answering-base' && 'Trả lời để AI hiểu rõ hơn về dự án của bạn'}
-                  {pageState === 'ba-chat' && 'Mô tả chi tiết yêu cầu – AI sẽ sinh tài liệu SRS'}
+                  {pageState === 'brief' &&
+                    'Nói ngắn gọn bạn muốn làm gì để AI đặt câu hỏi phù hợp'}
+                  {pageState === 'ba-chat' && 'Trả lời các câu hỏi để AI làm rõ yêu cầu và tạo SRS'}
                   {pageState === 'srs-review' && 'Kiểm tra SRS nháp trước khi đánh giá rủi ro'}
                   {pageState === 'risk-chat' && 'AI đánh giá rủi ro & đề xuất ngân sách, thời hạn'}
                   {pageState === 'completed' && 'SRS đã được tạo, sẵn sàng đăng dự án'}
@@ -1147,85 +1111,52 @@ const AIBriefPage: React.FC = () => {
             </div>
           )}
 
-          {/* === PHASE: Loading === */}
-          {pageState === 'loading-questions' && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-4 py-16">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center animate-pulse">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-                  />
-                </svg>
-              </div>
-              <p className="text-sm text-gray-500 font-medium">Đang kết nối với SAM AI...</p>
-            </div>
-          )}
-
-          {/* === PHASE: Answering base questions === */}
-          {pageState === 'answering-base' && (
-            <div className="flex-1 overflow-y-auto p-6">
-              {baseQuestions.length === 0 && !error ? (
-                <div className="text-center text-sm text-gray-400 py-8">
-                  Không có câu hỏi khởi động.
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {baseQuestions.map((q) => (
-                    <BaseQuestionCard
-                      key={q.id}
-                      question={q}
-                      selectedOptions={baseAnswers[q.id]?.selectedOptions ?? []}
-                      onToggleOption={(opt) => handleToggleOption(q.id, opt)}
-                      onCustomInput={(text) => handleCustomInput(q.id, text)}
-                      customInput={baseAnswers[q.id]?.customInput ?? ''}
-                    />
-                  ))}
-                </div>
-              )}
-
-              <div className="mt-6 flex justify-between items-center">
+          {/* Client describes the project before any AI questions are generated. */}
+          {pageState === 'brief' && (
+            <div className="p-6 sm:p-8">
+              <label
+                htmlFor="project-brief"
+                className="mb-3 block text-sm font-semibold text-gray-800"
+              >
+                Bạn muốn thực hiện dự án gì?
+              </label>
+              <textarea
+                id="project-brief"
+                value={projectBrief}
+                onChange={(event) => {
+                  setProjectBrief(event.target.value);
+                  if (error) setError(null);
+                }}
+                maxLength={3000}
+                rows={7}
+                placeholder="Ví dụ: Tôi muốn làm website đặt lịch khám. Bệnh nhân chọn bác sĩ và khung giờ; phòng khám cần quản lý lịch hẹn..."
+                className="w-full resize-y rounded-xl border border-gray-200 px-4 py-3 text-sm leading-relaxed text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              />
+              <p className="mt-2 text-xs text-gray-500">
+                Chỉ cần mô tả ý tưởng ban đầu. AI sẽ hỏi tiếp những thông tin còn thiếu.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={handleSkip}
                   className="text-sm text-gray-400 hover:text-gray-600 font-medium cursor-pointer bg-transparent border-0"
                 >
-                  Bỏ qua, tự nhập
+                  Bỏ qua AI, tự nhập dự án
                 </button>
                 <button
                   type="button"
                   onClick={handleStartBaChat}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-8 py-3 rounded-xl shadow-md shadow-blue-200 hover:shadow-lg transition-all cursor-pointer border-0 flex items-center gap-2"
+                  disabled={!projectBrief.trim() || isBaSending}
+                  className="rounded-xl border-0 bg-blue-600 px-8 py-3 text-sm font-bold text-white shadow-md shadow-blue-200 transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Bắt đầu phân tích
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"
-                    />
-                  </svg>
+                  Tạo câu hỏi
                 </button>
               </div>
             </div>
           )}
-
           {/* === PHASE: BA Chat === */}
           {pageState === 'ba-chat' && (
-            <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex flex-col">
               {/* SRS URL badge */}
               {latestSrsUrl && (
                 <div className="mx-6 mt-3 px-3 py-2 bg-green-50 border border-green-200 rounded-xl flex items-center gap-2 text-xs text-green-700 font-medium">
@@ -1251,12 +1182,16 @@ const AIBriefPage: React.FC = () => {
               )}
 
               {/* Messages area */}
-              <div className="flex-1 overflow-y-auto px-6 py-4">
-                {baMessages.map((msg) => (
+              <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
+                {baMessages.map((msg, index) => (
                   <ChatBubble
                     key={msg.id}
                     message={msg}
-                    onSubmitAnswers={(summary) => handleSendBaMessage(summary)}
+                    onSubmitAnswers={
+                      index === baMessages.length - 1 && msg.role === 'assistant'
+                        ? (summary) => handleSendBaMessage(summary)
+                        : undefined
+                    }
                     isSending={isBaSending}
                   />
                 ))}
@@ -1306,9 +1241,9 @@ const AIBriefPage: React.FC = () => {
 
           {/* === PHASE: Review generated SRS before starting risk assessment === */}
           {pageState === 'srs-review' && (
-            <div className="flex-1 overflow-y-auto p-6 bg-slate-50">
+            <div className="ai-srs-review p-6 bg-slate-50">
               <div className="max-w-3xl mx-auto space-y-4">
-                <div className="flex items-start gap-3 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl">
+                <div className="ai-srs-banner flex items-start gap-3 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl">
                   <div className="text-lg leading-none">✨</div>
                   <div>
                     <h2 className="text-sm font-bold text-blue-900">SRS nháp đã sẵn sàng</h2>
@@ -1337,7 +1272,7 @@ const AIBriefPage: React.FC = () => {
                     type="button"
                     onClick={handleContinueToRisk}
                     disabled={!latestSrsContent}
-                    className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md shadow-amber-200 transition-all cursor-pointer border-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="ai-brief-risk-continue bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md shadow-amber-200 transition-all cursor-pointer border-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     SRS ổn, đánh giá rủi ro
                     <svg
@@ -1361,7 +1296,7 @@ const AIBriefPage: React.FC = () => {
 
           {/* === PHASE: Risk Chat === */}
           {pageState === 'risk-chat' && (
-            <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex flex-col">
               <div className="mx-6 mt-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 font-semibold flex-1">
                   <svg
@@ -1402,7 +1337,7 @@ const AIBriefPage: React.FC = () => {
               </div>
 
               {/* Messages + live SRS preview */}
-              <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 px-6 py-4 overflow-y-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 max-h-[60vh] overflow-y-auto px-6 py-4">
                 <div className="min-w-0">
                   {riskMessages.map((msg) => (
                     <ChatBubble
@@ -1466,8 +1401,8 @@ const AIBriefPage: React.FC = () => {
 
           {/* === PHASE: Completed === */}
           {pageState === 'completed' && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 py-10 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
+            <div className="flex flex-col items-center justify-center gap-6 px-6 py-10 text-center">
+              <div className="ai-brief-complete-mark w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-200">
                 <svg
                   className="w-8 h-8 text-white"
                   fill="none"
@@ -1492,7 +1427,7 @@ const AIBriefPage: React.FC = () => {
                   onClick={() => setIsSrsModalOpen(true)}
                   className="text-sm text-blue-600 hover:text-blue-800 font-semibold cursor-pointer bg-transparent border-0 flex items-center gap-2 underline underline-offset-2"
                 >
-                  📄 Xem tài liệu SRS đã tạo
+                  Xem tài liệu SRS đã tạo
                 </button>
               )}
 

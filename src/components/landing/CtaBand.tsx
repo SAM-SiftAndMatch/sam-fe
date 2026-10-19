@@ -22,7 +22,7 @@ export const CtaBand: React.FC = () => {
             <SecondaryButton to={paths.PATH_FREELANCER}>Tìm việc Freelance</SecondaryButton>
           </div>
 
-          <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-slate-500 font-mono">
+          <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-slate-500">
             <span>✓ Miễn phí tạo đặc tả SRS</span>
             <span>✓ Ký quỹ Escrow an toàn</span>
             <span>✓ Bảo chứng chất lượng bởi AI QC</span>

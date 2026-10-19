@@ -57,7 +57,7 @@ const RoleSelectionPage: React.FC = () => {
             </p>
 
             {/* Micro value snippets */}
-            <div className="w-full space-y-2 mb-8 text-xs text-slate-600 font-mono bg-slate-50 p-4 rounded-lg border border-slate-100">
+            <div className="w-full space-y-2 mb-8 text-xs text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-100">
               <div className="flex items-center gap-2">
                 <span className="text-[#1D4ED8] font-bold">✓</span>
                 <span>Tự động chuẩn hóa PRD với AI PM</span>
@@ -88,7 +88,7 @@ const RoleSelectionPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate(PATH_CLIENT_PRICING)}
-              className="w-full text-center text-xs font-mono font-medium text-slate-500 hover:text-[#1D4ED8] transition-colors cursor-pointer py-1"
+              className="w-full text-center text-xs font-medium text-slate-500 hover:text-[#1D4ED8] transition-colors cursor-pointer py-1"
             >
               XEM GÓI DỊCH VỤ →
             </button>
@@ -120,7 +120,7 @@ const RoleSelectionPage: React.FC = () => {
             </p>
 
             {/* Micro value snippets */}
-            <div className="w-full space-y-2 mb-8 text-xs text-slate-600 font-mono bg-slate-50 p-4 rounded-lg border border-slate-100">
+            <div className="w-full space-y-2 mb-8 text-xs text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-100">
               <div className="flex items-center gap-2">
                 <span className="text-[#1D4ED8] font-bold">✓</span>
                 <span>Tự động nhận đề xuất job chuẩn tech-stack</span>
@@ -151,7 +151,7 @@ const RoleSelectionPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate(PATH_FREELANCER_PRICING)}
-              className="w-full text-center text-xs font-mono font-medium text-slate-500 hover:text-[#1D4ED8] transition-colors cursor-pointer py-1"
+              className="w-full text-center text-xs font-medium text-slate-500 hover:text-[#1D4ED8] transition-colors cursor-pointer py-1"
             >
               XEM GÓI DỊCH VỤ →
             </button>

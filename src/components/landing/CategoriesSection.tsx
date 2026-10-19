@@ -79,7 +79,7 @@ export const CategoriesSection: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate(paths.PATH_CLIENT_FIND_FREELANCER)}
-          className="text-xs font-mono font-semibold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0 flex items-center gap-1 self-start md:self-auto"
+          className="text-xs font-semibold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0 flex items-center gap-1 self-start md:self-auto"
         >
           XEM TẤT CẢ DANH MỤC →
         </button>
@@ -93,10 +93,10 @@ export const CategoriesSection: React.FC = () => {
               className="group h-full bg-white rounded-[12px] p-5 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 cursor-pointer flex flex-col justify-between"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="font-mono text-[10px] text-slate-400 group-hover:text-[#1D4ED8] transition-colors">
+                <span className="text-[10px] text-slate-400 group-hover:text-[#1D4ED8] transition-colors">
                   #{cat.code}
                 </span>
-                <span className="font-mono text-[11px] text-[#1D4ED8] opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-[11px] text-[#1D4ED8] opacity-0 group-hover:opacity-100 transition-opacity">
                   CHỌN →
                 </span>
               </div>
@@ -104,7 +104,7 @@ export const CategoriesSection: React.FC = () => {
                 <h3 className="text-base font-bold text-slate-900 group-hover:text-[#1D4ED8] transition-colors mb-1">
                   {cat.name}
                 </h3>
-                <p className="font-mono text-[11px] text-slate-500">{cat.count}</p>
+                <p className="text-[11px] text-slate-500">{cat.count}</p>
               </div>
             </div>
           </ScrollReveal>

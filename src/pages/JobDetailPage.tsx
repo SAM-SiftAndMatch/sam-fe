@@ -8,6 +8,7 @@ import { proposalApi } from '../api/proposal';
 import AppHeader from '../components/AppHeader';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
+import JobStatusBadge from '../components/JobStatusBadge';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { extractApiResponse } from '../lib/api-error';
 import * as paths from '../routes/paths';
@@ -286,35 +287,19 @@ const JobDetailPage: React.FC = () => {
             <section className="bg-white rounded-xl p-8 border border-slate-200/90 shadow-xs">
               {/* Status + Urgent badges */}
               <div className="flex flex-wrap gap-2 mb-4">
-                <span
-                  className={`text-xs font-mono font-medium px-2.5 py-1 rounded-md ${
-                    job.status === 'OPEN'
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
-                      : job.status === 'IN_PROGRESS'
-                        ? 'bg-blue-50 text-blue-700 border border-blue-200/60'
-                        : job.status === 'AWAITING_PAYMENT'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200/60'
-                          : 'bg-slate-100 text-slate-600 border border-slate-200'
-                  }`}
-                >
-                  {job.status === 'OPEN'
-                    ? '🟢 Đang mở'
-                    : job.status === 'IN_PROGRESS'
-                      ? '🔵 Đang thực hiện'
-                      : job.status === 'AWAITING_PAYMENT'
-                        ? '🟡 Chờ nạp tiền'
-                        : job.status}
-                </span>
+                <JobStatusBadge status={job.status} />
                 {job.isUrgentHiring && (
-                  <span className="text-xs font-mono font-medium text-white bg-red-500 px-2.5 py-1 rounded-md">
+                  <span className="text-xs font-medium text-white bg-red-500 px-2.5 py-1 rounded-md">
                     🔥 Tuyển gấp
                   </span>
                 )}
-                {job.isFeatured && (
-                  <span className="text-xs font-mono font-medium text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-md">
-                    ⭐ Nổi bật
-                  </span>
-                )}
+                {job.isFeatured &&
+                  job.status === 'OPEN' &&
+                  (!job.deadline || new Date(job.deadline).getTime() >= Date.now()) && (
+                    <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-md">
+                      ⭐ Nổi bật
+                    </span>
+                  )}
               </div>
               <h1 className="text-2xl md:text-3xl font-bold text-slate-900 leading-snug mb-4 tracking-tight">
                 {job.title}
@@ -324,7 +309,7 @@ const JobDetailPage: React.FC = () => {
                 {job.skills?.map((skill) => (
                   <span
                     key={skill.id}
-                    className="text-xs font-mono font-medium text-[#1D4ED8] bg-blue-50/70 border border-blue-100 px-2.5 py-1 rounded-md"
+                    className="text-xs font-medium text-[#1D4ED8] bg-blue-50/70 border border-blue-100 px-2.5 py-1 rounded-md"
                   >
                     {skill.name}
                     {skill.yearsOfExperience ? ` (${skill.yearsOfExperience}+năm)` : ''}
@@ -635,11 +620,9 @@ const JobDetailPage: React.FC = () => {
                     />
                   </svg>
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                    Loại dự án
+                    Nghiệm thu
                   </span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {job.requiresAiQa ? 'Có bảo vệ QA' : 'Tiêu chuẩn'}
-                  </span>
+                  <span className="text-sm font-bold text-gray-900">Có checklist hỗ trợ</span>
                 </div>
               </div>
             </section>
@@ -649,7 +632,7 @@ const JobDetailPage: React.FC = () => {
                 <h2 className="text-base font-bold text-slate-900">Các công việc tương tự</h2>
                 <button
                   type="button"
-                  className="text-xs font-mono font-medium text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0"
+                  className="text-xs font-medium text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0"
                 >
                   XEM TẤT CẢ →
                 </button>
@@ -658,7 +641,7 @@ const JobDetailPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="border border-slate-200/90 rounded-lg p-5 hover:border-[#1D4ED8]/60 transition-colors bg-white flex flex-col">
                   <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-mono font-bold text-white bg-[#1D4ED8] px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-white bg-[#1D4ED8] px-2 py-0.5 rounded">
                       MỚI ĐĂNG
                     </span>
                     <button
@@ -686,15 +669,15 @@ const JobDetailPage: React.FC = () => {
                     Kỹ sư Computer Vision cho Hệ thống An ninh
                   </h3>
                   <div className="flex gap-2 mb-4">
-                    <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                    <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                       OpenCV
                     </span>
-                    <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                    <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                       C++
                     </span>
                   </div>
                   <div className="mt-auto flex items-center justify-between pt-2 border-t border-slate-100">
-                    <span className="text-sm font-bold font-mono text-[#1D4ED8]">₫35,000,000</span>
+                    <span className="text-sm font-bold text-[#1D4ED8]">₫35,000,000</span>
                     <button
                       type="button"
                       className="text-xs font-medium text-[#1D4ED8] bg-blue-50 px-3 py-1.5 rounded-md cursor-pointer border border-blue-100 hover:bg-blue-100/60 transition-colors"
@@ -706,7 +689,7 @@ const JobDetailPage: React.FC = () => {
 
                 <div className="border border-slate-200/90 rounded-lg p-5 hover:border-[#1D4ED8]/60 transition-colors bg-white flex flex-col">
                   <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-mono font-bold text-white bg-[#1D4ED8] px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-white bg-[#1D4ED8] px-2 py-0.5 rounded">
                       MỚI ĐĂNG
                     </span>
                     <button
@@ -734,15 +717,15 @@ const JobDetailPage: React.FC = () => {
                     Chuyên gia AI tạo hình & Stable Diffusion
                   </h3>
                   <div className="flex gap-2 mb-4">
-                    <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                    <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                       Stable Diffusion
                     </span>
-                    <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                    <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                       Midjourney
                     </span>
                   </div>
                   <div className="mt-auto flex items-center justify-between pt-2 border-t border-slate-100">
-                    <span className="text-sm font-bold font-mono text-[#1D4ED8]">₫30,000,000</span>
+                    <span className="text-sm font-bold text-[#1D4ED8]">₫30,000,000</span>
                     <button
                       type="button"
                       className="text-xs font-medium text-[#1D4ED8] bg-blue-50 px-3 py-1.5 rounded-md cursor-pointer border border-blue-100 hover:bg-blue-100/60 transition-colors"
@@ -756,7 +739,7 @@ const JobDetailPage: React.FC = () => {
 
             <div className="w-full rounded-xl bg-slate-900 border border-slate-800 p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
               <div className="md:w-1/2">
-                <span className="font-mono text-[10px] text-blue-400 uppercase tracking-widest block mb-1">
+                <span className="text-[10px] text-blue-400 uppercase tracking-widest block mb-1">
                   {'//'} HỆ SINH THÁI
                 </span>
                 <h3 className="text-lg font-bold mb-1.5 tracking-tight">Thông tin về SAM</h3>
@@ -765,28 +748,28 @@ const JobDetailPage: React.FC = () => {
                   dự án tương lai.
                 </p>
               </div>
-              <div className="md:w-1/2 flex justify-between w-full font-mono">
+              <div className="md:w-1/2 flex justify-between w-full">
                 <div className="flex flex-col items-center">
                   <span className="text-xl font-bold text-white">4.8</span>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400">
                     Sao đánh giá
                   </span>
                 </div>
                 <div className="flex flex-col items-center">
                   <span className="text-xl font-bold text-white">#1</span>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400">
                     Nền tảng
                   </span>
                 </div>
                 <div className="flex flex-col items-center">
                   <span className="text-xl font-bold text-white">2M+</span>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400">
                     Truy cập
                   </span>
                 </div>
                 <div className="flex flex-col items-center">
                   <span className="text-xl font-bold text-white">$15M</span>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400">
                     Đã chi trả
                   </span>
                 </div>
@@ -798,23 +781,15 @@ const JobDetailPage: React.FC = () => {
           <div className="flex flex-col gap-6">
             <section className="bg-white rounded-xl p-6 border border-slate-200/90 shadow-xs">
               <div className="flex justify-between items-center mb-5">
-                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">
+                <span className="text-[10px] text-slate-400 uppercase tracking-widest">
                   THÔNG TIN DỰ ÁN
                 </span>
-                <span
-                  className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded uppercase ${
-                    job.status === 'OPEN'
-                      ? 'bg-blue-50 text-[#1D4ED8] border border-blue-100'
-                      : 'bg-slate-100 text-slate-600 border border-slate-200'
-                  }`}
-                >
-                  {job.status === 'OPEN' ? 'Đang mở' : job.status}
-                </span>
+                <JobStatusBadge status={job.status} />
               </div>
 
               <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
-                <span className="text-xs font-mono text-slate-500">MÃ DỰ ÁN:</span>
-                <span className="text-xs font-mono font-bold text-slate-900">
+                <span className="text-xs text-slate-500">MÃ DỰ ÁN:</span>
+                <span className="font-mono text-xs font-semibold text-slate-900">
                   {job.id.slice(0, 8).toUpperCase()}
                 </span>
               </div>
@@ -839,10 +814,10 @@ const JobDetailPage: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-0.5">
+                    <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">
                       Ngân sách
                     </div>
-                    <div className="text-lg font-bold font-mono text-[#1D4ED8]">
+                    <div className="text-lg font-bold text-[#1D4ED8]">
                       {formatBudget(job.budgetMin, job.budgetMax)}
                     </div>
                   </div>
@@ -867,7 +842,7 @@ const JobDetailPage: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-0.5">
+                    <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">
                       Thanh toán
                     </div>
                     <div className="text-xs font-semibold text-slate-900">
@@ -895,7 +870,7 @@ const JobDetailPage: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-0.5">
+                    <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">
                       Hình thức làm việc
                     </div>
                     <div className="text-xs font-semibold text-slate-900">
@@ -907,19 +882,19 @@ const JobDetailPage: React.FC = () => {
             </section>
 
             <section className="bg-white rounded-xl p-6 border border-slate-200/90 shadow-xs">
-              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block mb-4">
+              <span className="text-[10px] text-slate-400 uppercase tracking-widest block mb-4">
                 THÔNG TIN KHÁCH HÀNG
               </span>
 
               <div className="flex items-center gap-3.5 mb-5">
-                <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center text-slate-400 text-xs font-mono font-bold">
+                <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center text-slate-400 text-xs font-bold">
                   {(job.clientName || 'KH').slice(0, 2).toUpperCase()}
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 leading-tight">
                     {job.clientName || 'Khách hàng'}
                   </h3>
-                  <div className="flex items-center gap-1 mt-1 font-mono text-xs">
+                  <div className="flex items-center gap-1 mt-1 text-xs">
                     <span className="text-amber-500">★</span>
                     <span className="font-bold text-slate-900">4.9</span>
                     <span className="text-slate-400 text-[11px]">(42)</span>

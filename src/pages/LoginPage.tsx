@@ -68,7 +68,7 @@ const LoginPage: React.FC = () => {
       <div className="w-full max-w-5xl flex justify-start items-center z-10 mb-4">
         <Link
           to={paths.PATH_HOME}
-          className="text-xs font-mono font-medium text-slate-600 hover:text-[#1D4ED8] transition-colors flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3.5 py-2 rounded-lg shadow-xs border border-slate-200 hover:border-slate-300"
+          className="text-xs font-medium text-slate-600 hover:text-[#1D4ED8] transition-colors flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3.5 py-2 rounded-lg shadow-xs border border-slate-200 hover:border-slate-300"
         >
           <svg
             className="w-4 h-4"
@@ -90,12 +90,7 @@ const LoginPage: React.FC = () => {
         <div className="hidden md:flex md:col-span-5 bg-slate-900 border-r border-slate-800 p-8 lg:p-10 flex-col justify-between text-white relative">
           <div>
             <div className="flex items-center justify-between mb-8">
-              <span
-                className="text-3xl font-black tracking-tight text-white"
-                style={{ fontFamily: "'Quedora', sans-serif" }}
-              >
-                SAM
-              </span>
+              <span className="text-3xl font-extrabold tracking-tight text-white">SAM</span>
             </div>
 
             <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
@@ -107,7 +102,7 @@ const LoginPage: React.FC = () => {
             </p>
 
             {/* Live-looking architecture micro-snippet */}
-            <div className="space-y-3 font-mono text-[11px]">
+            <div className="space-y-3 text-[11px]">
               <div className="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 flex items-start gap-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
                 <div>
@@ -146,7 +141,7 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
+          <div className="pt-6 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
             <span>ESCROW PROTECTED</span>
             <span className="text-emerald-400 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -159,10 +154,7 @@ const LoginPage: React.FC = () => {
         <div className="md:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white">
           <div className="mb-6">
             <div className="md:hidden mb-4 flex items-center justify-between">
-              <span
-                className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] leading-none"
-                style={{ fontFamily: "'Quedora', sans-serif" }}
-              >
+              <span className="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] leading-none">
                 SAM
               </span>
             </div>

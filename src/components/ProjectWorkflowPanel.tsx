@@ -1,8 +1,12 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { workflowApi } from '../api/workflow';
+import { workspaceKeys } from '../pages/workspace-query';
+import { useAuthStore } from '../stores/useAuthStore';
 import type {
+  DeliveryStatus,
   ProjectDelivery,
   ProjectTaskStatus,
   ProjectTimeline,
@@ -23,11 +27,17 @@ const statusLabel: Record<ProjectTaskStatus, string> = {
 
 const statusClass: Record<ProjectTaskStatus, string> = {
   TODO: 'bg-slate-100 text-slate-600',
-  IN_PROGRESS: 'bg-blue-50 text-blue-700',
+  IN_PROGRESS: 'bg-orange-50 text-orange-700',
   BLOCKED: 'bg-red-50 text-red-700',
   SUBMITTED: 'bg-violet-50 text-violet-700',
   ACCEPTED: 'bg-emerald-50 text-emerald-700',
   REOPENED: 'bg-amber-50 text-amber-700',
+};
+
+const deliveryStatusAppearance: Record<DeliveryStatus, { label: string; className: string }> = {
+  SUBMITTED: { label: 'Chờ nghiệm thu', className: 'text-violet-700' },
+  REVISION_REQUESTED: { label: 'Cần chỉnh sửa', className: 'text-amber-700' },
+  ACCEPTED: { label: 'Đã nghiệm thu', className: 'text-emerald-700' },
 };
 
 const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
@@ -37,8 +47,8 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   onSettlementCompleted,
   layout = 'compact',
 }) => {
-  const [timeline, setTimeline] = useState<ProjectTimeline | null>(null);
-  const [deliveries, setDeliveries] = useState<ProjectDelivery[]>([]);
+  const userId = useAuthStore((state) => state.user?.userId) ?? '';
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const reportTask = searchParams.get('task');
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
@@ -47,7 +57,6 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   const [expandedQaId, setExpandedQaId] = useState<string | null>(null);
   const [loadingQaId, setLoadingQaId] = useState<string | null>(null);
   const [settlement, setSettlement] = useState<SandboxSettlement | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reportTaskId, setReportTaskId] = useState<string | null>(null);
   const [reportContent, setReportContent] = useState('');
@@ -65,36 +74,46 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
 
   const canUseWorkflow = jobStatus === 'IN_PROGRESS' || jobStatus === 'COMPLETED';
   const canReport = role === 'freelancer' && jobStatus === 'IN_PROGRESS';
-
-  const loadWorkflow = useCallback(async () => {
-    if (!canUseWorkflow) return;
-    setLoading(true);
+  const timelineQuery = useQuery({
+    queryKey: workspaceKeys.timeline(userId, jobId),
+    queryFn: () => workflowApi.getTimelineSummary(jobId),
+    enabled: canUseWorkflow && Boolean(userId),
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+  });
+  const deliveriesQuery = useQuery({
+    queryKey: workspaceKeys.deliveries(userId, jobId),
+    queryFn: () => workflowApi.getDeliveries(jobId),
+    enabled: canUseWorkflow && Boolean(userId),
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+  });
+  const timeline = timelineQuery.data ?? null;
+  const deliveries = deliveriesQuery.data ?? [];
+  const loading = canUseWorkflow && (timelineQuery.isPending || deliveriesQuery.isPending);
+  const queryError = timelineQuery.error ?? deliveriesQuery.error;
+  const loadWorkflow = () => {
     setError(null);
-    try {
-      const [timelineData, deliveryData] = await Promise.all([
-        workflowApi.getTimelineSummary(jobId),
-        workflowApi.getDeliveries(jobId),
-      ]);
-      setTimeline(timelineData);
-      setDeliveries(deliveryData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không tải được tiến độ dự án');
-    } finally {
-      setLoading(false);
-    }
-  }, [canUseWorkflow, jobId]);
+    void Promise.all([timelineQuery.refetch(), deliveriesQuery.refetch()]);
+  };
 
   const loadTaskReports = useCallback(
     async (taskId: string) => {
       try {
-        const result = await workflowApi.getTaskReports(jobId, taskId);
+        const result = await queryClient.fetchQuery({
+          queryKey: workspaceKeys.reports(userId, jobId, taskId),
+          queryFn: () => workflowApi.getTaskReports(jobId, taskId),
+          staleTime: 10_000,
+        });
         setReportLists((current) => ({ ...current, [taskId]: result }));
         setExpandedTaskId(taskId);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Không tải được báo cáo');
       }
     },
-    [jobId]
+    [jobId, queryClient, userId]
   );
 
   const setReportLocation = useCallback(
@@ -117,10 +136,6 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   );
 
   useEffect(() => {
-    void loadWorkflow();
-  }, [loadWorkflow]);
-
-  useEffect(() => {
     if (!searchParams.has('page') && !searchParams.has('reportPage')) return;
     setSearchParams(
       (current) => {
@@ -138,8 +153,9 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
       setExpandedTaskId(null);
       return;
     }
+    // Khi timeline được đồng bộ lại, làm mới báo cáo đang mở của phía còn lại.
     void loadTaskReports(reportTask);
-  }, [canUseWorkflow, loadTaskReports, reportTask, timeline?.tasks]);
+  }, [canUseWorkflow, loadTaskReports, reportTask, timeline?.tasks, timelineQuery.dataUpdatedAt]);
 
   const toggleQaPlan = async (deliveryId: string) => {
     if (expandedQaId === deliveryId) {
@@ -186,7 +202,14 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         progress: reportProgress,
         status: reportStatus,
       });
-      setTimeline({ ...updated, tasks: updated.tasks.map((task) => ({ ...task, reports: [] })) });
+      queryClient.setQueryData<ProjectTimeline>(workspaceKeys.timeline(userId, jobId), {
+        ...updated,
+        tasks: updated.tasks.map((task) => ({ ...task, reports: [] })),
+      });
+      void queryClient.invalidateQueries({ queryKey: workspaceKeys.timeline(userId, jobId) });
+      void queryClient.invalidateQueries({
+        queryKey: workspaceKeys.reports(userId, jobId, reportTaskId),
+      });
       setReportLists((current) => {
         const next = { ...current };
         delete next[reportTaskId];
@@ -211,7 +234,11 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         repositoryUrl: repositoryUrl.trim() || undefined,
         note: deliveryNote.trim() || undefined,
       });
-      setDeliveries((current) => [delivery, ...current]);
+      queryClient.setQueryData<ProjectDelivery[]>(
+        workspaceKeys.deliveries(userId, jobId),
+        (current) => [delivery, ...(current ?? [])]
+      );
+      void queryClient.invalidateQueries({ queryKey: workspaceKeys.deliveries(userId, jobId) });
       setWebUrl('');
       setRepositoryUrl('');
       setDeliveryNote('');
@@ -228,9 +255,13 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
     setError(null);
     try {
       const result = await workflowApi.acceptDelivery(jobId, delivery.id);
-      setDeliveries((current) =>
-        current.map((item) => (item.id === result.delivery.id ? result.delivery : item))
+      queryClient.setQueryData<ProjectDelivery[]>(
+        workspaceKeys.deliveries(userId, jobId),
+        (current) =>
+          (current ?? []).map((item) => (item.id === result.delivery.id ? result.delivery : item))
       );
+      void queryClient.invalidateQueries({ queryKey: workspaceKeys.deliveries(userId, jobId) });
+      void queryClient.invalidateQueries({ queryKey: workspaceKeys.timeline(userId, jobId) });
       setSettlement(result.settlement);
       setModalMode(null);
       setActiveDelivery(null);
@@ -256,7 +287,11 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
       const updated = await workflowApi.requestDeliveryRevision(jobId, activeDelivery.id, {
         reason: revisionReason.trim(),
       });
-      setDeliveries((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+      queryClient.setQueryData<ProjectDelivery[]>(
+        workspaceKeys.deliveries(userId, jobId),
+        (current) => (current ?? []).map((item) => (item.id === updated.id ? updated : item))
+      );
+      void queryClient.invalidateQueries({ queryKey: workspaceKeys.deliveries(userId, jobId) });
       setModalMode(null);
       setActiveDelivery(null);
       setRevisionReason('');
@@ -314,13 +349,18 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
       </div>
 
       {loading && <p className="text-xs text-gray-500">Đang tải timeline...</p>}
-      {error && <p className="text-xs text-red-600 bg-red-50 rounded-xl p-3">{error}</p>}
+      {(error || queryError) && (
+        <p className="text-xs text-red-600 bg-red-50 rounded-xl p-3">
+          {error ||
+            (queryError instanceof Error ? queryError.message : 'Không tải được tiến độ dự án')}
+        </p>
+      )}
 
       <div className={`flex flex-col gap-4 ${layout === 'expanded' ? 'md:gap-5' : ''}`}>
         {weeks.map(([weekNumber, tasks]) => (
           <section key={weekNumber} className="relative pl-5 border-l-2 border-slate-200">
-            <span className="absolute -left-[7px] top-0 w-3 h-3 rounded-full bg-blue-600 border-2 border-white" />
-            <p className="text-xs font-black text-gray-900 mb-2">Tuần {weekNumber}</p>
+            <span className="workspace-week-dot absolute -left-[7px] top-0 w-3 h-3 rounded-full bg-blue-600 border-2 border-white" />
+            <p className="text-xs font-extrabold text-gray-900 mb-2">Tuần {weekNumber}</p>
             <div className="flex flex-col gap-2">
               {tasks.map((task) => {
                 const latestReport = reportLists[task.id]?.[0];
@@ -332,7 +372,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                     <p className="text-xs font-bold text-gray-800 leading-relaxed">{task.title}</p>
                     <div className="flex items-center justify-between gap-2 mt-2">
                       <span
-                        className={`text-[10px] font-bold px-2 py-1 rounded-full ${statusClass[task.status]}`}
+                        className={`workspace-task-status text-[10px] font-bold px-2 py-1 rounded-full ${statusClass[task.status]}`}
                       >
                         {statusLabel[task.status]}
                       </span>
@@ -521,12 +561,10 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                   <p className="text-xs font-bold text-gray-800">
                     Phiên bản {delivery.versionNumber}
                   </p>
-                  <span className="text-[10px] font-bold text-violet-700">
-                    {delivery.status === 'ACCEPTED'
-                      ? 'Đã nghiệm thu'
-                      : delivery.status === 'REVISION_REQUESTED'
-                        ? 'Cần chỉnh sửa'
-                        : 'Chờ nghiệm thu'}
+                  <span
+                    className={`text-[10px] font-semibold ${deliveryStatusAppearance[delivery.status].className}`}
+                  >
+                    {deliveryStatusAppearance[delivery.status].label}
                   </span>
                 </div>
                 <a

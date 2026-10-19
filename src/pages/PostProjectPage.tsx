@@ -1,6 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import jobApi from '../api/job';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { PATH_CLIENT_CONFIRM_PROJECT } from '../routes/paths';
@@ -25,7 +27,7 @@ type LocationState = {
   description?: string;
   selectedSkills?: string[];
   budgetAmount?: number;
-  upgrades?: { featured: boolean; urgent: boolean; warranty: boolean };
+  upgrades?: { featured: boolean; urgent: boolean };
   restoreStep?: number;
   /** Từ AIBriefPage: URL file SRS đã upload lên Cloudinary */
   srsDocumentUrl?: string;
@@ -53,7 +55,7 @@ const PostProjectPage: React.FC = () => {
     description: initialDescription = '',
     selectedSkills: initialSkills = [],
     budgetAmount: initialBudgetAmount = 1000000,
-    upgrades: initialUpgrades = { featured: false, urgent: false, warranty: true },
+    upgrades: initialUpgrades = { featured: false, urgent: false },
     restoreStep = 1,
     srsDocumentUrl: initialSrsDocumentUrl = '',
   } = (location.state as LocationState) || {};
@@ -163,11 +165,12 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
   }, [currentStep, aiPricingState, description, selectedTags]);
 
   const [upgrades, setUpgrades] = useState(initialUpgrades);
+  const addonPrices = useQuery({ queryKey: ['job-addon-prices'], queryFn: jobApi.getAddonPrices });
+  const featuredFee = addonPrices.data?.featuredFee ?? 59000;
+  const urgentFee = addonPrices.data?.urgentFee ?? 99000;
 
   const totalUpgradesCost =
-    (upgrades.featured ? 59000 : 0) +
-    (upgrades.urgent ? 99000 : 0) +
-    (upgrades.warranty ? 59000 : 0);
+    (upgrades.featured ? featuredFee : 0) + (upgrades.urgent ? urgentFee : 0);
   const totalPrice = budgetAmount + totalUpgradesCost;
 
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
@@ -207,67 +210,62 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
     ];
 
     return (
-      <div className="w-full max-w-3xl mx-auto mb-12 relative">
-        {/* Container cho đường gạch ngang, căn chuẩn từ tâm step 1 đến tâm step 4 */}
-        <div className="absolute top-5 left-[40px] right-[40px] h-[2px] bg-gray-400 z-0">
-          {/* Đường gạch ngang xanh thể hiện tiến độ */}
-          <div
-            className="h-full bg-green-500 transition-all duration-500"
-            style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
-          />
-        </div>
+      <div
+        className="project-flow-stepper project-flow-stepper--post relative mx-auto mb-12 grid w-full max-w-3xl grid-cols-4"
+        aria-label="Tiến độ đăng dự án"
+      >
+        {steps.map((step) => {
+          const isCompleted = step.id < currentStep;
+          const isActive = step.id === currentStep;
 
-        <div className="flex justify-between items-start">
-          {steps.map((step) => {
-            const isCompleted = step.id < currentStep;
-            const isActive = step.id === currentStep;
-
-            return (
-              <div
-                key={step.id}
-                onClick={() => {
-                  if (step.id <= highestStep) goToStep(step.id);
-                }}
-                className={`flex flex-col items-center gap-2 relative z-10 bg-[#F8FAFC] px-1 md:px-2 w-14 md:w-20 text-center shrink-0 ${step.id <= highestStep ? 'cursor-pointer hover:-translate-y-0.5 transition-transform' : 'cursor-not-allowed'}`}
-              >
-                {isCompleted ? (
-                  <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow-md">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                      role="img"
-                      aria-label="Completed"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                ) : isActive ? (
-                  <div className="w-10 h-10 rounded-full bg-[#1D4ED8] text-white flex items-center justify-center font-bold text-sm shadow-md">
-                    {step.id}
-                  </div>
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-200 text-gray-400 flex items-center justify-center font-bold text-sm">
-                    {step.id}
-                  </div>
-                )}
+          return (
+            <div key={step.id} className="relative flex min-w-0 flex-col items-center">
+              {step.id < steps.length && (
                 <span
-                  className={`text-[11px] md:text-xs font-bold whitespace-nowrap ${isActive || isCompleted ? (isCompleted ? 'text-green-500' : 'text-[#1D4ED8]') : 'text-gray-400'}`}
+                  aria-hidden="true"
+                  className={`project-flow-line absolute left-[calc(50%+25px)] top-[19px] h-0.5 w-[calc(100%-50px)] ${isCompleted ? 'project-flow-line--done' : ''}`}
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => goToStep(step.id)}
+                disabled={step.id > highestStep || isActive}
+                aria-current={isActive ? 'step' : undefined}
+                aria-label={`${step.label}${isCompleted ? ' – quay lại bước này' : ''}`}
+                className={`project-flow-node flex min-w-0 flex-col items-center gap-2 rounded-lg px-1 text-center ${step.id <= highestStep && !isActive ? 'project-flow-node--back' : ''}`}
+              >
+                <span
+                  className={`project-flow-circle relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                    isCompleted
+                      ? 'project-flow-circle--done'
+                      : isActive
+                        ? 'project-flow-circle--active'
+                        : 'project-flow-circle--upcoming'
+                  }`}
+                >
+                  {isCompleted ? '✓' : step.id}
+                </span>
+                <span
+                  className={`project-flow-label text-[11px] font-bold md:text-xs ${
+                    isActive
+                      ? 'project-flow-label--active'
+                      : isCompleted
+                        ? 'project-flow-label--done'
+                        : ''
+                  }`}
                 >
                   {step.label}
                 </span>
-              </div>
-            );
-          })}
-        </div>
+              </button>
+            </div>
+          );
+        })}
       </div>
     );
   };
 
   return (
-    <div className="client-route min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
+    <div className="client-route project-post-page min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-12 flex flex-col">
@@ -615,7 +613,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   </div>
 
                   <div className="text-center mb-8">
-                    <div className="text-[48px] font-black text-[#1D4ED8] leading-none mb-4">
+                    <div className="text-[48px] font-extrabold text-[#1D4ED8] leading-none mb-4">
                       {new Intl.NumberFormat('vi-VN').format(budgetAmount)}
                     </div>
                     <div className="w-full max-w-lg mx-auto relative px-4">
@@ -937,9 +935,11 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 </div>
                 <h4 className="text-sm font-bold text-gray-900 mb-1">Nổi bật (Featured)</h4>
                 <p className="text-[11px] text-gray-500 mb-6">
-                  Giữ bài đăng của bạn ở vị trí ưu tiên hàng đầu trong 7 ngày.
+                  Ưu tiên hiển thị đến khi hết hạn đăng dự án hoặc dự án ngừng tuyển.
                 </p>
-                <div className="text-sm font-bold text-[#1D4ED8]">59.000 VNĐ</div>
+                <div className="text-sm font-bold text-[#1D4ED8]">
+                  {new Intl.NumberFormat('vi-VN').format(featuredFee)} VNĐ
+                </div>
               </button>
 
               {/* Option 2 */}
@@ -982,68 +982,15 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     />
                   </svg>
                 </div>
-                <h4 className="text-sm font-bold text-gray-900 mb-1">Gấp (Urgent)</h4>
+                <h4 className="text-sm font-bold text-gray-900 mb-1">Gợi ý freelancer</h4>
                 <p className="text-[11px] text-gray-500 mb-6">
-                  Đánh dấu dự án là ưu tiên cao để nhận được hồ sơ ngay trong 24h.
+                  AI gợi ý tối đa 5 freelancer phù hợp và gửi thông báo tuyển gấp.
                 </p>
-                <div className="text-sm font-bold text-[#1D4ED8]">99.000 VNĐ</div>
+                <div className="text-sm font-bold text-[#1D4ED8]">
+                  {new Intl.NumberFormat('vi-VN').format(urgentFee)} VNĐ
+                </div>
               </button>
             </div>
-
-            {/* Big Blue Option */}
-            <button
-              type="button"
-              className={`w-full text-left block bg-[#2563EB] rounded-[32px] p-8 md:p-10 border-2 transition-all cursor-pointer relative overflow-hidden ${upgrades.warranty ? 'border-[#60A5FA] shadow-[0_8px_30px_rgba(37,99,235,0.4)]' : 'border-transparent'}`}
-              onClick={() => setUpgrades({ ...upgrades, warranty: !upgrades.warranty })}
-            >
-              <div className="absolute -right-10 -top-10 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl pointer-events-none" />
-              <div className="flex justify-between items-start relative z-10 mb-6">
-                <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm text-white flex items-center justify-center border border-white/30">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    role="img"
-                    aria-label="Shield"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <h4 className="text-xl font-bold text-white mb-2 relative z-10">
-                Gói Bảo Hành (Gợi ý sử dụng)
-              </h4>
-              <p className="text-sm text-white/80 mb-8 max-w-sm leading-relaxed relative z-10">
-                SAM AI sẽ tự động kiểm tra sản phẩm đầu ra, hỗ trợ khắc phục lỗi và giải quyết các
-                vấn đề phát sinh trong 30 ngày sau nghiệm thu.
-              </p>
-              <div className="text-2xl font-black text-white relative z-10">59.000 VNĐ</div>
-
-              {/* Check icon top right if active */}
-              <div
-                className={`absolute top-8 right-8 w-6 h-6 rounded-full border-2 flex items-center justify-center ${upgrades.warranty ? 'bg-white border-white' : 'border-white/40'}`}
-              >
-                {upgrades.warranty && (
-                  <svg
-                    className="w-4 h-4 text-[#2563EB]"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    role="img"
-                    aria-label="Checked"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </div>
-            </button>
 
             {/* Bottom Bar */}
             <div className="bg-white rounded-xl p-6 border border-slate-200/90 flex flex-col md:flex-row items-center justify-between shadow-xs mt-4 gap-6 md:gap-0">
@@ -1060,11 +1007,11 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
                     Tổng cộng dự kiến:
                   </div>
-                  <div className="text-[28px] font-black text-[#1D4ED8] leading-none">
+                  <div className="text-[28px] font-extrabold text-[#1D4ED8] leading-none">
                     {new Intl.NumberFormat('vi-VN').format(totalPrice)} VNĐ
                   </div>
                   <div className="text-[9px] text-gray-400 italic mt-1">
-                    Bao gồm phí nâng cấp và bảo đảm dữ liệu.
+                    Bao gồm ngân sách dự án và phí nâng cấp dự kiến.
                   </div>
                 </div>
                 <button
@@ -1220,7 +1167,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                     Ngân sách dự kiến
                   </div>
-                  <div className="text-xl font-black text-[#1D4ED8]">
+                  <div className="text-xl font-extrabold text-[#1D4ED8]">
                     {new Intl.NumberFormat('vi-VN').format(budgetAmount)} VNĐ
                   </div>
                 </div>
@@ -1280,7 +1227,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
               </button>
               <h2 className="text-xl font-bold text-[#1D4ED8] mb-6">Nâng cấp đã chọn</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {!upgrades.featured && !upgrades.urgent && !upgrades.warranty && (
+                {!upgrades.featured && !upgrades.urgent && (
                   <div className="text-sm text-gray-500 italic col-span-2">
                     Không có gói nâng cấp nào được chọn.
                   </div>
@@ -1321,7 +1268,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     <div>
                       <h4 className="text-xs font-bold text-gray-900 mb-0.5">
                         Nổi bật (Featured)
-                        <span className="text-[#1D4ED8] ml-1.5">+59.000đ</span>
+                        <span className="text-[#1D4ED8] ml-1.5">
+                          +{new Intl.NumberFormat('vi-VN').format(featuredFee)}đ
+                        </span>
                       </h4>
                       <p className="text-[10px] text-gray-500">Ghim dự án lên đầu trang</p>
                     </div>
@@ -1362,53 +1311,13 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-gray-900 mb-0.5">
-                        Gấp (Urgent)
-                        <span className="text-[#1D4ED8] ml-1.5">+99.000đ</span>
-                      </h4>
-                      <p className="text-[10px] text-gray-500">Ưu tiên tìm freelancer trong 24h</p>
-                    </div>
-                  </div>
-                )}
-                {upgrades.warranty && (
-                  <div className="flex items-center gap-3 border border-gray-200 rounded-2xl p-4 relative group">
-                    <button
-                      type="button"
-                      onClick={() => setUpgrades({ ...upgrades, warranty: false })}
-                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-500 flex items-center justify-center cursor-pointer shadow-sm transition-all"
-                      title="Bỏ nâng cấp này"
-                    >
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
-                      </svg>
-                    </button>
-                    <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center shrink-0">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                        />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-gray-900 mb-0.5">
-                        Gói Bảo Hành
-                        <span className="text-[#1D4ED8] ml-1.5">+59.000đ</span>
+                        Gợi ý freelancer
+                        <span className="text-[#1D4ED8] ml-1.5">
+                          +{new Intl.NumberFormat('vi-VN').format(urgentFee)}đ
+                        </span>
                       </h4>
                       <p className="text-[10px] text-gray-500">
-                        AI tự động matching chuyên gia phù hợp
+                        AI gợi ý tối đa 5 ứng viên phù hợp
                       </p>
                     </div>
                   </div>
@@ -1423,10 +1332,10 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                   Tổng cộng dự kiến:
                 </div>
                 <div className="text-[10px] text-gray-400 italic mb-2">
-                  Bao gồm phí nâng cấp và bảo đảm thanh toán.
+                  Bao gồm ngân sách dự án và phí nâng cấp dự kiến.
                 </div>
               </div>
-              <div className="text-[36px] font-black text-[#1D4ED8] leading-none">
+              <div className="text-[36px] font-extrabold text-[#1D4ED8] leading-none">
                 {new Intl.NumberFormat('vi-VN').format(totalPrice)} VNĐ
               </div>
             </div>

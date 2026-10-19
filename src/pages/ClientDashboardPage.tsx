@@ -1,195 +1,144 @@
-import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jobApi } from '../api/job';
+import { type UserNotification, notificationsApi } from '../api/notifications';
 import { profileApi } from '../api/profile';
+import { subscriptionApi } from '../api/subscription';
 import AppHeader from '../components/AppHeader';
 import FooterDashboard from '../components/FooterDashboard';
+import JobStatusBadge from '../components/JobStatusBadge';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
 import { PrimaryButton } from '../components/landing/LandingButtons';
+import { PACKAGE_BUSINESS_ID } from '../features/subscription';
 import {
   PATH_CLIENT_AI_BRIEF,
   PATH_CLIENT_PRICING,
   PATH_CLIENT_PROFILE,
   PATH_CLIENT_PROJECTS,
+  PATH_CLIENT_PROJECT_DETAIL,
+  PATH_NOTIFICATIONS,
+  PATH_WORKSPACE,
 } from '../routes/paths';
-import type { ClientProfileResponse } from '../types/profile';
+import { useAuthStore } from '../stores/useAuthStore';
+import type { ClientDashboardOverview } from '../types/job';
+import { formatDate, formatMoney } from '../utils/format';
 
-// === MOCK DATA ===
-const STATS = [
+const stats: {
+  label: string;
+  description: string;
+  key?: keyof Pick<ClientDashboardOverview, 'totalPosted' | 'inProgress' | 'completed'>;
+  color: string;
+  background: string;
+  icon: string;
+}[] = [
   {
-    id: 1,
     label: 'Tổng quan',
-    count: '12',
-    desc: 'Đã đăng',
+    description: 'Đã đăng',
+    key: 'totalPosted',
     color: 'text-[#1D4ED8]',
-    bg: 'bg-[#EEF2FF]',
+    background: 'bg-[#EEF2FF]',
     icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
   },
   {
-    id: 2,
     label: 'Tiến độ',
-    count: '04',
-    desc: 'Đang thực hiện',
+    description: 'Đang thực hiện',
+    key: 'inProgress',
     color: 'text-[#0AAAD7]',
-    bg: 'bg-[#E0F7FA]',
+    background: 'bg-[#E0F7FA]',
     icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
   },
   {
-    id: 3,
     label: 'Thành công',
-    count: '48',
-    desc: 'Hoàn thành',
+    description: 'Hoàn thành',
+    key: 'completed',
     color: 'text-emerald-500',
-    bg: 'bg-emerald-50',
+    background: 'bg-emerald-50',
     icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
   },
   {
-    id: 4,
     label: 'Lưu trữ',
-    count: '03',
-    desc: 'Bản nháp',
+    description: 'Bản nháp · đang phát triển',
     color: 'text-gray-400',
-    bg: 'bg-gray-100',
+    background: 'bg-gray-100',
     icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
   },
 ];
 
-const DRAFTS = [
-  {
-    id: 1,
-    title: 'Thiết kế UI/UX App Fintech',
-    update: 'Cập nhật 2 giờ trước',
-    progress: 65,
-  },
-  {
-    id: 2,
-    title: 'Viết Content Marketing Blog',
-    update: 'Cập nhật 1 ngày trước',
-    progress: 30,
-  },
+const suggestions = [
+  'Phát triển Website',
+  'Nhập liệu',
+  'Trợ lý ảo',
+  'Soạn thảo văn bản',
+  'AI Engineer',
 ];
 
-const HISTORY = [
-  {
-    id: 1,
-    title: 'Website Thương mại điện tử',
-    status: 'Hoàn thành vào 12/05/2024',
-    price: '350.000 VND',
-    badge: 'Hoàn thành',
-    badgeColor: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-  },
-  {
-    id: 2,
-    title: 'Mobile App Đặt lịch khám bệnh',
-    status: 'Đang thực hiện • Freelancer: Minh Đức',
-    price: '480.000 VND',
-    badge: 'Đang chạy',
-    badgeColor: 'text-orange-500 bg-orange-50 border-orange-200',
-  },
-];
+function budgetLabel(min: number | null, max: number | null) {
+  if (min == null) return max == null ? 'Thương lượng' : `Tối đa ${formatMoney(max)} đ`;
+  if (max == null) return `Từ ${formatMoney(min)} đ`;
+  return min === max ? `${formatMoney(min)} đ` : `${formatMoney(min)} – ${formatMoney(max)} đ`;
+}
 
-const NOTIFICATIONS = [
-  {
-    id: 1,
-    title: 'Anh Tuấn vừa gửi báo cáo cho dự án',
-    highlight: 'Fintech App',
-    time: '10 phút trước',
-    iconColor: 'text-[#1D4ED8]',
-    iconBg: 'bg-[#EEF2FF]',
-    iconPath:
-      'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-  },
-  {
-    id: 2,
-    title: 'Bạn có 3 bản nháp chưa hoàn thành. Hãy tiếp tục để tìm nhân tài!',
-    highlight: '',
-    time: '3 giờ trước',
-    iconColor: 'text-orange-500',
-    iconBg: 'bg-orange-50',
-    iconPath:
-      'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
-  },
-  {
-    id: 3,
-    title: 'Thanh toán cho dự án E-commerce đã được xác nhận.',
-    highlight: '',
-    time: 'Hôm qua',
-    iconColor: 'text-emerald-500',
-    iconBg: 'bg-emerald-50',
-    iconPath:
-      'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-  },
-];
-
-const ClientDashboardPage: React.FC = () => {
+export default function ClientDashboardPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
   const [searchQuery, setSearchQuery] = useState('');
-  const [placeholderText, setPlaceholderText] = useState('');
-  const [clientProfile, setClientProfile] = useState<ClientProfileResponse | null>(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
-  useEffect(() => {
-    const fullText = "Mô tả công việc bạn cần (ví dụ: 'Thiết kế logo hiện đại cho startup')";
-    let i = 0;
-    let isDeleting = false;
-    let timeoutId: ReturnType<typeof setTimeout>;
+  const profile = useQuery({
+    queryKey: ['client-profile', user?.userId],
+    queryFn: profileApi.getClientProfile,
+    enabled: Boolean(user?.userId),
+    staleTime: 60_000,
+    refetchOnMount: 'always',
+  });
+  const overview = useQuery({
+    queryKey: ['client-dashboard-overview', user?.userId],
+    queryFn: jobApi.getClientDashboardOverview,
+    enabled: Boolean(user?.userId),
+    staleTime: 30_000,
+    refetchOnMount: 'always',
+  });
+  const notifications = useQuery({
+    queryKey: ['user-notifications', 'recent', user?.userId],
+    queryFn: notificationsApi.recent,
+    enabled: Boolean(user?.userId),
+    staleTime: 15_000,
+  });
+  const subscriptions = useQuery({
+    queryKey: ['subscriptions', 'me', user?.userId],
+    queryFn: subscriptionApi.mySubscriptions,
+    enabled: Boolean(user?.userId),
+    staleTime: 60_000,
+    refetchOnMount: 'always',
+  });
 
-    const type = () => {
-      if (!isDeleting) {
-        setPlaceholderText(fullText.slice(0, i + 1));
-        i++;
-        if (i === fullText.length) {
-          isDeleting = true;
-          timeoutId = setTimeout(type, 3000); // Wait before deleting
-        } else {
-          timeoutId = setTimeout(type, 50); // Typing speed
-        }
-      } else {
-        setPlaceholderText(fullText.slice(0, i - 1));
-        i--;
-        if (i === 0) {
-          isDeleting = false;
-          timeoutId = setTimeout(type, 500); // Wait before re-typing
-        } else {
-          timeoutId = setTimeout(type, 20); // Deleting speed
-        }
-      }
-    };
+  const businessActive = subscriptions.data?.some(
+    (item) =>
+      item.packageId === PACKAGE_BUSINESS_ID &&
+      item.status === 'ACTIVE' &&
+      (!item.endDate || new Date(item.endDate).getTime() > Date.now())
+  );
 
-    timeoutId = setTimeout(type, 500);
-    return () => clearTimeout(timeoutId);
-  }, []);
+  const startBrief = (suggestion?: string) => {
+    const description = (suggestion ?? searchQuery).trim();
+    if (description) navigate(PATH_CLIENT_AI_BRIEF, { state: { initialQuery: description } });
+  };
 
-  useEffect(() => {
-    let isMounted = true;
-    setIsLoadingProfile(true);
-    profileApi
-      .getClientProfile()
-      .then((data) => {
-        if (isMounted) {
-          setClientProfile(data);
-        }
-      })
-      .catch((err) => {
-        console.warn('Could not fetch client profile on dashboard:', err);
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoadingProfile(false);
-        }
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const hasCompanyProfile = Boolean(clientProfile?.companyName?.trim());
-
-  const handleSearch = (query?: string) => {
-    const q = query || searchQuery;
-    if (!q.trim()) return; // Do nothing if empty
-
-    navigate(PATH_CLIENT_AI_BRIEF, { state: { initialQuery: q } });
+  const openNotification = (notification: UserNotification) => {
+    if (!notification.readAt) {
+      void notificationsApi
+        .markRead(notification.id)
+        .then(() => queryClient.invalidateQueries({ queryKey: ['user-notifications'] }))
+        .catch(() => undefined);
+    }
+    if (notification.roomId) {
+      navigate(PATH_WORKSPACE.replace(':projectId', notification.roomId));
+    } else if (notification.jobId) {
+      navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', notification.jobId));
+    } else {
+      navigate(PATH_NOTIFICATIONS);
+    }
   };
 
   return (
@@ -198,32 +147,15 @@ const ClientDashboardPage: React.FC = () => {
       <AppHeader />
 
       <main className="client-dashboard-page relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
-        {/* Profile incomplete warning (mirror freelancer landing) */}
-        {!isLoadingProfile && !hasCompanyProfile && (
-          <section className="border border-amber-200/80 bg-amber-50/90 p-6 text-center shadow-[0_1px_3px_rgba(0,0,0,0.03)] md:p-8 rounded-[12px]">
-            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">
+        {profile.isSuccess && !profile.data.companyName?.trim() && (
+          <section className="dashboard-profile-warning rounded-[12px] border border-amber-200/80 bg-amber-50/90 p-6 text-center shadow-[0_1px_3px_rgba(0,0,0,0.03)] md:p-8">
+            <h2 className="mb-1 text-lg font-bold text-gray-900">
               Hồ sơ công ty của bạn chưa hoàn thiện
-            </h3>
-            <p className="text-xs text-gray-600 mb-5 max-w-md mx-auto">
-              Hãy cập nhật tên công ty, lĩnh vực và thông tin liên hệ để tạo uy tín với Freelancer
-              trước khi đăng dự án tuyển dụng.
+            </h2>
+            <p className="mx-auto mb-5 max-w-md text-xs text-gray-600">
+              Hãy cập nhật tên công ty để tạo uy tín với Freelancer trước khi đăng dự án tuyển dụng.
             </p>
-            <PrimaryButton onClick={() => navigate(PATH_CLIENT_PROFILE)} size="sm" className="mt-1">
+            <PrimaryButton onClick={() => navigate(PATH_CLIENT_PROFILE)} size="sm">
               Hoàn thiện hồ sơ công ty
             </PrimaryButton>
           </section>
@@ -231,446 +163,249 @@ const ClientDashboardPage: React.FC = () => {
 
         <section className="relative flex w-full flex-col items-center overflow-hidden py-6 text-center md:py-10">
           <div className="pointer-events-none absolute left-1/2 top-0 h-80 w-[58rem] -translate-x-1/2 rounded-full bg-[#1D4ED8]/[0.06] blur-3xl" />
-
           <h1 className="relative z-10 mb-4 text-3xl font-bold tracking-tight text-slate-900 md:text-5xl">
             Chào mừng trở lại,
             <br />
-            <span className="text-[#1D4ED8]">Ngô Tiến Nhật</span>
+            <span className="text-[#1D4ED8]">
+              {profile.data?.fullName || user?.fullName || 'bạn'}
+            </span>
           </h1>
           <p className="relative z-10 mb-8 max-w-xl text-sm leading-relaxed text-slate-600 md:text-base">
             Bắt đầu dự án mới hoặc quản lý các công việc đang diễn ra một cách thông minh và hiệu
             quả hơn với SAM AI
           </p>
-          <div className="relative z-10 mb-5 flex w-full max-w-3xl flex-col items-stretch gap-2 rounded-[12px] border border-slate-200/90 bg-white p-2 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:flex-row sm:items-center sm:gap-0">
-            <div className="flex items-center flex-1 min-w-0">
-              <span className="pl-4 text-slate-400">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  role="img"
-                  aria-label="Search"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </span>
-              <input
-                type="text"
-                aria-label="Tìm kiếm công việc"
-                placeholder={placeholderText}
-                className="min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:ring-0"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              />
-            </div>
-            <PrimaryButton onClick={() => handleSearch()} className="shrink-0" withArrow={false}>
-              Tạo mô tả
+          <div className="dashboard-search relative z-10 mb-5 flex w-full max-w-3xl flex-col items-stretch gap-2 rounded-[12px] border border-slate-200/90 bg-white p-2 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:flex-row sm:items-center sm:gap-0">
+            <input
+              type="text"
+              aria-label="Mô tả sơ bộ dự án"
+              placeholder="Bạn muốn thực hiện dự án gì?"
+              className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:ring-0"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') startBrief();
+              }}
+            />
+            <PrimaryButton onClick={() => startBrief()} className="shrink-0" withArrow={false}>
+              Tiếp tục
             </PrimaryButton>
           </div>
-
           <div className="relative z-10 mb-4 flex flex-wrap items-center justify-center gap-2">
-            <span className="mr-1 font-mono text-[10px] font-medium uppercase tracking-wider text-slate-400">
+            <span className="mr-1 text-[10px] font-medium uppercase tracking-wider text-slate-400">
               Gợi ý nhanh
             </span>
-            {[
-              'Phát triển Website',
-              'Nhập liệu',
-              'Trợ lý ảo',
-              'Soạn thảo văn bản',
-              'AI Engineer',
-            ].map((tag) => (
+            {suggestions.map((suggestion) => (
               <button
-                key={tag}
+                key={suggestion}
                 type="button"
-                onClick={() => handleSearch(tag)}
-                className="client-dashboard-suggestion rounded-[6px] border border-slate-200 bg-white px-3 py-1.5 font-mono text-xs text-slate-700 transition-colors active:scale-[0.97]"
+                onClick={() => startBrief(suggestion)}
+                className="client-dashboard-suggestion rounded-[6px] border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 transition-colors active:scale-[0.97]"
               >
-                + {tag}
+                + {suggestion}
               </button>
             ))}
           </div>
         </section>
 
-        {/* ================= STATS SECTION ================= */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {STATS.map((stat) => (
+        <section
+          className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6"
+          aria-label="Tổng quan dự án"
+        >
+          {stats.map((stat) => (
             <div
-              key={stat.id}
-              className="dashboard-surface-card dashboard-stat-card bg-white rounded-[24px] p-5 md:p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col relative overflow-hidden"
+              key={stat.label}
+              className="dashboard-surface-card dashboard-stat-card relative flex flex-col overflow-hidden rounded-[24px] border border-gray-100 bg-white p-5 shadow-[0_2px_15px_rgb(0,0,0,0.02)] md:p-6"
             >
-              <div className="flex justify-between items-start mb-4">
+              <div className="mb-4 flex items-start justify-between">
                 <div
-                  className={`w-10 h-10 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center shrink-0`}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${stat.background} ${stat.color}`}
                 >
                   <svg
-                    className="w-5 h-5"
+                    className="h-5 w-5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     strokeWidth={2}
-                    role="img"
-                    aria-label={stat.label}
+                    aria-hidden="true"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d={stat.icon} />
                   </svg>
                 </div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">
+                <span className="text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">
                   {stat.label}
                 </span>
               </div>
               <div className="mt-auto">
-                <div className="text-3xl font-black text-gray-900 leading-none mb-1">
-                  {stat.count}
+                <div className="mb-1 text-3xl font-extrabold leading-none text-gray-900">
+                  {stat.key ? (overview.isLoading ? '…' : (overview.data?.[stat.key] ?? '—')) : '—'}
                 </div>
-                <div className="text-xs font-semibold text-gray-500">{stat.desc}</div>
+                <div className="text-xs font-semibold text-gray-500">{stat.description}</div>
               </div>
             </div>
           ))}
         </section>
 
-        {/* ================= VIP BANNER ================= */}
-        <section className="dashboard-primary-panel w-full bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] rounded-[32px] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0_8px_30px_rgba(29,78,216,0.2)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-white opacity-5 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="flex flex-col items-start relative z-10 w-full md:w-2/3">
-            <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase mb-4 text-white border border-white/30 flex items-center gap-1.5 shadow-sm">
-              <svg
-                className="w-3 h-3 text-yellow-300"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                role="img"
-                aria-label="Premium"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              Premium
+        <section className="dashboard-primary-panel dashboard-premium-panel relative flex w-full flex-col items-center justify-between gap-8 overflow-hidden rounded-[32px] bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] p-8 shadow-[0_8px_30px_rgba(29,78,216,0.2)] md:flex-row md:p-10">
+          <div className="relative z-10 flex w-full flex-col items-start md:w-2/3">
+            <span className="mb-4 rounded-full border border-white/30 bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+              {businessActive ? 'Đang sử dụng' : 'Premium'}
             </span>
-            <h2 className="text-2xl font-bold text-white mb-3">
-              Gói tháng: dùng thả ga, khỏi mua lẻ
+            <h2 className="mb-3 text-2xl font-bold text-white">
+              {businessActive
+                ? 'Gói BUSINESS đang hoạt động'
+                : 'Gói tháng: dùng thả ga, khỏi mua lẻ'}
             </h2>
-            <p className="text-white/80 text-sm mb-8 leading-relaxed max-w-md">
-              BUSINESS 249k/tháng: Ghim Nổi bật + Tuyển gấp không giới hạn mọi dự án. AI QA Nâng cao
-              299k/tháng: bảo hành code mọi dự án. Gói lẻ từng dự án chỉ bán lúc đăng việc.
+            <p className="mb-8 max-w-md text-sm leading-relaxed text-white/80">
+              BUSINESS 249k/tháng: Nổi bật + Gợi ý freelancer cho mọi dự án. Checklist hỗ trợ nghiệm
+              thu vẫn có sẵn cho mọi dự án.
             </p>
             <button
               type="button"
               onClick={() => navigate(PATH_CLIENT_PRICING)}
-              className="bg-white text-[#1D4ED8] hover:bg-gray-50 font-bold px-8 py-3 rounded-full shadow-md transition-colors cursor-pointer border-0 text-sm"
+              className="dashboard-premium-cta cursor-pointer rounded-full border-0 bg-white px-8 py-3 text-sm font-bold text-[#1D4ED8] shadow-md transition-colors hover:bg-gray-50"
             >
-              Nâng cấp VIP
+              {businessActive ? 'Xem gói của tôi' : 'Xem gói BUSINESS'}
             </button>
-          </div>
-
-          <div className="relative z-10 w-28 h-28 shrink-0 bg-white/10 rounded-[32px] flex items-center justify-center border border-white/20 shadow-inner backdrop-blur-sm">
-            <svg
-              className="w-16 h-16 text-white/90"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-              role="img"
-              aria-label="AI Brain"
-            >
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-            </svg>
           </div>
         </section>
 
-        {/* ================= BOTTOM GRID (Left & Right) ================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-8">
-          {/* CỘT TRÁI (8 Cols) */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex flex-col gap-10">
-            {/* Các yêu cầu nháp */}
             <section>
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="dashboard-section-title text-xl font-bold text-gray-900">
-                  Các yêu cầu nháp
-                </h3>
+              <h2 className="dashboard-section-title mb-5 text-xl font-bold text-gray-900">
+                Các yêu cầu nháp
+              </h2>
+              <div className="dashboard-surface-card rounded-3xl border border-gray-100 bg-white p-6 text-sm text-gray-600 shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
+                Tính năng đang được phát triển.
+              </div>
+            </section>
+
+            <section>
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="dashboard-section-title text-xl font-bold text-gray-900">
+                  Dự án gần đây
+                </h2>
                 <button
                   type="button"
                   onClick={() => navigate(PATH_CLIENT_PROJECTS)}
-                  className="text-xs font-bold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0"
+                  className="cursor-pointer border-0 bg-transparent text-xs font-bold text-[#1D4ED8] hover:underline"
                 >
                   Xem tất cả
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {DRAFTS.map((draft) => (
-                  <div
-                    key={draft.id}
-                    className="dashboard-surface-card bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col"
+              <div className="dashboard-surface-card flex flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
+                {overview.isLoading && (
+                  <p className="p-6 text-sm text-gray-500">Đang tải dự án gần đây...</p>
+                )}
+                {overview.isError && (
+                  <p className="p-6 text-sm text-red-700">Không tải được dự án gần đây.</p>
+                )}
+                {overview.data?.recentProjects.length === 0 && (
+                  <p className="p-6 text-sm text-gray-500">Bạn chưa đăng dự án nào.</p>
+                )}
+                {overview.data?.recentProjects.map((project) => (
+                  <button
+                    key={project.id}
+                    type="button"
+                    onClick={() => navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', project.id))}
+                    className="dashboard-history-row flex w-full cursor-pointer items-center justify-between gap-4 border-b border-gray-100 p-5 text-left transition-colors last:border-0 hover:bg-gray-50"
                   >
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                        {draft.update}
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-bold text-gray-900">{project.title}</h3>
+                      <span className="text-[11px] font-medium text-gray-500">
+                        Cập nhật {formatDate(project.updatedAt)}
+                        {project.freelancerName ? ` · Freelancer: ${project.freelancerName}` : ''}
                       </span>
-                      <button
-                        type="button"
-                        className="text-gray-400 hover:text-gray-600 bg-transparent border-0 cursor-pointer p-0"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                          role="img"
-                          aria-label="More options"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                          />
-                        </svg>
-                      </button>
                     </div>
-                    <h4 className="text-[17px] font-bold text-gray-900 leading-snug mb-6 flex-grow">
-                      {draft.title}
-                    </h4>
-
-                    <div className="mb-6">
-                      <div className="flex justify-between items-center text-xs font-bold mb-2">
-                        <span className="text-gray-500">Tiến độ hoàn thiện</span>
-                        <span className="text-[#1D4ED8]">{draft.progress}%</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#1D4ED8] rounded-full transition-all"
-                          style={{ width: `${draft.progress}%` }}
-                        />
-                      </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5 text-right">
+                      <span className="text-xs font-semibold text-gray-700">
+                        Ngân sách: {budgetLabel(project.budgetMin, project.budgetMax)}
+                      </span>
+                      <JobStatusBadge status={project.status} className="text-[10px]" />
                     </div>
-
-                    <button
-                      type="button"
-                      className="w-full py-3 rounded-xl border border-[#DCE4FF] text-[#1D4ED8] text-xs font-bold hover:bg-[#EEF2FF] transition-colors cursor-pointer mt-auto"
-                    >
-                      Tiếp tục chỉnh sửa
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Lịch sử công việc */}
-            <section>
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="dashboard-section-title text-xl font-bold text-gray-900">
-                  Lịch sử công việc
-                </h3>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => navigate(PATH_CLIENT_PROJECTS)}
-                    className="text-xs font-bold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0 mr-2"
-                  >
-                    Xem tất cả
                   </button>
-                  <button
-                    type="button"
-                    className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer"
-                  >
-                    <svg
-                      className="w-3.5 h-3.5 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      role="img"
-                      aria-label="Filter"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                      />
-                    </svg>
-                    Tất cả trạng thái
-                  </button>
-                  <div className="relative">
-                    <svg
-                      className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      role="img"
-                      aria-label="Search"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
-                    <input
-                      type="text"
-                      placeholder="Tìm dự án..."
-                      className="w-36 text-xs bg-white border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 focus:outline-none focus:border-[#1D4ED8] placeholder:text-gray-400"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="dashboard-surface-card bg-white rounded-3xl border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col overflow-hidden">
-                {HISTORY.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className={`p-5 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer ${index !== HISTORY.length - 1 ? 'border-b border-gray-100' : ''}`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] text-[#1D4ED8] flex items-center justify-center shrink-0">
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                          role="img"
-                          aria-label="Project"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-gray-900 mb-1">{item.title}</h4>
-                        <span className="text-[11px] text-gray-500 font-medium">{item.status}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-gray-900 mb-1">{item.price}</div>
-                        <span
-                          className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${item.badgeColor}`}
-                        >
-                          {item.badge}
-                        </span>
-                      </div>
-                      <svg
-                        className="w-4 h-4 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        role="img"
-                        aria-label="Arrow Right"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
                 ))}
               </div>
             </section>
           </div>
 
-          {/* CỘT PHẢI (4 Cols) */}
           <div className="flex flex-col gap-6">
-            {/* Thông báo */}
-            <div className="dashboard-surface-card bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="dashboard-section-title text-lg font-bold text-gray-900">
+            <section className="dashboard-surface-card rounded-3xl border border-gray-100 bg-white p-6 shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="dashboard-section-title text-lg font-bold text-gray-900">
                   Thông báo
-                </h3>
-                <span className="w-5 h-5 bg-red-600 text-white rounded-full flex items-center justify-center text-[10px] font-bold">
-                  3
-                </span>
+                </h2>
+                {(notifications.data?.unreadCount ?? 0) > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+                    {(notifications.data?.unreadCount ?? 0) > 99
+                      ? '99+'
+                      : notifications.data?.unreadCount}
+                  </span>
+                )}
               </div>
-
-              <div className="flex flex-col gap-5">
-                {NOTIFICATIONS.map((noti) => (
-                  <div key={noti.id} className="flex items-start gap-3">
-                    <div
-                      className={`w-8 h-8 rounded-full ${noti.iconBg} ${noti.iconColor} flex items-center justify-center shrink-0 mt-0.5`}
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        role="img"
-                        aria-label="Notification Icon"
+              <div className="flex flex-col gap-2">
+                {notifications.isLoading && (
+                  <p className="text-xs text-gray-500">Đang tải thông báo...</p>
+                )}
+                {notifications.isError && (
+                  <p className="text-xs text-red-700">Không tải được thông báo.</p>
+                )}
+                {notifications.data?.items.length === 0 && (
+                  <p className="text-xs text-gray-500">Bạn chưa có thông báo nào.</p>
+                )}
+                {notifications.data?.items.slice(0, 3).map((notification) => (
+                  <button
+                    key={notification.id}
+                    type="button"
+                    onClick={() => openNotification(notification)}
+                    className="dashboard-notification-item flex w-full cursor-pointer items-start gap-3 rounded-lg border-0 bg-transparent p-2 text-left hover:bg-gray-50"
+                  >
+                    <span
+                      className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${notification.readAt ? 'bg-gray-300' : 'bg-blue-600'}`}
+                      aria-hidden="true"
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-xs font-semibold leading-relaxed text-gray-700">
+                        {notification.type === 'CHAT_MESSAGE'
+                          ? `${notification.actorName || 'Người dùng'} đã gửi ${notification.unreadCount} tin nhắn mới${notification.jobTitle ? ` trong dự án “${notification.jobTitle}”` : ''}.`
+                          : notification.message ||
+                            [notification.actorName, notification.jobTitle]
+                              .filter(Boolean)
+                              .join(' · ') ||
+                            'Có cập nhật mới.'}
+                      </span>
+                      <time
+                        className="mt-1 block text-[10px] font-semibold text-gray-400"
+                        dateTime={notification.createdAt}
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d={noti.iconPath} />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-700 font-medium leading-relaxed mb-1">
-                        {noti.title}{' '}
-                        {noti.highlight && (
-                          <span className="font-bold text-[#1D4ED8]">{noti.highlight}</span>
-                        )}
-                      </p>
-                      <span className="text-[10px] text-gray-400 font-semibold">{noti.time}</span>
-                    </div>
-                  </div>
+                        {new Date(notification.createdAt).toLocaleString('vi-VN')}
+                      </time>
+                    </span>
+                  </button>
                 ))}
               </div>
-
-              <div className="w-full border-t border-gray-100 mt-6 pt-5 text-center">
+              <div className="mt-6 w-full border-t border-gray-100 pt-5 text-center">
                 <button
                   type="button"
-                  className="text-xs font-bold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0 p-0"
+                  onClick={() => navigate(PATH_NOTIFICATIONS)}
+                  className="cursor-pointer border-0 bg-transparent p-0 text-xs font-bold text-[#1D4ED8] hover:underline"
                 >
-                  Xem tất cả hoạt động
+                  Xem tất cả thông báo
                 </button>
               </div>
-            </div>
+            </section>
 
-            {/* Support Banner */}
-            <div className="dashboard-primary-panel bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] rounded-3xl p-6 text-white relative overflow-hidden flex flex-col items-start shadow-md">
-              <div className="absolute -bottom-6 -right-6 opacity-30 pointer-events-none">
-                <svg
-                  className="w-32 h-32"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  role="img"
-                  aria-label="Support Agent"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold mb-2 relative z-10">Cần hỗ trợ?</h3>
-              <p className="text-[11px] text-white/80 leading-relaxed mb-4 max-w-[200px] relative z-10">
-                Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7.
+            <section className="dashboard-primary-panel dashboard-support-panel relative flex flex-col items-start overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] p-6 text-white shadow-md">
+              <h2 className="relative z-10 mb-2 text-lg font-bold">Cần hỗ trợ?</h2>
+              <p className="relative z-10 text-[11px] leading-relaxed text-white/80">
+                Tính năng đang được phát triển.
               </p>
-              <button
-                type="button"
-                className="text-xs font-bold flex items-center gap-1 hover:underline cursor-pointer bg-transparent border-0 p-0 relative z-10"
-              >
-                Liên hệ ngay
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  role="img"
-                  aria-label="Arrow Right"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </button>
-            </div>
+            </section>
           </div>
         </div>
       </main>
 
-      {/* 3. Footer */}
       <FooterDashboard />
     </div>
   );
-};
-
-export default ClientDashboardPage;
+}

@@ -1,4 +1,5 @@
 import type React from 'react';
+import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import LoadingScreen from '../components/LoadingScreen';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -24,6 +25,7 @@ import ClientProfilePage from '../pages/ClientProfilePage';
 import ClientProjectDetailPage from '../pages/ClientProjectDetailPage';
 import ClientProjectListPage from '../pages/ClientProjectListPage';
 import ConfirmProjectPage from '../pages/ConfirmProjectPage';
+import JobAddonReturnPage from '../pages/JobAddonReturnPage';
 import PostProjectPage from '../pages/PostProjectPage';
 import SuccessProjectPage from '../pages/SuccessProjectPage';
 import VnpayReturnPage from '../pages/VnpayReturnPage';
@@ -37,14 +39,18 @@ import CreateFreelancerProfilePage from '../pages/CreateFreelancerProfilePage';
 import FindFreelancerPage from '../pages/FindFreelancerPage';
 import FreelancerApplicationsPage from '../pages/FreelancerApplicationsPage';
 import FreelancerEarningsPage from '../pages/FreelancerEarningsPage';
+import FreelancerInvitationsPage from '../pages/FreelancerInvitationsPage';
 import FreelancerJobsPage from '../pages/FreelancerJobsPage';
 import FreelancerProjectDetailPage from '../pages/FreelancerProjectDetailPage';
 import FreelancerProjectListPage from '../pages/FreelancerProjectListPage';
 import JobDetailPage from '../pages/JobDetailPage';
+import NotificationsPage from '../pages/NotificationsPage';
 import SuccessApplicationPage from '../pages/SuccessApplicationPage';
-import WorkspacePage from '../pages/WorkspacePage';
-import WorkspaceTimelinePage from '../pages/WorkspaceTimelinePage';
 import WorkspacesPage from '../pages/WorkspacesPage';
+
+const WorkspaceLayout = lazy(() => import('../pages/WorkspaceLayout'));
+const WorkspaceChatView = lazy(() => import('../pages/WorkspaceChatView'));
+const WorkspaceTimelineView = lazy(() => import('../pages/WorkspaceTimelineView'));
 
 const RootRoute: React.FC = () => {
   const { isAuthenticated, isLoading, user } = useAuthStore();
@@ -92,6 +98,7 @@ const AppRoutes = () => {
         <Route path={paths.PATH_CLIENT_SUCCESS_PROJECT} element={<SuccessProjectPage />} />
         <Route path={paths.PATH_CLIENT_PROJECTS} element={<ClientProjectListPage />} />
         <Route path={paths.PATH_CLIENT_PROJECT_DETAIL} element={<ClientProjectDetailPage />} />
+        <Route path={paths.PATH_CLIENT_ADDON_RETURN} element={<JobAddonReturnPage />} />
         <Route path={paths.PATH_CLIENT_PAYMENT} element={<ClientPaymentPage />} />
         <Route path={paths.PATH_CLIENT_PAYMENT_RETURN} element={<VnpayReturnPage />} />
         <Route path={paths.PATH_CLIENT_FIND_FREELANCER} element={<FindFreelancerPage />} />
@@ -106,6 +113,7 @@ const AppRoutes = () => {
           element={<CreateFreelancerProfilePage />}
         />
         <Route path={paths.PATH_FREELANCER_APPLICATIONS} element={<FreelancerApplicationsPage />} />
+        <Route path={paths.PATH_FREELANCER_INVITATIONS} element={<FreelancerInvitationsPage />} />
         <Route path={paths.PATH_FREELANCER_PROJECTS} element={<FreelancerProjectListPage />} />
         <Route
           path={paths.PATH_FREELANCER_PROJECT_DETAIL}
@@ -118,9 +126,19 @@ const AppRoutes = () => {
 
       {/* Authenticated routes (any role) */}
       <Route element={<AuthGuard />}>
+        <Route path={paths.PATH_NOTIFICATIONS} element={<NotificationsPage />} />
         <Route path={paths.PATH_WORKSPACES} element={<WorkspacesPage />} />
-        <Route path={paths.PATH_WORKSPACE_TIMELINE} element={<WorkspaceTimelinePage />} />
-        <Route path={paths.PATH_WORKSPACE} element={<WorkspacePage />} />
+        <Route
+          path={paths.PATH_WORKSPACE}
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <WorkspaceLayout />
+            </Suspense>
+          }
+        >
+          <Route index element={<WorkspaceChatView />} />
+          <Route path="timeline" element={<WorkspaceTimelineView />} />
+        </Route>
         <Route path={paths.PATH_WORKSPACE_CONTRACT} element={<ContractPage />} />
       </Route>
     </Routes>
