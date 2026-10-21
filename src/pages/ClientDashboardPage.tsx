@@ -173,10 +173,9 @@ export default function ClientDashboardPage() {
 
         <section className="relative flex w-full flex-col items-center overflow-hidden py-6 text-center md:py-10">
           <div className="pointer-events-none absolute left-1/2 top-0 h-80 w-[58rem] -translate-x-1/2 rounded-full bg-[#1D4ED8]/[0.06] blur-3xl" />
-          <h1 className="relative z-10 mb-4 text-3xl font-bold tracking-tight text-slate-900 md:text-5xl">
+          <h1 className="relative z-10 mb-4 text-3xl font-bold leading-[1.25] tracking-tight text-slate-900 md:text-5xl md:leading-[1.2]">
             Chào mừng trở lại,
-            <br />
-            <span className="text-[#1D4ED8]">
+            <span className="mt-2 block pb-1 text-[#1D4ED8]">
               {profile.data?.fullName || user?.fullName || 'bạn'}
             </span>
           </h1>
