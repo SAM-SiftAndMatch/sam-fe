@@ -17,6 +17,7 @@ import ProposalStatusBadge from '../components/ProposalStatusBadge';
 import SrsPdfActions from '../components/SrsPdfActions';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
+import { SUPPORT_FACEBOOK_URL } from '../lib/support';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_PROJECTS, PATH_WORKSPACE } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { JobResponse, RecommendationResponse } from '../types/job';
@@ -891,9 +892,14 @@ const ClientProjectDetailPage: React.FC = () => {
                   <p className="text-sm text-[#1D4ED8]/80 mb-4">
                     Đội ngũ hỗ trợ của SAM luôn sẵn sàng giải đáp thắc mắc.
                   </p>
-                  <button className="w-full py-2.5 rounded-full bg-white text-[#1D4ED8] font-bold text-sm border-0 cursor-pointer shadow-sm">
+                  <a
+                    href={SUPPORT_FACEBOOK_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full py-2.5 rounded-full bg-white text-[#1D4ED8] font-bold text-sm text-center border-0 cursor-pointer shadow-sm"
+                  >
                     Liên hệ hỗ trợ
-                  </button>
+                  </a>
                 </div>
 
                 {/* Project Action Buttons */}

@@ -5,6 +5,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import SamBrandLogo from '../components/SamBrandLogo';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -90,7 +91,9 @@ const LoginPage: React.FC = () => {
         <div className="hidden md:flex md:col-span-5 bg-slate-900 border-r border-slate-800 p-8 lg:p-10 flex-col justify-between text-white relative">
           <div>
             <div className="flex items-center justify-between mb-8">
-              <span className="text-3xl font-extrabold tracking-tight text-white">SAM</span>
+              <span className="flex items-center gap-2">
+                <SamBrandLogo />
+              </span>
             </div>
 
             <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
@@ -154,9 +157,7 @@ const LoginPage: React.FC = () => {
         <div className="md:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white">
           <div className="mb-6">
             <div className="md:hidden mb-4 flex items-center justify-between">
-              <span className="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] leading-none">
-                SAM
-              </span>
+              <SamBrandLogo />
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">
               Chào mừng quay trở lại

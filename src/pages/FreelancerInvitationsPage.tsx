@@ -60,7 +60,7 @@ const FreelancerInvitationsPage = () => {
               setPage(0);
             }}
             aria-label="Lọc lời mời"
-            className="rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-gray-900"
+            className="cursor-pointer rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-gray-900"
           >
             <option value="">Tất cả trạng thái</option>
             {Object.entries(statusText).map(([value, label]) => (
@@ -113,7 +113,7 @@ const FreelancerInvitationsPage = () => {
                     type="button"
                     disabled={respond.isPending}
                     onClick={() => respond.mutate({ id: invitation.id, action: 'accept' })}
-                    className="rounded-xl bg-blue-700 px-4 py-2 text-white font-semibold disabled:opacity-50"
+                    className="cursor-pointer rounded-xl bg-blue-700 px-4 py-2 text-white font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Đồng ý, mở phòng chat
                   </button>
@@ -121,7 +121,7 @@ const FreelancerInvitationsPage = () => {
                     type="button"
                     disabled={respond.isPending}
                     onClick={() => respond.mutate({ id: invitation.id, action: 'decline' })}
-                    className="rounded-xl border border-gray-300 px-4 py-2 text-gray-800 font-semibold disabled:opacity-50"
+                    className="cursor-pointer rounded-xl border border-gray-300 px-4 py-2 text-gray-800 font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Từ chối
                   </button>
@@ -131,7 +131,7 @@ const FreelancerInvitationsPage = () => {
                 <button
                   type="button"
                   onClick={() => navigate(PATH_WORKSPACE.replace(':projectId', invitation.roomId!))}
-                  className="mt-5 rounded-xl border border-blue-300 px-4 py-2 text-blue-800 font-semibold"
+                  className="mt-5 cursor-pointer rounded-xl border border-blue-300 px-4 py-2 text-blue-800 font-semibold"
                 >
                   Mở phòng chat
                 </button>

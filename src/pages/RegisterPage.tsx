@@ -5,6 +5,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import SamBrandLogo from '../components/SamBrandLogo';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -94,9 +95,7 @@ const RegisterPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center items-center gap-2 mb-3">
-            <span className="text-3xl sm:text-4xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] leading-none">
-              SAM
-            </span>
+            <SamBrandLogo />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-1.5 tracking-tight">
             Khám phá tương lai công việc

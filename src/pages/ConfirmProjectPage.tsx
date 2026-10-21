@@ -1,11 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import jobApi from '../api/job';
+import { projectDraftApi } from '../api/projectDrafts';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
-import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_SUCCESS_PROJECT } from '../routes/paths';
+import {
+  PATH_CLIENT_AI_BRIEF,
+  PATH_CLIENT_POST_PROJECT,
+  PATH_CLIENT_SUCCESS_PROJECT,
+} from '../routes/paths';
+import type { ProjectDraft } from '../types/projectDraft';
 
 const PROJECT_CATEGORIES = [
   'Lập trình & IT',
@@ -28,6 +34,7 @@ type LocationState = {
   upgrades?: { featured: boolean; urgent: boolean };
   selectedSkills?: string[];
   selectedTags?: string[];
+  customCategory?: string;
   srsDocumentUrl?: string;
   srsContent?: string;
   exactBudgetVnd?: number;
@@ -38,8 +45,24 @@ type LocationState = {
 
 const ConfirmProjectPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const location = useLocation();
-  const state = (location.state as LocationState) || {};
+  const draftId = new URLSearchParams(location.search).get('draftId');
+  const routeState = (location.state as LocationState) || {};
+  const [draft, setDraft] = useState<ProjectDraft | null>(null);
+  const [draftLoading, setDraftLoading] = useState(Boolean(draftId));
+  const [draftLoadError, setDraftLoadError] = useState(false);
+  const state: LocationState = draft
+    ? {
+        ...(draft.state as LocationState),
+        ...routeState,
+        fromAiBrief: draft.flowType === 'AI',
+        srsDocumentUrl: routeState.srsDocumentUrl ?? draft.srsDocumentUrl ?? '',
+        srsContent: routeState.srsContent ?? draft.srsContent ?? '',
+        exactBudgetVnd: routeState.exactBudgetVnd ?? draft.exactBudgetVnd ?? undefined,
+        durationMonths: routeState.durationMonths ?? draft.durationMonths ?? undefined,
+      }
+    : routeState;
 
   const isFromAi = state.fromAiBrief || false;
 
@@ -63,6 +86,83 @@ const ConfirmProjectPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const prices = useQuery({ queryKey: ['job-addon-prices'], queryFn: jobApi.getAddonPrices });
 
+  useEffect(() => {
+    if (!draftId) return;
+    let active = true;
+    setDraftLoading(true);
+    projectDraftApi
+      .get(draftId)
+      .then((loaded) => {
+        if (!active) return;
+        if (loaded.status === 'PUBLISHED' && loaded.publishedJobId) {
+          navigate(`${PATH_CLIENT_SUCCESS_PROJECT}?jobId=${loaded.publishedJobId}`, {
+            replace: true,
+          });
+          return;
+        }
+        setDraft(loaded);
+        const saved = loaded.state as LocationState;
+        setTitle(saved.projectName ?? '');
+        setCategory(saved.category ?? '');
+        setCustomCategory(saved.customCategory ?? '');
+        setUpgrades(saved.upgrades ?? { featured: false, urgent: false });
+        setDeadline(saved.deadline?.slice(0, 10) ?? defaultDeadline);
+        setDraftLoading(false);
+      })
+      .catch(() => {
+        if (active) {
+          setDraftLoadError(true);
+          setDraftLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [draftId, navigate]);
+
+  useEffect(() => {
+    if (!draftId || !draft || draftLoading || createdJobId) return;
+    projectDraftApi.backup(draftId, {
+      phase: 'confirm',
+      title,
+      state: {
+        ...draft.state,
+        projectName: title,
+        category,
+        customCategory,
+        upgrades,
+        deadline,
+      },
+    });
+    const timeout = setTimeout(() => {
+      void projectDraftApi
+        .update(draftId, {
+          phase: 'confirm',
+          title,
+          state: {
+            ...draft.state,
+            projectName: title,
+            category,
+            customCategory,
+            upgrades,
+            deadline,
+          },
+        })
+        .catch(() => setError('Chưa lưu được bản nháp. Vui lòng kiểm tra kết nối.'));
+    }, 800);
+    return () => clearTimeout(timeout);
+  }, [
+    draftId,
+    draft,
+    draftLoading,
+    createdJobId,
+    title,
+    category,
+    customCategory,
+    upgrades,
+    deadline,
+  ]);
+
   const totalUpgradesCost = useMemo(() => {
     return (
       (upgrades.featured ? (prices.data?.featuredFee ?? 59000) : 0) +
@@ -71,6 +171,10 @@ const ConfirmProjectPage: React.FC = () => {
   }, [upgrades, prices.data]);
 
   const handleConfirm = async () => {
+    if (draftId && (!draft || draftLoading)) {
+      setError('Chưa tải xong bản nháp. Vui lòng thử lại.');
+      return;
+    }
     if (isFromAi) {
       if (!title.trim()) {
         setError('Vui lòng nhập tên dự án.');
@@ -103,6 +207,20 @@ const ConfirmProjectPage: React.FC = () => {
     setError(null);
 
     try {
+      if (draftId && draft) {
+        await projectDraftApi.update(draftId, {
+          phase: 'confirm',
+          title,
+          state: {
+            ...draft.state,
+            projectName: title,
+            category,
+            customCategory,
+            upgrades,
+            deadline,
+          },
+        });
+      }
       const budget = state.exactBudgetVnd || state.budgetAmount || 1000000;
       const durationMonths = state.durationMonths || 3;
 
@@ -130,8 +248,12 @@ const ConfirmProjectPage: React.FC = () => {
 
       const createdJob = createdJobId
         ? await jobApi.getJobById(createdJobId)
-        : await jobApi.createJob(jobPayload);
+        : draftId
+          ? await projectDraftApi.publish(draftId, jobPayload)
+          : await jobApi.createJob(jobPayload);
       setCreatedJobId(createdJob.id);
+      void queryClient.invalidateQueries({ queryKey: ['project-drafts'] });
+      void queryClient.invalidateQueries({ queryKey: ['client-dashboard-overview'] });
       const addonSummary =
         upgrades.featured || upgrades.urgent ? await jobApi.getAddonSummary(createdJob.id) : null;
       if (payNow && addonSummary?.orderStatus === 'PENDING') {
@@ -176,6 +298,15 @@ const ConfirmProjectPage: React.FC = () => {
             <div className="w-full mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-medium text-center">
               {error}
             </div>
+          )}
+
+          {draftLoading && (
+            <p className="mb-6 text-center text-sm text-gray-500">Đang tải bản nháp...</p>
+          )}
+          {draftLoadError && (
+            <p className="mb-6 text-center text-sm text-red-600">
+              Không tải được bản nháp. Vui lòng trở lại dashboard.
+            </p>
           )}
 
           {isFromAi && (
@@ -405,12 +536,22 @@ const ConfirmProjectPage: React.FC = () => {
           <div className="flex items-center justify-center gap-4 w-full border-t border-gray-100 pt-6">
             <button
               type="button"
-              onClick={() =>
-                isFromAi
-                  ? navigate(-1)
-                  : navigate(PATH_CLIENT_POST_PROJECT, { state: { ...state, restoreStep: 4 } })
-              }
-              disabled={isSubmitting}
+              onClick={() => {
+                if (isFromAi) {
+                  if (draftId) navigate(`${PATH_CLIENT_AI_BRIEF}?draftId=${draftId}`);
+                  else navigate(-1);
+                } else {
+                  navigate(
+                    draftId
+                      ? `${PATH_CLIENT_POST_PROJECT}?draftId=${draftId}`
+                      : PATH_CLIENT_POST_PROJECT,
+                    {
+                      state: { ...state, restoreStep: 4 },
+                    }
+                  );
+                }
+              }}
+              disabled={isSubmitting || draftLoading}
               className="flex items-center justify-center gap-2 w-1/3 h-[44px] rounded-lg border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Quay lại
@@ -418,7 +559,7 @@ const ConfirmProjectPage: React.FC = () => {
             <button
               type="button"
               onClick={handleConfirm}
-              disabled={isSubmitting}
+              disabled={isSubmitting || draftLoading || draftLoadError}
               className="group relative flex items-center justify-center gap-2 flex-1 h-[44px] rounded-lg bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-medium text-sm border-t border-t-blue-400/30 shadow-xs btn-sweep active:scale-[0.97] transition-all cursor-pointer border-0 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (

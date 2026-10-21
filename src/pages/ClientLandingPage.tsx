@@ -1,6 +1,7 @@
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ProjectBriefPrompt from '../components/ProjectBriefPrompt';
 import AnimatedNumber from '../components/landing/AnimatedNumber';
 import CategoriesSection from '../components/landing/CategoriesSection';
 import ComparisonSection from '../components/landing/ComparisonSection';
@@ -18,40 +19,6 @@ import * as paths from '../routes/paths';
 const ClientLandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [placeholderText, setPlaceholderText] = useState('');
-
-  // LOCKED CHAT BOX PLACEHOLDER TYPING LOGIC
-  useEffect(() => {
-    const fullText = "Mô tả công việc bạn cần (ví dụ: 'Thiết kế logo hiện đại cho startup')";
-    let i = 0;
-    let isDeleting = false;
-    let timeoutId: ReturnType<typeof setTimeout>;
-
-    const type = () => {
-      if (!isDeleting) {
-        setPlaceholderText(fullText.slice(0, i + 1));
-        i++;
-        if (i === fullText.length) {
-          isDeleting = true;
-          timeoutId = setTimeout(type, 3000); // Wait before deleting
-        } else {
-          timeoutId = setTimeout(type, 50); // Typing speed
-        }
-      } else {
-        setPlaceholderText(fullText.slice(0, i - 1));
-        i--;
-        if (i === 0) {
-          isDeleting = false;
-          timeoutId = setTimeout(type, 500); // Wait before re-typing
-        } else {
-          timeoutId = setTimeout(type, 20); // Deleting speed
-        }
-      }
-    };
-
-    timeoutId = setTimeout(type, 500);
-    return () => clearTimeout(timeoutId);
-  }, []);
 
   const handleSearch = (query?: string) => {
     const q = query || searchQuery;
@@ -92,48 +59,11 @@ const ClientLandingPage: React.FC = () => {
             className="animate-hero-fade-up relative z-10 flex w-full flex-col items-center"
             style={{ animationDelay: '320ms' }}
           >
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-slate-700">
-              Bạn cần hoàn thành công việc gì?
-            </h2>
-
-            {/* LOCKED COMPONENT: Chat Input Box (Exact markup, classes, styling and behavior preserved) */}
-            <div className="relative z-10 mb-4 flex w-full max-w-5xl flex-col items-stretch gap-2 rounded-[28px] border border-gray-100 bg-white p-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] sm:flex-row sm:items-center sm:gap-0 sm:rounded-full">
-              <div className="flex items-center flex-1 min-w-0">
-                <span className="pl-4 text-gray-400">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    role="img"
-                    aria-label="Search"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </span>
-                <input
-                  type="text"
-                  aria-label="Mô tả sơ bộ dự án"
-                  placeholder={placeholderText}
-                  className="flex-1 bg-transparent border-0 focus:ring-0 outline-none text-sm px-3 text-gray-700 placeholder:text-gray-400 min-w-0"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => handleSearch()}
-                className="bg-[#1D4ED8] hover:bg-[#153bb5] text-white text-sm font-bold px-6 sm:px-8 py-3 rounded-full transition-colors cursor-pointer border-0 shrink-0"
-              >
-                Tiếp tục
-              </button>
-            </div>
+            <ProjectBriefPrompt
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSubmit={handleSearch}
+            />
           </div>
 
           {/* 3 Small Example-Prompt Chips (Item 5 - 320ms delay, outside chat component) */}

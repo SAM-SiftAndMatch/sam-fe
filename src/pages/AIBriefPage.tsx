@@ -2,12 +2,13 @@ import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useLocation, useNavigate } from 'react-router-dom';
-import aiApi from '../api/ai';
+import { projectDraftApi } from '../api/projectDrafts';
 import storageApi from '../api/storage';
 import AppHeader from '../components/AppHeader';
 import { PATH_CLIENT_CONFIRM_PROJECT, PATH_CLIENT_POST_PROJECT } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { AiChatResponse, AiQuestion, ChatMessage } from '../types/ai';
+import type { ProjectDraft, ProjectDraftTurn } from '../types/projectDraft';
 
 // === Tạo session ID duy nhất cho mỗi phiên làm việc ===
 function generateSessionId(): string {
@@ -28,60 +29,54 @@ const getDraft = (key: string): string => {
 interface AiQuestionPanelProps {
   questions: AiQuestion[];
   onSubmitAnswers: (summary: string) => void;
+  answers: Record<string, { selectedOptions: string[]; customInput: string; showCustom: boolean }>;
+  onAnswersChange: (
+    answers: Record<string, { selectedOptions: string[]; customInput: string; showCustom: boolean }>
+  ) => void;
   disabled?: boolean;
 }
 
 const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
   questions,
   onSubmitAnswers,
+  answers,
+  onAnswersChange,
   disabled,
 }) => {
-  // Map: questionId → { selectedOptions: string[], customInput: string, showCustom: boolean }
-  const [answers, setAnswers] = useState<
-    Record<string, { selectedOptions: string[]; customInput: string; showCustom: boolean }>
-  >(() => {
-    const init: Record<
-      string,
-      { selectedOptions: string[]; customInput: string; showCustom: boolean }
-    > = {};
-    for (const q of questions) {
-      init[q.id] = { selectedOptions: [], customInput: '', showCustom: false };
-    }
-    return init;
-  });
-
   const toggleOption = (qId: string, opt: string) => {
-    setAnswers((prev) => {
-      const cur = prev[qId];
-      const isSelected = cur.selectedOptions.includes(opt);
-      return {
-        ...prev,
-        [qId]: {
-          ...cur,
-          selectedOptions: isSelected
-            ? cur.selectedOptions.filter((o) => o !== opt)
-            : [...cur.selectedOptions, opt],
-        },
-      };
+    const cur = answers[qId] ?? { selectedOptions: [], customInput: '', showCustom: false };
+    const isSelected = cur.selectedOptions.includes(opt);
+    onAnswersChange({
+      ...answers,
+      [qId]: {
+        ...cur,
+        selectedOptions: isSelected
+          ? cur.selectedOptions.filter((option) => option !== opt)
+          : [...cur.selectedOptions, opt],
+      },
     });
   };
 
   const setCustom = (qId: string, text: string) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [qId]: { ...prev[qId], customInput: text },
-    }));
+    onAnswersChange({
+      ...answers,
+      [qId]: {
+        ...(answers[qId] ?? { selectedOptions: [], customInput: '', showCustom: false }),
+        customInput: text,
+      },
+    });
   };
 
   const toggleShowCustom = (qId: string) => {
-    setAnswers((prev) => ({
-      ...prev,
+    const cur = answers[qId] ?? { selectedOptions: [], customInput: '', showCustom: false };
+    onAnswersChange({
+      ...answers,
       [qId]: {
-        ...prev[qId],
-        showCustom: !prev[qId].showCustom,
+        ...cur,
+        showCustom: !cur.showCustom,
         customInput: '',
       },
-    }));
+    });
   };
 
   const handleSubmit = () => {
@@ -223,10 +218,20 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
 interface ChatBubbleProps {
   message: ChatMessage;
   onSubmitAnswers?: (summary: string) => void;
+  answers?: Record<string, { selectedOptions: string[]; customInput: string; showCustom: boolean }>;
+  onAnswersChange?: (
+    answers: Record<string, { selectedOptions: string[]; customInput: string; showCustom: boolean }>
+  ) => void;
   isSending?: boolean;
 }
 
-const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onSubmitAnswers, isSending }) => {
+const ChatBubble: React.FC<ChatBubbleProps> = ({
+  message,
+  onSubmitAnswers,
+  answers,
+  onAnswersChange,
+  isSending,
+}) => {
   const isUser = message.role === 'user';
   const hasQuestions = !isUser && message.questions && message.questions.length > 0;
 
@@ -281,10 +286,12 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onSubmitAnswers, isSen
         </div>
 
         {/* Follow-up question panel */}
-        {hasQuestions && onSubmitAnswers && (
+        {hasQuestions && onSubmitAnswers && onAnswersChange && (
           <AiQuestionPanel
             questions={message.questions!}
             onSubmitAnswers={onSubmitAnswers}
+            answers={answers ?? {}}
+            onAnswersChange={onAnswersChange}
             disabled={isSending}
           />
         )}
@@ -563,6 +570,12 @@ const AIBriefPage: React.FC = () => {
   const userId = useAuthStore((state) => state.user?.userId);
   const routeState = location.state as BriefRouteState | null;
   const draftKey = `sam:ai-brief:description:${userId ?? 'client'}`;
+  const urlDraftId = new URLSearchParams(location.search).get('draftId');
+  const [draftId, setDraftId] = useState<string | null>(urlDraftId);
+  const [draftLoaded, setDraftLoaded] = useState(!urlDraftId);
+  const creatingDraft = useRef<Promise<string> | null>(null);
+  const createdDraftId = useRef<string | null>(null);
+  const [restoredPending, setRestoredPending] = useState(false);
 
   // --- Session ---
   const sessionId = useRef<string>(generateSessionId());
@@ -592,6 +605,12 @@ const AIBriefPage: React.FC = () => {
   // --- Phase 3: Risk Chat ---
   const [riskMessages, setRiskMessages] = useState<ChatMessage[]>([]);
   const [riskInput, setRiskInput] = useState('');
+  const [questionAnswers, setQuestionAnswers] = useState<
+    Record<
+      string,
+      Record<string, { selectedOptions: string[]; customInput: string; showCustom: boolean }>
+    >
+  >({});
   const [isRiskSending, setIsRiskSending] = useState(false);
   const [isSavingSrs, setIsSavingSrs] = useState(false);
 
@@ -600,8 +619,187 @@ const AIBriefPage: React.FC = () => {
 
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
+  const restoreDraft = useCallback((draft: ProjectDraft) => {
+    const state = draft.state;
+    setProjectBrief(draft.brief ?? '');
+    setPageState((draft.phase as PageState) || 'brief');
+    setBaInput(typeof state.baInput === 'string' ? state.baInput : '');
+    setRiskInput(typeof state.riskInput === 'string' ? state.riskInput : '');
+    setQuestionAnswers((state.questionAnswers as typeof questionAnswers | undefined) ?? {});
+    setLatestSrsContent(draft.srsContent);
+    setLatestSrsUrl(draft.srsDocumentUrl);
+    setExactBudgetVnd(draft.exactBudgetVnd);
+    setDurationMonths(draft.durationMonths);
+    const toMessages = (turns: ProjectDraftTurn[]): ChatMessage[] =>
+      turns.flatMap((turn) => {
+        const userMessage: ChatMessage = {
+          id: `${turn.id}:user`,
+          role: 'user',
+          content: turn.userMessage,
+          timestamp: new Date(turn.createdAt),
+        };
+        if (!turn.aiResponse || turn.status !== 'COMPLETED') return [userMessage];
+        return [
+          userMessage,
+          {
+            id: `${turn.id}:assistant`,
+            role: 'assistant',
+            content: turn.aiResponse.aiMessage || '',
+            timestamp: new Date(turn.createdAt),
+            questions: turn.aiResponse.questions,
+          },
+        ];
+      });
+    setBaMessages(toMessages(draft.turns.filter((turn) => turn.phase === 'BA')));
+    setRiskMessages(toMessages(draft.turns.filter((turn) => turn.phase === 'RISK')));
+    const pending = draft.turns.some(
+      (turn) => turn.status === 'PENDING' || turn.status === 'PROCESSING'
+    );
+    setRestoredPending(pending);
+    setIsBaSending(
+      pending &&
+        draft.turns.some(
+          (turn) =>
+            turn.phase === 'BA' && (turn.status === 'PENDING' || turn.status === 'PROCESSING')
+        )
+    );
+    setIsRiskSending(
+      pending &&
+        draft.turns.some(
+          (turn) =>
+            turn.phase === 'RISK' && (turn.status === 'PENDING' || turn.status === 'PROCESSING')
+        )
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!urlDraftId) return;
+    if (createdDraftId.current === urlDraftId) return;
+    let active = true;
+    setDraftLoaded(false);
+    setDraftId(urlDraftId);
+    projectDraftApi
+      .get(urlDraftId)
+      .then((draft) => {
+        if (!active) return;
+        if (draft.flowType !== 'AI' || draft.status !== 'EDITING')
+          throw new Error('Bản nháp không còn khả dụng');
+        restoreDraft(draft);
+        setDraftLoaded(true);
+      })
+      .catch(() => {
+        if (active)
+          setError('Không tải được bản nháp. Vui lòng quay lại trang tổng quan và thử lại.');
+      });
+    return () => {
+      active = false;
+    };
+  }, [urlDraftId, restoreDraft]);
+
+  useEffect(() => {
+    if (!draftId || !restoredPending) return;
+    const interval = setInterval(() => {
+      void projectDraftApi
+        .get(draftId)
+        .then((draft) => {
+          if (
+            draft.turns.every((turn) => turn.status !== 'PENDING' && turn.status !== 'PROCESSING')
+          ) {
+            restoreDraft(draft);
+            if (draft.turns.some((turn) => turn.status === 'FAILED')) {
+              setError('Một tin nhắn AI đã thất bại. Bạn có thể gửi lại nội dung để thử lại.');
+            }
+          }
+        })
+        .catch(() => undefined);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [draftId, restoredPending, restoreDraft]);
+
+  const ensureDraft = useCallback(
+    (brief: string): Promise<string> => {
+      if (draftId) return Promise.resolve(draftId);
+      if (creatingDraft.current) return creatingDraft.current;
+      const promise = projectDraftApi
+        .create({ flowType: 'AI', brief })
+        .then((draft) => {
+          createdDraftId.current = draft.id;
+          setDraftId(draft.id);
+          setDraftLoaded(true);
+          navigate(`${location.pathname}?draftId=${draft.id}`, { replace: true, state: null });
+          return draft.id;
+        })
+        .finally(() => {
+          creatingDraft.current = null;
+        });
+      creatingDraft.current = promise;
+      return promise;
+    },
+    [draftId, location.pathname, navigate]
+  );
+
+  useEffect(() => {
+    if (draftId || !draftLoaded || !projectBrief.trim()) return;
+    const timeout = setTimeout(() => {
+      void ensureDraft(projectBrief.trim()).catch(() =>
+        setError('Chưa tạo được bản nháp. Vui lòng kiểm tra kết nối.')
+      );
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [draftId, draftLoaded, projectBrief, ensureDraft]);
+
+  useEffect(() => {
+    if (!draftId || !draftLoaded) return;
+    projectDraftApi.backup(draftId, {
+      brief: projectBrief,
+      phase: pageState,
+      state: { baInput, riskInput, questionAnswers },
+    });
+    const timeout = setTimeout(() => {
+      void projectDraftApi
+        .update(draftId, {
+          brief: projectBrief,
+          phase: pageState,
+          state: { baInput, riskInput, questionAnswers },
+        })
+        .catch(() => setError('Chưa lưu được bản nháp. Vui lòng kiểm tra kết nối.'));
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [draftId, draftLoaded, projectBrief, pageState, baInput, riskInput, questionAnswers]);
+
+  const sendDraftTurn = useCallback(
+    async (phase: 'BA' | 'RISK', message: string, brief: string) => {
+      const id = await ensureDraft(brief);
+      const clientMessageId = crypto.randomUUID();
+      const result = await projectDraftApi.sendTurn(id, {
+        clientMessageId,
+        phase,
+        userMessage: message,
+      });
+      if (result.status === 'COMPLETED' && result.aiResponse)
+        return { response: result.aiResponse, turnId: result.id };
+      if (result.status === 'FAILED') throw new Error('AI không thể xử lý tin nhắn');
+      for (let attempt = 0; attempt < 30; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const draft = await projectDraftApi.get(id);
+        const turn = draft.turns.find((item) => item.clientMessageId === clientMessageId);
+        if (turn?.status === 'COMPLETED' && turn.aiResponse)
+          return { response: turn.aiResponse, turnId: turn.id };
+        if (turn?.status === 'FAILED') throw new Error('AI không thể xử lý tin nhắn');
+      }
+      setRestoredPending(true);
+      throw new Error('AI vẫn đang xử lý. Bạn có thể quay lại bản nháp sau.');
+    },
+    [ensureDraft]
+  );
+
   useEffect(() => {
     if (!routeState?.resetBrief && typeof routeState?.initialQuery !== 'string') return;
+    if (!urlDraftId) {
+      createdDraftId.current = null;
+      setDraftId(null);
+      setDraftLoaded(true);
+    }
     baRequestId.current += 1;
     riskRequestId.current += 1;
     sessionId.current = generateSessionId();
@@ -616,6 +814,7 @@ const AIBriefPage: React.FC = () => {
     setDurationMonths(null);
     setRiskMessages([]);
     setRiskInput('');
+    setQuestionAnswers({});
     setIsRiskSending(false);
     setIsSavingSrs(false);
     setIsSrsModalOpen(false);
@@ -644,9 +843,9 @@ const AIBriefPage: React.FC = () => {
   // =========================================
   // Xử lý response từ BA chat
   // =========================================
-  const handleBaResponse = useCallback((response: AiChatResponse) => {
+  const handleBaResponse = useCallback((response: AiChatResponse, turnId: string) => {
     const aiMsg: ChatMessage = {
-      id: `msg-${Date.now()}`,
+      id: `${turnId}:assistant`,
       role: 'assistant',
       content: response.aiMessage || '',
       timestamp: new Date(),
@@ -695,26 +894,20 @@ const AIBriefPage: React.FC = () => {
     setError(null);
 
     try {
-      const response = await aiApi.chatWithAiBa({
-        sessionId: sessionId.current,
-        userMessage,
-      });
+      const { response, turnId } = await sendDraftTurn('BA', userMessage, userMessage);
       if (requestId !== baRequestId.current) return;
       if (response.status !== 'ASKING' || !response.questions?.length) {
         throw new Error('AI did not return clarification questions for the first turn');
       }
-      handleBaResponse(response);
+      handleBaResponse(response, turnId);
     } catch (err) {
       if (requestId !== baRequestId.current) return;
       console.error('BA initial brief error:', err);
-      sessionId.current = generateSessionId();
-      setBaMessages([]);
-      setPageState('brief');
-      setError('Chưa tạo được câu hỏi. Mô tả của bạn vẫn được giữ lại, vui lòng thử lại.');
+      setError('Chưa tạo được câu hỏi. Vui lòng kiểm tra kết nối và thử gửi lại.');
     } finally {
       if (requestId === baRequestId.current) setIsBaSending(false);
     }
-  }, [projectBrief, isBaSending, handleBaResponse]);
+  }, [projectBrief, isBaSending, handleBaResponse, sendDraftTurn]);
 
   // =========================================
   // Gửi message trong BA Chat
@@ -748,12 +941,9 @@ const AIBriefPage: React.FC = () => {
       const requestId = ++baRequestId.current;
 
       try {
-        const response = await aiApi.chatWithAiBa({
-          sessionId: sessionId.current,
-          userMessage: msg,
-        });
+        const { response, turnId } = await sendDraftTurn('BA', msg, projectBrief);
         if (requestId !== baRequestId.current) return;
-        handleBaResponse(response);
+        handleBaResponse(response, turnId);
         // BA đã hoàn tất: đưa khách sang màn review SRS, không tự động vào Risk Chat.
         if (response.status === 'COMPLETED') {
           setPageState('srs-review');
@@ -766,7 +956,15 @@ const AIBriefPage: React.FC = () => {
         if (requestId === baRequestId.current) setIsBaSending(false);
       }
     },
-    [baInput, isBaSending, handleBaResponse, latestSrsContent, riskMessages.length]
+    [
+      baInput,
+      isBaSending,
+      handleBaResponse,
+      latestSrsContent,
+      riskMessages.length,
+      projectBrief,
+      sendDraftTurn,
+    ]
   );
 
   const goToPreviousPhase = (target: PageState) => {
@@ -779,7 +977,7 @@ const AIBriefPage: React.FC = () => {
   // =========================================
   // Bắt đầu Risk Chat
   // =========================================
-  const handleStartRiskChat = useCallback(async (srsContent: string) => {
+  const handleStartRiskChat = useCallback(async () => {
     const userMessage = 'Hãy đánh giá rủi ro và đề xuất ngân sách, thời hạn phù hợp cho dự án này.';
     const userMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
@@ -793,15 +991,11 @@ const AIBriefPage: React.FC = () => {
     const requestId = ++riskRequestId.current;
 
     try {
-      const response = await aiApi.chatWithAiRisk({
-        sessionId: sessionId.current,
-        userMessage,
-        currentSrsContent: srsContent,
-      });
+      const { response, turnId } = await sendDraftTurn('RISK', userMessage, projectBrief);
       if (requestId !== riskRequestId.current) return;
 
       const aiMsg: ChatMessage = {
-        id: `msg-${Date.now()}`,
+        id: `${turnId}:assistant`,
         role: 'assistant',
         content: response.aiMessage || '',
         timestamp: new Date(),
@@ -821,7 +1015,7 @@ const AIBriefPage: React.FC = () => {
     } finally {
       if (requestId === riskRequestId.current) setIsRiskSending(false);
     }
-  }, []);
+  }, [projectBrief, sendDraftTurn]);
 
   // =========================================
   // Gửi message trong Risk Chat
@@ -844,20 +1038,11 @@ const AIBriefPage: React.FC = () => {
       const requestId = ++riskRequestId.current;
 
       try {
-        const response = await aiApi.chatWithAiRisk({
-          sessionId: sessionId.current,
-          userMessage: msg,
-          currentSrsContent: latestSrsContent ?? '',
-          // Gửi kèm toàn bộ lịch sử chat để AI nhớ đã đề xuất Option 1/2 với con số gì
-          chatHistory: riskMessages.map((m) => ({
-            role: m.role === 'user' ? 'user' : 'assistant',
-            content: m.content,
-          })),
-        });
+        const { response, turnId } = await sendDraftTurn('RISK', msg, projectBrief);
         if (requestId !== riskRequestId.current) return;
 
         const aiMsg: ChatMessage = {
-          id: `msg-${Date.now()}`,
+          id: `${turnId}:assistant`,
           role: 'assistant',
           content: response.aiMessage || '',
           timestamp: new Date(),
@@ -885,7 +1070,7 @@ const AIBriefPage: React.FC = () => {
     // QUAN TRỌNG: phải có riskMessages trong deps, nếu không callback bị stale
     // closure, chatHistory gửi lên AI sẽ rỗng/thiếu tin AI đã đề xuất option
     // => AI không nhớ con số mình từng đề nghị => trả về "giữ nguyên" sai lầm.
-    [riskInput, isRiskSending, latestSrsContent, riskMessages]
+    [riskInput, isRiskSending, projectBrief, sendDraftTurn]
   );
 
   // =========================================
@@ -902,7 +1087,7 @@ const AIBriefPage: React.FC = () => {
       return;
     }
     setPageState('risk-chat');
-    handleStartRiskChat(latestSrsContent);
+    handleStartRiskChat();
   }, [handleStartRiskChat, latestSrsContent]);
 
   const handleComplete = useCallback(async () => {
@@ -925,13 +1110,21 @@ const AIBriefPage: React.FC = () => {
       );
       if (activeSession !== sessionId.current) return;
 
+      const id = await ensureDraft(projectBrief);
+      await projectDraftApi.update(id, {
+        phase: 'confirm',
+        brief: projectBrief,
+        srsDocumentUrl,
+        state: { baInput, riskInput, questionAnswers },
+      });
+
       try {
         sessionStorage.removeItem(draftKey);
       } catch {
         // The project is ready even if browser storage is unavailable.
       }
 
-      navigate(PATH_CLIENT_CONFIRM_PROJECT, {
+      navigate(`${PATH_CLIENT_CONFIRM_PROJECT}?draftId=${id}`, {
         state: {
           srsDocumentUrl,
           srsContent,
@@ -946,7 +1139,19 @@ const AIBriefPage: React.FC = () => {
     } finally {
       setIsSavingSrs(false);
     }
-  }, [navigate, latestSrsContent, exactBudgetVnd, durationMonths, isSavingSrs, draftKey]);
+  }, [
+    navigate,
+    latestSrsContent,
+    exactBudgetVnd,
+    durationMonths,
+    isSavingSrs,
+    draftKey,
+    ensureDraft,
+    projectBrief,
+    baInput,
+    riskInput,
+    questionAnswers,
+  ]);
 
   const handleSkip = useCallback(() => {
     navigate(PATH_CLIENT_POST_PROJECT, { state: { description: projectBrief.trim() } });
@@ -1187,6 +1392,10 @@ const AIBriefPage: React.FC = () => {
                   <ChatBubble
                     key={msg.id}
                     message={msg}
+                    answers={questionAnswers[msg.id]}
+                    onAnswersChange={(answers) =>
+                      setQuestionAnswers((current) => ({ ...current, [msg.id]: answers }))
+                    }
                     onSubmitAnswers={
                       index === baMessages.length - 1 && msg.role === 'assistant'
                         ? (summary) => handleSendBaMessage(summary)
@@ -1339,11 +1548,19 @@ const AIBriefPage: React.FC = () => {
               {/* Messages + live SRS preview */}
               <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 max-h-[60vh] overflow-y-auto px-6 py-4">
                 <div className="min-w-0">
-                  {riskMessages.map((msg) => (
+                  {riskMessages.map((msg, index) => (
                     <ChatBubble
                       key={msg.id}
                       message={msg}
-                      onSubmitAnswers={(summary) => handleSendRiskMessage(summary)}
+                      answers={questionAnswers[msg.id]}
+                      onAnswersChange={(answers) =>
+                        setQuestionAnswers((current) => ({ ...current, [msg.id]: answers }))
+                      }
+                      onSubmitAnswers={
+                        index === riskMessages.length - 1 && msg.role === 'assistant'
+                          ? (summary) => handleSendRiskMessage(summary)
+                          : undefined
+                      }
                       isSending={isRiskSending}
                     />
                   ))}

@@ -1,23 +1,27 @@
+import samLogo from '../assets/sam-logo-transparent.png';
+
 type SamBrandLogoProps = {
-  isScrolled: boolean;
+  isScrolled?: boolean;
+  showTagline?: boolean;
 };
 
-const SamBrandLogo = ({ isScrolled }: SamBrandLogoProps) => (
+const SamBrandLogo = ({ isScrolled = false, showTagline = true }: SamBrandLogoProps) => (
   <>
     <span
-      className={`select-none bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] bg-clip-text font-extrabold leading-none tracking-tighter text-transparent transition-all duration-300 group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] ${
-        isScrolled ? 'text-2xl sm:text-[28px]' : 'text-3xl sm:text-[38px]'
-      }`}
-    >
-      SAM
-    </span>
-    <span
-      className={`hidden self-center border-l border-slate-300 pl-2 text-[10px] font-medium uppercase tracking-widest text-slate-500 transition-opacity duration-200 sm:inline-block ${
-        isScrolled ? 'opacity-80' : 'opacity-100'
-      }`}
-    >
-      Sift &amp; Match
-    </span>
+      className={`sam-brand-logo shrink-0 ${isScrolled ? 'sam-brand-logo--small' : ''}`}
+      style={{ maskImage: `url(${samLogo})`, WebkitMaskImage: `url(${samLogo})` }}
+      role="img"
+      aria-label="SAM"
+    />
+    {showTagline && (
+      <span
+        className={`hidden self-center border-l border-slate-300 pl-2 text-[10px] font-medium uppercase tracking-widest text-slate-500 transition-opacity duration-200 sm:inline-block ${
+          isScrolled ? 'opacity-80' : 'opacity-100'
+        }`}
+      >
+        Sift &amp; Match
+      </span>
+    )}
   </>
 );
 
