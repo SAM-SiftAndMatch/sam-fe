@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import { type UserNotification, notificationsApi } from '../api/notifications';
 import { profileApi } from '../api/profile';
+import { projectDraftApi } from '../api/projectDrafts';
 import { subscriptionApi } from '../api/subscription';
 import AppHeader from '../components/AppHeader';
 import FooterDashboard from '../components/FooterDashboard';
@@ -13,6 +14,7 @@ import { PrimaryButton } from '../components/landing/LandingButtons';
 import { PACKAGE_BUSINESS_ID } from '../features/subscription';
 import {
   PATH_CLIENT_AI_BRIEF,
+  PATH_CLIENT_DRAFTS,
   PATH_CLIENT_PRICING,
   PATH_CLIENT_PROFILE,
   PATH_CLIENT_PROJECTS,
@@ -23,6 +25,7 @@ import {
 import { useAuthStore } from '../stores/useAuthStore';
 import type { ClientDashboardOverview } from '../types/job';
 import { formatDate, formatMoney } from '../utils/format';
+import { projectDraftHref } from '../utils/projectDraft';
 
 const stats: {
   label: string;
@@ -58,7 +61,7 @@ const stats: {
   },
   {
     label: 'Lưu trữ',
-    description: 'Bản nháp · đang phát triển',
+    description: 'Bản nháp',
     color: 'text-gray-400',
     background: 'bg-gray-100',
     icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
@@ -97,6 +100,13 @@ export default function ClientDashboardPage() {
     queryFn: jobApi.getClientDashboardOverview,
     enabled: Boolean(user?.userId),
     staleTime: 30_000,
+    refetchOnMount: 'always',
+  });
+  const draftList = useQuery({
+    queryKey: ['project-drafts', 'page', user?.userId, 0, 3],
+    queryFn: () => projectDraftApi.page(0, 3),
+    enabled: Boolean(user?.userId),
+    staleTime: 10_000,
     refetchOnMount: 'always',
   });
   const notifications = useQuery({
@@ -237,7 +247,13 @@ export default function ClientDashboardPage() {
               </div>
               <div className="mt-auto">
                 <div className="mb-1 text-3xl font-extrabold leading-none text-gray-900">
-                  {stat.key ? (overview.isLoading ? '…' : (overview.data?.[stat.key] ?? '—')) : '—'}
+                  {stat.key
+                    ? overview.isLoading
+                      ? '…'
+                      : (overview.data?.[stat.key] ?? '—')
+                    : draftList.isLoading
+                      ? '…'
+                      : (draftList.data?.totalElements ?? '—')}
                 </div>
                 <div className="text-xs font-semibold text-gray-500">{stat.description}</div>
               </div>
@@ -272,11 +288,43 @@ export default function ClientDashboardPage() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex flex-col gap-10">
             <section>
-              <h2 className="dashboard-section-title mb-5 text-xl font-bold text-gray-900">
-                Các yêu cầu nháp
-              </h2>
-              <div className="dashboard-surface-card rounded-3xl border border-gray-100 bg-white p-6 text-sm text-gray-600 shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
-                Tính năng đang được phát triển.
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="dashboard-section-title text-xl font-bold text-gray-900">
+                  Các yêu cầu nháp
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => navigate(PATH_CLIENT_DRAFTS)}
+                  className="cursor-pointer border-0 bg-transparent text-xs font-bold text-[#1D4ED8] hover:underline"
+                >
+                  Xem tất cả
+                </button>
+              </div>
+              <div className="dashboard-surface-card overflow-hidden rounded-3xl border border-gray-100 bg-white text-sm text-gray-600 shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
+                {draftList.isLoading && <p className="p-6">Đang tải bản nháp...</p>}
+                {draftList.isError && <p className="p-6 text-red-700">Không tải được bản nháp.</p>}
+                {draftList.data?.items.length === 0 && (
+                  <p className="p-6">Bạn chưa có yêu cầu nháp nào.</p>
+                )}
+                {draftList.data?.items.map((draft) => (
+                  <button
+                    key={draft.id}
+                    type="button"
+                    onClick={() => navigate(projectDraftHref(draft))}
+                    className="dashboard-history-row flex w-full cursor-pointer items-center justify-between gap-4 border-b border-gray-100 p-5 text-left last:border-0 hover:bg-gray-50"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate font-bold text-gray-900">
+                        {draft.title?.trim() || draft.brief?.slice(0, 80) || 'Yêu cầu chưa đặt tên'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {draft.flowType === 'AI' ? 'AI Brief' : 'Đăng thủ công'} · Cập nhật{' '}
+                        {formatDate(draft.updatedAt)}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-xs font-bold text-[#1D4ED8]">Tiếp tục</span>
+                  </button>
+                ))}
               </div>
             </section>
 

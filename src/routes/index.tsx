@@ -16,6 +16,7 @@ import RegisterPage from '../pages/RegisterPage';
 import RoleSelectionPage from '../pages/RoleSelectionPage';
 
 import ClientDashboardPage from '../pages/ClientDashboardPage';
+import ClientDraftsPage from '../pages/ClientDraftsPage';
 import ClientLandingPage from '../pages/ClientLandingPage';
 import ClientPricingPage from '../pages/ClientPricingPage';
 
@@ -92,6 +93,7 @@ const AppRoutes = () => {
       {/* Client protected routes */}
       <Route element={<RoleGuard allowedRoles={['CLIENT']} />}>
         <Route path={paths.PATH_CLIENT_DASHBOARD} element={<ClientDashboardPage />} />
+        <Route path={paths.PATH_CLIENT_DRAFTS} element={<ClientDraftsPage />} />
         <Route path={paths.PATH_CLIENT_POST_PROJECT} element={<PostProjectPage />} />
         <Route path={paths.PATH_CLIENT_AI_BRIEF} element={<AIBriefPage />} />
         <Route path={paths.PATH_CLIENT_CONFIRM_PROJECT} element={<ConfirmProjectPage />} />

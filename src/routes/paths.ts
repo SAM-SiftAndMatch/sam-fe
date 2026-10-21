@@ -12,6 +12,7 @@ export const PATH_CLIENT_AI_BRIEF = '/client/projects/ai-brief';
 export const PATH_CLIENT_CONFIRM_PROJECT = '/client/projects/confirm';
 export const PATH_CLIENT_SUCCESS_PROJECT = '/client/projects/success';
 export const PATH_CLIENT_PROJECTS = '/client/projects';
+export const PATH_CLIENT_DRAFTS = '/client/projects/drafts';
 export const PATH_CLIENT_PROJECT_DETAIL = '/client/projects/:id';
 export const PATH_CLIENT_ADDON_RETURN = '/client/projects/:id/addon-return';
 export const PATH_CLIENT_PAYMENT = '/client/payment/:contractId';
