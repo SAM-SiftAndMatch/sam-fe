@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { projectDraftApi } from '../api/projectDrafts';
 import AppHeader from '../components/AppHeader';
 import PaginationNav from '../components/PaginationNav';
+import ProjectDraftProgress from '../components/ProjectDraftProgress';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { ProjectDraftSummary } from '../types/projectDraft';
@@ -80,6 +81,7 @@ export default function ClientDraftsPage() {
                     {draft.flowType === 'AI' ? 'AI Brief' : 'Đăng thủ công'} · Cập nhật{' '}
                     {formatDate(draft.updatedAt)}
                   </p>
+                  <ProjectDraftProgress draft={draft} />
                 </div>
                 <div className="flex gap-2">
                   <button

@@ -6,7 +6,7 @@ export const LoadingScreen: React.FC = () => {
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center font-sans">
       <div className="flex flex-col items-center gap-4">
         <div className="flex items-center gap-2 animate-pulse">
-          <SamBrandLogo />
+          <SamBrandLogo showTagline={false} />
         </div>
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-[#0047FF] animate-bounce [animation-delay:-0.3s]" />

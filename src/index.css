@@ -175,6 +175,34 @@ html.theme-dark .sam-brand-logo::after {
   transform: translateY(-1px);
 }
 
+/* Keep the shared homepage prompt pill-shaped on the Client dashboard. */
+.client-route main .dashboard-search {
+  border-radius: 28px !important;
+}
+
+@media (min-width: 640px) {
+  .client-route main .dashboard-search {
+    border-radius: 9999px !important;
+  }
+}
+
+.client-route main .dashboard-search input.project-brief-prompt-input,
+.client-route main .dashboard-search input.project-brief-prompt-input:focus {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.client-route main .dashboard-search button {
+  border-radius: 9999px !important;
+  box-shadow: none !important;
+}
+
+.client-route main .dashboard-search button:hover {
+  transform: none !important;
+}
+
 /* Secondary quick suggestions retain the white landing-page treatment. */
 .client-route main .client-dashboard-suggestion {
   border-color: #e2e8f0 !important;
@@ -220,6 +248,12 @@ html.theme-dark .sam-brand-logo::after {
   border-radius: 12px !important;
   background: linear-gradient(120deg, #1d4ed8 0%, #0a78d7 100%) !important;
   box-shadow: 0 8px 28px rgb(29 78 216 / 0.16) !important;
+}
+
+.client-dashboard-page .dashboard-premium-panel {
+  border-color: #7e22ce !important;
+  background: linear-gradient(120deg, #581c87 0%, #6d28d9 55%, #7e22ce 100%) !important;
+  box-shadow: 0 8px 28px rgb(88 28 135 / 0.2) !important;
 }
 
 .client-dashboard-page .dashboard-primary-panel > div > span:first-child {
@@ -563,6 +597,10 @@ html.theme-dark .client-dashboard-page .dashboard-search:focus-within {
   box-shadow: 0 0 0 3px rgb(91 156 255 / 0.18) !important;
 }
 
+html.theme-dark .client-dashboard-page .project-brief-prompt-title {
+  color: #dbeafe !important;
+}
+
 html.theme-dark .client-dashboard-page .dashboard-history-search {
   border-color: #33445e !important;
   background-color: #101b2e !important;
@@ -620,6 +658,18 @@ html.theme-dark .client-dashboard-page .dashboard-draft-action {
 
 html.theme-dark .client-dashboard-page .dashboard-draft-action:hover {
   background-color: #1d3554 !important;
+}
+
+html.theme-dark .client-route .project-draft-progress-label {
+  color: #a9bad3 !important;
+}
+
+html.theme-dark .client-route .project-draft-progress-value {
+  color: #93c5fd !important;
+}
+
+html.theme-dark .client-route .project-draft-progress-segment.bg-gray-200 {
+  background-color: #33445e !important;
 }
 
 html.theme-dark .client-dashboard-page .dashboard-history-filter {

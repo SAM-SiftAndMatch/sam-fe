@@ -6,7 +6,6 @@ import {
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
-import AnimatedNumber from '../components/landing/AnimatedNumber';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
 import { PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
 import LandingFooter from '../components/landing/LandingFooter';
@@ -114,10 +113,10 @@ const ClientPricingPage: React.FC = () => {
         )}
 
         {/* Pricing Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 w-full items-stretch mb-16">
+        <div className="grid w-full grid-cols-1 items-stretch gap-6 pb-12 md:grid-cols-2 lg:gap-8">
           {/* Gói 1: Basic */}
           <ScrollReveal delayMs={0} className="h-full">
-            <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
+            <div className="group flex h-full min-h-[500px] flex-col justify-between rounded-[12px] border border-slate-200/90 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)] transition-all duration-200 hover:-translate-y-[2px] hover:border-[#1D4ED8]/60 sm:min-h-[560px] sm:p-8">
               <div>
                 <div className="flex items-center justify-end mb-4">
                   <span className="text-xs text-slate-400">KHỞI ĐẦU</span>
@@ -159,7 +158,7 @@ const ClientPricingPage: React.FC = () => {
 
           {/* Gói 2: Business (Được làm nổi bật) */}
           <ScrollReveal delayMs={100} className="h-full">
-            <div className="group h-full bg-white rounded-[12px] p-6 sm:p-8 border-2 border-[#1D4ED8] shadow-[0_4px_20px_rgba(29,78,216,0.08)] hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between relative">
+            <div className="group relative flex h-full min-h-[500px] flex-col justify-between rounded-[12px] border-2 border-[#1D4ED8] bg-white p-6 shadow-[0_4px_20px_rgba(29,78,216,0.08)] transition-all duration-200 hover:-translate-y-[2px] sm:min-h-[560px] sm:p-8">
               {/* Badge Phổ biến */}
               <div className="absolute -top-3.5 right-6">
                 <span className="text-[10px] font-bold uppercase tracking-wider bg-[#1D4ED8] text-white px-3 py-1 rounded-[6px] shadow-sm">
@@ -211,45 +210,6 @@ const ClientPricingPage: React.FC = () => {
             </div>
           </ScrollReveal>
         </div>
-
-        <p className="text-xs text-slate-500 mb-16 max-w-xl text-center">
-          * Gói lẻ theo từng dự án (Nổi bật 59k · Gợi ý freelancer 99k) được chọn khi đăng dự án.
-          Checklist hỗ trợ nghiệm thu vẫn có cho mọi dự án.
-        </p>
-
-        {/* Section Stats (4 cột kỹ thuật) */}
-        <ScrollReveal className="w-full max-w-4xl pt-10 border-t border-slate-200/80">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#1D4ED8]">
-                <AnimatedNumber value={50000} suffix="+" />
-              </span>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
-                Freelancer AI
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#1D4ED8]">
-                <AnimatedNumber value={98} suffix="%" />
-              </span>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
-                Hài lòng từ khách hàng
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#1D4ED8]">&lt; 24H</span>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
-                Thời gian kết nối TB
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#1D4ED8]">100%</span>
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mt-1">
-                Thanh toán an toàn
-              </span>
-            </div>
-          </div>
-        </ScrollReveal>
       </main>
 
       {/* Footer đồng nhất */}

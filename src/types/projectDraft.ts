@@ -27,6 +27,8 @@ export interface ProjectDraftSummary {
   id: string;
   flowType: DraftFlow;
   phase: DraftPhase;
+  progressStep: number;
+  progressPercent: number;
   title: string | null;
   brief: string | null;
   updatedAt: string;
