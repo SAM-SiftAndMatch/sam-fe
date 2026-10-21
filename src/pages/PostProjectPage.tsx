@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import jobApi from '../api/job';
+import { projectDraftApi } from '../api/projectDrafts';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { PATH_CLIENT_CONFIRM_PROJECT } from '../routes/paths';
+import type { ProjectDraft } from '../types/projectDraft';
 
 // === MOCK DATA ===
 const SKILLS_SUGGESTION = [
@@ -46,6 +48,13 @@ type LocationState = {
 const PostProjectPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const urlDraftId = new URLSearchParams(location.search).get('draftId');
+  const [draftId, setDraftId] = useState<string | null>(urlDraftId);
+  const [loadedDraft, setLoadedDraft] = useState<ProjectDraft | null>(null);
+  const [draftLoading, setDraftLoading] = useState(Boolean(urlDraftId));
+  const [draftError, setDraftError] = useState<string | null>(null);
+  const creatingDraft = useRef<Promise<string> | null>(null);
+  const createdDraftId = useRef<string | null>(null);
   const {
     projectId,
     keyword = '',
@@ -59,7 +68,7 @@ const PostProjectPage: React.FC = () => {
     restoreStep = 1,
     srsDocumentUrl: initialSrsDocumentUrl = '',
   } = (location.state as LocationState) || {};
-  const [selectedTags] = useState<string[]>(initialTags);
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
 
   // Quản lý Step hiện tại (1 -> 4)
   const [currentStep, setCurrentStep] = useState(restoreStep);
@@ -173,6 +182,154 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
     (upgrades.featured ? featuredFee : 0) + (upgrades.urgent ? urgentFee : 0);
   const totalPrice = budgetAmount + totalUpgradesCost;
 
+  useEffect(() => {
+    if (!urlDraftId || createdDraftId.current === urlDraftId) return;
+    let active = true;
+    setDraftLoading(true);
+    projectDraftApi
+      .get(urlDraftId)
+      .then((draft) => {
+        if (!active) return;
+        if (draft.flowType !== 'MANUAL' || draft.status !== 'EDITING')
+          throw new Error('Bản nháp không khả dụng');
+        const saved = draft.state as LocationState & {
+          currentStep?: number;
+          budgetType?: string;
+          duration?: string;
+        };
+        setLoadedDraft(draft);
+        setDraftId(draft.id);
+        setProjectName(saved.projectName ?? draft.title ?? '');
+        setCategory(saved.category ?? '');
+        setDescription(saved.description ?? draft.brief ?? '');
+        setSelectedSkills(saved.selectedSkills ?? []);
+        setSelectedTags(saved.selectedTags ?? []);
+        setBudgetAmount(saved.budgetAmount ?? initialBudgetAmount);
+        setAiSuggestedPrice(saved.budgetAmount ?? initialBudgetAmount);
+        setAiPricingState('done');
+        setBudgetType(saved.budgetType ?? 'ai');
+        setDuration(saved.duration ?? 'fast');
+        setUpgrades(saved.upgrades ?? { featured: false, urgent: false });
+        setDeadline(saved.deadline?.slice(0, 10) ?? defaultDeadline);
+        setCurrentStep(saved.currentStep ?? 1);
+        setHighestStep(saved.currentStep ?? 1);
+        setDraftLoading(false);
+      })
+      .catch(() => {
+        if (active) {
+          setDraftError('Không tải được bản nháp. Vui lòng quay lại dashboard.');
+          setDraftLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [urlDraftId]);
+
+  const ensureDraft = useCallback(
+    (brief: string, title: string): Promise<string> => {
+      if (draftId) return Promise.resolve(draftId);
+      if (creatingDraft.current) return creatingDraft.current;
+      const promise = projectDraftApi
+        .create({ flowType: 'MANUAL', brief, title })
+        .then((draft) => {
+          createdDraftId.current = draft.id;
+          setDraftId(draft.id);
+          setLoadedDraft(draft);
+          navigate(`${location.pathname}?draftId=${draft.id}`, { replace: true, state: null });
+          return draft.id;
+        })
+        .finally(() => {
+          creatingDraft.current = null;
+        });
+      creatingDraft.current = promise;
+      return promise;
+    },
+    [draftId, location.pathname, navigate]
+  );
+
+  const draftState = {
+    projectId,
+    projectName,
+    category,
+    description,
+    selectedSkills,
+    selectedTags,
+    budgetAmount,
+    budgetType,
+    duration,
+    upgrades,
+    deadline,
+    currentStep,
+    srsDocumentUrl: initialSrsDocumentUrl,
+  };
+
+  useEffect(() => {
+    if (draftId || draftLoading || (!projectName.trim() && !description.trim())) return;
+    const timeout = setTimeout(() => {
+      void ensureDraft(description, projectName).catch(() =>
+        setDraftError('Chưa tạo được bản nháp.')
+      );
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [draftId, draftLoading, projectName, description, ensureDraft]);
+
+  useEffect(() => {
+    if (!draftId || draftLoading || (!loadedDraft && createdDraftId.current !== draftId)) return;
+    projectDraftApi.backup(draftId, {
+      title: projectName,
+      brief: description,
+      phase: (['info', 'budget', 'addons', 'review'] as const)[currentStep - 1] ?? 'info',
+      state: draftState,
+    });
+    const timeout = setTimeout(() => {
+      void projectDraftApi
+        .update(draftId, {
+          title: projectName,
+          brief: description,
+          phase: (['info', 'budget', 'addons', 'review'] as const)[currentStep - 1] ?? 'info',
+          state: draftState,
+        })
+        .catch(() => setDraftError('Chưa lưu được bản nháp. Vui lòng kiểm tra kết nối.'));
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [
+    draftId,
+    draftLoading,
+    loadedDraft,
+    projectName,
+    description,
+    category,
+    selectedSkills,
+    selectedTags,
+    budgetAmount,
+    budgetType,
+    duration,
+    upgrades,
+    deadline,
+    currentStep,
+  ]);
+
+  const goToConfirm = async () => {
+    try {
+      const id = await ensureDraft(description, projectName);
+      await projectDraftApi.update(id, {
+        title: projectName,
+        brief: description,
+        phase: 'confirm',
+        state: draftState,
+      });
+      navigate(`${PATH_CLIENT_CONFIRM_PROJECT}?draftId=${id}`, {
+        state: {
+          ...draftState,
+          deadline: deadline ? new Date(deadline).toISOString() : undefined,
+        },
+      });
+    } catch {
+      setDraftError('Không lưu được bản nháp. Vui lòng thử lại.');
+    }
+  };
+
   const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 4));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
   const goToStep = (step: number) => setCurrentStep(step);
@@ -269,11 +426,20 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
       <AppHeader />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-12 flex flex-col">
+        {draftError && (
+          <p
+            role="alert"
+            className="mb-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          >
+            {draftError}
+          </p>
+        )}
+        {draftLoading && <p className="mb-5 text-sm text-gray-500">Đang tải bản nháp...</p>}
         {/* Render Stepper Global */}
-        {renderStepper()}
+        {!draftLoading && renderStepper()}
 
         {/* ================= STEP 1: THÔNG TIN ================= */}
-        {currentStep === 1 && (
+        {!draftLoading && currentStep === 1 && (
           <div className="w-full max-w-3xl mx-auto bg-white rounded-[32px] p-8 md:p-12 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 flex flex-col animate-[fadeIn_0.3s_ease-out]">
             <div className="mb-10">
               <h1 className="text-2xl md:text-[28px] font-bold text-gray-900 mb-2">
@@ -542,7 +708,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
         )}
 
         {/* ================= STEP 2: NGÂN SÁCH ================= */}
-        {currentStep === 2 && (
+        {!draftLoading && currentStep === 2 && (
           <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 animate-[fadeIn_0.3s_ease-out]">
             {aiPricingState === 'analyzing' ? (
               <div className="bg-white rounded-xl p-12 shadow-xs border border-slate-200/90 flex flex-col items-center justify-center text-center min-h-[400px]">
@@ -878,7 +1044,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
         )}
 
         {/* ================= STEP 3: NÂNG CẤP ================= */}
-        {currentStep === 3 && (
+        {!draftLoading && currentStep === 3 && (
           <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 animate-[fadeIn_0.3s_ease-out]">
             <div className="text-center mb-4">
               <h1 className="text-3xl font-bold text-[#1D4ED8] mb-2">Tăng hiệu quả tuyển dụng</h1>
@@ -1030,7 +1196,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
         )}
 
         {/* ================= STEP 4: XEM LẠI ================= */}
-        {currentStep === 4 && (
+        {!draftLoading && currentStep === 4 && (
           <div className="w-full max-w-4xl mx-auto flex flex-col gap-6 animate-[fadeIn_0.3s_ease-out]">
             <div className="text-center mb-4">
               <h1 className="text-3xl font-bold text-[#1D4ED8] mb-2">Xem lại dự án của bạn</h1>
@@ -1365,22 +1531,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
               </button>
               <button
                 type="button"
-                onClick={() =>
-                  navigate(PATH_CLIENT_CONFIRM_PROJECT, {
-                    state: {
-                      projectId,
-                      projectName,
-                      description,
-                      category,
-                      budgetAmount,
-                      upgrades,
-                      selectedSkills,
-                      selectedTags,
-                      srsDocumentUrl: initialSrsDocumentUrl,
-                      deadline: deadline ? new Date(deadline).toISOString() : undefined,
-                    },
-                  })
-                }
+                onClick={() => void goToConfirm()}
                 className="group relative h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] text-white text-sm font-medium px-8 rounded-lg border-t border-t-blue-400/30 shadow-xs btn-sweep active:scale-[0.97] transition-all flex items-center gap-2 cursor-pointer border-0"
               >
                 <span>Đăng dự án ngay</span>

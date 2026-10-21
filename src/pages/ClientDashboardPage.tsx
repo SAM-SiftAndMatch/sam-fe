@@ -4,15 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import { type UserNotification, notificationsApi } from '../api/notifications';
 import { profileApi } from '../api/profile';
+import { projectDraftApi } from '../api/projectDrafts';
 import { subscriptionApi } from '../api/subscription';
 import AppHeader from '../components/AppHeader';
 import FooterDashboard from '../components/FooterDashboard';
 import JobStatusBadge from '../components/JobStatusBadge';
+import ProjectBriefPrompt from '../components/ProjectBriefPrompt';
+import ProjectDraftProgress from '../components/ProjectDraftProgress';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
 import { PrimaryButton } from '../components/landing/LandingButtons';
 import { PACKAGE_BUSINESS_ID } from '../features/subscription';
+import { SUPPORT_FACEBOOK_URL } from '../lib/support';
 import {
   PATH_CLIENT_AI_BRIEF,
+  PATH_CLIENT_DRAFTS,
   PATH_CLIENT_PRICING,
   PATH_CLIENT_PROFILE,
   PATH_CLIENT_PROJECTS,
@@ -23,6 +28,7 @@ import {
 import { useAuthStore } from '../stores/useAuthStore';
 import type { ClientDashboardOverview } from '../types/job';
 import { formatDate, formatMoney } from '../utils/format';
+import { projectDraftHref } from '../utils/projectDraft';
 
 const stats: {
   label: string;
@@ -58,7 +64,7 @@ const stats: {
   },
   {
     label: 'Lưu trữ',
-    description: 'Bản nháp · đang phát triển',
+    description: 'Bản nháp',
     color: 'text-gray-400',
     background: 'bg-gray-100',
     icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
@@ -97,6 +103,13 @@ export default function ClientDashboardPage() {
     queryFn: jobApi.getClientDashboardOverview,
     enabled: Boolean(user?.userId),
     staleTime: 30_000,
+    refetchOnMount: 'always',
+  });
+  const draftList = useQuery({
+    queryKey: ['project-drafts', 'page', user?.userId, 0, 3],
+    queryFn: () => projectDraftApi.page(0, 3),
+    enabled: Boolean(user?.userId),
+    staleTime: 10_000,
     refetchOnMount: 'always',
   });
   const notifications = useQuery({
@@ -163,33 +176,18 @@ export default function ClientDashboardPage() {
 
         <section className="relative flex w-full flex-col items-center overflow-hidden py-6 text-center md:py-10">
           <div className="pointer-events-none absolute left-1/2 top-0 h-80 w-[58rem] -translate-x-1/2 rounded-full bg-[#1D4ED8]/[0.06] blur-3xl" />
-          <h1 className="relative z-10 mb-4 text-3xl font-bold tracking-tight text-slate-900 md:text-5xl">
+          <h1 className="relative z-10 mb-4 text-3xl font-bold leading-[1.25] tracking-tight text-slate-900 md:text-5xl md:leading-[1.2]">
             Chào mừng trở lại,
-            <br />
-            <span className="text-[#1D4ED8]">
+            <span className="mt-2 block pb-1 text-[#1D4ED8]">
               {profile.data?.fullName || user?.fullName || 'bạn'}
             </span>
           </h1>
-          <p className="relative z-10 mb-8 max-w-xl text-sm leading-relaxed text-slate-600 md:text-base">
-            Bắt đầu dự án mới hoặc quản lý các công việc đang diễn ra một cách thông minh và hiệu
-            quả hơn với SAM AI
-          </p>
-          <div className="dashboard-search relative z-10 mb-5 flex w-full max-w-3xl flex-col items-stretch gap-2 rounded-[12px] border border-slate-200/90 bg-white p-2 shadow-[0_8px_30px_rgba(15,23,42,0.06)] sm:flex-row sm:items-center sm:gap-0">
-            <input
-              type="text"
-              aria-label="Mô tả sơ bộ dự án"
-              placeholder="Bạn muốn thực hiện dự án gì?"
-              className="min-w-0 flex-1 border-0 bg-transparent px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:ring-0"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') startBrief();
-              }}
-            />
-            <PrimaryButton onClick={() => startBrief()} className="shrink-0" withArrow={false}>
-              Tiếp tục
-            </PrimaryButton>
-          </div>
+          <ProjectBriefPrompt
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onSubmit={startBrief}
+            className="dashboard-search"
+          />
           <div className="relative z-10 mb-4 flex flex-wrap items-center justify-center gap-2">
             <span className="mr-1 text-[10px] font-medium uppercase tracking-wider text-slate-400">
               Gợi ý nhanh
@@ -237,7 +235,13 @@ export default function ClientDashboardPage() {
               </div>
               <div className="mt-auto">
                 <div className="mb-1 text-3xl font-extrabold leading-none text-gray-900">
-                  {stat.key ? (overview.isLoading ? '…' : (overview.data?.[stat.key] ?? '—')) : '—'}
+                  {stat.key
+                    ? overview.isLoading
+                      ? '…'
+                      : (overview.data?.[stat.key] ?? '—')
+                    : draftList.isLoading
+                      ? '…'
+                      : (draftList.data?.totalElements ?? '—')}
                 </div>
                 <div className="text-xs font-semibold text-gray-500">{stat.description}</div>
               </div>
@@ -245,7 +249,7 @@ export default function ClientDashboardPage() {
           ))}
         </section>
 
-        <section className="dashboard-primary-panel dashboard-premium-panel relative flex w-full flex-col items-center justify-between gap-8 overflow-hidden rounded-[32px] bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] p-8 shadow-[0_8px_30px_rgba(29,78,216,0.2)] md:flex-row md:p-10">
+        <section className="dashboard-primary-panel dashboard-premium-panel relative flex w-full flex-col items-center justify-between gap-8 overflow-hidden rounded-[32px] p-8 md:flex-row md:p-10">
           <div className="relative z-10 flex w-full flex-col items-start md:w-2/3">
             <span className="mb-4 rounded-full border border-white/30 bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
               {businessActive ? 'Đang sử dụng' : 'Premium'}
@@ -262,7 +266,7 @@ export default function ClientDashboardPage() {
             <button
               type="button"
               onClick={() => navigate(PATH_CLIENT_PRICING)}
-              className="dashboard-premium-cta cursor-pointer rounded-full border-0 bg-white px-8 py-3 text-sm font-bold text-[#1D4ED8] shadow-md transition-colors hover:bg-gray-50"
+              className="dashboard-premium-cta cursor-pointer rounded-full border-0 bg-white px-8 py-3 text-sm font-bold text-violet-800 shadow-md transition-colors hover:bg-violet-50"
             >
               {businessActive ? 'Xem gói của tôi' : 'Xem gói BUSINESS'}
             </button>
@@ -272,11 +276,44 @@ export default function ClientDashboardPage() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex flex-col gap-10">
             <section>
-              <h2 className="dashboard-section-title mb-5 text-xl font-bold text-gray-900">
-                Các yêu cầu nháp
-              </h2>
-              <div className="dashboard-surface-card rounded-3xl border border-gray-100 bg-white p-6 text-sm text-gray-600 shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
-                Tính năng đang được phát triển.
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="dashboard-section-title text-xl font-bold text-gray-900">
+                  Các yêu cầu nháp
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => navigate(PATH_CLIENT_DRAFTS)}
+                  className="cursor-pointer border-0 bg-transparent text-xs font-bold text-[#1D4ED8] hover:underline"
+                >
+                  Xem tất cả
+                </button>
+              </div>
+              <div className="dashboard-surface-card overflow-hidden rounded-3xl border border-gray-100 bg-white text-sm text-gray-600 shadow-[0_2px_15px_rgb(0,0,0,0.02)]">
+                {draftList.isLoading && <p className="p-6">Đang tải bản nháp...</p>}
+                {draftList.isError && <p className="p-6 text-red-700">Không tải được bản nháp.</p>}
+                {draftList.data?.items.length === 0 && (
+                  <p className="p-6">Bạn chưa có yêu cầu nháp nào.</p>
+                )}
+                {draftList.data?.items.map((draft) => (
+                  <button
+                    key={draft.id}
+                    type="button"
+                    onClick={() => navigate(projectDraftHref(draft))}
+                    className="dashboard-history-row flex w-full cursor-pointer items-center justify-between gap-4 border-b border-gray-100 p-5 text-left last:border-0 hover:bg-gray-50"
+                  >
+                    <div className="min-w-0">
+                      <span className="block truncate font-bold text-gray-900">
+                        {draft.title?.trim() || draft.brief?.slice(0, 80) || 'Yêu cầu chưa đặt tên'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {draft.flowType === 'AI' ? 'AI Brief' : 'Đăng thủ công'} · Cập nhật{' '}
+                        {formatDate(draft.updatedAt)}
+                      </span>
+                      <ProjectDraftProgress draft={draft} />
+                    </div>
+                    <span className="shrink-0 text-xs font-bold text-[#1D4ED8]">Tiếp tục</span>
+                  </button>
+                ))}
               </div>
             </section>
 
@@ -398,8 +435,16 @@ export default function ClientDashboardPage() {
             <section className="dashboard-primary-panel dashboard-support-panel relative flex flex-col items-start overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] p-6 text-white shadow-md">
               <h2 className="relative z-10 mb-2 text-lg font-bold">Cần hỗ trợ?</h2>
               <p className="relative z-10 text-[11px] leading-relaxed text-white/80">
-                Tính năng đang được phát triển.
+                Liên hệ đội ngũ SAM qua Facebook.
               </p>
+              <a
+                href={SUPPORT_FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative z-10 mt-4 rounded-lg bg-white px-4 py-2 text-xs font-bold text-[#1D4ED8] hover:bg-blue-50"
+              >
+                Liên hệ hỗ trợ
+              </a>
             </section>
           </div>
         </div>
