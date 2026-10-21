@@ -12,6 +12,7 @@ import JobStatusBadge from '../components/JobStatusBadge';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
 import { PrimaryButton } from '../components/landing/LandingButtons';
 import { PACKAGE_BUSINESS_ID } from '../features/subscription';
+import { SUPPORT_FACEBOOK_URL } from '../lib/support';
 import {
   PATH_CLIENT_AI_BRIEF,
   PATH_CLIENT_DRAFTS,
@@ -445,8 +446,16 @@ export default function ClientDashboardPage() {
             <section className="dashboard-primary-panel dashboard-support-panel relative flex flex-col items-start overflow-hidden rounded-3xl bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] p-6 text-white shadow-md">
               <h2 className="relative z-10 mb-2 text-lg font-bold">Cần hỗ trợ?</h2>
               <p className="relative z-10 text-[11px] leading-relaxed text-white/80">
-                Tính năng đang được phát triển.
+                Liên hệ đội ngũ SAM qua Facebook.
               </p>
+              <a
+                href={SUPPORT_FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative z-10 mt-4 rounded-lg bg-white px-4 py-2 text-xs font-bold text-[#1D4ED8] hover:bg-blue-50"
+              >
+                Liên hệ hỗ trợ
+              </a>
             </section>
           </div>
         </div>

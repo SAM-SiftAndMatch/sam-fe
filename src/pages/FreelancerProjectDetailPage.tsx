@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import { SUPPORT_FACEBOOK_URL } from '../lib/support';
 import { PATH_FREELANCER_PROJECTS } from '../routes/paths';
 
 // === MOCK DATA ===
@@ -743,9 +744,14 @@ const FreelancerProjectDetailPage: React.FC = () => {
               </div>
               <h3 className="font-bold text-[#1D4ED8] mb-2">Bạn cần giúp đỡ?</h3>
               <p className="text-sm text-[#1D4ED8]/80 mb-4">Đội ngũ hỗ trợ SAM luôn sẵn sàng.</p>
-              <button className="w-full py-2.5 rounded-full bg-white text-[#1D4ED8] font-bold text-sm border-0 cursor-pointer shadow-sm">
+              <a
+                href={SUPPORT_FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full py-2.5 rounded-full bg-white text-[#1D4ED8] font-bold text-sm text-center border-0 cursor-pointer shadow-sm"
+              >
                 Liên hệ hỗ trợ
-              </button>
+              </a>
             </div>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import type React from 'react';
+import { SUPPORT_FACEBOOK_URL } from '../lib/support';
 
 const Footer: React.FC = () => {
   return (
@@ -21,7 +22,12 @@ const Footer: React.FC = () => {
         <a href="#" className="transition-colors hover:text-[#1D4ED8]">
           Bảo mật
         </a>
-        <a href="#" className="transition-colors hover:text-[#1D4ED8]">
+        <a
+          href={SUPPORT_FACEBOOK_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-colors hover:text-[#1D4ED8]"
+        >
           Trợ giúp
         </a>
       </div>

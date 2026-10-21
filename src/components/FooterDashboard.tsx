@@ -1,4 +1,5 @@
 import type React from 'react';
+import { SUPPORT_FACEBOOK_URL } from '../lib/support';
 
 const FooterDashboard: React.FC = () => {
   return (
@@ -109,12 +110,14 @@ const FooterDashboard: React.FC = () => {
               >
                 Blog
               </button>
-              <button
-                type="button"
+              <a
+                href={SUPPORT_FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-gray-500 hover:text-[#0047FF] text-sm text-left transition-colors cursor-pointer bg-transparent border-0 p-0"
               >
                 Liên hệ
-              </button>
+              </a>
               <button
                 type="button"
                 className="text-gray-500 hover:text-[#0047FF] text-sm text-left transition-colors cursor-pointer bg-transparent border-0 p-0"

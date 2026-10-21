@@ -58,6 +58,19 @@ export const jobApi = {
       (await apiClient.get<ApiResponse<JobAddonSummary>>(`/jobs/${jobId}/addons`)).data,
       'Không tải được trạng thái tính năng'
     ),
+  confirmAddonReturn: async (
+    jobId: string,
+    vnpayParams: Record<string, string>
+  ): Promise<JobAddonSummary> =>
+    requireApiResult(
+      (
+        await apiClient.post<ApiResponse<JobAddonSummary>>(
+          `/jobs/${jobId}/addons/confirm-return`,
+          vnpayParams
+        )
+      ).data,
+      'Không xác minh được kết quả thanh toán tính năng'
+    ),
   selectAddons: async (
     jobId: string,
     featured: boolean,
