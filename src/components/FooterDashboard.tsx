@@ -1,5 +1,6 @@
 import type React from 'react';
 import { SUPPORT_FACEBOOK_URL } from '../lib/support';
+import SamBrandLogo from './SamBrandLogo';
 
 const FooterDashboard: React.FC = () => {
   return (
@@ -9,9 +10,9 @@ const FooterDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">
           {/* Cột 1: Logo & Thông tin */}
           <div className="flex flex-col items-start col-span-1">
-            <span className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0047FF] to-[#00B2FF] mb-4">
-              SAM
-            </span>
+            <div className="mb-4 flex items-center gap-2">
+              <SamBrandLogo />
+            </div>
             <p className="text-gray-500 text-sm leading-relaxed mb-6">
               Nền tảng kết nối nhân tài hàng đầu
               <br />

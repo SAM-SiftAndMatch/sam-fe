@@ -1,6 +1,7 @@
 import type React from 'react';
 import { Link } from 'react-router-dom';
 import * as paths from '../../routes/paths';
+import SamBrandLogo from '../SamBrandLogo';
 
 export const LandingFooter: React.FC = () => {
   return (
@@ -14,12 +15,7 @@ export const LandingFooter: React.FC = () => {
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="flex items-center gap-2 mb-3 group"
             >
-              <span className="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#1D4ED8] via-[#0066FF] to-[#0AAAD7] group-hover:from-[#0AAAD7] group-hover:to-[#1D4ED8] transition-all duration-300 leading-none">
-                SAM
-              </span>
-              <span className="text-[10px] text-slate-400 uppercase tracking-wider self-center">
-                SIFT & MATCH
-              </span>
+              <SamBrandLogo />
             </Link>
             <p className="text-slate-500 text-xs sm:text-sm leading-relaxed mb-6">
               Nền tảng kết nối nhân tài hàng đầu Việt Nam ứng dụng trí tuệ nhân tạo để thẩm định và
