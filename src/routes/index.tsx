@@ -10,6 +10,10 @@ import AuthGuard from '../components/guards/AuthGuard';
 import GuestGuard from '../components/guards/GuestGuard';
 import RoleGuard from '../components/guards/RoleGuard';
 
+import GoogleAuthReturnPage from '../pages/GoogleAuthReturnPage';
+import GoogleCompletePage from '../pages/GoogleCompletePage';
+import GoogleConnectPage from '../pages/GoogleConnectPage';
+import GoogleLinkPendingPage from '../pages/GoogleLinkPendingPage';
 // Pages
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
@@ -80,11 +84,13 @@ const AppRoutes = () => {
         <Route path={paths.PATH_LOGIN} element={<LoginPage />} />
         <Route path={paths.PATH_REGISTER} element={<RegisterPage />} />
         <Route path={paths.PATH_ROLE_SELECTION} element={<RoleSelectionPage />} />
+        <Route path={paths.PATH_GOOGLE_AUTH_COMPLETE} element={<GoogleCompletePage />} />
       </Route>
 
       {/* Public routes */}
       <Route path={paths.PATH_HOME} element={<RootRoute />} />
       <Route path={paths.PATH_HOME_ALT} element={<RootRoute />} />
+      <Route path={paths.PATH_GOOGLE_AUTH_RETURN} element={<GoogleAuthReturnPage />} />
       <Route path={paths.PATH_CLIENT_PRICING} element={<ClientPricingPage />} />
       <Route path={paths.PATH_FREELANCER} element={<FreelancerPage />} />
       <Route path={paths.PATH_FREELANCER_PRICING} element={<FreelancerPricingPage />} />
@@ -128,6 +134,8 @@ const AppRoutes = () => {
 
       {/* Authenticated routes (any role) */}
       <Route element={<AuthGuard />}>
+        <Route path={paths.PATH_GOOGLE_AUTH_LINK} element={<GoogleLinkPendingPage />} />
+        <Route path={paths.PATH_GOOGLE_AUTH_CONNECT} element={<GoogleConnectPage />} />
         <Route path={paths.PATH_NOTIFICATIONS} element={<NotificationsPage />} />
         <Route path={paths.PATH_WORKSPACES} element={<WorkspacesPage />} />
         <Route

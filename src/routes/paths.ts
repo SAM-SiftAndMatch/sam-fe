@@ -1,6 +1,10 @@
 export const PATH_LOGIN = '/login';
 export const PATH_REGISTER = '/register';
 export const PATH_ROLE_SELECTION = '/role-selection';
+export const PATH_GOOGLE_AUTH_RETURN = '/auth/google/return';
+export const PATH_GOOGLE_AUTH_COMPLETE = '/auth/google/complete';
+export const PATH_GOOGLE_AUTH_LINK = '/auth/google/link';
+export const PATH_GOOGLE_AUTH_CONNECT = '/auth/google/connect';
 
 export const PATH_HOME = '/';
 export const PATH_HOME_ALT = '/home';

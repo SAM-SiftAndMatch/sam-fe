@@ -41,6 +41,32 @@ export const authApi = {
       tokenManager.clearToken();
     }
   },
+  completeGoogle: async (role: 'CLIENT' | 'FREELANCER'): Promise<AuthResponse> => {
+    const res = await apiClient.post<ApiResponse<AuthResponse>>('/auth/google/complete', {
+      role,
+      acceptedTerms: true,
+    });
+    const auth = res.data.result;
+    if (!auth) throw new Error(res.data.message || 'Không hoàn tất được đăng ký Google');
+    tokenManager.setToken(auth.accessToken);
+    return auth;
+  },
+  linkGooglePending: async (password: string): Promise<void> => {
+    await apiClient.post<ApiResponse<void>>('/auth/google/link-pending', { password });
+  },
+  googleLinkStatus: async (): Promise<boolean> => {
+    const res = await apiClient.get<ApiResponse<{ linked: boolean }>>('/auth/google/status');
+    return res.data.result?.linked ?? false;
+  },
+  startGoogleLink: async (password: string): Promise<string> => {
+    const res = await apiClient.post<ApiResponse<{ authorizationUrl: string }>>(
+      '/auth/google/link/start',
+      { password }
+    );
+    const url = res.data.result?.authorizationUrl;
+    if (!url) throw new Error('Không bắt đầu được liên kết Google');
+    return url;
+  },
 };
 
 export default authApi;
