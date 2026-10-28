@@ -5,8 +5,14 @@ import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 import SamBrandLogo from '../components/SamBrandLogo';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
+import {
+  clearGoogleLinkPending,
+  googleAuthEnabled,
+  setGoogleLinkPending,
+} from '../lib/google-auth';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 
@@ -19,6 +25,8 @@ const LoginPage: React.FC = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const reason = searchParams.get('reason');
+  const googleError = searchParams.get('google_error');
+  const googleLink = searchParams.get('google_link') === '1';
 
   const { login } = useAuthStore();
   const state = location.state as { returnTo?: string; initialQuery?: string } | null;
@@ -38,7 +46,12 @@ const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     setServerError(null);
     try {
+      if (googleLink) setGoogleLinkPending();
       const auth = await login(data);
+      if (googleLink) {
+        navigate(paths.PATH_GOOGLE_AUTH_LINK, { replace: true });
+        return;
+      }
       if (state?.returnTo) {
         navigate(state.returnTo, { state: { initialQuery: state.initialQuery } });
       } else if (auth.role === 'FREELANCER') {
@@ -47,6 +60,7 @@ const LoginPage: React.FC = () => {
         navigate(paths.PATH_CLIENT_DASHBOARD);
       }
     } catch (err: unknown) {
+      if (googleLink) clearGoogleLinkPending();
       if (axios.isAxiosError(err)) {
         const message =
           err.response?.data?.message ||
@@ -212,6 +226,21 @@ const LoginPage: React.FC = () => {
           )}
 
           {/* Form Fields */}
+          {googleLink && (
+            <p className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+              Email này đã có tài khoản SAM. Hãy đăng nhập bằng mật khẩu SAM để liên kết Google.
+            </p>
+          )}
+          {googleError && (
+            <p
+              role="alert"
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+            >
+              {googleError === 'cancelled'
+                ? 'Bạn đã hủy đăng nhập Google.'
+                : 'Không hoàn tất được đăng nhập Google. Vui lòng thử lại.'}
+            </p>
+          )}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Email Input */}
             <div>
@@ -405,6 +434,12 @@ const LoginPage: React.FC = () => {
               </button>
             </div>
           </form>
+
+          {googleAuthEnabled && (
+            <div className="mt-5">
+              <GoogleLoginButton returnTo={state?.returnTo} initialQuery={state?.initialQuery} />
+            </div>
+          )}
 
           {/* Footer inside Card */}
           <div className="mt-8 pt-6 border-t border-slate-100 text-center text-xs text-slate-500 font-medium">
