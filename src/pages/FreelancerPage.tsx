@@ -211,10 +211,8 @@ const FreelancerPage: React.FC = () => {
               </div>
             ) : (
               /* Profile not completed banner */
-              <div className="bg-white rounded-[12px] p-6 sm:p-8 text-center max-w-xl border border-amber-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
-                <h3 className="text-lg font-bold text-slate-900 mb-2">
-                  Cập nhật hồ sơ để nhận đề xuất AI
-                </h3>
+              <div className="mx-auto w-full max-w-2xl bg-white rounded-[12px] px-6 py-8 sm:px-8 sm:py-10 text-center border border-black/20 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                <h3 className="text-lg font-bold text-slate-900 mb-2">Cập nhật hồ sơ</h3>
                 <p className="text-xs sm:text-sm text-slate-600 mb-6 max-w-md mx-auto leading-relaxed">
                   Hãy cập nhật thông tin nghề nghiệp, kỹ năng và mức giá của bạn để hệ thống AI
                   Matching bắt đầu đề xuất các công việc phù hợp nhất.

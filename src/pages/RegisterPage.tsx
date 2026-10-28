@@ -5,8 +5,10 @@ import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 import SamBrandLogo from '../components/SamBrandLogo';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
+import { googleAuthEnabled } from '../lib/google-auth';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 
@@ -371,62 +373,18 @@ const RegisterPage: React.FC = () => {
           </div>
         </form>
 
-        {/* Divider */}
-        <div className="flex items-center my-6">
-          <div className="flex-grow border-t border-slate-200" />
-          <span className="mx-3 text-[11px] text-slate-400 uppercase tracking-wider">
-            HOẶC ĐĂNG KÝ BẰNG
-          </span>
-          <div className="flex-grow border-t border-slate-200" />
-        </div>
-
-        {/* Social Logins */}
-        <div className="grid grid-cols-3 gap-3">
-          <button
-            type="button"
-            className="h-[40px] flex items-center justify-center border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition cursor-pointer"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" role="img" aria-label="Google">
-              <path
-                fill="#EA4335"
-                d="M12 5.04c1.64 0 3.12.56 4.28 1.67l3.2-3.2C17.52 1.58 14.97 1 12 1 7.24 1 3.2 3.73 1.24 7.72l3.74 2.9C5.91 7.23 8.71 5.04 12 5.04z"
-              />
-              <path
-                fill="#4285F4"
-                d="M23.45 12.27c0-.82-.07-1.61-.21-2.38H12v4.51h6.42c-.28 1.47-1.11 2.71-2.36 3.55l3.66 2.84c2.14-1.97 3.38-4.88 3.38-8.52z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.04 14.82c-.24-.72-.38-1.49-.38-2.32s.14-1.6.38-2.32L1.3 7.28C.47 8.94 0 10.79 0 12.72s.47 3.78 1.3 5.44l3.74-2.94z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c3.24 0 5.97-1.08 7.96-2.91l-3.66-2.84c-1.01.68-2.31 1.09-4.3 1.09-3.29 0-6.09-2.19-7.08-5.58L1.18 15.7C3.15 19.7 7.21 23 12 23z"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="h-[40px] flex items-center justify-center border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition cursor-pointer text-slate-800"
-          >
-            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" role="img" aria-label="Apple">
-              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.2.67-2.92 1.49-.62.71-1.16 1.85-1.01 2.96 1.12.09 2.27-.58 2.94-1.39z" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="h-[40px] flex items-center justify-center border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition cursor-pointer"
-          >
-            <svg
-              className="w-4 h-4 fill-[#0A66C2]"
-              viewBox="0 0 24 24"
-              role="img"
-              aria-label="LinkedIn"
-            >
-              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-            </svg>
-          </button>
-        </div>
+        {googleAuthEnabled && (
+          <>
+            <div className="flex items-center my-6">
+              <div className="flex-grow border-t border-slate-200" />
+              <span className="mx-3 text-[11px] text-slate-400 uppercase tracking-wider">
+                HOẶC ĐĂNG KÝ BẰNG
+              </span>
+              <div className="flex-grow border-t border-slate-200" />
+            </div>
+            <GoogleLoginButton role={selectedAccountType} />
+          </>
+        )}
 
         {/* Under Card Links */}
         <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-600">

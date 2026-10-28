@@ -1,5 +1,6 @@
 import type React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { hasGoogleLinkPending } from '../../lib/google-auth';
 import * as paths from '../../routes/paths';
 import { useAuthStore } from '../../stores/useAuthStore';
 import LoadingScreen from '../LoadingScreen';
@@ -16,6 +17,9 @@ export const GuestGuard: React.FC<GuestGuardProps> = ({ children }) => {
   }
 
   if (isAuthenticated) {
+    if (hasGoogleLinkPending()) {
+      return <Navigate to={paths.PATH_GOOGLE_AUTH_LINK} replace />;
+    }
     if (user?.role === 'FREELANCER') {
       return <Navigate to={paths.PATH_FREELANCER} replace />;
     }

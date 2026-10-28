@@ -22,6 +22,8 @@ COPY . .
 # Build argument for backend API URL (embedded at build time by Vite)
 ARG VITE_API_URL=http://localhost:8080
 ENV VITE_API_URL=${VITE_API_URL}
+ARG VITE_GOOGLE_AUTH_ENABLED=false
+ENV VITE_GOOGLE_AUTH_ENABLED=${VITE_GOOGLE_AUTH_ENABLED}
 
 # Build production bundle
 RUN pnpm run build

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { chatApi } from '../api/chat';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
+import { googleAuthEnabled } from '../lib/google-auth';
 import {
   PATH_CLIENT_AI_BRIEF,
   PATH_CLIENT_DASHBOARD,
@@ -19,6 +20,7 @@ import {
   PATH_FREELANCER_INVITATIONS,
   PATH_FREELANCER_JOBS,
   PATH_FREELANCER_PROJECTS,
+  PATH_GOOGLE_AUTH_CONNECT,
   PATH_HOME,
   PATH_JOB_DETAIL,
   PATH_LOGIN,
@@ -426,6 +428,18 @@ const AppHeader: React.FC = () => {
                     >
                       {profileLabel}
                     </button>
+                    {googleAuthEnabled && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          closeMenus();
+                          navigate(PATH_GOOGLE_AUTH_CONNECT);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
+                      >
+                        Liên kết Google
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={logoutAndRedirect}
