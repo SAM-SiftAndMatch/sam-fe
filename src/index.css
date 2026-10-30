@@ -301,6 +301,20 @@ html.theme-dark [class*="bg-[#F5F3FF]"] {
   background-color: #111a2b !important;
 }
 
+/* The Google button keeps its light branded surface and dark label in either theme. */
+html.theme-dark .google-login-button {
+  background-color: #fff !important;
+  color: #1f1f1f !important;
+}
+
+html.theme-dark .google-login-button:hover {
+  background-color: #f8faff !important;
+}
+
+html.theme-dark .google-login-button:active {
+  background-color: #eef2f8 !important;
+}
+
 /* Keep Freelancer status panels readable instead of leaving their light semantic tints on dark surfaces. */
 html.theme-dark [class~="bg-blue-50"],
 html.theme-dark [class~="bg-blue-100"] {
