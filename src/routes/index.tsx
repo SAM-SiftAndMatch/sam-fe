@@ -110,7 +110,6 @@ const AppRoutes = () => {
         <Route path={paths.PATH_CLIENT_PROJECT_DETAIL} element={<ClientProjectDetailPage />} />
         <Route path={paths.PATH_CLIENT_ADDON_RETURN} element={<JobAddonReturnPage />} />
         <Route path={paths.PATH_CLIENT_PAYMENT} element={<ClientPaymentPage />} />
-        <Route path={paths.PATH_CLIENT_PAYMENT_RETURN} element={<VnpayReturnPage />} />
         <Route path={paths.PATH_CLIENT_FIND_FREELANCER} element={<FindFreelancerPage />} />
         <Route path={paths.PATH_CLIENT_PROFILE} element={<ClientProfilePage />} />
       </Route>
@@ -146,6 +145,8 @@ const AppRoutes = () => {
       </Route>
       {/* Authenticated routes (any role) */}
       <Route element={<AuthGuard />}>
+        {/* Both contract funding and freelancer deposits return to this legacy URL. */}
+        <Route path={paths.PATH_CLIENT_PAYMENT_RETURN} element={<VnpayReturnPage />} />
         <Route path={paths.PATH_GOOGLE_AUTH_LINK} element={<GoogleLinkPendingPage />} />
         <Route path={paths.PATH_GOOGLE_AUTH_CONNECT} element={<GoogleConnectPage />} />
         <Route path={paths.PATH_NOTIFICATIONS} element={<NotificationsPage />} />
