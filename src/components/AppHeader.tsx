@@ -49,6 +49,7 @@ const AppHeader: React.FC = () => {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const isClient = user?.role === 'CLIENT';
+  const isAdmin = user?.role === 'ADMIN';
   const chatUnread = useQuery({
     queryKey: ['chat-unread-count', user?.userId],
     queryFn: chatApi.unreadCount,
@@ -56,23 +57,29 @@ const AppHeader: React.FC = () => {
     staleTime: 10_000,
   });
 
-  const navItems: NavItem[] = isClient
-    ? [
-        { label: 'Dự án', path: PATH_CLIENT_PROJECTS },
-        { label: 'Tin nhắn', path: PATH_WORKSPACES, state: { role: 'client' } },
-        { label: 'Tìm Freelancer', path: PATH_CLIENT_FIND_FREELANCER },
-      ]
-    : [
-        { label: 'Tìm việc', path: PATH_FREELANCER_JOBS },
-        { label: 'Ứng tuyển', path: PATH_FREELANCER_APPLICATIONS },
-        { label: 'Lời mời', path: PATH_FREELANCER_INVITATIONS },
-        { label: 'Dự án của tôi', path: PATH_FREELANCER_PROJECTS },
-        { label: 'Tin nhắn', path: PATH_WORKSPACES, state: { role: 'freelancer' } },
-        { label: 'Thu nhập', path: PATH_FREELANCER_EARNINGS },
-      ];
-  const profilePath = isClient ? PATH_CLIENT_PROFILE : PATH_FREELANCER_CREATE_PROFILE;
-  const profileLabel = isClient ? 'Hồ sơ công ty' : 'Hồ sơ của tôi';
-  const homePath = isClient ? PATH_CLIENT_DASHBOARD : PATH_FREELANCER;
+  const navItems: NavItem[] = isAdmin
+    ? [{ label: 'Vận hành tài chính', path: '/admin/finance' }]
+    : isClient
+      ? [
+          { label: 'Dự án', path: PATH_CLIENT_PROJECTS },
+          { label: 'Tin nhắn', path: PATH_WORKSPACES, state: { role: 'client' } },
+          { label: 'Tìm Freelancer', path: PATH_CLIENT_FIND_FREELANCER },
+        ]
+      : [
+          { label: 'Tìm việc', path: PATH_FREELANCER_JOBS },
+          { label: 'Ứng tuyển', path: PATH_FREELANCER_APPLICATIONS },
+          { label: 'Lời mời', path: PATH_FREELANCER_INVITATIONS },
+          { label: 'Dự án của tôi', path: PATH_FREELANCER_PROJECTS },
+          { label: 'Tin nhắn', path: PATH_WORKSPACES, state: { role: 'freelancer' } },
+          { label: 'Thu nhập', path: PATH_FREELANCER_EARNINGS },
+        ];
+  const profilePath = isAdmin
+    ? '/admin/finance'
+    : isClient
+      ? PATH_CLIENT_PROFILE
+      : PATH_FREELANCER_CREATE_PROFILE;
+  const profileLabel = isAdmin ? 'Quản trị' : isClient ? 'Hồ sơ công ty' : 'Hồ sơ của tôi';
+  const homePath = isAdmin ? '/admin/finance' : isClient ? PATH_CLIENT_DASHBOARD : PATH_FREELANCER;
 
   useEffect(() => {
     const closeOnOutsideClick = (event: MouseEvent) => {

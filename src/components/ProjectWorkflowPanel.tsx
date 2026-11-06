@@ -547,9 +547,11 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
         <div className="mt-3 flex flex-col gap-2">
           {settlement && (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-[11px] text-emerald-800">
-              Nghiệm thu đã hoàn tất. Ví thử nghiệm freelancer được ghi có{' '}
+              Nghiệm thu đã hoàn tất. Công nợ freelancer được ghi nhận{' '}
               {(settlement.freelancerPayout + settlement.depositRefund).toLocaleString('vi-VN')}{' '}
-              VND. Phí nền tảng: {settlement.platformFee.toLocaleString('vi-VN')} VND.
+              VND. Khoản này chờ ít nhất 7 ngày bảo trì và xử lý xong ticket trước khi được rút.{' '}
+              {settlement.sandbox && 'Đây là dữ liệu mô phỏng, không được rút thành tiền thật.'} Phí
+              nền tảng: {settlement.platformFee.toLocaleString('vi-VN')} VND.
             </div>
           )}
           {deliveries.length === 0 ? (
@@ -669,8 +671,9 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                   cho phiên bản {activeDelivery.versionNumber}.
                 </p>
                 <p className="mt-2 rounded-lg bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
-                  Sau khi xác nhận, hệ thống sẽ quyết toán bằng ví thử nghiệm và không thể yêu cầu
-                  chỉnh sửa phiên bản này.
+                  Sau khi xác nhận, dự án hoàn thành và ghi công nợ chờ bảo trì 7 ngày. Bạn vẫn có
+                  thể báo lỗi thuộc phạm vi bàn giao qua ticket trong chat hoặc workspace trước hạn.
+                  Tiền chỉ đủ điều kiện chi sau thời hạn này và khi ticket đã được giải quyết.
                 </p>
                 <div className="mt-5 flex gap-3">
                   <button

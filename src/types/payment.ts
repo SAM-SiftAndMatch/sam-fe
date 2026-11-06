@@ -1,6 +1,12 @@
-export type PaymentType = 'CONTRACT_FUND' | 'SECURITY_DEPOSIT';
+export type PaymentType = 'CONTRACT_FUND' | 'SECURITY_DEPOSIT' | 'MAINTENANCE_FUND';
 
-export type PaymentStatus = 'PENDING' | 'HELD_IN_ESCROW' | 'RELEASED' | 'REFUNDED' | 'EXPIRED';
+export type PaymentStatus =
+  | 'PENDING'
+  | 'HELD_IN_ESCROW'
+  | 'RELEASED'
+  | 'REFUNDED'
+  | 'EXPIRED'
+  | 'SETTLED';
 
 export interface CreateEscrowRequest {
   contractId: string;
@@ -20,6 +26,9 @@ export interface PaymentResponse {
   amount: number;
   currency: string;
   status: PaymentStatus;
+  checkoutUrl?: string;
+  provider?: string;
+  environment?: string;
   vnpayUrl?: string | null;
   escrowHeldAt?: string | null;
   releasedAt?: string | null;

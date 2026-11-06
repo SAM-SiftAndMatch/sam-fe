@@ -28,7 +28,7 @@ export const paymentApi = {
     return requireApiResult(res.data, 'Failed to fetch funding status');
   },
 
-  // FE tự báo đã chuyển sau redirect VNPay (giống confirm-payment của mua gói)
+  // Read-only compatibility endpoint; only verified provider IPN can confirm funding.
   confirmPayment: async (
     paymentId: string,
     data: ConfirmFundingRequest

@@ -53,6 +53,7 @@ import NotificationsPage from '../pages/NotificationsPage';
 import SuccessApplicationPage from '../pages/SuccessApplicationPage';
 import WorkspacesPage from '../pages/WorkspacesPage';
 
+const AdminFinancePage = lazy(() => import('../pages/AdminFinancePage'));
 const WorkspaceLayout = lazy(() => import('../pages/WorkspaceLayout'));
 const WorkspaceChatView = lazy(() => import('../pages/WorkspaceChatView'));
 const WorkspaceTimelineView = lazy(() => import('../pages/WorkspaceTimelineView'));
@@ -65,6 +66,7 @@ const RootRoute: React.FC = () => {
   }
 
   if (isAuthenticated) {
+    if (user?.role === 'ADMIN') return <Navigate to="/admin/finance" replace />;
     if (user?.role === 'FREELANCER') {
       return <Navigate to={paths.PATH_FREELANCER} replace />;
     }
@@ -132,6 +134,16 @@ const AppRoutes = () => {
         <Route path={paths.PATH_JOB_APPLY_SUCCESS} element={<SuccessApplicationPage />} />
       </Route>
 
+      <Route element={<RoleGuard allowedRoles={['ADMIN']} />}>
+        <Route
+          path="/admin/finance"
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <AdminFinancePage />
+            </Suspense>
+          }
+        />
+      </Route>
       {/* Authenticated routes (any role) */}
       <Route element={<AuthGuard />}>
         <Route path={paths.PATH_GOOGLE_AUTH_LINK} element={<GoogleLinkPendingPage />} />

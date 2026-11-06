@@ -97,18 +97,11 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
           ? await paymentApi.createFund({ contractId, returnUrl })
           : await paymentApi.createDeposit({ contractId, returnUrl });
       if (!created.vnpayUrl) {
-        setError('Không tạo được link thanh toán VNPay');
+        setError('Không tạo được liên kết thanh toán');
         return;
       }
-      // Ghi nhớ để khi VNPay redirect về thì FE tự gọi confirm (giống mua gói)
-      try {
-        localStorage.setItem(
-          'SAM_PENDING_FUNDING',
-          JSON.stringify({ paymentId: created.paymentId, contractId, roomId, kind })
-        );
-      } catch {
-        // bỏ qua lỗi quota
-      }
+      // Navigation only. The backend confirms funding through verified provider IPN.
+      sessionStorage.setItem('sam:payment-return', `/workspace/${roomId}/contract`);
       window.location.href = created.vnpayUrl;
     } catch (e) {
       // Khoản có rồi (bấm Nạp 2 lần / quay lại sau khi chưa trả xong): tải lại bảng cho đúng
@@ -196,7 +189,7 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
                   disabled={paying !== null || !verifiedOk}
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#1D4ED8] to-[#0AAAD7] text-white font-bold text-sm shadow-md hover:opacity-90 transition-opacity cursor-pointer border-0 disabled:opacity-50"
                 >
-                  {paying === 'fund' ? 'Đang tạo link...' : 'Nạp qua VNPay'}
+                  {paying === 'fund' ? 'Đang tạo link...' : 'Thanh toán giá trị hợp đồng'}
                 </button>
               )}
             </div>
@@ -222,7 +215,7 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
                   disabled={paying !== null || !verifiedOk}
                   className="px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm shadow-md transition-colors cursor-pointer border-0 disabled:opacity-50"
                 >
-                  {paying === 'deposit' ? 'Đang tạo link...' : 'Đặt cọc qua VNPay'}
+                  {paying === 'deposit' ? 'Đang tạo link...' : 'Thanh toán cọc cam kết'}
                 </button>
               )}
             </div>

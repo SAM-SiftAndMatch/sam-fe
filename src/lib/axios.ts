@@ -33,6 +33,8 @@ const processQueue = (error: unknown, token: string | null = null) => {
 // Request interceptor: Attach Access Token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    const scoped = config as InternalAxiosRequestConfig & { _samSessionEpoch?: number };
+    scoped._samSessionEpoch = tokenManager.getSessionEpoch();
     const token = tokenManager.getToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -44,13 +46,20 @@ apiClient.interceptors.request.use(
 
 // Response interceptor: Auto refresh on 401
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const scoped = response.config as InternalAxiosRequestConfig & { _samSessionEpoch?: number };
+    if (scoped._samSessionEpoch !== tokenManager.getSessionEpoch())
+      return Promise.reject(new Error('Phiên đăng nhập đã thay đổi.'));
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
     if (!originalRequest) {
       return Promise.reject(error);
     }
 
+    if (originalRequest._samSessionEpoch !== tokenManager.getSessionEpoch())
+      return Promise.reject(new Error('Phiên đăng nhập đã thay đổi.'));
     const responseCode = error.response?.data?.code;
 
     // Do not retry auth endpoints or already retried requests
@@ -72,10 +81,15 @@ apiClient.interceptors.response.use(
 
     // 401 Unauthorized -> Attempt token refresh
     if (error.response?.status === 401) {
+      if (!tokenManager.getToken()) return Promise.reject(error);
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
             resolve: (token: string) => {
+              if (originalRequest._samSessionEpoch !== tokenManager.getSessionEpoch()) {
+                reject(new Error('Phiên đăng nhập đã thay đổi.'));
+                return;
+              }
               if (originalRequest.headers) {
                 originalRequest.headers.Authorization = `Bearer ${token}`;
               }
@@ -96,6 +110,17 @@ apiClient.interceptors.response.use(
           throw new Error('No access token returned from refresh');
         }
 
+        if (originalRequest._samSessionEpoch !== tokenManager.getSessionEpoch())
+          throw new Error('Phiên đăng nhập đã thay đổi.');
+        const previous = tokenManager.decodePayload(tokenManager.getToken() || '');
+        const next = tokenManager.decodePayload(newToken);
+        if (
+          previous &&
+          (!next ||
+            previous.user_id !== next.user_id ||
+            previous.account_type !== next.account_type)
+        )
+          throw new Error('Danh tính phiên đăng nhập đã thay đổi.');
         tokenManager.setToken(newToken);
         processQueue(null, newToken);
 
@@ -105,6 +130,8 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
+        if (originalRequest._samSessionEpoch !== tokenManager.getSessionEpoch())
+          return Promise.reject(refreshError);
         tokenManager.clearToken();
         // Redirect to login if refresh fails
         if (!window.location.pathname.includes('/login')) {
