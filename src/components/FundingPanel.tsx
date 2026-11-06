@@ -3,6 +3,7 @@ import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { paymentApi } from '../api/payment';
 import { usePaymentNotifications } from '../features/payment';
+import { beginCheckout } from '../lib/checkout';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { AmountVerification, FundingStatus } from '../types/payment';
 import { formatMoney } from '../utils/format';
@@ -96,13 +97,12 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
         kind === 'fund'
           ? await paymentApi.createFund({ contractId, returnUrl })
           : await paymentApi.createDeposit({ contractId, returnUrl });
-      if (!created.vnpayUrl) {
+      if (!created.checkoutUrl && !created.orderId) {
         setError('Không tạo được liên kết thanh toán');
         return;
       }
       // Navigation only. The backend confirms funding through verified provider IPN.
-      sessionStorage.setItem('sam:payment-return', `/workspace/${roomId}/contract`);
-      window.location.href = created.vnpayUrl;
+      beginCheckout(created, `/workspace/${roomId}/contract`);
     } catch (e) {
       // Khoản có rồi (bấm Nạp 2 lần / quay lại sau khi chưa trả xong): tải lại bảng cho đúng
       void loadFunding();

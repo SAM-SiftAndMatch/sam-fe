@@ -89,10 +89,7 @@ export interface JobAddonSummary {
   businessIncluded: boolean;
 }
 
-export interface JobAddonCheckout {
-  orderId: string;
-  vnpayUrl: string;
-}
+export type JobAddonCheckout = import('../lib/checkout').Checkout;
 
 // Khớp BE: AiRecommendationResponse.java + SkillExperienceDto.java
 export type RecommendationStatus =

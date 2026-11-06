@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { dateTime, financeError, financeGet, financePost, money } from '../../api/finance';
+import { beginCheckout } from '../../lib/checkout';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { Field, Modal, Notice, inputClass, primaryClass, secondaryClass } from './FinanceUI';
 
@@ -168,24 +169,10 @@ export default function PaidMaintenancePanel({
     setBusy(true);
     setError('');
     try {
-      const payment = await financePost<{ checkoutUrl?: string; vnpayUrl?: string }>(
+      const payment = await financePost<{ checkoutUrl?: string; orderId?: string }>(
         `/paid-maintenance-orders/${order}/checkout`
       );
-      const target = payment.checkoutUrl || payment.vnpayUrl;
-      if (!target) throw new Error('Chưa tạo được liên kết thanh toán.');
-      const parsed = new URL(target);
-      if (
-        parsed.protocol !== 'https:' ||
-        ![
-          'payment.pay2s.vn',
-          'sandbox-payment.pay2s.vn',
-          'pay.vnpay.vn',
-          'sandbox.vnpayment.vn',
-        ].includes(parsed.hostname)
-      )
-        throw new Error('Liên kết thanh toán không hợp lệ.');
-      sessionStorage.setItem('sam:payment-return', window.location.pathname);
-      window.location.assign(target);
+      beginCheckout(payment, window.location.pathname);
     } catch (cause) {
       setError(financeError(cause));
     } finally {

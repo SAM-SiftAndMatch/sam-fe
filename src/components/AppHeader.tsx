@@ -62,6 +62,7 @@ const AppHeader: React.FC = () => {
     : isClient
       ? [
           { label: 'Dự án', path: PATH_CLIENT_PROJECTS },
+          { label: 'Thanh toán', path: '/payments/history' },
           { label: 'Tin nhắn', path: PATH_WORKSPACES, state: { role: 'client' } },
           { label: 'Tìm Freelancer', path: PATH_CLIENT_FIND_FREELANCER },
         ]
@@ -72,6 +73,7 @@ const AppHeader: React.FC = () => {
           { label: 'Dự án của tôi', path: PATH_FREELANCER_PROJECTS },
           { label: 'Tin nhắn', path: PATH_WORKSPACES, state: { role: 'freelancer' } },
           { label: 'Thu nhập', path: PATH_FREELANCER_EARNINGS },
+          { label: 'Thanh toán', path: '/payments/history' },
         ];
   const profilePath = isAdmin
     ? '/admin/finance'

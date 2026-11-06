@@ -92,6 +92,25 @@ export default function AdminFinancePage() {
     enabled: user?.role === 'ADMIN' && tab === 'receipts',
     refetchInterval: 30000,
   });
+  const checkoutReviews = useQuery({
+    queryKey: ['admin-finance', user?.userId, 'checkout-review', page],
+    queryFn: () =>
+      financeGet<
+        {
+          id: string;
+          purpose: string;
+          amount: number;
+          environment: string;
+          status: string;
+          fulfillmentStatus: string;
+          recommendationStatus?: string;
+          providerReference?: string;
+          receivedAmount?: number;
+        }[]
+      >(`/checkouts/admin/review?page=${page}`),
+    enabled: user?.role === 'ADMIN' && tab === 'checkout-review',
+    refetchInterval: 15000,
+  });
   const audit = useQuery({
     queryKey: ['admin-finance', user?.userId, 'audit', page],
     queryFn: () => financeGet<FinanceAudit[]>(`/finance/admin/audit?page=${page}`),
@@ -145,15 +164,17 @@ export default function AdminFinancePage() {
     }
   };
   const list =
-    tab === 'banks'
-      ? banks
-      : tab === 'withdrawals'
-        ? withdrawals
-        : tab === 'receipts'
-          ? receipts
-          : tab === 'audit'
-            ? audit
-            : tickets;
+    tab === 'checkout-review'
+      ? checkoutReviews
+      : tab === 'banks'
+        ? banks
+        : tab === 'withdrawals'
+          ? withdrawals
+          : tab === 'receipts'
+            ? receipts
+            : tab === 'audit'
+              ? audit
+              : tickets;
   return (
     <div className="min-h-screen bg-slate-50">
       <AppHeader />
@@ -176,6 +197,7 @@ export default function AdminFinancePage() {
             ['withdrawals', 'Chi trả công nợ'],
             ['tickets', 'Ticket bảo trì'],
             ['receipts', 'Đối soát tiền vào'],
+            ['checkout-review', 'Đối soát gói và checkout'],
             ['audit', 'Nhật ký vận hành'],
           ].map(([key, label]) => (
             <button
@@ -338,6 +360,32 @@ export default function AdminFinancePage() {
               </p>
             </button>
           ))}
+        {tab === 'checkout-review' && (
+          <>
+            <Notice>
+              Đối soát các giao dịch có kết quả tạo đơn chưa rõ, tiền không khớp hoặc kích hoạt đang
+              thử lại. Không yêu cầu khách trả thêm khi đã ghi nhận tiền.
+            </Notice>
+            {checkoutReviews.data?.map((o, index) => (
+              <article
+                key={`${o.id}:${index}`}
+                className="rounded-2xl border border-slate-200 bg-white p-5"
+              >
+                <p className="font-semibold">
+                  {money(o.amount)} · {o.purpose} · {o.environment}
+                </p>
+                <p>
+                  {o.status} · {o.fulfillmentStatus}
+                  {o.recommendationStatus === 'RETRY' ? ' · Gợi ý freelancer đang thử lại' : ''}
+                </p>
+                <p className="break-all text-sm">
+                  Mã checkout: {o.id} · Mã giao dịch: {o.providerReference || 'Chưa có'}
+                </p>
+                {o.receivedAmount != null && <p>Đã nhận: {money(o.receivedAmount)}</p>}
+              </article>
+            ))}
+          </>
+        )}
         {tab === 'receipts' && (
           <Notice>
             Khoản cần rà soát được giữ riêng trong sổ cái, chưa tạo công nợ có thể rút. Đối chiếu

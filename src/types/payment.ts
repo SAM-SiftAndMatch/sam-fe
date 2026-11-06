@@ -13,10 +13,7 @@ export interface CreateEscrowRequest {
   returnUrl?: string;
 }
 
-export interface ConfirmFundingRequest {
-  txnRef?: string | null;
-  amountVnd?: number | null;
-}
+export type ConfirmFundingRequest = Record<string, never>;
 
 export interface PaymentResponse {
   paymentId: string;
@@ -29,7 +26,7 @@ export interface PaymentResponse {
   checkoutUrl?: string;
   provider?: string;
   environment?: string;
-  vnpayUrl?: string | null;
+  orderId?: string | null;
   escrowHeldAt?: string | null;
   releasedAt?: string | null;
 }

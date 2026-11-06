@@ -20,7 +20,7 @@ export const PATH_CLIENT_DRAFTS = '/client/projects/drafts';
 export const PATH_CLIENT_PROJECT_DETAIL = '/client/projects/:id';
 export const PATH_CLIENT_ADDON_RETURN = '/client/projects/:id/addon-return';
 export const PATH_CLIENT_PAYMENT = '/client/payment/:contractId';
-export const PATH_CLIENT_PAYMENT_RETURN = '/client/payment/vnpay-return';
+export const PATH_PAYMENT_RETURN = '/payment/return';
 export const PATH_CLIENT_FIND_FREELANCER = '/client/freelancers';
 export const PATH_CLIENT_PROFILE = '/client/profile';
 

@@ -31,9 +31,10 @@ import ClientProjectDetailPage from '../pages/ClientProjectDetailPage';
 import ClientProjectListPage from '../pages/ClientProjectListPage';
 import ConfirmProjectPage from '../pages/ConfirmProjectPage';
 import JobAddonReturnPage from '../pages/JobAddonReturnPage';
+import PaymentHistoryPage from '../pages/PaymentHistoryPage';
+import PaymentReturnPage from '../pages/PaymentReturnPage';
 import PostProjectPage from '../pages/PostProjectPage';
 import SuccessProjectPage from '../pages/SuccessProjectPage';
-import VnpayReturnPage from '../pages/VnpayReturnPage';
 
 import FreelancerPage from '../pages/FreelancerPage';
 import FreelancerPricingPage from '../pages/FreelancerPricingPage';
@@ -90,6 +91,7 @@ const AppRoutes = () => {
       </Route>
 
       {/* Public routes */}
+      <Route path={paths.PATH_PAYMENT_RETURN} element={<PaymentReturnPage />} />
       <Route path={paths.PATH_HOME} element={<RootRoute />} />
       <Route path={paths.PATH_HOME_ALT} element={<RootRoute />} />
       <Route path={paths.PATH_GOOGLE_AUTH_RETURN} element={<GoogleAuthReturnPage />} />
@@ -145,8 +147,8 @@ const AppRoutes = () => {
       </Route>
       {/* Authenticated routes (any role) */}
       <Route element={<AuthGuard />}>
+        <Route path="/payments/history" element={<PaymentHistoryPage />} />
         {/* Both contract funding and freelancer deposits return to this legacy URL. */}
-        <Route path={paths.PATH_CLIENT_PAYMENT_RETURN} element={<VnpayReturnPage />} />
         <Route path={paths.PATH_GOOGLE_AUTH_LINK} element={<GoogleLinkPendingPage />} />
         <Route path={paths.PATH_GOOGLE_AUTH_CONNECT} element={<GoogleConnectPage />} />
         <Route path={paths.PATH_NOTIFICATIONS} element={<NotificationsPage />} />

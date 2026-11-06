@@ -141,7 +141,7 @@ function renderReturn(role, isAuthenticated = true, isLoading = false) {
   return renderToStaticMarkup(
     React.createElement(
       StaticRouter,
-      { location: '/client/payment/vnpay-return' },
+      { location: '/payment/return' },
       React.createElement(routes.default)
     )
   );
@@ -149,10 +149,9 @@ function renderReturn(role, isAuthenticated = true, isLoading = false) {
 
 for (const role of ['CLIENT', 'FREELANCER']) {
   test(`the actual return route accepts authenticated ${role}`, () => {
-    assert.match(renderReturn(role), /VnpayReturnPage/);
+    assert.match(renderReturn(role), /PaymentReturnPage/);
   });
 }
-test('the return route waits for cookie restoration and still protects expired sessions', () => {
-  assert.match(renderReturn(null, false, true), /RESTORING_SESSION/);
-  assert.doesNotMatch(renderReturn(null, false), /VnpayReturnPage/);
+test('payment return is reachable from the mobile browser without a web session', () => {
+  assert.match(renderReturn(null, false), /PaymentReturnPage/);
 });

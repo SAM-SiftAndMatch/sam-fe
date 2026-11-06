@@ -1,6 +1,8 @@
+import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import PaginationNav from '../../../components/PaginationNav';
 import { usePageSearchParam } from '../../../hooks/usePageSearchParam';
+import { checkoutMessage } from '../../../lib/checkout';
 import type { UserSubscriptionResponse } from '../../../types/subscription';
 import { useMySubscriptionsPage } from '../hooks/useSubscriptions';
 import { PACKAGE_META } from '../packages';
@@ -26,7 +28,8 @@ function PackageRow({ sub }: { sub: UserSubscriptionResponse }) {
       <div>
         <div className="font-bold text-sm text-gray-900">{meta?.name || 'Gói dịch vụ'}</div>
         <div className="text-xs text-gray-500">
-          {meta?.price || ''} · Hạn dùng: {formatDateTime(sub.endDate)}
+          {sub.checkout ? `${new Intl.NumberFormat('vi-VN').format(sub.checkout.amount)} đ` : ''} ·
+          Hạn dùng: {sub.status === 'PENDING' ? 'Chưa kích hoạt' : formatDateTime(sub.endDate)}
           {sub.targetProjectId
             ? ` · Dự án SAM-${sub.targetProjectId.slice(0, 8).toUpperCase()}`
             : ''}
@@ -35,8 +38,20 @@ function PackageRow({ sub }: { sub: UserSubscriptionResponse }) {
       <span
         className={`text-[11px] font-bold px-3 py-1 rounded-full border shrink-0 ${badge.className}`}
       >
-        {badge.text}
+        {sub.checkout
+          ? checkoutMessage(sub.checkout)
+          : sub.environment === 'LEGACY'
+            ? 'Lịch sử cổng thanh toán cũ'
+            : badge.text}
       </span>
+      {sub.checkout && (
+        <Link
+          className="text-sm text-blue-700"
+          to={`/payment/return?orderId=${sub.checkout.orderId}`}
+        >
+          Xem giao dịch
+        </Link>
+      )}
     </div>
   );
 }
