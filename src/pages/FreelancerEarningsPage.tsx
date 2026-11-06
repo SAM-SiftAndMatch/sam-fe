@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowUpRight, Clock3, Landmark, LockKeyhole, Wallet } from 'lucide-react';
-import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   type Withdrawal,
   dateTime,
@@ -9,10 +9,12 @@ import {
   financeError,
   financeGet,
   financePost,
+  financePut,
   money,
   statusLabel,
 } from '../api/finance';
 import AppHeader from '../components/AppHeader';
+import BankSetupNotice from '../components/finance/BankSetupNotice';
 import {
   Field,
   Modal,
@@ -21,12 +23,15 @@ import {
   primaryClass,
   secondaryClass,
 } from '../components/finance/FinanceUI';
+import IncomeOverview from '../components/finance/IncomeOverview';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export default function FreelancerEarningsPage() {
   const userId = useAuthStore((s) => s.user?.userId);
   const cache = useQueryClient();
-  const [tab, setTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [tab, setTab] = useState(searchParams.get('tab') === 'banks' ? 'banks' : 'income');
+  const [editingBank, setEditingBank] = useState<string | null>(null);
   const [modal, setModal] = useState<'bank' | 'withdraw' | 'disable' | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -60,6 +65,9 @@ export default function FreelancerEarningsPage() {
   const open = (kind: 'bank' | 'withdraw' | 'disable') => {
     setError('');
     setPassword('');
+    setNumber('');
+    setHolder('');
+    setEditingBank(null);
     setModal(kind);
     if (kind === 'withdraw') {
       setBankId('');
@@ -69,6 +77,7 @@ export default function FreelancerEarningsPage() {
   };
   const close = () => {
     setModal(null);
+    setEditingBank(null);
     setPassword('');
     setNumber('');
     setHolder('');
@@ -80,12 +89,15 @@ export default function FreelancerEarningsPage() {
     setError('');
     try {
       if (modal === 'bank')
-        await financePost('/finance/bank-accounts', {
-          bankCode,
-          accountNumber: number,
-          accountHolder: holder,
-          password,
-        });
+        await (editingBank ? financePut : financePost)(
+          editingBank ? `/finance/bank-accounts/${editingBank}` : '/finance/bank-accounts',
+          {
+            bankCode,
+            accountNumber: number,
+            accountHolder: holder,
+            password,
+          }
+        );
       else if (modal === 'disable')
         await financePost(`/finance/bank-accounts/${bankId}/disable`, { password });
       else
@@ -99,7 +111,7 @@ export default function FreelancerEarningsPage() {
         modal === 'disable'
           ? 'Đã ngừng sử dụng tài khoản nhận tiền.'
           : modal === 'bank'
-            ? 'Đã thêm tài khoản. Bạn có thể rút tiền sau khi tài khoản được xác minh.'
+            ? 'Đã lưu tài khoản nhận tiền. Thông tin thay đổi cần được xác minh trước khi dùng để rút.'
             : 'Đã tạo yêu cầu rút. Số tiền được giữ riêng để chờ duyệt, chưa chuyển về ngân hàng.'
       );
       close();
@@ -118,6 +130,22 @@ export default function FreelancerEarningsPage() {
       setNotice(financeError(cause));
     }
   };
+  const bankAction = searchParams.get('action');
+  const bankTab = searchParams.get('tab');
+  useEffect(() => {
+    if (bankTab === 'banks') setTab('banks');
+    if (bankAction === 'add-bank') {
+      setModal('bank');
+      setEditingBank(null);
+      setNumber('');
+      setHolder('');
+      setPassword('');
+      setError('');
+      const next = new URLSearchParams(searchParams);
+      next.delete('action');
+      setSearchParams(next, { replace: true });
+    }
+  }, [bankAction, bankTab, searchParams, setSearchParams]);
   const data = wallet.data;
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -126,7 +154,7 @@ export default function FreelancerEarningsPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold tracking-widest text-blue-700">TÀI CHÍNH CỦA BẠN</p>
-            <h1 className="mt-2 text-3xl font-bold">Thu nhập & công nợ</h1>
+            <h1 className="mt-2 text-3xl font-bold">Thu nhập & thanh toán</h1>
             <p className="mt-2 max-w-2xl text-sm text-slate-500">
               Theo dõi tiền theo từng dự án, tài khoản nhận tiền và tiến trình chi trả.
             </p>
@@ -145,14 +173,19 @@ export default function FreelancerEarningsPage() {
             Yêu cầu rút tiền
           </button>
         </div>
-        <div className="my-6 flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950">
-          <LockKeyhole size={20} className="mt-0.5 shrink-0" />
-          <p>
-            Tiền được ghi công nợ ngay sau nghiệm thu. Bạn chỉ có thể rút sau{' '}
-            <strong>7 ngày bảo trì</strong> và khi các ticket liên quan đã được giải quyết. Hoàn cọc
-            được theo dõi riêng với thù lao.
-          </p>
+        <div className="mt-6">
+          <BankSetupNotice />
         </div>
+        {tab !== 'income' && (
+          <div className="my-6 flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950">
+            <LockKeyhole size={20} className="mt-0.5 shrink-0" />
+            <p>
+              Tiền được ghi công nợ ngay sau nghiệm thu. Bạn chỉ có thể rút sau{' '}
+              <strong>7 ngày bảo trì</strong> và khi các ticket liên quan đã được giải quyết. Hoàn
+              cọc được theo dõi riêng với thù lao.
+            </p>
+          </div>
+        )}
         {notice && (
           <div className="mb-4">
             <Notice>{notice}</Notice>
@@ -166,59 +199,61 @@ export default function FreelancerEarningsPage() {
             </button>
           </Notice>
         )}
-        {wallet.isPending ? (
-          <p className="py-8 text-slate-500">Đang tải công nợ…</p>
-        ) : (
-          data && (
-            <>
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {[
-                  ['Khả dụng', data.availableBalance, Wallet],
-                  ['Chờ hết hạn bảo trì', data.pendingBalance, Clock3],
-                  ['Đang giữ do ticket', data.heldBalance, LockKeyhole],
-                  ['Đang chờ chi trả', data.reservedBalance, Landmark],
-                ].map(([label, value, Icon]) => {
-                  const StatIcon = Icon as typeof Wallet;
-                  return (
-                    <div
-                      key={String(label)}
-                      className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
-                    >
-                      <StatIcon size={18} className="mb-4 text-blue-700" />
-                      <p className="text-xs text-slate-500">{String(label)}</p>
-                      <p className="mt-1 text-xl font-bold">{money(Number(value))}</p>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500">
-                <span>
-                  Giá trị hợp đồng đang ký quỹ: <strong>{money(data.escrowGross)}</strong>
-                </span>
-                <span>
-                  Cọc đang giữ: <strong>{money(data.lockedDeposit)}</strong>
-                </span>
-                <span>
-                  Đã chuyển ngân hàng: <strong>{money(data.paidTotal)}</strong>
-                </span>
-              </div>
-              {data.sandboxBalance > 0 && (
-                <p className="mt-3 text-xs text-slate-500">
-                  Số dư mô phỏng: {money(data.sandboxBalance)}. Khoản này không được rút thành tiền
-                  thật.
-                </p>
-              )}
-              {!data.withdrawalsEnabled && (
-                <p className="mt-3 text-sm text-slate-500">
-                  Chi trả ngân hàng chưa được mở. Công nợ và lịch sử vẫn được lưu đầy đủ.
-                </p>
-              )}
-            </>
-          )
-        )}
+        {tab !== 'income' &&
+          (wallet.isPending ? (
+            <p className="py-8 text-slate-500">Đang tải công nợ…</p>
+          ) : (
+            data && (
+              <>
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  {[
+                    ['Khả dụng', data.availableBalance, Wallet],
+                    ['Chờ hết hạn bảo trì', data.pendingBalance, Clock3],
+                    ['Đang giữ do ticket', data.heldBalance, LockKeyhole],
+                    ['Đang chờ chi trả', data.reservedBalance, Landmark],
+                  ].map(([label, value, Icon]) => {
+                    const StatIcon = Icon as typeof Wallet;
+                    return (
+                      <div
+                        key={String(label)}
+                        className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+                      >
+                        <StatIcon size={18} className="mb-4 text-blue-700" />
+                        <p className="text-xs text-slate-500">{String(label)}</p>
+                        <p className="mt-1 text-xl font-bold">{money(Number(value))}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500">
+                  <span>
+                    Giá trị hợp đồng đang ký quỹ: <strong>{money(data.escrowGross)}</strong>
+                  </span>
+                  <span>
+                    Cọc đang giữ: <strong>{money(data.lockedDeposit)}</strong>
+                  </span>
+                  <span>
+                    Đã chuyển ngân hàng: <strong>{money(data.paidTotal)}</strong>
+                  </span>
+                </div>
+                {data.sandboxBalance > 0 && (
+                  <p className="mt-3 text-xs text-slate-500">
+                    Số dư mô phỏng: {money(data.sandboxBalance)}. Khoản này không được rút thành
+                    tiền thật.
+                  </p>
+                )}
+                {!data.withdrawalsEnabled && (
+                  <p className="mt-3 text-sm text-slate-500">
+                    Chi trả ngân hàng chưa được mở. Công nợ và lịch sử vẫn được lưu đầy đủ.
+                  </p>
+                )}
+              </>
+            )
+          ))}
         <div className="my-6 flex gap-2 overflow-x-auto border-b border-slate-200 pb-3">
           {[
-            ['overview', 'Theo dự án'],
+            ['income', 'Thu nhập'],
+            ['overview', 'Số dư theo dự án'],
             ['banks', 'Tài khoản nhận tiền'],
             ['withdrawals', 'Yêu cầu rút'],
             ['history', 'Lịch sử giao dịch'],
@@ -237,6 +272,7 @@ export default function FreelancerEarningsPage() {
             </button>
           ))}
         </div>
+        {tab === 'income' && <IncomeOverview />}
         {tab === 'overview' && (
           <div className="space-y-3">
             {data?.payables.length === 0 && (
@@ -287,8 +323,8 @@ export default function FreelancerEarningsPage() {
           <div>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm text-slate-500">
-                Thông tin được mã hóa khi lưu. Thay người nhận bằng cách thêm tài khoản mới để xác
-                minh.
+                Thông tin được mã hóa khi lưu. Cập nhật sẽ lưu phiên bản mới và gửi xác minh lại;
+                lệnh chi cũ giữ nguyên người nhận.
               </p>
               <button type="button" className={secondaryClass} onClick={() => open('bank')}>
                 Thêm tài khoản
@@ -312,12 +348,13 @@ export default function FreelancerEarningsPage() {
                       onClick={() => {
                         open('bank');
                         setBankCode(bank.bankCode);
+                        setEditingBank(bank.id);
                         setNotice(
-                          'Để thay tài khoản, hãy thêm thông tin mới. Tài khoản đang dùng vẫn giữ nguyên cho yêu cầu đã tạo.'
+                          'Nhập lại đầy đủ thông tin ngân hàng. Nếu đang có lệnh chi chưa kết thúc, hãy dùng Thêm tài khoản để giữ an toàn cho lệnh cũ.'
                         );
                       }}
                     >
-                      Thay tài khoản nhận tiền
+                      Cập nhật tài khoản
                     </button>
                   )}
                   {bank.status !== 'DISABLED' && (
@@ -413,7 +450,9 @@ export default function FreelancerEarningsPage() {
           <Modal
             title={
               modal === 'bank'
-                ? 'Thêm tài khoản nhận tiền'
+                ? editingBank
+                  ? 'Cập nhật tài khoản nhận tiền'
+                  : 'Thêm tài khoản nhận tiền'
                 : modal === 'disable'
                   ? 'Ngừng sử dụng tài khoản'
                   : 'Yêu cầu rút tiền'
