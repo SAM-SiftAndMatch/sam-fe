@@ -10,7 +10,7 @@ import { PATH_FREELANCER_PROJECTS } from '../routes/paths';
 const PROJECTS_DATA: Record<string, any> = {
   fp1: {
     id: 'fp1',
-    title: 'Phát triển module thanh toán VNPay cho Website Next.js',
+    title: 'Phát triển module thanh toán Pay2S cho Website Next.js',
     clientName: 'Công ty ABC Tech',
     clientAvatar:
       'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=100&q=80',
@@ -20,7 +20,7 @@ const PROJECTS_DATA: Record<string, any> = {
     startedAt: '01/07/2024',
     progress: 65,
     description:
-      'Tích hợp cổng thanh toán VNPay vào hệ thống E-commerce hiện có bằng Next.js và Node.js. Yêu cầu xử lý an toàn các giao dịch, quản lý callback/webhook từ VNPay.',
+      'Tích hợp cổng thanh toán Pay2S vào hệ thống E-commerce hiện có bằng Next.js và Node.js. Yêu cầu xử lý an toàn các giao dịch, quản lý callback/webhook từ Pay2S.',
     skills: ['Next.js', 'Node.js', 'API Integration', 'TypeScript'],
     contractCode: 'SAM-HD-2024-001',
   },

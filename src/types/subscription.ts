@@ -1,4 +1,4 @@
-export type SubscriptionStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
+export type SubscriptionStatus = 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
 
 export interface PurchaseSubscriptionRequest {
   packageId: string;
@@ -13,5 +13,7 @@ export interface UserSubscriptionResponse {
   startDate: string;
   endDate?: string | null;
   targetProjectId?: string | null;
-  vnpayUrl?: string | null;
+  checkout?: import('../lib/checkout').Checkout | null;
+  environment: string;
+  entitled: boolean;
 }

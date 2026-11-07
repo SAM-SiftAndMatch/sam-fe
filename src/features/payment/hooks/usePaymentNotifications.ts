@@ -1,6 +1,6 @@
-import { Client } from '@stomp/stompjs';
 import { useEffect, useRef } from 'react';
 import SockJS from 'sockjs-client';
+import { createAuthenticatedStompClient } from '../../../lib/authenticated-stomp';
 import { useAuthStore } from '../../../stores/useAuthStore';
 
 export interface PaymentNotification {
@@ -27,7 +27,7 @@ export function usePaymentNotifications(
 
   useEffect(() => {
     if (!isAuthenticated || !userId || !contractId) return;
-    const client = new Client({
+    const client = createAuthenticatedStompClient({
       webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL}/ws`) as WebSocket,
       reconnectDelay: 5000,
     });

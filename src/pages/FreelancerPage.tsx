@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import { profileApi } from '../api/profile';
 import AppHeader from '../components/AppHeader';
+import BankSetupNotice from '../components/finance/BankSetupNotice';
+import IncomeOverview from '../components/finance/IncomeOverview';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
 import { PrimaryButton, SecondaryButton } from '../components/landing/LandingButtons';
 import LandingFooter from '../components/landing/LandingFooter';
@@ -111,6 +113,9 @@ const FreelancerPage: React.FC = () => {
                 nhất cho bạn.
               </p>
             </div>
+
+            <BankSetupNotice />
+            <IncomeOverview compact />
 
             {/* Profile Card View */}
             {isLoadingProfile ? (

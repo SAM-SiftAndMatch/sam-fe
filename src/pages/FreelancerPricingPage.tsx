@@ -3,6 +3,7 @@ import {
   useMySubscriptions,
   usePurchasePackage,
 } from '@/features/subscription';
+import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
@@ -11,18 +12,31 @@ import { PrimaryButton, SecondaryButton } from '../components/landing/LandingBut
 import LandingFooter from '../components/landing/LandingFooter';
 import LandingNavbar from '../components/landing/LandingNavbar';
 import ScrollReveal from '../components/landing/ScrollReveal';
+import { requireApiResult } from '../lib/api-error';
+import apiClient from '../lib/axios';
+import { beginCheckout } from '../lib/checkout';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
+import type { ApiResponse } from '../types/api';
 
 const FreelancerPricingPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
   const { subscriptions, refetch } = useMySubscriptions();
+  const catalog = useQuery({
+    queryKey: ['package-catalog', user?.userId],
+    queryFn: async () =>
+      requireApiResult(
+        (await apiClient.get<ApiResponse<{ id: string; price: number }[]>>('/packages')).data,
+        'Không tải được bảng giá'
+      ),
+    enabled: isAuthenticated,
+    refetchOnWindowFocus: true,
+  });
+  const catalogPrice = catalog.data?.find((p) => p.id === PACKAGE_PRO_DEV_ID)?.price;
   const { purchase, purchasingId, error, successMessage } = usePurchasePackage();
 
-  const ownsProDev = subscriptions.some(
-    (s) => s.packageId === PACKAGE_PRO_DEV_ID && s.status === 'ACTIVE'
-  );
+  const ownsProDev = subscriptions.some((s) => s.packageId === PACKAGE_PRO_DEV_ID && s.entitled);
 
   const handlePurchase = async () => {
     if (!isAuthenticated) {
@@ -34,9 +48,8 @@ const FreelancerPricingPage: React.FC = () => {
       return;
     }
     const result = await purchase(PACKAGE_PRO_DEV_ID);
-    if (result?.vnpayUrl) {
-      localStorage.setItem('SAM_PENDING_SUBSCRIPTION', result.id);
-      window.location.href = result.vnpayUrl;
+    if (result?.checkout) {
+      beginCheckout(result.checkout, '/freelancer/pricing');
       return;
     }
     if (result) {
@@ -141,7 +154,9 @@ const FreelancerPricingPage: React.FC = () => {
 
                 <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-slate-100">
                   <span className="text-4xl sm:text-5xl font-extrabold text-[#1D4ED8] leading-none">
-                    149.000đ
+                    {catalogPrice != null
+                      ? `${new Intl.NumberFormat('vi-VN').format(catalogPrice)}đ`
+                      : 'Xem giá khi đăng nhập'}
                   </span>
                   <span className="text-xs text-slate-500">/tháng</span>
                 </div>

@@ -175,7 +175,7 @@ const FreelancerProjectListPage: React.FC = () => {
             </div>
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
-                Ví thử nghiệm
+                Công nợ khả dụng
               </p>
               <p className="text-xl font-extrabold text-gray-900">
                 {formatCurrency(wallet?.availableBalance ?? 0)}

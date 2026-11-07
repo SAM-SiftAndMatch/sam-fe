@@ -1,9 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { subscriptionApi } from '../../../api/subscription';
 import { useAuthStore } from '../../../stores/useAuthStore';
-import type { PageResult } from '../../../types/api';
-import type { UserSubscriptionResponse } from '../../../types/subscription';
 
 function toMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
@@ -15,58 +14,37 @@ function toMessage(error: unknown, fallback: string): string {
 }
 
 export function useMySubscriptions() {
-  const { isAuthenticated } = useAuthStore();
-  const [subscriptions, setSubscriptions] = useState<UserSubscriptionResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    if (!isAuthenticated) {
-      setSubscriptions([]);
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
-    try {
-      setSubscriptions(await subscriptionApi.mySubscriptions());
-    } catch (e) {
-      setError(toMessage(e, 'Không tải được danh sách gói dịch vụ'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  return { subscriptions, isLoading, error, refetch: load };
+  const { user, isAuthenticated } = useAuthStore();
+  const enabled = Boolean(user?.userId && isAuthenticated);
+  const query = useQuery({
+    queryKey: ['subscriptions', user?.userId],
+    queryFn: subscriptionApi.mySubscriptions,
+    enabled,
+    refetchOnWindowFocus: true,
+  });
+  return {
+    subscriptions: query.data ?? [],
+    isLoading: enabled && query.isPending,
+    error: query.isError ? toMessage(query.error, 'Không tải được danh sách gói dịch vụ') : null,
+    refetch: query.refetch,
+  };
 }
 
 export function useMySubscriptionsPage(page: number) {
-  const { isAuthenticated } = useAuthStore();
-  const [result, setResult] = useState<PageResult<UserSubscriptionResponse> | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const load = useCallback(async () => {
-    if (!isAuthenticated) {
-      setResult(null);
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
-    try {
-      setResult(await subscriptionApi.mySubscriptionsPage(page));
-    } catch (e) {
-      setError(toMessage(e, 'Không tải được danh sách gói dịch vụ'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated, page]);
-  useEffect(() => {
-    void load();
-  }, [load]);
-  return { result, isLoading, error, refetch: load };
+  const { user, isAuthenticated } = useAuthStore();
+  const enabled = Boolean(user?.userId && isAuthenticated);
+  const query = useQuery({
+    queryKey: ['subscriptions-page', user?.userId, page],
+    queryFn: () => subscriptionApi.mySubscriptionsPage(page),
+    enabled,
+    refetchOnWindowFocus: true,
+  });
+  return {
+    result: query.data ?? null,
+    isLoading: enabled && query.isPending,
+    error: query.isError ? toMessage(query.error, 'Không tải được gói dịch vụ') : null,
+    refetch: query.refetch,
+  };
 }
 
 export function usePurchasePackage() {
@@ -79,14 +57,13 @@ export function usePurchasePackage() {
     setError(null);
     setSuccessMessage(null);
     try {
-      const returnUrl = `${window.location.origin}/client/payment/vnpay-return`;
+      const returnUrl = `${window.location.origin}/payment/return`;
       const result = await subscriptionApi.purchase({
         packageId,
         projectId: projectId ?? null,
         returnUrl,
       });
-      // Có vnpayUrl = phải sang VNPay thanh toán (page tự redirect), chưa kích hoạt nên không báo thành công.
-      if (!result.vnpayUrl) {
+      if (result.entitled) {
         setSuccessMessage('Mua gói thành công! Gói đã được kích hoạt.');
       }
       return result;
