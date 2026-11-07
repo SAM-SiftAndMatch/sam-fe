@@ -1,6 +1,7 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
 import type { ApiResponse } from '../types/api';
 import type { AuthResponse } from '../types/auth';
+import { observePaymentResult, paymentRequestKey, paymentScope } from './payment-idempotency';
 import { tokenManager } from './token-manager';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}/api/v1`;
@@ -38,6 +39,10 @@ apiClient.interceptors.request.use(
     const token = tokenManager.getToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
+      const owner = tokenManager.decodePayload(token)?.user_id;
+      const scope = paymentScope(config.url || '', config.method || 'GET', config.data);
+      if (owner && scope && !config.headers['Idempotency-Key'])
+        config.headers['Idempotency-Key'] = paymentRequestKey(owner, scope);
     }
     return config;
   },
@@ -50,6 +55,18 @@ apiClient.interceptors.response.use(
     const scoped = response.config as InternalAxiosRequestConfig & { _samSessionEpoch?: number };
     if (scoped._samSessionEpoch !== tokenManager.getSessionEpoch())
       return Promise.reject(new Error('Phiên đăng nhập đã thay đổi.'));
+    const owner = tokenManager.decodePayload(tokenManager.getToken() || '')?.user_id;
+    if (owner)
+      observePaymentResult(
+        owner,
+        paymentScope(
+          response.config.url || '',
+          response.config.method || 'GET',
+          response.config.data
+        ),
+        response.config.headers?.['Idempotency-Key'] as string | undefined,
+        response.data?.result
+      );
     return response;
   },
   async (error) => {

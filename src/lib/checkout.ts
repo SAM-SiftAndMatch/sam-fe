@@ -11,6 +11,8 @@ export interface Checkout {
   fulfillmentStatus: 'NONE' | 'PENDING' | 'RETRY' | 'APPLIED' | 'REVIEW';
   checkoutUrl?: string | null;
   transferContent: string;
+  supportCode?: string;
+  reviewRequired?: boolean;
   expiresAt: string;
   createdAt?: string;
   paidAt?: string | null;

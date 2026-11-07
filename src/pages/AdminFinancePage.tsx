@@ -23,6 +23,7 @@ import {
   secondaryClass,
 } from '../components/finance/FinanceUI';
 import MaintenancePanel from '../components/finance/MaintenancePanel';
+import PaymentCasesPanel from '../components/finance/PaymentCasesPanel';
 import { useAuthStore } from '../stores/useAuthStore';
 
 interface FinanceReceipt {
@@ -198,6 +199,7 @@ export default function AdminFinancePage() {
             ['tickets', 'Ticket bảo trì'],
             ['receipts', 'Đối soát tiền vào'],
             ['checkout-review', 'Đối soát gói và checkout'],
+            ['payment-cases', 'Hồ sơ sự cố thanh toán'],
             ['audit', 'Nhật ký vận hành'],
           ].map(([key, label]) => (
             <button
@@ -214,7 +216,7 @@ export default function AdminFinancePage() {
             </button>
           ))}
         </div>
-        {list.isError && (
+        {tab !== 'payment-cases' && list.isError && (
           <Notice error>
             Không tải được dữ liệu.{' '}
             <button type="button" onClick={() => void list.refetch()} className="underline">
@@ -222,8 +224,11 @@ export default function AdminFinancePage() {
             </button>
           </Notice>
         )}
-        {list.isPending && <p className="text-slate-500">Đang tải…</p>}
-        {list.data?.length === 0 && <Notice>Chưa có mục nào trong danh sách.</Notice>}
+        {tab !== 'payment-cases' && list.isPending && <p className="text-slate-500">Đang tải…</p>}
+        {tab !== 'payment-cases' && list.data?.length === 0 && (
+          <Notice>Chưa có mục nào trong danh sách.</Notice>
+        )}
+        {tab === 'payment-cases' && <PaymentCasesPanel owner={user.userId} />}
         {tab === 'banks' &&
           banks.data?.map((bank) => (
             <div

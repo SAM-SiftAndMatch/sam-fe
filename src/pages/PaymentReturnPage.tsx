@@ -4,7 +4,12 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { checkoutApi } from '../api/checkout';
 import AppHeader from '../components/AppHeader';
 import LoadingScreen from '../components/LoadingScreen';
-import { checkoutId, checkoutMessage, safePaymentDestination } from '../lib/checkout';
+import {
+  beginCheckout,
+  checkoutId,
+  checkoutMessage,
+  safePaymentDestination,
+} from '../lib/checkout';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export default function PaymentReturnPage() {
@@ -79,8 +84,29 @@ export default function PaymentReturnPage() {
               </p>
               {order && (
                 <p className="mt-3 text-sm text-slate-500">
-                  Nội dung chuyển khoản: {order.transferContent}
+                  Mã hỗ trợ: {order.supportCode || order.orderId}
+                  {order.paymentStatus === 'PENDING' && (
+                    <>
+                      <br />
+                      Nội dung chuyển khoản: {order.transferContent}
+                    </>
+                  )}
                 </p>
+              )}
+              {order?.reviewRequired && (
+                <p className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
+                  SAM đang kiểm tra đơn này. Nếu đã chuyển tiền, bạn không cần thanh toán lại. Khi
+                  liên hệ hỗ trợ, cung cấp mã đơn phía trên.
+                </p>
+              )}
+              {order?.paymentStatus === 'PENDING' && order.checkoutUrl && (
+                <button
+                  type="button"
+                  className="mt-5 rounded-xl bg-blue-700 px-5 py-3 text-white"
+                  onClick={() => beginCheckout(order, safePaymentDestination(context.returnTo))}
+                >
+                  Tiếp tục thanh toán
+                </button>
               )}
               {result.isError && (
                 <p role="alert" className="mt-4 text-red-700">
