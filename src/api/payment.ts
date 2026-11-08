@@ -11,7 +11,7 @@ import type {
 } from '../types/payment';
 
 export const paymentApi = {
-  // Client nạp 100% giá trị hợp đồng (trả về vnpayUrl để redirect)
+  // Client nạp 100% giá trị hợp đồng (trả về checkoutUrl để redirect)
   createFund: async (data: CreateEscrowRequest): Promise<PaymentResponse> => {
     const res = await apiClient.post<ApiResponse<PaymentResponse>>('/payments/fund', data);
     return requireApiResult(res.data, 'Failed to create fund payment');
@@ -28,7 +28,7 @@ export const paymentApi = {
     return requireApiResult(res.data, 'Failed to fetch funding status');
   },
 
-  // FE tự báo đã chuyển sau redirect VNPay (giống confirm-payment của mua gói)
+  // Read-only compatibility endpoint; only verified provider IPN can confirm funding.
   confirmPayment: async (
     paymentId: string,
     data: ConfirmFundingRequest

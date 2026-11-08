@@ -1,4 +1,4 @@
-import { Client } from '@stomp/stompjs';
+import type { Client } from '@stomp/stompjs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -9,6 +9,8 @@ import type { ContractBroadcast } from '../api/contract';
 import { type WorkspaceSummary, workspaceApi } from '../api/workspace';
 import AppHeader from '../components/AppHeader';
 import { getJobStatusAppearance } from '../components/JobStatusBadge';
+import MaintenancePanel from '../components/finance/MaintenancePanel';
+import { createAuthenticatedStompClient } from '../lib/authenticated-stomp';
 import { useAuthStore } from '../stores/useAuthStore';
 import { type MessagePages, appendConfirmedMessage, workspaceKeys } from './workspace-query';
 
@@ -61,7 +63,7 @@ export default function WorkspaceLayout() {
 
   useEffect(() => {
     if (!roomId || !jobId || !userId) return;
-    const client = new Client({
+    const client = createAuthenticatedStompClient({
       webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL}/ws`) as WebSocket,
       reconnectDelay: 5000,
     });
@@ -266,7 +268,16 @@ export default function WorkspaceLayout() {
               </section>
             }
           >
-            <Outlet context={context} />
+            <section className="flex min-h-0 min-w-0 flex-1 flex-col">
+              <MaintenancePanel
+                jobId={context.summary.jobId}
+                completed={context.summary.jobStatus === 'COMPLETED'}
+                viewerRole={context.role}
+              />
+              <div className="flex min-h-0 flex-1">
+                <Outlet context={context} />
+              </div>
+            </section>
           </Suspense>
         ) : (
           <section className="flex-1 rounded-[32px] bg-white p-8 text-sm text-gray-500">

@@ -31,9 +31,10 @@ import ClientProjectDetailPage from '../pages/ClientProjectDetailPage';
 import ClientProjectListPage from '../pages/ClientProjectListPage';
 import ConfirmProjectPage from '../pages/ConfirmProjectPage';
 import JobAddonReturnPage from '../pages/JobAddonReturnPage';
+import PaymentHistoryPage from '../pages/PaymentHistoryPage';
+import PaymentReturnPage from '../pages/PaymentReturnPage';
 import PostProjectPage from '../pages/PostProjectPage';
 import SuccessProjectPage from '../pages/SuccessProjectPage';
-import VnpayReturnPage from '../pages/VnpayReturnPage';
 
 import FreelancerPage from '../pages/FreelancerPage';
 import FreelancerPricingPage from '../pages/FreelancerPricingPage';
@@ -53,6 +54,7 @@ import NotificationsPage from '../pages/NotificationsPage';
 import SuccessApplicationPage from '../pages/SuccessApplicationPage';
 import WorkspacesPage from '../pages/WorkspacesPage';
 
+const AdminFinancePage = lazy(() => import('../pages/AdminFinancePage'));
 const WorkspaceLayout = lazy(() => import('../pages/WorkspaceLayout'));
 const WorkspaceChatView = lazy(() => import('../pages/WorkspaceChatView'));
 const WorkspaceTimelineView = lazy(() => import('../pages/WorkspaceTimelineView'));
@@ -65,6 +67,7 @@ const RootRoute: React.FC = () => {
   }
 
   if (isAuthenticated) {
+    if (user?.role === 'ADMIN') return <Navigate to="/admin/finance" replace />;
     if (user?.role === 'FREELANCER') {
       return <Navigate to={paths.PATH_FREELANCER} replace />;
     }
@@ -88,6 +91,7 @@ const AppRoutes = () => {
       </Route>
 
       {/* Public routes */}
+      <Route path={paths.PATH_PAYMENT_RETURN} element={<PaymentReturnPage />} />
       <Route path={paths.PATH_HOME} element={<RootRoute />} />
       <Route path={paths.PATH_HOME_ALT} element={<RootRoute />} />
       <Route path={paths.PATH_GOOGLE_AUTH_RETURN} element={<GoogleAuthReturnPage />} />
@@ -108,7 +112,6 @@ const AppRoutes = () => {
         <Route path={paths.PATH_CLIENT_PROJECT_DETAIL} element={<ClientProjectDetailPage />} />
         <Route path={paths.PATH_CLIENT_ADDON_RETURN} element={<JobAddonReturnPage />} />
         <Route path={paths.PATH_CLIENT_PAYMENT} element={<ClientPaymentPage />} />
-        <Route path={paths.PATH_CLIENT_PAYMENT_RETURN} element={<VnpayReturnPage />} />
         <Route path={paths.PATH_CLIENT_FIND_FREELANCER} element={<FindFreelancerPage />} />
         <Route path={paths.PATH_CLIENT_PROFILE} element={<ClientProfilePage />} />
       </Route>
@@ -132,8 +135,20 @@ const AppRoutes = () => {
         <Route path={paths.PATH_JOB_APPLY_SUCCESS} element={<SuccessApplicationPage />} />
       </Route>
 
+      <Route element={<RoleGuard allowedRoles={['ADMIN']} />}>
+        <Route
+          path="/admin/finance"
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <AdminFinancePage />
+            </Suspense>
+          }
+        />
+      </Route>
       {/* Authenticated routes (any role) */}
       <Route element={<AuthGuard />}>
+        <Route path="/payments/history" element={<PaymentHistoryPage />} />
+        {/* Both contract funding and freelancer deposits return to this legacy URL. */}
         <Route path={paths.PATH_GOOGLE_AUTH_LINK} element={<GoogleLinkPendingPage />} />
         <Route path={paths.PATH_GOOGLE_AUTH_CONNECT} element={<GoogleConnectPage />} />
         <Route path={paths.PATH_NOTIFICATIONS} element={<NotificationsPage />} />

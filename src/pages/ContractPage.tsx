@@ -1,4 +1,4 @@
-import { Client } from '@stomp/stompjs';
+import type { Client } from '@stomp/stompjs';
 import { useQueryClient } from '@tanstack/react-query';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -11,13 +11,13 @@ import {
   type ContractRevision,
   contractApi,
 } from '../api/contract';
-import { paymentApi } from '../api/payment';
 import AppHeader from '../components/AppHeader';
 import ContractMarkdown from '../components/ContractMarkdown';
 import Footer from '../components/Footer';
 import FundingPanel from '../components/FundingPanel';
 import PaginationNav from '../components/PaginationNav';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
+import { createAuthenticatedStompClient } from '../lib/authenticated-stomp';
 import { useAuthStore } from '../stores/useAuthStore';
 import { diffLines } from '../utils/diff';
 import { formatMoney } from '../utils/format';
@@ -75,50 +75,46 @@ const ContractPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [fundingNotice, setFundingNotice] = useState<string | null>(null);
 
-  // VNPay redirect về (chữa cháy thay IPN như mua gói): FE tự gọi confirm
+  // Redirects are navigation only. Funding status is read from the backend's verified IPN.
   useEffect(() => {
-    const responseCode = searchParams.get('vnp_ResponseCode');
-    if (!responseCode) return;
-    const raw = localStorage.getItem('SAM_PENDING_FUNDING');
+    const returned =
+      searchParams.has('vnp_ResponseCode') ||
+      searchParams.has('resultCode') ||
+      searchParams.has('orderId');
+    if (!returned) return;
     localStorage.removeItem('SAM_PENDING_FUNDING');
-    // Chỉ xóa query VNPay, giữ lại trang lịch sử hợp đồng và các query khác.
+    setFundingNotice(
+      'Đang xác nhận thanh toán. Chỉ kết quả đã xác minh từ nhà cung cấp mới cập nhật bảng nạp tiền.'
+    );
     setSearchParams(
       (current) => {
         const next = new URLSearchParams(current);
-        for (const key of [...next.keys()]) {
-          if (key.startsWith('vnp_')) next.delete(key);
-        }
+        for (const key of [...next.keys()])
+          if (
+            key.startsWith('vnp_') ||
+            [
+              'resultCode',
+              'orderId',
+              'requestId',
+              'transId',
+              'message',
+              'signature',
+              'm2signature',
+              'responseTime',
+              'partnerCode',
+              'accessKey',
+              'amount',
+              'orderInfo',
+              'orderType',
+              'payType',
+              'extraData',
+            ].includes(key)
+          )
+            next.delete(key);
         return next;
       },
       { replace: true }
     );
-    if (responseCode !== '00') {
-      setFundingNotice('Thanh toán VNPay chưa hoàn tất, bạn có thể thử lại.');
-      return;
-    }
-    if (!raw) return;
-    try {
-      const pending = JSON.parse(raw) as { paymentId?: string };
-      if (!pending.paymentId) return;
-      const txnRef = searchParams.get('vnp_TxnRef');
-      const amountParam = searchParams.get('vnp_Amount');
-      paymentApi
-        .confirmPayment(pending.paymentId, {
-          txnRef,
-          amountVnd: amountParam ? Number.parseInt(amountParam, 10) : null,
-        })
-        .then(() => {
-          setFundingNotice('Đã ghi nhận chuyển tiền! Bảng nạp tiền bên dưới tự cập nhật.');
-        })
-        .catch(() => {
-          setFundingNotice(
-            'VNPay báo thành công nhưng chưa ghi nhận được, bấm Tải lại ở bảng nạp tiền.'
-          );
-        });
-    } catch {
-      // payload local hỏng thì thôi
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Resolve phòng (roomId hoặc jobId) rồi tải hợp đồng
@@ -156,7 +152,7 @@ const ContractPage: React.FC = () => {
   useEffect(() => {
     if (!contract?.id) return;
     const contractId = contract.id;
-    const client = new Client({
+    const client = createAuthenticatedStompClient({
       webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL}/ws`) as WebSocket,
       reconnectDelay: 5000,
     });

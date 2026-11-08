@@ -1,8 +1,8 @@
-import { Client } from '@stomp/stompjs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import SockJS from 'sockjs-client';
 import { type UserNotification, notificationsApi } from '../api/notifications';
+import { createAuthenticatedStompClient } from '../lib/authenticated-stomp';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export type InviteNotification = UserNotification;
@@ -32,7 +32,7 @@ export function useInviteNotifications(onEvent?: (n: InviteNotification) => void
 
   useEffect(() => {
     if (!isAuthenticated || !userId) return;
-    const client = new Client({
+    const client = createAuthenticatedStompClient({
       webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL}/ws`) as WebSocket,
       reconnectDelay: 5000,
     });

@@ -104,7 +104,7 @@ export interface SandboxSettlement {
   freelancerPayout: number;
   platformFee: number;
   depositRefund: number;
-  status: 'SIMULATED_COMPLETED';
+  status: 'SIMULATED_COMPLETED' | 'POSTED';
   completedAt: string;
   sandbox: boolean;
 }

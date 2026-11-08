@@ -17,6 +17,7 @@ import ProposalStatusBadge from '../components/ProposalStatusBadge';
 import SrsPdfActions from '../components/SrsPdfActions';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
+import { beginCheckout } from '../lib/checkout';
 import { SUPPORT_FACEBOOK_URL } from '../lib/support';
 import { PATH_CLIENT_POST_PROJECT, PATH_CLIENT_PROJECTS, PATH_WORKSPACE } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -73,7 +74,7 @@ const ClientProjectDetailPage: React.FC = () => {
     setServerError(null);
     try {
       const checkout = await jobApi.checkoutAddons(id);
-      window.location.assign(checkout.vnpayUrl);
+      beginCheckout(checkout, `/client/projects/${id}`);
     } catch (error) {
       setServerError(
         error instanceof Error ? error.message : 'Không bắt đầu được thanh toán tính năng.'
@@ -160,6 +161,8 @@ const ClientProjectDetailPage: React.FC = () => {
 
   // Realtime: dev vừa Claim / chấp nhận / nộp hồ sơ -> tự reload mà không cần F5
   useInviteNotifications((n) => {
+    if (n.jobId === id && n.type === 'PROJECT_ADDON_PAYMENT_PAID')
+      void queryClient.invalidateQueries({ queryKey: ['job-addons', id] });
     if (
       n.jobId === id &&
       (n.type === 'DEV_CLAIM' ||

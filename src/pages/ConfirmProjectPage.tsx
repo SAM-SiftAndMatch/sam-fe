@@ -6,6 +6,7 @@ import jobApi from '../api/job';
 import { projectDraftApi } from '../api/projectDrafts';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import { beginCheckout } from '../lib/checkout';
 import {
   PATH_CLIENT_AI_BRIEF,
   PATH_CLIENT_POST_PROJECT,
@@ -258,7 +259,7 @@ const ConfirmProjectPage: React.FC = () => {
         upgrades.featured || upgrades.urgent ? await jobApi.getAddonSummary(createdJob.id) : null;
       if (payNow && addonSummary?.orderStatus === 'PENDING') {
         const checkout = await jobApi.checkoutAddons(createdJob.id);
-        window.location.assign(checkout.vnpayUrl);
+        beginCheckout(checkout, `/client/projects/${createdJob.id}`);
         return;
       }
 
