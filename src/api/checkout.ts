@@ -3,6 +3,11 @@ import apiClient from '../lib/axios';
 import type { Checkout } from '../lib/checkout';
 import type { ApiResponse } from '../types/api';
 export const checkoutApi = {
+  prepareRetry: async (id: string) =>
+    requireApiResult(
+      (await apiClient.post<ApiResponse<Checkout>>(`/checkouts/${id}/prepare-retry`)).data,
+      'Chưa thể khôi phục thanh toán'
+    ),
   get: async (id: string) =>
     requireApiResult(
       (await apiClient.get<ApiResponse<Checkout>>(`/checkouts/${id}`)).data,
