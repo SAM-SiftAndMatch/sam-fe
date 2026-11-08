@@ -1,9 +1,10 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { checkoutApi } from '../api/checkout';
 import AppHeader from '../components/AppHeader';
 import LoadingScreen from '../components/LoadingScreen';
+import { extractApiResponse } from '../lib/api-error';
 import {
   beginCheckout,
   checkoutId,
@@ -43,6 +44,15 @@ export default function PaymentReturnPage() {
         : false,
   });
   const order = result.data;
+  const retry = useMutation({
+    mutationFn: (input: { orderId: string; ownerId: string }) =>
+      checkoutApi.prepareRetry(input.orderId),
+    onSuccess: (updated, input) => {
+      cache.setQueryData(['checkout', input.ownerId, updated.orderId], updated);
+      void cache.invalidateQueries({ queryKey: ['checkout-history', input.ownerId] });
+    },
+  });
+  const retryForOrder = retry.variables?.orderId === id && retry.variables.ownerId === user?.userId;
   useEffect(() => {
     if (order?.paymentStatus !== 'PAID' || order.fulfillmentStatus !== 'APPLIED') return;
     void cache.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'checkout' });
@@ -93,10 +103,44 @@ export default function PaymentReturnPage() {
                   )}
                 </p>
               )}
-              {order?.reviewRequired && (
+              {order?.reviewRequired && order.paymentStatus !== 'EXPIRED' && (
                 <p className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
                   SAM đang kiểm tra đơn này. Nếu đã chuyển tiền, bạn không cần thanh toán lại. Khi
                   liên hệ hỗ trợ, cung cấp mã đơn phía trên.
+                </p>
+              )}
+              {order?.paymentStatus === 'EXPIRED' && (
+                <div className="mt-4 rounded-xl border border-slate-200 p-4">
+                  <p className="text-sm text-slate-600">
+                    Nếu chưa chuyển tiền, bạn có thể khôi phục thanh toán. SAM sẽ yêu cầu Pay2S đóng
+                    liên kết cũ trước khi cho phép tạo lại. Nếu đã chuyển tiền, hãy kiểm tra lại
+                    hoặc liên hệ hỗ trợ bằng mã đơn phía trên.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={(retryForOrder && retry.isPending) || !user?.userId}
+                    className="mt-3 rounded-xl bg-blue-700 px-5 py-3 text-white disabled:opacity-50"
+                    onClick={() => {
+                      if (user?.userId)
+                        retry.mutate({ orderId: order.orderId, ownerId: user.userId });
+                    }}
+                  >
+                    {retryForOrder && retry.isPending
+                      ? 'Đang xác nhận với Pay2S…'
+                      : 'Khôi phục thanh toán'}
+                  </button>
+                </div>
+              )}
+              {retryForOrder && retry.data?.orderId === id && retry.isSuccess && (
+                <output className="mt-4 block rounded-xl bg-green-50 p-4 text-sm text-green-900">
+                  Đã đóng liên kết cũ. Bấm “Quay lại dịch vụ”, sau đó chọn thanh toán để tạo liên
+                  kết mới.
+                </output>
+              )}
+              {retryForOrder && retry.isError && (
+                <p role="alert" className="mt-4 text-sm text-red-700">
+                  {extractApiResponse(retry.error)?.message ||
+                    'Chưa thể xác nhận đóng liên kết cũ. Vui lòng kiểm tra lại hoặc liên hệ hỗ trợ.'}
                 </p>
               )}
               {order?.paymentStatus === 'PENDING' && order.checkoutUrl && (
