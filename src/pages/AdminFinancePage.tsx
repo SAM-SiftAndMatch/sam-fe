@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import {
   type BankAccount,
   type Beneficiary,
@@ -13,7 +13,7 @@ import {
   money,
   statusLabel,
 } from '../api/finance';
-import AppHeader from '../components/AppHeader';
+import { AdminPageHeader } from '../components/admin/AdminUI';
 import {
   Field,
   Modal,
@@ -43,10 +43,9 @@ interface FinanceAudit {
   detail: string;
   createdAt: string;
 }
-export default function AdminFinancePage() {
+function AdminFinanceContent({ tab }: { tab: string }) {
   const user = useAuthStore((s) => s.user);
   const cache = useQueryClient();
-  const [tab, setTab] = useState('tickets');
   const [page, setPage] = useState(0);
   const [operation, setOperation] = useState<{ id: string; type: string } | null>(null);
   const [password, setPassword] = useState('');
@@ -177,45 +176,16 @@ export default function AdminFinancePage() {
               ? audit
               : tickets;
   return (
-    <div className="min-h-screen bg-slate-50">
-      <AppHeader />
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <div>
-          <p className="text-xs font-semibold tracking-widest text-blue-700">VẬN HÀNH SAM</p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-900">Tài chính & bảo trì</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Xác minh người nhận, kiểm soát chi trả và xử lý ticket sau nghiệm thu.
-          </p>
-        </div>
-        <Notice>
-          Chi trả hiện dùng chuyển khoản thủ công có đối soát. Xem người nhận chỉ sau xác thực lại.
-          Nếu bật kiểm soát kép, người chuyển tiền phải khác người duyệt.
-        </Notice>
+    <div>
+      <div className="space-y-6">
+        <AdminPageHeader title={financeTitles[tab]} description={financeDescriptions[tab]} />
+        {['banks', 'withdrawals'].includes(tab) && (
+          <Notice>
+            Chi trả hiện dùng chuyển khoản thủ công có đối soát. Xem người nhận chỉ sau xác thực
+            lại. Nếu bật kiểm soát kép, người chuyển tiền phải khác người duyệt.
+          </Notice>
+        )}
         {notice && <Notice>{notice}</Notice>}
-        <div className="flex flex-wrap gap-2">
-          {[
-            ['banks', 'Xác minh ngân hàng'],
-            ['withdrawals', 'Chi trả công nợ'],
-            ['tickets', 'Ticket bảo trì'],
-            ['receipts', 'Đối soát tiền vào'],
-            ['checkout-review', 'Đối soát gói và checkout'],
-            ['payment-cases', 'Hồ sơ sự cố thanh toán'],
-            ['audit', 'Nhật ký vận hành'],
-          ].map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              className={tab === key ? primaryClass : secondaryClass}
-              onClick={() => {
-                setTab(key);
-                setPage(0);
-                setJob(null);
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
         {tab !== 'payment-cases' && list.isError && (
           <Notice error>
             Không tải được dữ liệu.{' '}
@@ -551,7 +521,32 @@ export default function AdminFinancePage() {
             </dl>
           </Modal>
         )}
-      </main>
+      </div>
     </div>
   );
+}
+
+const financeTitles: Record<string, string> = {
+  banks: 'Xác minh tài khoản ngân hàng',
+  withdrawals: 'Chi trả freelancer',
+  tickets: 'Ticket bảo trì',
+  receipts: 'Đối soát tiền vào',
+  'checkout-review': 'Đối soát gói & giao dịch',
+  'payment-cases': 'Hồ sơ sự cố thanh toán',
+  audit: 'Nhật ký vận hành',
+};
+const financeDescriptions: Record<string, string> = {
+  banks: 'Xác minh người thụ hưởng trước khi xử lý các yêu cầu chi trả.',
+  withdrawals: 'Theo dõi yêu cầu rút thu nhập và đối soát các lệnh chuyển tiền.',
+  tickets: 'Quản lý yêu cầu bảo trì và các vấn đề phát sinh sau nghiệm thu.',
+  receipts: 'Đối chiếu các khoản tiền vào và giao dịch cần xác minh.',
+  'checkout-review': 'Theo dõi các đơn thanh toán và quyền lợi đang chờ hoàn tất.',
+  'payment-cases':
+    'Xử lý giao dịch cần hỗ trợ. Mọi quyết định và bằng chứng đều được lưu trong lịch sử.',
+  audit: 'Tra cứu lịch sử thao tác và quyết định trong quy trình tài chính.',
+};
+export default function AdminFinancePage() {
+  const { section = 'payment-cases' } = useParams();
+  if (!financeTitles[section]) return <Navigate to="/admin/finance/payment-cases" replace />;
+  return <AdminFinanceContent key={section} tab={section} />;
 }

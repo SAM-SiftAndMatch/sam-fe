@@ -3,6 +3,11 @@ import apiClient from '../lib/axios';
 import type { Checkout } from '../lib/checkout';
 import type { ApiResponse } from '../types/api';
 export const checkoutApi = {
+  retry: async (id: string) =>
+    requireApiResult(
+      (await apiClient.post<ApiResponse<Checkout>>(`/checkouts/${id}/retry`)).data,
+      'Chưa thể tạo lại liên kết thanh toán'
+    ),
   prepareRetry: async (id: string) =>
     requireApiResult(
       (await apiClient.post<ApiResponse<Checkout>>(`/checkouts/${id}/prepare-retry`)).data,
