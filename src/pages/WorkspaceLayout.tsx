@@ -4,7 +4,7 @@ import { isAxiosError } from 'axios';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import SockJS from 'sockjs-client';
-import { type ChatMessage, chatApi } from '../api/chat';
+import { type ChatMessage, type SendChatMessage, chatApi } from '../api/chat';
 import type { ContractBroadcast } from '../api/contract';
 import { type WorkspaceSummary, workspaceApi } from '../api/workspace';
 import AppHeader from '../components/AppHeader';
@@ -20,7 +20,7 @@ export interface WorkspaceContext {
   role: 'client' | 'freelancer';
   workspacesPage: number;
   markCompleted: () => void;
-  sendMessage: (content: string) => boolean;
+  sendMessage: (input: SendChatMessage) => Promise<void>;
   getDraft: () => string;
   saveDraft: (content: string) => void;
   getScrollTop: () => number | undefined;
@@ -130,16 +130,21 @@ export default function WorkspaceLayout() {
   }, [roomId, jobId, contractId, userId, projectId, queryClient]);
 
   const sendMessage = useCallback(
-    (content: string) => {
-      const client = stompRef.current;
-      if (!client?.connected || !roomId || !userId) return false;
-      client.publish({
-        destination: `/app/chat/${roomId}/send`,
-        body: JSON.stringify({ senderId: userId, content }),
-      });
-      return true;
+    async (input: SendChatMessage) => {
+      if (!roomId || !userId) throw new Error('Không tìm thấy cuộc hội thoại.');
+      const message = await chatApi.sendMessage(roomId, input);
+      if (useAuthStore.getState().user?.userId !== userId) return;
+      const key = workspaceKeys.messages(userId, roomId);
+      await queryClient.cancelQueries({ queryKey: key });
+      if (queryClient.getQueryData<MessagePages>(key)) {
+        queryClient.setQueryData<MessagePages>(key, (previous) =>
+          appendConfirmedMessage(previous, message)
+        );
+      } else {
+        void queryClient.invalidateQueries({ queryKey: key });
+      }
     },
-    [roomId, userId]
+    [roomId, userId, queryClient]
   );
   const getDraft = useCallback(() => draftsRef.current[roomId ?? ''] ?? '', [roomId]);
   const saveDraft = useCallback(

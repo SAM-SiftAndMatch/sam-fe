@@ -3,80 +3,17 @@ import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'rea
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { type ChatMessage, chatApi } from '../api/chat';
 import { workflowApi } from '../api/workflow';
+import ChatComposer from '../components/chat/ChatComposer';
+import ChatMessageAttachments from '../components/chat/ChatMessageAttachments';
 import { formatMoney } from '../utils/format';
 import type { WorkspaceContext } from './WorkspaceLayout';
 import { workspaceKeys } from './workspace-query';
 
-const ChatComposer = memo(function ChatComposer({
-  getDraft,
-  saveDraft,
-  sendMessage,
-}: Pick<WorkspaceContext, 'getDraft' | 'saveDraft' | 'sendMessage'>) {
-  const [input, setInput] = useState(getDraft);
-  const [connectionError, setConnectionError] = useState(false);
-  const send = () => {
-    const content = input.trim();
-    if (!content) return;
-    if (!sendMessage(content)) {
-      setConnectionError(true);
-      return;
-    }
-    setConnectionError(false);
-    setInput('');
-    saveDraft('');
-  };
-  return (
-    <div className="p-6 bg-transparent">
-      {connectionError && (
-        <p className="mb-2 text-xs text-red-600">Đang kết nối lại. Hãy thử gửi sau giây lát.</p>
-      )}
-      <div className="bg-white border border-gray-200 rounded-[28px] p-2 flex flex-col shadow-[0_10px_30px_rgb(0,0,0,0.05)] focus-within:border-[#1D4ED8] transition-all">
-        <div className="flex items-end gap-2 px-3 pb-2 pt-1">
-          <input
-            type="text"
-            aria-label="Nhập nội dung tin nhắn"
-            placeholder="Nhập nội dung tin nhắn của bạn..."
-            value={input}
-            onChange={(event) => {
-              setInput(event.target.value);
-              saveDraft(event.target.value);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') send();
-            }}
-            className="flex-1 bg-transparent border-0 focus:ring-0 text-sm py-2 outline-none text-gray-700 placeholder:text-gray-400"
-          />
-          <button
-            type="button"
-            onClick={send}
-            disabled={!input.trim()}
-            className="w-10 h-10 bg-[#1D4ED8] hover:bg-[#00B2FF] text-white rounded-full flex items-center justify-center shrink-0 transition-colors shadow-md cursor-pointer border-0 disabled:opacity-50"
-            aria-label="Gửi tin nhắn"
-          >
-            <svg
-              className="w-4 h-4 ml-0.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-});
-
 const ChatBubble = memo(function ChatBubble({
   message,
   myId,
-}: { message: ChatMessage; myId: string }) {
+  onImageLoad,
+}: { message: ChatMessage; myId: string; onImageLoad: () => void }) {
   if (message.system) {
     return (
       <div className="flex justify-center">
@@ -99,13 +36,24 @@ const ChatBubble = memo(function ChatBubble({
   const mine = message.senderId === myId;
   return (
     <div
-      className={`flex flex-col gap-1.5 max-w-[80%] ${mine ? 'items-end self-end' : 'items-start'}`}
+      className={`flex min-w-0 flex-col gap-1.5 max-w-[80%] ${mine ? 'items-end self-end' : 'items-start'}`}
     >
-      <div
-        className={`p-4 rounded-2xl text-sm leading-relaxed ${mine ? 'bg-[#1D4ED8] text-white rounded-tr-sm shadow-md' : 'bg-white text-gray-800 rounded-tl-sm shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100'}`}
-      >
-        {message.content}
-      </div>
+      {message.content && (
+        <div
+          className={`max-w-full rounded-2xl p-4 text-sm leading-relaxed ${mine ? 'bg-[#1D4ED8] text-white rounded-tr-sm shadow-md' : 'bg-white text-gray-800 rounded-tl-sm shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100'}`}
+        >
+          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        </div>
+      )}
+      {!!message.attachments?.length && (
+        <ChatMessageAttachments
+          roomId={message.roomId}
+          readerId={myId}
+          attachments={message.attachments}
+          alignEnd={mine}
+          onImageLoad={onImageLoad}
+        />
+      )}
       <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
         {message.senderName}
         {message.createdAt ? ` • ${new Date(message.createdAt).toLocaleString('vi-VN')}` : ''}
@@ -247,8 +195,10 @@ export default function WorkspaceChatView() {
     const lastId = messages.at(-1)?.id;
     if (lastId && !initializedScroll.current) {
       const saved = context.getScrollTop();
-      if (saved !== undefined) container.scrollTop = saved;
-      else bottomRef.current?.scrollIntoView();
+      if (saved !== undefined) {
+        container.scrollTop = saved;
+        shouldScrollBottom.current = container.scrollHeight - saved - container.clientHeight < 120;
+      } else bottomRef.current?.scrollIntoView();
       previousLastId.current = lastId;
       initializedScroll.current = true;
       return;
@@ -372,13 +322,22 @@ export default function WorkspaceChatView() {
             </p>
           ) : (
             messages.map((message) => (
-              <ChatBubble key={message.id} message={message} myId={userId} />
+              <ChatBubble
+                key={message.id}
+                message={message}
+                myId={userId}
+                onImageLoad={() => {
+                  if (shouldScrollBottom.current) bottomRef.current?.scrollIntoView();
+                }}
+              />
             ))
           )}
           <div ref={bottomRef} />
         </div>
         {canChat ? (
           <ChatComposer
+            key={`${userId}:${summary.roomId}`}
+            roomId={summary.roomId}
             getDraft={context.getDraft}
             saveDraft={context.saveDraft}
             sendMessage={context.sendMessage}
