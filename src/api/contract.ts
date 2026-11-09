@@ -23,6 +23,13 @@ export interface ContractDetail {
   freelancerAgreed: boolean;
   clientId: string;
   clientName: string;
+  clientEmail?: string | null;
+  clientPhone?: string | null;
+  freelancerEmail?: string | null;
+  freelancerPhone?: string | null;
+  contractDate?: string | null;
+  policyVersion?: string | null;
+  platformTerms?: string | null;
   freelancerId: string;
   freelancerName: string;
   reviewStatus?: string | null;

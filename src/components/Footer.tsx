@@ -1,5 +1,6 @@
 import type React from 'react';
 import { SUPPORT_FACEBOOK_URL } from '../lib/support';
+import PolicyLinks from './PolicyLinks';
 import SamBrandLogo from './SamBrandLogo';
 
 const Footer: React.FC = () => {
@@ -17,12 +18,7 @@ const Footer: React.FC = () => {
 
       {/* Phần bên phải: Các liên kết (Điều khoản, Bảo mật, Trợ giúp) */}
       <div className="flex flex-wrap items-center gap-6 sm:gap-8 text-xs font-medium text-slate-500">
-        <a href="#" className="transition-colors hover:text-[#1D4ED8]">
-          Điều khoản
-        </a>
-        <a href="#" className="transition-colors hover:text-[#1D4ED8]">
-          Bảo mật
-        </a>
+        <PolicyLinks />
         <a
           href={SUPPORT_FACEBOOK_URL}
           target="_blank"

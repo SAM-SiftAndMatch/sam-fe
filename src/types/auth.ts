@@ -10,6 +10,7 @@ export interface RegisterRequest {
   password: string;
   fullName: string;
   accountType: 'FREELANCER' | 'CLIENT';
+  acceptedTerms: boolean;
 }
 
 export interface AuthResponse {

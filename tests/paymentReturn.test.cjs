@@ -118,6 +118,8 @@ function renderReturn(role, isAuthenticated = true, isLoading = false) {
   const routes = load('src/routes/index.tsx', (name) => {
     if (name === '../stores/useAuthStore') return { useAuthStore: () => state };
     if (name === './paths') return load('src/routes/paths.ts', require);
+    if (name === '../components/guards/ProfileCompletionGuard')
+      return { default: ({ children }) => children };
     if (name.startsWith('../components/guards/')) {
       const file = `src/${name.slice(3)}.tsx`;
       if (!guards[file]) {
