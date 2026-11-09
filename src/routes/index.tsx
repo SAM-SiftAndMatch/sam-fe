@@ -55,6 +55,10 @@ import SuccessApplicationPage from '../pages/SuccessApplicationPage';
 import WorkspacesPage from '../pages/WorkspacesPage';
 
 const AdminFinancePage = lazy(() => import('../pages/AdminFinancePage'));
+const AdminLayout = lazy(() => import('../components/admin/AdminLayout'));
+const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage'));
+const AdminRevenuePage = lazy(() => import('../pages/AdminRevenuePage'));
+const AdminUsersPage = lazy(() => import('../pages/AdminUsersPage'));
 const WorkspaceLayout = lazy(() => import('../pages/WorkspaceLayout'));
 const WorkspaceChatView = lazy(() => import('../pages/WorkspaceChatView'));
 const WorkspaceTimelineView = lazy(() => import('../pages/WorkspaceTimelineView'));
@@ -67,7 +71,7 @@ const RootRoute: React.FC = () => {
   }
 
   if (isAuthenticated) {
-    if (user?.role === 'ADMIN') return <Navigate to="/admin/finance" replace />;
+    if (user?.role === 'ADMIN') return <Navigate to="/admin" replace />;
     if (user?.role === 'FREELANCER') {
       return <Navigate to={paths.PATH_FREELANCER} replace />;
     }
@@ -137,13 +141,20 @@ const AppRoutes = () => {
 
       <Route element={<RoleGuard allowedRoles={['ADMIN']} />}>
         <Route
-          path="/admin/finance"
+          path="/admin"
           element={
             <Suspense fallback={<LoadingScreen />}>
-              <AdminFinancePage />
+              <AdminLayout />
             </Suspense>
           }
-        />
+        >
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="revenue" element={<AdminRevenuePage />} />
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="finance" element={<Navigate to="/admin/finance/payment-cases" replace />} />
+          <Route path="finance/:section" element={<AdminFinancePage />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Route>
       </Route>
       {/* Authenticated routes (any role) */}
       <Route element={<AuthGuard />}>

@@ -10,6 +10,7 @@ export function paymentScope(path: string, method: string, body: unknown): strin
     return `${path}:${String(value.packageId)}:${String(value.projectId || '')}`;
   if (path === '/payments/fund' || path === '/payments/deposit')
     return `${path}:${String(value.contractId)}`;
+  if (/^\/checkouts\/[a-f0-9-]{36}\/retry$/i.test(path)) return path;
   if (/^\/jobs\/[a-f0-9-]{36}\/addons\/checkout$/i.test(path)) return path;
   if (/^\/paid-maintenance-orders\/[a-f0-9-]{36}\/checkout$/i.test(path)) return path;
   return null;
