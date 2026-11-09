@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
+import PolicyLinks from '../components/PolicyLinks';
 import { clearGoogleRole, getGoogleRole } from '../lib/google-auth';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -14,10 +15,11 @@ export default function GoogleCompletePage() {
   const [error, setError] = useState<string | null>(null);
 
   const complete = async () => {
+    if (!acceptedTerms) return;
     setSubmitting(true);
     setError(null);
     try {
-      const auth = await authApi.completeGoogle(role);
+      const auth = await authApi.completeGoogle(role, acceptedTerms);
       clearGoogleRole();
       setUser({ userId: auth.userId, email: auth.email, fullName: auth.fullName, role: auth.role });
       navigate(
@@ -59,7 +61,10 @@ export default function GoogleCompletePage() {
             onChange={(event) => setAcceptedTerms(event.target.checked)}
             className="mt-1"
           />
-          <span>Tôi đồng ý với Điều khoản Dịch vụ và Chính sách Bảo mật của SAM.</span>
+          <span>
+            Tôi đã đọc và đồng ý với <PolicyLinks /> của SAM, bao gồm trách nhiệm khi tham gia dự
+            án.
+          </span>
         </label>
         {error && (
           <p role="alert" className="mt-4 text-sm text-red-700">

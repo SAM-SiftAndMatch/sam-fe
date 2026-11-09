@@ -4,7 +4,20 @@ export interface FreelancerSkillRequest {
   yearsOfExperience: number;
 }
 
-export interface FreelancerProfileRequest {
+export interface ContractContactRequest {
+  contractName: string;
+  contactEmail: string;
+  phoneNumber: string;
+  acceptedTerms: boolean;
+}
+export interface ContractContactResponse {
+  contractName?: string | null;
+  contactEmail?: string | null;
+  phoneNumber?: string | null;
+  policyAcceptedAt?: string | null;
+  policyVersion?: string | null;
+}
+export interface FreelancerProfileRequest extends ContractContactRequest {
   headline: string;
   bio?: string | null;
   hourlyRate?: number | null;
@@ -19,7 +32,7 @@ export interface FreelancerSkillResponse {
   yearsOfExperience: number;
 }
 
-export interface FreelancerProfileResponse {
+export interface FreelancerProfileResponse extends ContractContactResponse {
   id?: string | null;
   userId: string;
   fullName: string;
@@ -37,14 +50,14 @@ export interface SkillOption {
   name: string;
 }
 
-export interface ClientProfileRequest {
+export interface ClientProfileRequest extends ContractContactRequest {
   companyName: string;
   industry?: string | null;
   websiteUrl?: string | null;
   description?: string | null;
 }
 
-export interface ClientProfileResponse {
+export interface ClientProfileResponse extends ContractContactResponse {
   id?: string | null;
   userId: string;
   fullName: string;

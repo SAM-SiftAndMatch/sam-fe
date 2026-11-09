@@ -2,6 +2,8 @@ import type React from 'react';
 import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import LoadingScreen from '../components/LoadingScreen';
+import ProfileCompletionGuard from '../components/guards/ProfileCompletionGuard';
+import PolicyPage from '../pages/PolicyPage';
 import { useAuthStore } from '../stores/useAuthStore';
 import * as paths from './paths';
 
@@ -95,6 +97,8 @@ const AppRoutes = () => {
       </Route>
 
       {/* Public routes */}
+      <Route path="/terms" element={<PolicyPage />} />
+      <Route path="/privacy" element={<PolicyPage />} />
       <Route path={paths.PATH_PAYMENT_RETURN} element={<PaymentReturnPage />} />
       <Route path={paths.PATH_HOME} element={<RootRoute />} />
       <Route path={paths.PATH_HOME_ALT} element={<RootRoute />} />
@@ -108,9 +112,30 @@ const AppRoutes = () => {
       <Route element={<RoleGuard allowedRoles={['CLIENT']} />}>
         <Route path={paths.PATH_CLIENT_DASHBOARD} element={<ClientDashboardPage />} />
         <Route path={paths.PATH_CLIENT_DRAFTS} element={<ClientDraftsPage />} />
-        <Route path={paths.PATH_CLIENT_POST_PROJECT} element={<PostProjectPage />} />
-        <Route path={paths.PATH_CLIENT_AI_BRIEF} element={<AIBriefPage />} />
-        <Route path={paths.PATH_CLIENT_CONFIRM_PROJECT} element={<ConfirmProjectPage />} />
+        <Route
+          path={paths.PATH_CLIENT_POST_PROJECT}
+          element={
+            <ProfileCompletionGuard>
+              <PostProjectPage />
+            </ProfileCompletionGuard>
+          }
+        />
+        <Route
+          path={paths.PATH_CLIENT_AI_BRIEF}
+          element={
+            <ProfileCompletionGuard>
+              <AIBriefPage />
+            </ProfileCompletionGuard>
+          }
+        />
+        <Route
+          path={paths.PATH_CLIENT_CONFIRM_PROJECT}
+          element={
+            <ProfileCompletionGuard>
+              <ConfirmProjectPage />
+            </ProfileCompletionGuard>
+          }
+        />
         <Route path={paths.PATH_CLIENT_SUCCESS_PROJECT} element={<SuccessProjectPage />} />
         <Route path={paths.PATH_CLIENT_PROJECTS} element={<ClientProjectListPage />} />
         <Route path={paths.PATH_CLIENT_PROJECT_DETAIL} element={<ClientProjectDetailPage />} />
@@ -128,14 +153,28 @@ const AppRoutes = () => {
           element={<CreateFreelancerProfilePage />}
         />
         <Route path={paths.PATH_FREELANCER_APPLICATIONS} element={<FreelancerApplicationsPage />} />
-        <Route path={paths.PATH_FREELANCER_INVITATIONS} element={<FreelancerInvitationsPage />} />
+        <Route
+          path={paths.PATH_FREELANCER_INVITATIONS}
+          element={
+            <ProfileCompletionGuard>
+              <FreelancerInvitationsPage />
+            </ProfileCompletionGuard>
+          }
+        />
         <Route path={paths.PATH_FREELANCER_PROJECTS} element={<FreelancerProjectListPage />} />
         <Route
           path={paths.PATH_FREELANCER_PROJECT_DETAIL}
           element={<FreelancerProjectDetailPage />}
         />
         <Route path={paths.PATH_FREELANCER_EARNINGS} element={<FreelancerEarningsPage />} />
-        <Route path={paths.PATH_JOB_APPLY} element={<ApplyJobPage />} />
+        <Route
+          path={paths.PATH_JOB_APPLY}
+          element={
+            <ProfileCompletionGuard>
+              <ApplyJobPage />
+            </ProfileCompletionGuard>
+          }
+        />
         <Route path={paths.PATH_JOB_APPLY_SUCCESS} element={<SuccessApplicationPage />} />
       </Route>
 
@@ -175,7 +214,14 @@ const AppRoutes = () => {
           <Route index element={<WorkspaceChatView />} />
           <Route path="timeline" element={<WorkspaceTimelineView />} />
         </Route>
-        <Route path={paths.PATH_WORKSPACE_CONTRACT} element={<ContractPage />} />
+        <Route
+          path={paths.PATH_WORKSPACE_CONTRACT}
+          element={
+            <ProfileCompletionGuard>
+              <ContractPage />
+            </ProfileCompletionGuard>
+          }
+        />
       </Route>
     </Routes>
   );

@@ -1,13 +1,13 @@
 import { z } from 'zod';
+import { contactFields } from './contact-schema';
 
 export const clientProfileSchema = z.object({
-  companyName: z
-    .string()
-    .min(1, 'Tên công ty không được để trống')
-    .max(255, 'Tên công ty không được vượt quá 255 ký tự'),
+  ...contactFields,
+  companyName: z.string().max(255, 'Tên công ty không được vượt quá 255 ký tự'),
   industry: z.string().max(255, 'Lĩnh vực không được vượt quá 255 ký tự').optional(),
   websiteUrl: z
     .string()
+    .trim()
     .optional()
     .refine(
       (val) => !val || val.trim() === '' || /^https?:\/\//i.test(val),

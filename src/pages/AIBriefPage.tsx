@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { projectDraftApi } from '../api/projectDrafts';
 import storageApi from '../api/storage';
 import AppHeader from '../components/AppHeader';
+import { MINIMUM_PROJECT_BUDGET } from '../lib/participation-policy';
 import { PATH_CLIENT_CONFIRM_PROJECT, PATH_CLIENT_POST_PROJECT } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { AiChatResponse, AiQuestion, ChatMessage } from '../types/ai';
@@ -1097,6 +1098,12 @@ const AIBriefPage: React.FC = () => {
       return;
     }
 
+    if (!Number.isInteger(exactBudgetVnd) || (exactBudgetVnd ?? 0) < MINIMUM_PROJECT_BUDGET) {
+      setError(
+        'Ngân sách tối thiểu là 3.000.000đ. Vui lòng yêu cầu AI cập nhật ngân sách và SRS trước khi tiếp tục.'
+      );
+      return;
+    }
     setIsSavingSrs(true);
     setError(null);
     const activeSession = sessionId.current;

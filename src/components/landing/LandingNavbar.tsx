@@ -163,7 +163,11 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
               >
                 Đăng nhập
               </Link>
-              <PrimaryButton to={paths.PATH_REGISTER} size={isScrolled ? 'sm' : 'default'}>
+              <PrimaryButton
+                to={paths.PATH_REGISTER}
+                withArrow={false}
+                size={isScrolled ? 'sm' : 'default'}
+              >
                 Bắt đầu ngay
               </PrimaryButton>
             </>
@@ -241,7 +245,12 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
                   <SecondaryButton to={paths.PATH_LOGIN} size="sm" className="w-full">
                     Đăng nhập
                   </SecondaryButton>
-                  <PrimaryButton to={paths.PATH_REGISTER} size="sm" className="w-full">
+                  <PrimaryButton
+                    to={paths.PATH_REGISTER}
+                    withArrow={false}
+                    size="sm"
+                    className="w-full"
+                  >
                     Bắt đầu ngay
                   </PrimaryButton>
                 </>

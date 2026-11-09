@@ -1,5 +1,6 @@
 import type React from 'react';
 import { SUPPORT_FACEBOOK_URL } from '../lib/support';
+import { PolicyButton } from './PolicyLinks';
 import SamBrandLogo from './SamBrandLogo';
 
 const FooterDashboard: React.FC = () => {
@@ -132,18 +133,18 @@ const FooterDashboard: React.FC = () => {
           <div className="flex flex-col items-start col-span-1">
             <h3 className="text-gray-900 font-bold mb-5">Chính sách</h3>
             <div className="flex flex-col gap-4">
-              <button
-                type="button"
+              <PolicyButton
+                policy="terms"
                 className="text-gray-500 hover:text-[#0047FF] text-sm text-left transition-colors cursor-pointer bg-transparent border-0 p-0"
               >
                 Điều khoản
-              </button>
-              <button
-                type="button"
+              </PolicyButton>
+              <PolicyButton
+                policy="privacy"
                 className="text-gray-500 hover:text-[#0047FF] text-sm text-left transition-colors cursor-pointer bg-transparent border-0 p-0"
               >
                 Chính sách bảo mật
-              </button>
+              </PolicyButton>
             </div>
           </div>
         </div>

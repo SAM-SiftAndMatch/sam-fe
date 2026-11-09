@@ -1,6 +1,7 @@
 import type React from 'react';
 import { Link } from 'react-router-dom';
 import * as paths from '../../routes/paths';
+import { PolicyButton } from '../PolicyLinks';
 import SamBrandLogo from '../SamBrandLogo';
 
 export const LandingFooter: React.FC = () => {
@@ -88,12 +89,12 @@ export const LandingFooter: React.FC = () => {
               Chính sách & An toàn
             </h4>
             <div className="flex flex-col gap-2.5 text-xs sm:text-sm text-slate-600">
-              <a href="#" className="hover:text-[#1D4ED8] transition-colors">
+              <PolicyButton policy="terms" className="hover:text-[#1D4ED8] transition-colors">
                 Điều khoản dịch vụ
-              </a>
-              <a href="#" className="hover:text-[#1D4ED8] transition-colors">
+              </PolicyButton>
+              <PolicyButton policy="privacy" className="hover:text-[#1D4ED8] transition-colors">
                 Chính sách bảo mật
-              </a>
+              </PolicyButton>
               <a href="#" className="hover:text-[#1D4ED8] transition-colors">
                 Cơ chế Ký quỹ Escrow
               </a>

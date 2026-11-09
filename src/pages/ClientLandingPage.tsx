@@ -110,7 +110,9 @@ const ClientLandingPage: React.FC = () => {
             className="animate-hero-fade-up relative z-10 mb-16 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center"
             style={{ animationDelay: '620ms' }}
           >
-            <PrimaryButton to={paths.PATH_CLIENT_AI_BRIEF}>Tạo yêu cầu công việc</PrimaryButton>
+            <PrimaryButton to={paths.PATH_CLIENT_AI_BRIEF} withArrow={false}>
+              Tạo yêu cầu công việc
+            </PrimaryButton>
             <SecondaryButton to={paths.PATH_FREELANCER}>Tìm Việc Freelance</SecondaryButton>
           </div>
 

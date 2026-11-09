@@ -1,11 +1,13 @@
 import { type LoginFormData, loginSchema } from '@/features/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
+import { ArrowLeft } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import GoogleLoginButton from '../components/GoogleLoginButton';
+import { PolicyButton } from '../components/PolicyLinks';
 import SamBrandLogo from '../components/SamBrandLogo';
 import { InteractiveBackground } from '../components/landing/InteractiveBackground';
 import {
@@ -85,17 +87,8 @@ const LoginPage: React.FC = () => {
           to={paths.PATH_HOME}
           className="text-xs font-medium text-slate-600 hover:text-[#1D4ED8] transition-colors flex items-center gap-2 bg-white/90 backdrop-blur-sm px-3.5 py-2 rounded-lg shadow-xs border border-slate-200 hover:border-slate-300"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-            aria-hidden="true"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          ← VỀ TRANG CHỦ
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          VỀ TRANG CHỦ
         </Link>
       </div>
 
@@ -393,7 +386,7 @@ const LoginPage: React.FC = () => {
               </label>
             </div>
 
-            {/* Login Button (Tech button: 8px radius, 44px height, bevel top border, btn-sweep, arrow slide) */}
+            {/* Login Button (Tech button: 8px radius, 44px height, bevel top border, btn-sweep) */}
             <div className="pt-3">
               <button
                 type="submit"
@@ -426,9 +419,6 @@ const LoginPage: React.FC = () => {
                 ) : (
                   <>
                     <span>Đăng nhập</span>
-                    <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">
-                      →
-                    </span>
                   </>
                 )}
               </button>
@@ -463,19 +453,19 @@ const LoginPage: React.FC = () => {
 
       {/* External Page Footer */}
       <footer className="flex flex-wrap justify-center items-center gap-6 text-xs text-slate-500 font-medium mt-6 z-10">
-        <button
-          type="button"
+        <PolicyButton
+          policy="privacy"
           className="hover:text-slate-800 transition cursor-pointer bg-transparent border-0 p-0"
         >
           Chính sách bảo mật
-        </button>
+        </PolicyButton>
         <span className="text-slate-300">•</span>
-        <button
-          type="button"
+        <PolicyButton
+          policy="terms"
           className="hover:text-slate-800 transition cursor-pointer bg-transparent border-0 p-0"
         >
           Điều khoản dịch vụ
-        </button>
+        </PolicyButton>
         <span className="text-slate-300">•</span>
         <button
           type="button"

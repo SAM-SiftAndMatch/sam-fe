@@ -1,18 +1,24 @@
 import { type ClientProfileFormData, clientProfileSchema } from '@/features/profile';
 import { MyPackagesSection } from '@/features/subscription';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { profileApi } from '../api/profile';
 import AppHeader from '../components/AppHeader';
+import ProfileContactFields from '../components/ProfileContactFields';
+import { isParticipationProfileComplete } from '../lib/participation-policy';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 
 const ClientProfilePage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryClient = useQueryClient();
+  const returnContext = location.state as { returnTo?: string; returnState?: unknown } | null;
   const { user } = useAuthStore();
 
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
@@ -29,6 +35,10 @@ const ClientProfilePage: React.FC = () => {
   } = useForm<ClientProfileFormData>({
     resolver: zodResolver(clientProfileSchema),
     defaultValues: {
+      contractName: user?.fullName || '',
+      contactEmail: user?.email || '',
+      phoneNumber: '',
+      acceptedTerms: false,
       companyName: '',
       industry: '',
       websiteUrl: '',
@@ -47,6 +57,10 @@ const ClientProfilePage: React.FC = () => {
         if (isMounted && data) {
           setIsNewProfile(!data.id);
           reset({
+            contractName: data.contractName || data.fullName || '',
+            contactEmail: data.contactEmail || data.email || '',
+            phoneNumber: data.phoneNumber || '',
+            acceptedTerms: isParticipationProfileComplete(data),
             companyName: data.companyName || '',
             industry: data.industry || '',
             websiteUrl: data.websiteUrl || '',
@@ -77,6 +91,10 @@ const ClientProfilePage: React.FC = () => {
 
     try {
       await profileApi.updateClientProfile({
+        contractName: data.contractName.trim(),
+        contactEmail: data.contactEmail.trim(),
+        phoneNumber: data.phoneNumber.trim(),
+        acceptedTerms: data.acceptedTerms,
         companyName: data.companyName.trim(),
         industry: data.industry?.trim() || null,
         websiteUrl: data.websiteUrl?.trim() || null,
@@ -84,7 +102,12 @@ const ClientProfilePage: React.FC = () => {
       });
 
       setIsNewProfile(false);
-      setSuccessMessage('Hồ sơ công ty đã được lưu và cập nhật thành công!');
+      setSuccessMessage('Hồ sơ đã được lưu và cập nhật thành công!');
+      await queryClient.invalidateQueries({ queryKey: ['participation-profile', user?.userId] });
+      if (returnContext?.returnTo?.startsWith('/') && !returnContext.returnTo.startsWith('//')) {
+        navigate(returnContext.returnTo, { replace: true, state: returnContext.returnState });
+        return;
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
@@ -152,6 +175,19 @@ const ClientProfilePage: React.FC = () => {
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {returnContext?.returnTo && (
+                <p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+                  Hoàn thiện hồ sơ để tiếp tục đăng hoặc tham gia dự án. Sau khi lưu, bạn sẽ trở lại
+                  bước đang thực hiện.
+                </p>
+              )}
+              <ProfileContactFields
+                contractName={register('contractName')}
+                contactEmail={register('contactEmail')}
+                phoneNumber={register('phoneNumber')}
+                acceptedTerms={register('acceptedTerms')}
+                errors={errors}
+              />
               {/* Company Card */}
               <div className="bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-6 md:p-10 space-y-8">
                 {/* Section 1: Identity Header (read-only) */}
@@ -184,7 +220,7 @@ const ClientProfilePage: React.FC = () => {
                       htmlFor="companyName"
                       className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
                     >
-                      Tên công ty <span className="text-red-500">*</span>
+                      Tên công ty (nếu có)
                     </label>
                     <input
                       id="companyName"
@@ -228,7 +264,7 @@ const ClientProfilePage: React.FC = () => {
                     htmlFor="websiteUrl"
                     className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
                   >
-                    Website công ty
+                    Website công ty (không bắt buộc)
                   </label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
@@ -251,9 +287,13 @@ const ClientProfilePage: React.FC = () => {
                       type="url"
                       {...register('websiteUrl')}
                       placeholder="https://company.com"
+                      aria-describedby="websiteUrl-hint"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-[#0047FF] focus:ring-1 focus:ring-[#0047FF] bg-gray-50/40 focus:bg-white transition"
                     />
                   </div>
+                  <p id="websiteUrl-hint" className="mt-2 text-xs text-gray-500">
+                    Bạn có thể để trống và bổ sung sau.
+                  </p>
                   {errors.websiteUrl && (
                     <p className="mt-1 text-xs text-red-500">{errors.websiteUrl.message}</p>
                   )}

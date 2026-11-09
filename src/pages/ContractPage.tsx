@@ -16,7 +16,9 @@ import ContractMarkdown from '../components/ContractMarkdown';
 import Footer from '../components/Footer';
 import FundingPanel from '../components/FundingPanel';
 import PaginationNav from '../components/PaginationNav';
+import PolicyLinks from '../components/PolicyLinks';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
+import { extractApiResponse, getApiErrorMessage } from '../lib/api-error';
 import { createAuthenticatedStompClient } from '../lib/authenticated-stomp';
 import { useAuthStore } from '../stores/useAuthStore';
 import { diffLines } from '../utils/diff';
@@ -218,7 +220,12 @@ const ContractPage: React.FC = () => {
         const c = await contractApi.getContractByRoom(room.id);
         setContract(c);
       } catch {
-        setError(e instanceof Error ? e.message : 'Tạo hợp đồng thất bại.');
+        setError(
+          getApiErrorMessage(
+            extractApiResponse(e),
+            e instanceof Error ? e.message : 'Tạo hợp đồng thất bại.'
+          )
+        );
       }
     } finally {
       setCreating(false);
@@ -805,6 +812,12 @@ const ContractPage: React.FC = () => {
                         <p className="text-base font-bold text-gray-900 mb-2">
                           {contract.clientName}
                         </p>
+                        <p className="mb-1 break-words text-sm text-gray-600">
+                          SĐT: {contract.clientPhone || 'Chưa lưu trong hợp đồng'}
+                        </p>
+                        <p className="mb-3 break-all text-sm text-gray-600">
+                          Email: {contract.clientEmail || 'Chưa lưu trong hợp đồng'}
+                        </p>
                         <span
                           className={`text-[11px] font-bold px-2.5 py-1 rounded-full border w-fit ${
                             clientSigned
@@ -822,6 +835,12 @@ const ContractPage: React.FC = () => {
                         <p className="text-base font-bold text-gray-900 mb-2">
                           {contract.freelancerName}
                         </p>
+                        <p className="mb-1 break-words text-sm text-gray-600">
+                          SĐT: {contract.freelancerPhone || 'Chưa lưu trong hợp đồng'}
+                        </p>
+                        <p className="mb-3 break-all text-sm text-gray-600">
+                          Email: {contract.freelancerEmail || 'Chưa lưu trong hợp đồng'}
+                        </p>
                         <span
                           className={`text-[11px] font-bold px-2.5 py-1 rounded-full border w-fit ${
                             freelancerSigned
@@ -835,6 +854,26 @@ const ContractPage: React.FC = () => {
                     </div>
                   </section>
 
+                  <section className="border-b border-gray-100 p-6 md:p-8">
+                    <h2 className="mb-3 text-sm font-extrabold uppercase tracking-widest text-gray-900">
+                      Ngày lập và quy định nền tảng
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      Ngày lập hợp đồng:{' '}
+                      {contract.contractDate
+                        ? new Date(`${contract.contractDate}T00:00:00`).toLocaleDateString('vi-VN')
+                        : 'Chưa lưu ngày lập'}
+                    </p>
+                    {contract.platformTerms && (
+                      <p className="mt-3 text-sm leading-7 text-gray-700">
+                        {contract.platformTerms}
+                      </p>
+                    )}
+                    <p className="mt-3 text-sm text-gray-500">
+                      <PolicyLinks />
+                      {contract.policyVersion ? ` · Phiên bản ${contract.policyVersion}` : ''}
+                    </p>
+                  </section>
                   {/* Điều 2: Giá trị */}
                   <section className="p-6 md:p-8 border-b border-gray-100">
                     <h2 className="text-sm font-extrabold text-gray-900 uppercase tracking-widest mb-4">
