@@ -88,14 +88,14 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ navItems }) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full h-16 flex items-center justify-center pointer-events-none transition-all duration-300">
-      {/* Morphing Header Bar: Merged full-width when at top, shrinking to floating transparent bar when scrolling */}
+    <header className="sticky top-0 z-50 w-full h-16 shrink-0 flex items-center justify-center pointer-events-none">
       <div
-        className={`w-full transition-all duration-300 ease-out flex items-center justify-between pointer-events-auto relative ${
+        className={`page-header-surface pointer-events-auto relative flex w-full items-center justify-between border border-transparent transition-all duration-300 ease-out motion-reduce:transition-none ${
           isScrolled
-            ? 'max-w-[1160px] h-[56px] translate-y-2 px-5 sm:px-7 rounded-full bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-[0_8px_30px_rgba(15,23,42,0.06)] mx-4'
-            : 'max-w-[1440px] h-16 translate-y-0 px-4 sm:px-6 lg:px-8 rounded-none bg-transparent border-b border-transparent shadow-none mx-auto'
+            ? 'mx-4 h-[56px] translate-y-2 rounded-full px-5 sm:px-7 xl:mx-auto xl:w-[84%]'
+            : 'mx-0 h-16 translate-y-0 rounded-none px-4 sm:px-6 lg:px-8'
         }`}
+        data-scrolled={isScrolled}
       >
         {/* Logo - Left */}
         <div className="flex items-center gap-2 sm:gap-3">

@@ -488,16 +488,6 @@ html.theme-dark .theme-toggle {
   color: #a9c7ff !important;
 }
 
-/* Keep the app header as airy as the landing header, then give its floating state contrast. */
-html.theme-dark .app-header {
-  background-color: transparent !important;
-}
-
-html.theme-dark .app-header-shell--scrolled {
-  border-color: #27364d !important;
-  background-color: rgba(9, 15, 29, 0.9) !important;
-}
-
 .app-header button,
 .app-header a {
   cursor: pointer;
@@ -530,6 +520,59 @@ html.theme-dark .workspace-back-button:hover {
   box-shadow: none !important;
 }
 
+/* Workspace panels retain rounded surfaces with full-height navigation. */
+.workspace-route .workspace-sidebar,
+.workspace-route .workspace-context-sidebar {
+  background-color: #f1f5f9;
+}
+
+.workspace-route :is(.workspace-timeline, .workspace-maintenance) [class*="shadow"] {
+  box-shadow: none !important;
+}
+
+.workspace-route .workspace-maintenance > div {
+  margin-bottom: 0;
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+}
+
+/* Shared page and workspace headers use the same subtle divider and frosted surface. */
+.page-header-surface,
+.workspace-route .workspace-section-header,
+.workspace-resource-drawer .workspace-section-header {
+  border-bottom: 1px solid rgb(148 163 184 / 0.35);
+  background-color: rgb(255 255 255 / 0.92);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 12px -6px rgb(15 23 42 / 0.1);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+html.theme-dark .page-header-surface,
+html.theme-dark .workspace-route .workspace-section-header,
+html.theme-dark .workspace-resource-drawer .workspace-section-header {
+  border-bottom-color: rgb(100 116 139 / 0.4);
+  background-color: rgb(17 26 43 / 0.92) !important;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 4px 12px -6px rgb(0 0 0 / 0.24);
+}
+
+/* The floating outline stays on the same element as the header content. */
+.page-header-surface[data-scrolled="true"] {
+  border-color: rgb(148 163 184 / 0.35);
+}
+
+html.theme-dark .page-header-surface[data-scrolled="true"] {
+  border-color: rgb(100 116 139 / 0.4);
+}
+
+html.theme-dark .workspace-route .workspace-sidebar {
+  background-color: #0d1726 !important;
+}
+
+html.theme-dark .workspace-route .workspace-context-sidebar {
+  background-color: #101b2b !important;
+}
+
 html.theme-dark .workspace-route .workspace-back-link {
   color: #d9e5f5 !important;
 }
@@ -546,7 +589,8 @@ html.theme-dark .workspace-route .workspace-nav-link:not(.workspace-nav-link--ac
 html.theme-dark .workspace-route .workspace-nav-link--active {
   background-color: #1b385c !important;
   color: #c7e0ff !important;
-  box-shadow: inset 0 0 0 1px #365a83;
+  border-color: #669be3;
+  box-shadow: none;
 }
 
 html.theme-dark .workspace-route .workspace-nav-link--active:hover {

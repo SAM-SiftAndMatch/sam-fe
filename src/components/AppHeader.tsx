@@ -191,13 +191,14 @@ const AppHeader: React.FC = () => {
     ));
 
   return (
-    <header className="app-header sticky top-0 z-50 flex h-16 w-full items-center justify-center pointer-events-none transition-all duration-300">
+    <header className="app-header sticky top-0 z-50 flex h-16 w-full shrink-0 items-center justify-center pointer-events-none">
       <div
-        className={`app-header-shell pointer-events-auto relative flex w-full items-center justify-between gap-3 transition-all duration-300 ease-out ${
+        className={`app-header-shell page-header-surface pointer-events-auto relative flex w-full items-center justify-between gap-3 border border-transparent transition-all duration-300 ease-out motion-reduce:transition-none ${
           isScrolled
-            ? 'app-header-shell--scrolled mx-4 h-[56px] max-w-[1160px] translate-y-2 rounded-full border border-slate-200/80 bg-white/80 px-5 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-md sm:px-7'
-            : 'mx-auto h-16 max-w-[1440px] border-b border-transparent bg-transparent px-4 sm:px-6 lg:px-8'
+            ? 'mx-4 h-[56px] translate-y-2 rounded-full px-5 sm:px-7 xl:mx-auto xl:w-[84%]'
+            : 'mx-0 h-16 translate-y-0 rounded-none px-4 sm:px-6 lg:px-8'
         }`}
+        data-scrolled={isScrolled}
       >
         <button
           type="button"

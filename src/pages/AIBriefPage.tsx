@@ -258,6 +258,11 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
               : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm shadow-sm'
           }`}
         >
+          {message.outOfScope && (
+            <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+              Ngoài phạm vi dự án
+            </p>
+          )}
           <ReactMarkdown
             components={{
               p: ({ children }) => <span className="block whitespace-pre-wrap">{children}</span>,
@@ -648,6 +653,7 @@ const AIBriefPage: React.FC = () => {
             content: turn.aiResponse.aiMessage || '',
             timestamp: new Date(turn.createdAt),
             questions: turn.aiResponse.questions,
+            outOfScope: turn.aiResponse.status === 'OUT_OF_SCOPE',
           },
         ];
       });
@@ -851,6 +857,7 @@ const AIBriefPage: React.FC = () => {
       content: response.aiMessage || '',
       timestamp: new Date(),
       questions: response.questions,
+      outOfScope: response.status === 'OUT_OF_SCOPE',
     };
     setBaMessages((prev) => [...prev, aiMsg]);
 
@@ -897,6 +904,10 @@ const AIBriefPage: React.FC = () => {
     try {
       const { response, turnId } = await sendDraftTurn('BA', userMessage, userMessage);
       if (requestId !== baRequestId.current) return;
+      if (response.status === 'OUT_OF_SCOPE') {
+        handleBaResponse(response, turnId);
+        return;
+      }
       if (response.status !== 'ASKING' || !response.questions?.length) {
         throw new Error('AI did not return clarification questions for the first turn');
       }
@@ -925,17 +936,6 @@ const AIBriefPage: React.FC = () => {
         timestamp: new Date(),
       };
       setBaMessages((prev) => [...prev, userMsg]);
-      if (latestSrsContent) {
-        setLatestSrsContent(null);
-        setLatestSrsUrl(null);
-      }
-      // A revised brief invalidates any risk analysis produced from the previous SRS.
-      if (riskMessages.length > 0) {
-        setRiskMessages([]);
-        setRiskInput('');
-        setExactBudgetVnd(null);
-        setDurationMonths(null);
-      }
       setBaInput('');
       setIsBaSending(true);
       setError(null);
@@ -944,6 +944,19 @@ const AIBriefPage: React.FC = () => {
       try {
         const { response, turnId } = await sendDraftTurn('BA', msg, projectBrief);
         if (requestId !== baRequestId.current) return;
+        if (response.status !== 'OUT_OF_SCOPE') {
+          if (latestSrsContent) {
+            setLatestSrsContent(null);
+            setLatestSrsUrl(null);
+          }
+          // A revised brief invalidates any risk analysis produced from the previous SRS.
+          if (riskMessages.length > 0) {
+            setRiskMessages([]);
+            setRiskInput('');
+            setExactBudgetVnd(null);
+            setDurationMonths(null);
+          }
+        }
         handleBaResponse(response, turnId);
         // BA đã hoàn tất: đưa khách sang màn review SRS, không tự động vào Risk Chat.
         if (response.status === 'COMPLETED') {
@@ -1001,6 +1014,7 @@ const AIBriefPage: React.FC = () => {
         content: response.aiMessage || '',
         timestamp: new Date(),
         questions: response.questions,
+        outOfScope: response.status === 'OUT_OF_SCOPE',
       };
       setRiskMessages([userMsg, aiMsg]);
 
@@ -1048,6 +1062,7 @@ const AIBriefPage: React.FC = () => {
           content: response.aiMessage || '',
           timestamp: new Date(),
           questions: response.questions,
+          outOfScope: response.status === 'OUT_OF_SCOPE',
         };
         setRiskMessages((prev) => [...prev, aiMsg]);
 

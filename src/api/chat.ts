@@ -25,6 +25,31 @@ export interface ChatRoom {
   createdAt?: string | null;
 }
 
+export interface ChatAttachment {
+  id: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+}
+
+export interface SharedChatAttachment extends ChatAttachment {
+  messageId: string;
+  senderName: string;
+  sentAt: string;
+}
+export interface SharedChatLinks {
+  messageId: string;
+  senderName: string;
+  sentAt: string;
+  links: string[];
+}
+
+export interface SendChatMessage {
+  content: string;
+  attachmentIds?: string[];
+  clientMessageId: string;
+}
+
 export interface ChatMessage {
   id: string;
   roomId: string;
@@ -33,9 +58,60 @@ export interface ChatMessage {
   content: string;
   createdAt?: string | null;
   system?: boolean | null;
+  attachments?: ChatAttachment[];
 }
 
 export const chatApi = {
+  getSharedAttachments: async (
+    roomId: string,
+    type: 'images' | 'files',
+    page = 0
+  ): Promise<PageResult<SharedChatAttachment>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<SharedChatAttachment>>>(
+      `/chat/rooms/${roomId}/attachments`,
+      { params: { type, page, size: 18 } }
+    );
+    return requireApiResult(res.data, 'Không tải được tệp đã chia sẻ.');
+  },
+  getSharedLinks: async (roomId: string, page = 0): Promise<PageResult<SharedChatLinks>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<SharedChatLinks>>>(
+      `/chat/rooms/${roomId}/shared-links`,
+      { params: { page, size: 18 } }
+    );
+    return requireApiResult(res.data, 'Không tải được liên kết đã chia sẻ.');
+  },
+  sendMessage: async (roomId: string, input: SendChatMessage): Promise<ChatMessage> => {
+    const res = await apiClient.post<ApiResponse<ChatMessage>>(
+      `/chat/rooms/${roomId}/messages`,
+      input
+    );
+    return requireApiResult(res.data, 'Không gửi được tin nhắn. Vui lòng thử lại.');
+  },
+  uploadAttachment: async (
+    roomId: string,
+    file: File,
+    signal?: AbortSignal
+  ): Promise<ChatAttachment> => {
+    const form = new FormData();
+    form.append('file', file);
+    const res = await apiClient.post<ApiResponse<ChatAttachment>>(
+      `/chat/rooms/${roomId}/attachments`,
+      form,
+      { signal, headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return requireApiResult(res.data, 'Không tải được tệp đính kèm.');
+  },
+  getAttachmentBlob: async (
+    roomId: string,
+    attachmentId: string,
+    signal?: AbortSignal
+  ): Promise<Blob> => {
+    const res = await apiClient.get<Blob>(
+      `/chat/rooms/${roomId}/attachments/${attachmentId}/content`,
+      { responseType: 'blob', signal }
+    );
+    return res.data;
+  },
   unreadCount: async (): Promise<number> => {
     const res = await apiClient.get<ApiResponse<number>>('/chat/unread-count');
     return requireApiResult(res.data, 'Failed to fetch unread message count');

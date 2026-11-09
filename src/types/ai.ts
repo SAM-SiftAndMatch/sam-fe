@@ -18,7 +18,13 @@ export interface AiChatRequest {
 }
 
 // Khớp BE: AiChatResponse.java
-export type AiChatStatus = 'ASKING' | 'GENERATING' | 'COMPLETED' | 'NEGOTIATING' | 'FINALIZED';
+export type AiChatStatus =
+  | 'ASKING'
+  | 'GENERATING'
+  | 'COMPLETED'
+  | 'NEGOTIATING'
+  | 'FINALIZED'
+  | 'OUT_OF_SCOPE';
 
 export interface AiChatResponse {
   status: AiChatStatus;
@@ -42,4 +48,5 @@ export interface ChatMessage {
   timestamp: Date;
   /** Chỉ có ở tin nhắn của AI khi trả về câu hỏi follow-up */
   questions?: AiQuestion[] | null;
+  outOfScope?: boolean;
 }
