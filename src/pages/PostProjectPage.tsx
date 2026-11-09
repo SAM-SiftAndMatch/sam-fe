@@ -6,6 +6,7 @@ import jobApi from '../api/job';
 import { projectDraftApi } from '../api/projectDrafts';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
+import { MINIMUM_PROJECT_BUDGET } from '../lib/participation-policy';
 import { PATH_CLIENT_CONFIRM_PROJECT } from '../routes/paths';
 import type { ProjectDraft } from '../types/projectDraft';
 
@@ -63,7 +64,7 @@ const PostProjectPage: React.FC = () => {
     category: initialCategory = '',
     description: initialDescription = '',
     selectedSkills: initialSkills = [],
-    budgetAmount: initialBudgetAmount = 1000000,
+    budgetAmount: initialBudgetAmount = MINIMUM_PROJECT_BUDGET,
     upgrades: initialUpgrades = { featured: false, urgent: false },
     restoreStep = 1,
     srsDocumentUrl: initialSrsDocumentUrl = '',
@@ -140,9 +141,13 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
   }, [selectedTags, keyword, description]);
 
   const [budgetType, setBudgetType] = useState('ai'); // 'min', 'ai', 'max', 'custom'
-  const [budgetAmount, setBudgetAmount] = useState(initialBudgetAmount); // Giá trị mặc định
+  const [budgetAmount, setBudgetAmount] = useState(
+    Math.max(MINIMUM_PROJECT_BUDGET, initialBudgetAmount)
+  ); // Giá trị mặc định
   const [aiPricingState, setAiPricingState] = useState<'idle' | 'analyzing' | 'done'>('idle');
-  const [aiSuggestedPrice, setAiSuggestedPrice] = useState(initialBudgetAmount);
+  const [aiSuggestedPrice, setAiSuggestedPrice] = useState(
+    Math.max(MINIMUM_PROJECT_BUDGET, initialBudgetAmount)
+  );
   const [isInsightExpanded, setIsInsightExpanded] = useState(false);
   const [duration, setDuration] = useState('fast'); // 'fast', 'normal', 'slow'
   const defaultDeadline = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
@@ -157,7 +162,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
 
       setTimeout(() => {
         // Giả lập tính toán giá dựa trên độ dài description hoặc tags
-        let basePrice = 1000000;
+        let basePrice = MINIMUM_PROJECT_BUDGET;
         if (description.length > 500) basePrice += 500000;
 
         const hasUrgency = selectedTags.some(
@@ -204,8 +209,12 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
         setDescription(saved.description ?? draft.brief ?? '');
         setSelectedSkills(saved.selectedSkills ?? []);
         setSelectedTags(saved.selectedTags ?? []);
-        setBudgetAmount(saved.budgetAmount ?? initialBudgetAmount);
-        setAiSuggestedPrice(saved.budgetAmount ?? initialBudgetAmount);
+        setBudgetAmount(
+          Math.max(MINIMUM_PROJECT_BUDGET, saved.budgetAmount ?? initialBudgetAmount)
+        );
+        setAiSuggestedPrice(
+          Math.max(MINIMUM_PROJECT_BUDGET, saved.budgetAmount ?? initialBudgetAmount)
+        );
         setAiPricingState('done');
         setBudgetType(saved.budgetType ?? 'ai');
         setDuration(saved.duration ?? 'fast');
@@ -785,7 +794,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                     <div className="w-full max-w-lg mx-auto relative px-4">
                       <input
                         type="range"
-                        min={500000}
+                        min={MINIMUM_PROJECT_BUDGET}
                         max={100000000}
                         step={500000}
                         value={budgetAmount}
@@ -795,11 +804,11 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                         }}
                         className="w-full h-2 rounded-lg appearance-none cursor-pointer outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-[#1D4ED8] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-[0_0_0_1px_#1D4ED8,0_2px_4px_rgba(0,0,0,0.1)]"
                         style={{
-                          background: `linear-gradient(to right, #1D4ED8 ${((budgetAmount - 500000) / (100000000 - 500000)) * 100}%, #E5E7EB ${((budgetAmount - 500000) / (100000000 - 500000)) * 100}%)`,
+                          background: `linear-gradient(to right, #1D4ED8 ${((budgetAmount - MINIMUM_PROJECT_BUDGET) / (100000000 - MINIMUM_PROJECT_BUDGET)) * 100}%, #E5E7EB ${((budgetAmount - MINIMUM_PROJECT_BUDGET) / (100000000 - MINIMUM_PROJECT_BUDGET)) * 100}%)`,
                         }}
                       />
                       <div className="flex justify-between mt-2 text-[10px] font-semibold text-gray-400">
-                        <span>500.000</span>
+                        <span>3.000.000đ (tối thiểu)</span>
                         <span>100.000.000</span>
                       </div>
                     </div>
@@ -810,7 +819,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                       type="button"
                       onClick={() => {
                         setBudgetType('min');
-                        setBudgetAmount(aiSuggestedPrice * 0.7);
+                        setBudgetAmount(
+                          Math.max(MINIMUM_PROJECT_BUDGET, Math.round(aiSuggestedPrice * 0.7))
+                        );
                       }}
                       className={`p-4 rounded-2xl border ${budgetType === 'min' ? 'border-[#1D4ED8] bg-[#EEF2FF]' : 'border-gray-200 bg-white hover:border-gray-300'} flex flex-col items-center justify-center transition-colors cursor-pointer`}
                     >
@@ -818,7 +829,9 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                         Mức thấp nhất
                       </span>
                       <span className="text-xl font-bold text-gray-900">
-                        {new Intl.NumberFormat('vi-VN').format(aiSuggestedPrice * 0.7)}
+                        {new Intl.NumberFormat('vi-VN').format(
+                          Math.max(MINIMUM_PROJECT_BUDGET, Math.round(aiSuggestedPrice * 0.7))
+                        )}
                       </span>
                     </button>
                     <button

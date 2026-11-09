@@ -7,6 +7,7 @@ import { projectDraftApi } from '../api/projectDrafts';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { beginCheckout } from '../lib/checkout';
+import { MINIMUM_PROJECT_BUDGET } from '../lib/participation-policy';
 import {
   PATH_CLIENT_AI_BRIEF,
   PATH_CLIENT_POST_PROJECT,
@@ -172,6 +173,11 @@ const ConfirmProjectPage: React.FC = () => {
   }, [upgrades, prices.data]);
 
   const handleConfirm = async () => {
+    const projectBudget = state.exactBudgetVnd ?? state.budgetAmount ?? MINIMUM_PROJECT_BUDGET;
+    if (!Number.isInteger(projectBudget) || projectBudget < MINIMUM_PROJECT_BUDGET) {
+      setError('Ngân sách tối thiểu là 3.000.000đ. Vui lòng quay lại bước ngân sách để cập nhật.');
+      return;
+    }
     if (draftId && (!draft || draftLoading)) {
       setError('Chưa tải xong bản nháp. Vui lòng thử lại.');
       return;
@@ -222,7 +228,11 @@ const ConfirmProjectPage: React.FC = () => {
           },
         });
       }
-      const budget = state.exactBudgetVnd || state.budgetAmount || 1000000;
+      const budget = state.exactBudgetVnd ?? state.budgetAmount ?? MINIMUM_PROJECT_BUDGET;
+      if (!Number.isInteger(budget) || budget < MINIMUM_PROJECT_BUDGET)
+        throw new Error(
+          'Ngân sách tối thiểu là 3.000.000đ. Vui lòng cập nhật ngân sách trước khi đăng.'
+        );
       const durationMonths = state.durationMonths || 3;
 
       const finalTitle = isFromAi ? title.trim() : state.projectName || 'Dự án mới';

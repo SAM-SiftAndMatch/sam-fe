@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { contactFields } from './contact-schema';
 
 export const freelancerSkillSchema = z.object({
   skillId: z.number().optional().nullable(),
@@ -7,6 +8,7 @@ export const freelancerSkillSchema = z.object({
 });
 
 export const freelancerProfileSchema = z.object({
+  ...contactFields,
   headline: z
     .string()
     .min(1, 'Tiêu đề nghề nghiệp không được để trống')

@@ -41,10 +41,13 @@ export const authApi = {
       tokenManager.clearToken();
     }
   },
-  completeGoogle: async (role: 'CLIENT' | 'FREELANCER'): Promise<AuthResponse> => {
+  completeGoogle: async (
+    role: 'CLIENT' | 'FREELANCER',
+    acceptedTerms: boolean
+  ): Promise<AuthResponse> => {
     const res = await apiClient.post<ApiResponse<AuthResponse>>('/auth/google/complete', {
       role,
-      acceptedTerms: true,
+      acceptedTerms,
     });
     const auth = res.data.result;
     if (!auth) throw new Error(res.data.message || 'Không hoàn tất được đăng ký Google');

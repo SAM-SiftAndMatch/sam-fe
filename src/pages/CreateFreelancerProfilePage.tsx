@@ -1,14 +1,17 @@
 import { type FreelancerProfileFormData, freelancerProfileSchema } from '@/features/profile';
 import { MyPackagesSection } from '@/features/subscription';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { NumericFormat } from 'react-number-format';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { profileApi } from '../api/profile';
 import AppHeader from '../components/AppHeader';
+import ProfileContactFields from '../components/ProfileContactFields';
+import { isParticipationProfileComplete } from '../lib/participation-policy';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import { FALLBACK_SKILLS, type SkillOption } from '../types/profile';
@@ -23,6 +26,9 @@ interface DuplicateConflict {
 
 const CreateFreelancerProfilePage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryClient = useQueryClient();
+  const returnContext = location.state as { returnTo?: string; returnState?: unknown } | null;
   const { user } = useAuthStore();
 
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
@@ -49,6 +55,10 @@ const CreateFreelancerProfilePage: React.FC = () => {
   } = useForm<FreelancerProfileFormData>({
     resolver: zodResolver(freelancerProfileSchema),
     defaultValues: {
+      contractName: user?.fullName || '',
+      contactEmail: user?.email || '',
+      phoneNumber: '',
+      acceptedTerms: false,
       headline: '',
       bio: '',
       hourlyRate: null,
@@ -103,6 +113,10 @@ const CreateFreelancerProfilePage: React.FC = () => {
         const data = await profileApi.getFreelancerProfile();
         if (isMounted && data) {
           reset({
+            contractName: data.contractName || data.fullName || '',
+            contactEmail: data.contactEmail || data.email || '',
+            phoneNumber: data.phoneNumber || '',
+            acceptedTerms: isParticipationProfileComplete(data),
             headline: data.headline || '',
             bio: data.bio || '',
             hourlyRate: data.hourlyRate ? Number(data.hourlyRate) : null,
@@ -216,6 +230,10 @@ const CreateFreelancerProfilePage: React.FC = () => {
 
     try {
       await profileApi.updateFreelancerProfile({
+        contractName: data.contractName.trim(),
+        contactEmail: data.contactEmail.trim(),
+        phoneNumber: data.phoneNumber.trim(),
+        acceptedTerms: data.acceptedTerms,
         headline: data.headline.trim(),
         bio: data.bio?.trim() || null,
         hourlyRate:
@@ -232,6 +250,11 @@ const CreateFreelancerProfilePage: React.FC = () => {
       });
 
       setSuccessMessage('Hồ sơ đã được lưu và cập nhật thành công!');
+      await queryClient.invalidateQueries({ queryKey: ['participation-profile', user?.userId] });
+      if (returnContext?.returnTo?.startsWith('/') && !returnContext.returnTo.startsWith('//')) {
+        navigate(returnContext.returnTo, { replace: true, state: returnContext.returnState });
+        return;
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
@@ -302,6 +325,19 @@ const CreateFreelancerProfilePage: React.FC = () => {
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {returnContext?.returnTo && (
+                <p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+                  Hoàn thiện hồ sơ để tiếp tục đăng hoặc tham gia dự án. Sau khi lưu, bạn sẽ trở lại
+                  bước đang thực hiện.
+                </p>
+              )}
+              <ProfileContactFields
+                contractName={register('contractName')}
+                contactEmail={register('contactEmail')}
+                phoneNumber={register('phoneNumber')}
+                acceptedTerms={register('acceptedTerms')}
+                errors={errors}
+              />
               {/* Paper CV Card */}
               <div className="bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-6 md:p-10 space-y-8">
                 {/* Section 1: User Identity Header */}
