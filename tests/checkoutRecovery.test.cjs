@@ -67,6 +67,7 @@ function renderStatus(paymentStatus, mutation = {}) {
           checkoutId: (value) => value || null,
           safePaymentDestination: () => '/client/pricing',
           checkoutMessage: (value) => value.paymentStatus,
+          checkoutPurposeLabel: () => 'Gói dịch vụ',
         };
       if (name.startsWith('../components/'))
         return {
@@ -80,7 +81,7 @@ function renderStatus(paymentStatus, mutation = {}) {
 
 test('expired checkout offers recovery and explains when the buyer must not pay again', () => {
   const html = renderStatus('EXPIRED');
-  assert.match(html, /Khôi phục thanh toán/);
+  assert.match(html, /Tạo lại liên kết thanh toán/);
   assert.match(html, /Nếu đã chuyển tiền/);
   assert.doesNotMatch(html, /Tiếp tục thanh toán/);
 });
@@ -88,25 +89,25 @@ test('expired checkout offers recovery and explains when the buyer must not pay 
 test('paid and uncertain orders do not offer closing or another payment', () => {
   for (const state of ['PAID', 'UNKNOWN', 'REVIEW', 'CREATING']) {
     const html = renderStatus(state);
-    assert.doesNotMatch(html, /Khôi phục thanh toán/);
+    assert.doesNotMatch(html, /Tạo lại liên kết thanh toán/);
     assert.doesNotMatch(html, /Tiếp tục thanh toán/);
   }
 });
 
 test('recovery waits for provider confirmation and surfaces safe server errors', () => {
   assert.match(renderStatus('EXPIRED', { isPending: true }), /disabled=""/);
-  assert.match(renderStatus('EXPIRED', { isPending: true }), /Đang xác nhận với Pay2S/);
+  assert.match(renderStatus('EXPIRED', { isPending: true }), /Đang khôi phục thanh toán/);
   assert.match(
     renderStatus('EXPIRED', { isError: true, error: { message: 'Đã có thông tin nhận tiền' } }),
     /Đã có thông tin nhận tiền/
   );
 });
 
-test('confirmed closure sends the buyer back through the original business purchase', () => {
+test('cancelled checkout offers the same one-click recovery without sending the buyer back to purchase', () => {
   const html = renderStatus('CANCELLED', { isSuccess: true, data: { orderId: id } });
-  assert.match(html, /Đã đóng liên kết cũ/);
+  assert.match(html, /Tạo lại liên kết thanh toán/);
   assert.match(html, /Quay lại dịch vụ/);
-  assert.doesNotMatch(html, /Khôi phục thanh toán/);
+  assert.match(html, /tạo lại tự động/);
 });
 
 test('recovery state from a previous account is not shown to the current buyer', () => {

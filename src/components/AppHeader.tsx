@@ -58,7 +58,7 @@ const AppHeader: React.FC = () => {
   });
 
   const navItems: NavItem[] = isAdmin
-    ? [{ label: 'Vận hành tài chính', path: '/admin/finance' }]
+    ? [{ label: 'Quản trị SAM', path: '/admin' }]
     : isClient
       ? [
           { label: 'Dự án', path: PATH_CLIENT_PROJECTS },
@@ -76,12 +76,12 @@ const AppHeader: React.FC = () => {
           { label: 'Thanh toán', path: '/payments/history' },
         ];
   const profilePath = isAdmin
-    ? '/admin/finance'
+    ? '/admin'
     : isClient
       ? PATH_CLIENT_PROFILE
       : PATH_FREELANCER_CREATE_PROFILE;
   const profileLabel = isAdmin ? 'Quản trị' : isClient ? 'Hồ sơ công ty' : 'Hồ sơ của tôi';
-  const homePath = isAdmin ? '/admin/finance' : isClient ? PATH_CLIENT_DASHBOARD : PATH_FREELANCER;
+  const homePath = isAdmin ? '/admin' : isClient ? PATH_CLIENT_DASHBOARD : PATH_FREELANCER;
 
   useEffect(() => {
     const closeOnOutsideClick = (event: MouseEvent) => {
