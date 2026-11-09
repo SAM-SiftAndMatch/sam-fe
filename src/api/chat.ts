@@ -32,6 +32,18 @@ export interface ChatAttachment {
   sizeBytes: number;
 }
 
+export interface SharedChatAttachment extends ChatAttachment {
+  messageId: string;
+  senderName: string;
+  sentAt: string;
+}
+export interface SharedChatLinks {
+  messageId: string;
+  senderName: string;
+  sentAt: string;
+  links: string[];
+}
+
 export interface SendChatMessage {
   content: string;
   attachmentIds?: string[];
@@ -50,6 +62,24 @@ export interface ChatMessage {
 }
 
 export const chatApi = {
+  getSharedAttachments: async (
+    roomId: string,
+    type: 'images' | 'files',
+    page = 0
+  ): Promise<PageResult<SharedChatAttachment>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<SharedChatAttachment>>>(
+      `/chat/rooms/${roomId}/attachments`,
+      { params: { type, page, size: 18 } }
+    );
+    return requireApiResult(res.data, 'Không tải được tệp đã chia sẻ.');
+  },
+  getSharedLinks: async (roomId: string, page = 0): Promise<PageResult<SharedChatLinks>> => {
+    const res = await apiClient.get<ApiResponse<PageResult<SharedChatLinks>>>(
+      `/chat/rooms/${roomId}/shared-links`,
+      { params: { page, size: 18 } }
+    );
+    return requireApiResult(res.data, 'Không tải được liên kết đã chia sẻ.');
+  },
   sendMessage: async (roomId: string, input: SendChatMessage): Promise<ChatMessage> => {
     const res = await apiClient.post<ApiResponse<ChatMessage>>(
       `/chat/rooms/${roomId}/messages`,

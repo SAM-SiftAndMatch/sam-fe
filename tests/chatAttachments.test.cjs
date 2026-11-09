@@ -14,7 +14,14 @@ function load(file, dependency = require) {
       target: ts.ScriptTarget.ES2022,
     },
   }).outputText;
-  vm.runInNewContext(code, { exports, module: { exports }, require: dependency, FormData, Blob });
+  vm.runInNewContext(code, {
+    exports,
+    module: { exports },
+    require: dependency,
+    FormData,
+    Blob,
+    URL,
+  });
   return exports;
 }
 const policy = load('src/lib/chat-attachments.ts');
@@ -95,4 +102,52 @@ test('REST acknowledgement and websocket echo merge into a single attachment mes
   const echoed = appendConfirmedMessage(confirmed, message);
   assert.equal(echoed.pages[0].items.length, 1);
   assert.equal(echoed.pages[0].items[0].attachments[0].id, 'file-a');
+});
+
+test('shared history requests keep room, resource category and pagination separate', async () => {
+  const calls = [];
+  const page = { items: [], page: 2, size: 18, totalElements: 40, totalPages: 3, hasNext: false };
+  const { chatApi } = load('src/api/chat.ts', (name) => {
+    if (name === '../lib/axios')
+      return {
+        default: {
+          get: async (...args) => {
+            calls.push(args);
+            return { data: { result: page } };
+          },
+        },
+      };
+    if (name === '../lib/api-error') return { requireApiResult: (response) => response.result };
+    return require(name);
+  });
+  assert.equal(await chatApi.getSharedAttachments('room-a', 'files', 2), page);
+  assert.equal(calls[0][0], '/chat/rooms/room-a/attachments');
+  assert.equal(calls[0][1].params.type, 'files');
+  assert.equal(calls[0][1].params.page, 2);
+  assert.equal(calls[0][1].params.size, 18);
+  await chatApi.getSharedAttachments('room-b', 'images');
+  assert.equal(calls[1][0], '/chat/rooms/room-b/attachments');
+  assert.equal(calls[1][1].params.type, 'images');
+  assert.equal(calls[1][1].params.page, 0);
+  assert.equal(await chatApi.getSharedLinks('room-a', 2), page);
+  assert.equal(calls[2][0], '/chat/rooms/room-a/shared-links');
+  assert.equal(calls[2][1].params.page, 2);
+});
+
+test('shared links safely ignore malformed, non-web and credential URLs', () => {
+  const { parseSharedChatLink } = load('src/lib/chat-links.ts');
+  for (const value of [
+    'bad url',
+    'https://',
+    'javascript:alert(1)',
+    'data:text/plain,test',
+    'file:///tmp/file',
+    'https://user:pass@example.com',
+    'https://example.com:99999',
+  ]) {
+    assert.equal(parseSharedChatLink(value), null, value);
+  }
+  const link = parseSharedChatLink('https://example.com/docs?q=project#section');
+  assert.equal(link.hostname, 'example.com');
+  assert.equal(link.url, 'https://example.com/docs?q=project#section');
 });

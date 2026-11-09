@@ -47,7 +47,7 @@ function Preview({
       onClose={() => {
         if (!ref.current?.open) onClose();
       }}
-      className="fixed inset-0 m-auto max-h-[95dvh] w-[95vw] max-w-5xl overflow-hidden rounded-2xl border-0 bg-slate-950 p-0 text-white shadow-2xl backdrop:bg-black/70"
+      className="fixed inset-0 m-auto max-h-[95dvh] w-[95vw] max-w-5xl overflow-hidden rounded-2xl border-0 bg-slate-950 p-0 text-white shadow-none backdrop:bg-black/70"
     >
       <div className="flex items-center justify-end gap-3 p-4">
         {!image && <p className="mr-auto truncate text-sm">{attachment.fileName}</p>}
@@ -83,12 +83,19 @@ function Preview({
   );
 }
 
-function Attachment({
+export function ChatAttachmentItem({
   roomId,
   readerId,
   attachment,
   onImageLoad,
-}: { roomId: string; readerId: string; attachment: ChatAttachment; onImageLoad?: () => void }) {
+  thumbnail = false,
+}: {
+  roomId: string;
+  readerId: string;
+  attachment: ChatAttachment;
+  onImageLoad?: () => void;
+  thumbnail?: boolean;
+}) {
   const image = attachment.contentType.startsWith('image/');
   const pdf = attachment.contentType === 'application/pdf';
   const container = useRef<HTMLDivElement>(null);
@@ -146,7 +153,7 @@ function Attachment({
   return (
     <div
       ref={container}
-      className={`min-w-0 max-w-full overflow-hidden text-slate-800 ${image ? 'w-fit' : 'w-full rounded-xl border border-slate-200'}`}
+      className={`min-w-0 max-w-full overflow-hidden text-slate-800 ${image ? (thumbnail ? 'w-full' : 'w-fit') : 'w-full rounded-xl border border-slate-200'}`}
     >
       {image && (
         <button
@@ -154,7 +161,7 @@ function Attachment({
           onClick={() => void open()}
           disabled={!url || query.isFetching}
           aria-label="Xem ảnh"
-          className="block max-w-full overflow-hidden rounded-2xl bg-transparent text-center"
+          className={`block max-w-full overflow-hidden rounded-2xl bg-transparent text-center ${thumbnail ? 'w-full' : ''}`}
         >
           {url ? (
             <img
@@ -162,7 +169,11 @@ function Attachment({
               alt="Ảnh trong cuộc trò chuyện"
               loading="lazy"
               onLoad={onImageLoad}
-              className="block max-h-72 max-w-full rounded-2xl object-contain"
+              className={
+                thumbnail
+                  ? 'block h-24 w-full rounded-xl object-cover'
+                  : 'block max-h-72 max-w-full rounded-2xl object-contain'
+              }
             />
           ) : (
             <span className="block p-6 text-xs text-slate-500">
@@ -233,7 +244,7 @@ export default function ChatMessageAttachments({
       className={`grid w-72 min-w-0 max-w-full gap-2 sm:w-80 ${alignEnd ? 'justify-items-end' : 'justify-items-start'}`}
     >
       {attachments.map((attachment) => (
-        <Attachment
+        <ChatAttachmentItem
           key={attachment.id}
           roomId={roomId}
           readerId={readerId}

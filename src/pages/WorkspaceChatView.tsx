@@ -1,10 +1,13 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ListChecks, Menu } from 'lucide-react';
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { type ChatMessage, chatApi } from '../api/chat';
 import { workflowApi } from '../api/workflow';
 import ChatComposer from '../components/chat/ChatComposer';
 import ChatMessageAttachments from '../components/chat/ChatMessageAttachments';
+import WorkspacePanelDrawer from '../components/chat/WorkspacePanelDrawer';
+import WorkspaceResourcesPanel from '../components/chat/WorkspaceResourcesPanel';
 import { formatMoney } from '../utils/format';
 import type { WorkspaceContext } from './WorkspaceLayout';
 import { workspaceKeys } from './workspace-query';
@@ -17,7 +20,7 @@ const ChatBubble = memo(function ChatBubble({
   if (message.system) {
     return (
       <div className="flex justify-center">
-        <div className="workspace-system-message max-w-[90%] bg-gradient-to-br from-violet-600 via-[#6D28D9] to-[#1D4ED8] text-white rounded-3xl px-5 py-4 shadow-lg">
+        <div className="workspace-system-message max-w-[90%] bg-gradient-to-br from-violet-600 via-[#6D28D9] to-[#1D4ED8] text-white rounded-3xl px-5 py-4 shadow-none">
           <p className="text-[11px] font-extrabold uppercase tracking-widest text-white/80 mb-1.5">
             SAM AI hệ thống
           </p>
@@ -40,7 +43,7 @@ const ChatBubble = memo(function ChatBubble({
     >
       {message.content && (
         <div
-          className={`max-w-full rounded-2xl p-4 text-sm leading-relaxed ${mine ? 'bg-[#1D4ED8] text-white rounded-tr-sm shadow-md' : 'bg-white text-gray-800 rounded-tl-sm shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100'}`}
+          className={`max-w-full rounded-2xl p-4 text-sm leading-relaxed ${mine ? 'rounded-tr-sm bg-[#1D4ED8] text-white' : 'rounded-tl-sm border border-slate-200 bg-white text-gray-800'}`}
         >
           <p className="whitespace-pre-wrap break-words">{message.content}</p>
         </div>
@@ -86,7 +89,7 @@ function WorkflowPreview({ context }: { context: WorkspaceContext }) {
     refetchOnWindowFocus: true,
   });
   return (
-    <div className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
+    <div className="rounded-3xl border border-slate-200 bg-white p-4">
       <h3 className="text-[17px] font-bold text-gray-900">Tiến độ dự án</h3>
       {timeline ? (
         <>
@@ -101,7 +104,10 @@ function WorkflowPreview({ context }: { context: WorkspaceContext }) {
           </div>
           <div className="mt-4 flex flex-col gap-2">
             {timeline.tasks.slice(0, 3).map((task) => (
-              <div key={task.id} className="rounded-xl bg-slate-50 p-3 text-xs text-gray-700">
+              <div
+                key={task.id}
+                className="rounded-xl border-l-2 border-slate-200 bg-slate-50 p-3 text-xs text-gray-700"
+              >
                 <p className="font-semibold line-clamp-2">{task.title}</p>
                 <p className="mt-1 text-gray-500">
                   Tuần {task.weekNumber} · {task.progress}%
@@ -133,6 +139,7 @@ export default function WorkspaceChatView() {
   const location = useLocation();
   const queryClient = useQueryClient();
   const wide = useWideWorkspace();
+  const [sidePanel, setSidePanel] = useState<'timeline' | 'resources' | null>(null);
   const [awaitingReview, setAwaitingReview] = useState(
     () => (location.state as { awaitingReview?: boolean } | null)?.awaitingReview === true
   );
@@ -219,28 +226,63 @@ export default function WorkspaceChatView() {
     });
   };
 
+  const panelControls = (
+    <div className="flex items-center gap-1" aria-label="Chọn thông tin cuộc hội thoại">
+      {(
+        [
+          ['resources', 'Xem ảnh, tệp và liên kết đã gửi', Menu],
+          ['timeline', 'Xem tiến độ thu nhỏ', ListChecks],
+        ] as const
+      ).map(([value, label, Icon]) => (
+        <button
+          key={value}
+          type="button"
+          aria-label={label}
+          title={label}
+          aria-pressed={sidePanel === value}
+          aria-expanded={sidePanel === value}
+          onClick={() => setSidePanel((current) => (current === value ? null : value))}
+          className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${sidePanel === value ? 'bg-blue-50 text-blue-700' : 'text-slate-500 hover:bg-slate-100'}`}
+        >
+          <Icon size={19} aria-hidden="true" />
+        </button>
+      ))}
+    </div>
+  );
+  const panelContent =
+    sidePanel === 'timeline' ? (
+      <WorkflowPreview context={context} />
+    ) : (
+      <WorkspaceResourcesPanel
+        key={`${userId}:${summary.roomId}`}
+        roomId={summary.roomId}
+        userId={userId}
+      />
+    );
+
   return (
     <>
-      <section className="flex-1 flex flex-col min-w-0 h-full border border-gray-100 bg-white/50 backdrop-blur-sm rounded-[32px] overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-        <div className="bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between rounded-t-[32px] shadow-sm z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-[#EEF2FF] text-[#1D4ED8] rounded-full flex items-center justify-center font-extrabold text-xl">
+      <section className="workspace-chat flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[32px] bg-white">
+        <div className="workspace-section-header relative z-10 flex shrink-0 items-center justify-between gap-3 border-b px-4 py-4 md:px-6">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <div className="w-12 h-12 shrink-0 bg-[#EEF2FF] text-[#1D4ED8] rounded-full flex items-center justify-center font-extrabold text-xl">
               {otherName.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 leading-none mb-1">{otherName}</h3>
-              <p className="text-[11px] font-bold text-gray-400">Dự án: {summary.jobTitle}</p>
+            <div className="min-w-0">
+              <h3
+                title={otherName}
+                className="mb-1 truncate text-lg font-bold leading-none text-gray-900"
+              >
+                {otherName}
+              </h3>
+              <p title={summary.jobTitle} className="truncate text-[11px] font-bold text-gray-400">
+                Dự án: {summary.jobTitle}
+              </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate(`/workspace/${summary.roomId}/timeline`)}
-            className="lg:hidden shrink-0 rounded-lg bg-blue-50 px-3 py-2 text-[11px] font-bold text-blue-700 border-0 cursor-pointer"
-          >
-            Tiến độ
-          </button>
+          {panelControls}
         </div>
-        <div className="bg-white px-6 py-3 border-b border-gray-100 flex items-center gap-4 shadow-sm z-10">
+        <div className="flex shrink-0 items-center gap-4 border-b border-slate-200 bg-white px-4 py-3 md:px-6">
           <span className="flex-1 min-w-0">
             <span className="block text-sm font-bold text-gray-900">Hợp đồng</span>
             {summary.contractId ? (
@@ -264,7 +306,7 @@ export default function WorkspaceChatView() {
                   state: { workspacesPage },
                 })
               }
-              className="shrink-0 px-4 py-2.5 rounded-xl bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold text-xs shadow-md border-0 cursor-pointer"
+              className="shrink-0 px-4 py-2.5 rounded-xl bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold text-xs shadow-none border-0 cursor-pointer"
             >
               {summary.reviewStatus === 'NEEDS_CONFIRM'
                 ? 'Xem AI thẩm định'
@@ -281,7 +323,7 @@ export default function WorkspaceChatView() {
           )}
         </div>
         {awaitingReview && (
-          <div className="workspace-system-message mx-6 mt-4 rounded-2xl px-5 py-4 bg-gradient-to-r from-violet-600 to-[#1D4ED8] text-white shadow-lg">
+          <div className="workspace-system-message mx-6 mt-4 rounded-2xl px-5 py-4 bg-gradient-to-r from-violet-600 to-[#1D4ED8] text-white shadow-none">
             <p className="text-sm font-bold">Đã đủ 2 chữ ký! AI đang thẩm định hợp đồng...</p>
             <p className="text-xs text-white/75">Kết quả sẽ hiện dưới dạng tin nhắn hệ thống.</p>
           </div>
@@ -297,7 +339,7 @@ export default function WorkspaceChatView() {
               container.scrollHeight - container.scrollTop - container.clientHeight < 120;
             if (movingUp && container.scrollTop < 80) loadOlder();
           }}
-          className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 hide-scrollbar"
+          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-slate-50 p-4 md:p-6"
         >
           {messagesQuery.isFetchingNextPage && (
             <p className="self-center text-xs text-gray-400">Đang tải tin cũ...</p>
@@ -348,10 +390,18 @@ export default function WorkspaceChatView() {
           </p>
         )}
       </section>
-      {wide && (
-        <aside className="w-80 shrink-0 flex flex-col gap-4 h-full overflow-y-auto pr-2">
-          <WorkflowPreview context={context} />
+      {wide && sidePanel !== null && (
+        <aside
+          className="workspace-context-sidebar ml-3 flex h-full w-72 shrink-0 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-100"
+          aria-label="Thông tin cuộc hội thoại"
+        >
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">{panelContent}</div>
         </aside>
+      )}
+      {!wide && sidePanel !== null && (
+        <WorkspacePanelDrawer controls={panelControls} onClose={() => setSidePanel(null)}>
+          {panelContent}
+        </WorkspacePanelDrawer>
       )}
     </>
   );

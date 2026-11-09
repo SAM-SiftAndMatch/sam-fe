@@ -2,6 +2,8 @@ import type { InfiniteData } from '@tanstack/react-query';
 import type { ChatMessage, CursorResult } from '../api/chat';
 
 export const workspaceKeys = {
+  resources: (userId: string, roomId: string) =>
+    ['workspace', 'resources', userId, roomId] as const,
   summary: (userId: string, roomId: string) => ['workspace', 'summary', userId, roomId] as const,
   messages: (userId: string, roomId: string) => ['workspace', 'messages', userId, roomId] as const,
   timeline: (userId: string, jobId: string) => ['workspace', 'timeline', userId, jobId] as const,

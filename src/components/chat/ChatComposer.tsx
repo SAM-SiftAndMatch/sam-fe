@@ -132,13 +132,13 @@ export default memo(function ChatComposer({
     }
   };
   return (
-    <div className="bg-transparent p-3 sm:p-6">
+    <div className="shrink-0 border-t border-slate-200 bg-white p-3 sm:px-6 sm:py-4">
       {error && (
         <p role="alert" className="mb-2 text-xs text-red-600">
           {error}
         </p>
       )}
-      <div className="rounded-3xl border border-gray-200 bg-white p-2 shadow-[0_10px_30px_rgb(0,0,0,0.05)] focus-within:border-[#1D4ED8]">
+      <div className="rounded-3xl border border-slate-300 bg-white p-2 focus-within:border-[#1D4ED8]">
         {selected.length > 0 && (
           <div className="flex gap-3 overflow-x-auto px-3 pb-2 pt-2">
             {selected.map((item) => (
@@ -151,7 +151,7 @@ export default memo(function ChatComposer({
                   disabled={sending}
                   onClick={() => remove(item.id)}
                   aria-label={item.preview ? 'Bỏ ảnh' : `Bỏ ${item.file.name}`}
-                  className="absolute right-1 top-1 z-10 rounded-full bg-white p-1 text-slate-600 shadow-sm disabled:opacity-40"
+                  className="absolute right-1 top-1 z-10 rounded-full bg-white p-1 text-slate-600 shadow-none disabled:opacity-40"
                 >
                   <X size={14} />
                 </button>
@@ -249,7 +249,7 @@ export default memo(function ChatComposer({
             type="button"
             onClick={() => void send()}
             disabled={sending || (!input.trim() && !selected.length)}
-            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-[#1D4ED8] text-white shadow-md transition-colors hover:bg-blue-800 disabled:opacity-50"
+            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-[#1D4ED8] text-white shadow-none transition-colors hover:bg-blue-800 disabled:opacity-50"
             aria-label="Gửi tin nhắn"
           >
             {sending ? <LoaderCircle size={18} className="animate-spin" /> : <Send size={18} />}
