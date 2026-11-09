@@ -10,6 +10,7 @@ interface PaymentCase {
   supportCode?: string;
   amount?: number;
   environment?: string;
+  paymentStatus?: string;
   reason: string;
   state: string;
   assigneeId?: string;
@@ -40,6 +41,8 @@ const actions = [
   ['RETRY_EVENT', 'Kiểm tra lại thông báo đã lưu'],
   ['PROPOSE_PROVIDER_CLOSED', 'Đề nghị xác nhận Pay2S đã đóng, chưa nhận tiền'],
   ['APPROVE_PROVIDER_CLOSED', 'Admin thứ hai duyệt xác nhận chưa nhận tiền'],
+  ['PROPOSE_DEMO_MISMATCH', 'Đề nghị đóng đơn thử nghiệm bị ghi LIVE, chưa nhận tiền'],
+  ['APPROVE_DEMO_MISMATCH', 'Admin thứ hai duyệt đóng đơn thử nghiệm bị ghi LIVE'],
   ['PROPOSE_LATE_ALLOCATION', 'Đề nghị phân bổ khoản trả muộn đúng giá'],
   ['APPROVE_LATE_ALLOCATION', 'Admin thứ hai duyệt phân bổ khoản trả muộn'],
 ] as const;
@@ -127,7 +130,7 @@ export default function PaymentCasesPanel({ owner }: { owner: string }) {
             }
           >
             {item.state === 'RESOLVED'
-              ? `Đã xử lý: ${item.resolution}`
+              ? `Đã xử lý: ${item.resolution === 'DEMO_MISMATCH_NO_PAYMENT' ? 'Đã đóng bản ghi thử nghiệm tại SAM, chưa nhận tiền' : item.resolution}`
               : `Hạn xử lý: ${dateTime(item.dueAt)}`}
           </p>
           <p className="text-sm text-slate-500">
@@ -188,6 +191,15 @@ export default function PaymentCasesPanel({ owner }: { owner: string }) {
                 >
                   {actions
                     .filter(([value]) => selected.eventId || value !== 'RETRY_EVENT')
+                    .filter(
+                      ([value]) =>
+                        !value.endsWith('_DEMO_MISMATCH') ||
+                        (selected.checkoutId &&
+                          selected.environment === 'LIVE' &&
+                          ['EXPIRED', 'UNKNOWN', 'CANCELLED'].includes(
+                            selected.paymentStatus || ''
+                          ))
+                    )
                     .map(([value, label]) => (
                       <option key={value} value={value}>
                         {label}
@@ -195,6 +207,14 @@ export default function PaymentCasesPanel({ owner }: { owner: string }) {
                     ))}
                 </select>
               </Field>
+              {['PROPOSE_DEMO_MISMATCH', 'APPROVE_DEMO_MISMATCH'].includes(action) && (
+                <Notice>
+                  Đối chiếu bằng chứng đơn đã hiển thị QR/tài khoản demo và chưa nhận tiền thật.
+                  HTTP 404 riêng lẻ chưa đủ để xác nhận. Duyệt sẽ đóng bản ghi tại SAM và cho phép
+                  tạo đơn mới; thao tác này không gọi hủy hoặc hoàn tiền tại Pay2S. Người duyệt phải
+                  khác người đề nghị.
+                </Notice>
+              )}
               <Field
                 label="Bằng chứng / ghi chú"
                 hint="Dùng mã chứng từ nội bộ. Không nhập khóa Pay2S hoặc thông tin ngân hàng đầy đủ."
