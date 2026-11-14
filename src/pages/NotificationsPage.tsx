@@ -6,8 +6,10 @@ import Footer from '../components/Footer';
 import PaginationNav from '../components/PaginationNav';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
 import {
+  PATH_CLIENT_PRICING,
   PATH_CLIENT_PROJECT_DETAIL,
   PATH_FREELANCER_INVITATIONS,
+  PATH_FREELANCER_PRICING,
   PATH_JOB_DETAIL,
   PATH_WORKSPACE,
 } from '../routes/paths';
@@ -28,6 +30,10 @@ const notificationTitles: Record<string, string> = {
   PROJECT_ADDON_PAYMENT_PENDING: 'Chưa thanh toán tính năng dự án',
   PROJECT_ADDON_PAYMENT_PAID: 'Đã kích hoạt tính năng dự án',
   PROJECT_ADDON_PAYMENT_REVIEW: 'Thanh toán tính năng cần hỗ trợ',
+  PAYMENT_ESCROW_HELD: 'Đã nạp tiền vào escrow',
+  PROJECT_STARTED: 'Dự án đã bắt đầu',
+  PROJECT_SETTLEMENT_POSTED: 'Đã nghiệm thu và ghi công nợ',
+  SUBSCRIPTION_ACTIVE: 'Gói dịch vụ đã kích hoạt',
 };
 
 const titleFor = (type: string) => notificationTitles[type] ?? 'Cập nhật mới';
@@ -50,6 +56,15 @@ export default function NotificationsPage() {
     }
     if (notification.roomId) {
       navigate(PATH_WORKSPACE.replace(':projectId', notification.roomId));
+    } else if (notification.type === 'SUBSCRIPTION_ACTIVE') {
+      navigate(user?.role === 'CLIENT' ? PATH_CLIENT_PRICING : PATH_FREELANCER_PRICING);
+    } else if (
+      notification.jobId &&
+      (notification.type.startsWith('PAYMENT_') ||
+        notification.type === 'PROJECT_STARTED' ||
+        notification.type === 'PROJECT_SETTLEMENT_POSTED')
+    ) {
+      navigate(PATH_WORKSPACE.replace(':projectId', notification.jobId));
     } else if (user?.role === 'FREELANCER' && notification.type.startsWith('JOB_INVITE')) {
       navigate(PATH_FREELANCER_INVITATIONS);
     } else if (notification.jobId) {

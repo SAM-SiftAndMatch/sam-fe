@@ -41,6 +41,7 @@ type LocationState = {
   srsContent?: string;
   exactBudgetVnd?: number;
   durationMonths?: number;
+  duration?: string;
   fromAiBrief?: boolean;
   deadline?: string;
 };
@@ -67,6 +68,8 @@ const ConfirmProjectPage: React.FC = () => {
     : routeState;
 
   const isFromAi = state.fromAiBrief || false;
+  const DURATION_MONTHS: Record<string, number> = { fast: 1, normal: 3, slow: 6 };
+  const durationMonths = state.durationMonths ?? DURATION_MONTHS[state.duration ?? ''] ?? 3;
 
   // Local states for AI quick-publish
   const [title, setTitle] = useState(state.projectName || '');
@@ -233,7 +236,6 @@ const ConfirmProjectPage: React.FC = () => {
         throw new Error(
           'Ngân sách tối thiểu là 3.000.000đ. Vui lòng cập nhật ngân sách trước khi đăng.'
         );
-      const durationMonths = state.durationMonths || 3;
 
       const finalTitle = isFromAi ? title.trim() : state.projectName || 'Dự án mới';
       // Backend description logic: if from AI, we don't have a manual description, we can just say 'Xem chi tiết trong tài liệu SRS đính kèm.'
@@ -269,7 +271,7 @@ const ConfirmProjectPage: React.FC = () => {
         upgrades.featured || upgrades.urgent ? await jobApi.getAddonSummary(createdJob.id) : null;
       if (payNow && addonSummary?.orderStatus === 'PENDING') {
         const checkout = await jobApi.checkoutAddons(createdJob.id);
-        beginCheckout(checkout, `/client/projects/${createdJob.id}`);
+        await beginCheckout(checkout, `/client/projects/${createdJob.id}`);
         return;
       }
 
@@ -399,7 +401,7 @@ const ConfirmProjectPage: React.FC = () => {
                       Thời gian thực hiện dự án
                     </div>
                     <div className="text-2xl font-extrabold leading-tight">
-                      {state.durationMonths}{' '}
+                      {durationMonths}{' '}
                       <span className="text-sm font-bold text-slate-600">tháng</span>
                     </div>
                     <div className="text-[11px] text-slate-500 mt-1">

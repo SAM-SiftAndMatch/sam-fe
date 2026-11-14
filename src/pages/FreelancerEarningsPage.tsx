@@ -24,6 +24,7 @@ import {
   secondaryClass,
 } from '../components/finance/FinanceUI';
 import IncomeOverview from '../components/finance/IncomeOverview';
+import { VIETNAM_BANKS } from '../lib/banks';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export default function FreelancerEarningsPage() {
@@ -67,6 +68,7 @@ export default function FreelancerEarningsPage() {
     setPassword('');
     setNumber('');
     setHolder('');
+    setBankCode('VCB');
     setEditingBank(null);
     setModal(kind);
     if (kind === 'withdraw') {
@@ -83,18 +85,37 @@ export default function FreelancerEarningsPage() {
     setHolder('');
     setError('');
   };
+  const bankValidationError = () => {
+    if (!VIETNAM_BANKS.some((b) => b.code === bankCode))
+      return 'Chọn ngân hàng nhận tiền trong danh sách.';
+    const account = number.replace(/\s/g, '');
+    if (!/^[A-Za-z0-9]{4,40}$/.test(account))
+      return 'Số tài khoản chỉ gồm chữ và số, dài từ 4 đến 40 ký tự.';
+    const name = holder.trim().replace(/\s+/g, ' ');
+    if (name.length < 2) return 'Nhập tên chủ tài khoản.';
+    if (/[@\d]/.test(name))
+      return 'Tên chủ tài khoản phải là tên người thụ hưởng đăng ký tại ngân hàng, không dùng email hoặc số.';
+    return '';
+  };
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setBusy(true);
     setError('');
+    if (modal === 'bank') {
+      const invalid = bankValidationError();
+      if (invalid) {
+        setError(invalid);
+        return;
+      }
+    }
+    setBusy(true);
     try {
       if (modal === 'bank')
         await (editingBank ? financePut : financePost)(
           editingBank ? `/finance/bank-accounts/${editingBank}` : '/finance/bank-accounts',
           {
             bankCode,
-            accountNumber: number,
-            accountHolder: holder,
+            accountNumber: number.replace(/\s/g, ''),
+            accountHolder: holder.trim().replace(/\s+/g, ' '),
             password,
           }
         );
@@ -137,6 +158,7 @@ export default function FreelancerEarningsPage() {
     if (bankAction === 'add-bank') {
       setModal('bank');
       setEditingBank(null);
+      setBankCode('VCB');
       setNumber('');
       setHolder('');
       setPassword('');
@@ -464,16 +486,24 @@ export default function FreelancerEarningsPage() {
               {modal === 'bank' ? (
                 <>
                   <Field
-                    label="Mã ngân hàng"
-                    hint="Ví dụ VCB, ACB, MBB, BIDV. Đối chiếu với ngân hàng nhận tiền của bạn."
+                    label="Ngân hàng nhận tiền"
+                    hint="Chọn đúng ngân hàng bạn đang mở tài khoản. Mã ngân hàng được dùng để đối soát lệnh chi."
                   >
-                    <input
+                    <select
                       required
-                      maxLength={20}
                       value={bankCode}
-                      onChange={(e) => setBankCode(e.target.value.toUpperCase())}
+                      onChange={(e) => setBankCode(e.target.value)}
                       className={inputClass}
-                    />
+                    >
+                      {!VIETNAM_BANKS.some((b) => b.code === bankCode) && (
+                        <option value={bankCode}>{bankCode} (đang lưu)</option>
+                      )}
+                      {VIETNAM_BANKS.map((bank) => (
+                        <option key={bank.code} value={bank.code}>
+                          {bank.name} ({bank.code})
+                        </option>
+                      ))}
+                    </select>
                   </Field>
                   <Field label="Số tài khoản">
                     <input
@@ -488,7 +518,7 @@ export default function FreelancerEarningsPage() {
                   </Field>
                   <Field
                     label="Tên chủ tài khoản"
-                    hint="Nhập đúng tên người thụ hưởng đã đăng ký tại ngân hàng."
+                    hint="Nhập đúng tên người thụ hưởng đã đăng ký tại ngân hàng, không dùng email hoặc số điện thoại."
                   >
                     <input
                       required

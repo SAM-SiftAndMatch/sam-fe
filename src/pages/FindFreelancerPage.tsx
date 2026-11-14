@@ -164,7 +164,7 @@ const FindFreelancerPage = () => {
               </div>
               {freelancer.hourlyRate != null && (
                 <p className="mt-4 text-sm text-gray-700">
-                  Mức phí: {new Intl.NumberFormat('vi-VN').format(freelancer.hourlyRate)} / giờ
+                  Mức phí: {new Intl.NumberFormat('vi-VN').format(freelancer.hourlyRate)}đ/giờ
                 </p>
               )}
               <div className="mt-6 flex gap-3">

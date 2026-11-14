@@ -21,6 +21,10 @@ const ClientProfilePage: React.FC = () => {
   const returnContext = location.state as { returnTo?: string; returnState?: unknown } | null;
   const { user } = useAuthStore();
 
+  useEffect(() => {
+    if (returnContext?.returnTo) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [returnContext?.returnTo]);
+
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isNewProfile, setIsNewProfile] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -177,8 +181,8 @@ const ClientProfilePage: React.FC = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {returnContext?.returnTo && (
                 <p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-                  Hoàn thiện hồ sơ để tiếp tục đăng hoặc tham gia dự án. Sau khi lưu, bạn sẽ trở lại
-                  bước đang thực hiện.
+                  Bạn cần hoàn thiện thông tin dùng trong hợp đồng trước khi ứng tuyển/đăng dự án.
+                  Sau khi lưu, hệ thống sẽ đưa bạn trở lại bước đang thực hiện.
                 </p>
               )}
               <ProfileContactFields

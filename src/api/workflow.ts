@@ -8,6 +8,7 @@ import type {
   ProjectDelivery,
   ProjectTimeline,
   QaPlan,
+  SandboxSettlement,
   TaskReportRequest,
 } from '../types/workflow';
 
@@ -80,6 +81,13 @@ export const workflowApi = {
       `/projects/${jobId}/deliveries/${deliveryId}/accept`
     );
     return requireApiResult(res.data, 'Không thể xác nhận nghiệm thu');
+  },
+
+  getSettlement: async (jobId: string): Promise<SandboxSettlement> => {
+    const res = await apiClient.get<ApiResponse<SandboxSettlement>>(
+      `/projects/${jobId}/settlement`
+    );
+    return requireApiResult(res.data, 'Không tải được thông tin quyết toán');
   },
 };
 

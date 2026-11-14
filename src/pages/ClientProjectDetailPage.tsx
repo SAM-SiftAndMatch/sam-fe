@@ -74,7 +74,7 @@ const ClientProjectDetailPage: React.FC = () => {
     setServerError(null);
     try {
       const checkout = await jobApi.checkoutAddons(id);
-      beginCheckout(checkout, `/client/projects/${id}`);
+      await beginCheckout(checkout, `/client/projects/${id}`);
     } catch (error) {
       setServerError(
         error instanceof Error ? error.message : 'Không bắt đầu được thanh toán tính năng.'
