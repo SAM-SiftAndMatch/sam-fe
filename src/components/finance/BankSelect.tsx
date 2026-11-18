@@ -1,6 +1,6 @@
 import { Check, ChevronDown, Search } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
-import { type BankOption, VIETNAM_BANKS } from '../../lib/banks';
+import { type BankOption, VIETNAM_BANKS, normalizeBankCode } from '../../lib/banks';
 import { inputClass } from './FinanceUI';
 
 const searchText = (text: string) =>
@@ -28,8 +28,9 @@ export default function BankSelect({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
-  const selected = VIETNAM_BANKS.find((bank) => bank.code === value);
-  const keyword = searchText(query);
+  const canonicalValue = normalizeBankCode(value);
+  const selected = VIETNAM_BANKS.find((bank) => bank.code === canonicalValue);
+  const keyword = searchText(normalizeBankCode(query));
   const rank = (bank: BankOption) => {
     const code = searchText(bank.code);
     if (code === keyword) return 0;
@@ -55,7 +56,7 @@ export default function BankSelect({
     setActiveIndex(
       Math.max(
         0,
-        VIETNAM_BANKS.findIndex((bank) => bank.code === value)
+        VIETNAM_BANKS.findIndex((bank) => bank.code === canonicalValue)
       )
     );
     setOpen(true);
@@ -155,7 +156,7 @@ export default function BankSelect({
                   type="button"
                   // biome-ignore lint/a11y/useSemanticElements: Native options require a select, which cannot host the search input.
                   role="option"
-                  aria-selected={value === bank.code}
+                  aria-selected={canonicalValue === bank.code}
                   tabIndex={-1}
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => choose(bank.code)}
@@ -164,7 +165,7 @@ export default function BankSelect({
                   <span>
                     {bank.name} ({bank.code})
                   </span>
-                  {value === bank.code && (
+                  {canonicalValue === bank.code && (
                     <Check size={16} className="shrink-0 text-blue-700" aria-hidden="true" />
                   )}
                 </button>

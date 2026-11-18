@@ -3,6 +3,16 @@ export interface BankOption {
   name: string;
 }
 
+// MBB was accepted and suggested before the bank picker was introduced.
+export function normalizeBankCode(value: string): string {
+  const code = value.trim().toUpperCase();
+  return code === 'MBB' ? 'MB' : code;
+}
+
+export function isSupportedBankCode(value: string): boolean {
+  return VIETNAM_BANKS.some((bank) => bank.code === normalizeBankCode(value));
+}
+
 // Mã ngân hàng dùng nội bộ khi lưu và đối soát tài khoản nhận tiền.
 export const VIETNAM_BANKS: BankOption[] = [
   { code: 'VCB', name: 'Vietcombank' },

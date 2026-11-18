@@ -22,14 +22,19 @@ function harness(options = {}) {
     if (cache.has(file)) return cache.get(file);
     const exports = {};
     cache.set(file, exports);
-    const source = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
-      compilerOptions: {
-        module: ts.ModuleKind.CommonJS,
-        esModuleInterop: false,
-        target: ts.ScriptTarget.ES2022,
-        jsx: ts.JsxEmit.ReactJSX,
-      },
-    }).outputText;
+    const source = ts.transpileModule(
+      fs
+        .readFileSync(file, 'utf8')
+        .replaceAll('import.meta.env', '({ DEV: false, VITE_PAYMENT_DEMO: "false" })'),
+      {
+        compilerOptions: {
+          module: ts.ModuleKind.CommonJS,
+          esModuleInterop: false,
+          target: ts.ScriptTarget.ES2022,
+          jsx: ts.JsxEmit.ReactJSX,
+        },
+      }
+    ).outputText;
     vm.runInNewContext(source, {
       exports,
       module: { exports },

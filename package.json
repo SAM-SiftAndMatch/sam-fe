@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "biome lint .",
+    "test": "node --require ./tests/register-typescript.cjs --test tests/*.test.cjs",
     "format": "biome format --write .",
     "check": "biome check --write .",
     "preview": "vite preview",

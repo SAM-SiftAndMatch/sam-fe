@@ -6,6 +6,7 @@ import { chatApi } from '../api/chat';
 import type { UserNotification } from '../api/notifications';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { googleAuthEnabled } from '../lib/google-auth';
+import { notificationDestination } from '../lib/notification-routing';
 import {
   PATH_CLIENT_AI_BRIEF,
   PATH_CLIENT_DASHBOARD,
@@ -13,22 +14,18 @@ import {
   PATH_CLIENT_PRICING,
   PATH_CLIENT_PROFILE,
   PATH_CLIENT_PROJECTS,
-  PATH_CLIENT_PROJECT_DETAIL,
   PATH_FREELANCER,
   PATH_FREELANCER_APPLICATIONS,
   PATH_FREELANCER_CREATE_PROFILE,
   PATH_FREELANCER_EARNINGS,
   PATH_FREELANCER_INVITATIONS,
   PATH_FREELANCER_JOBS,
-  PATH_FREELANCER_PRICING,
   PATH_FREELANCER_PROJECTS,
   PATH_GOOGLE_AUTH_CONNECT,
   PATH_HOME,
-  PATH_JOB_DETAIL,
   PATH_LOGIN,
   PATH_NOTIFICATIONS,
   PATH_REGISTER,
-  PATH_WORKSPACE,
   PATH_WORKSPACES,
 } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -220,32 +217,10 @@ const AppHeader: React.FC = () => {
         ? 'app-header-nav-item--active bg-[#1D4ED8]/10 text-[#1D4ED8]'
         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
     }`;
-  const openNotification = (jobId?: string | null, roomId?: string | null, type?: string) => {
+  const openNotification = (notification: UserNotification) => {
     setNotificationsOpen(false);
-    if (roomId) return navigate(PATH_WORKSPACE.replace(':projectId', roomId));
-    if (type === 'SUBSCRIPTION_ACTIVE') {
-      return navigate(isClient ? PATH_CLIENT_PRICING : PATH_FREELANCER_PRICING);
-    }
-    if (
-      jobId &&
-      (type?.startsWith('PAYMENT_') ||
-        type === 'PROJECT_STARTED' ||
-        type === 'PROJECT_SETTLEMENT_POSTED' ||
-        type === 'DELIVERY_SUBMITTED' ||
-        type === 'DELIVERY_REVISION_REQUESTED' ||
-        type === 'PROJECT_DELIVERY_ACCEPTED' ||
-        type === 'MAINTENANCE_TICKET_UPDATED' ||
-        type === 'MAINTENANCE_ESCALATED')
-    ) {
-      return navigate(PATH_WORKSPACE.replace(':projectId', jobId));
-    }
-    if (!isClient && type?.startsWith('JOB_INVITE')) return navigate(PATH_FREELANCER_INVITATIONS);
-    if (!jobId) return;
-    navigate(
-      isClient && type !== '1_TOUCH_INVITE'
-        ? PATH_CLIENT_PROJECT_DETAIL.replace(':id', jobId)
-        : PATH_JOB_DETAIL.replace(':id', jobId)
-    );
+    const destination = notificationDestination(notification, user?.role);
+    if (destination) navigate(destination);
   };
 
   const renderNav = (mobile = false) =>
@@ -391,11 +366,7 @@ const AppHeader: React.FC = () => {
                           type="button"
                           onClick={() => {
                             void markRead(notification.id);
-                            openNotification(
-                              notification.jobId,
-                              notification.roomId,
-                              notification.type
-                            );
+                            openNotification(notification);
                           }}
                           className={`app-notification-item w-full border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50 ${notification.readAt ? '' : 'app-notification-item--unread bg-blue-50/50'}`}
                         >

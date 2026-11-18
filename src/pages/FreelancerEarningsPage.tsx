@@ -25,7 +25,7 @@ import {
   secondaryClass,
 } from '../components/finance/FinanceUI';
 import IncomeOverview from '../components/finance/IncomeOverview';
-import { VIETNAM_BANKS } from '../lib/banks';
+import { isSupportedBankCode, normalizeBankCode } from '../lib/banks';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export default function FreelancerEarningsPage() {
@@ -87,8 +87,7 @@ export default function FreelancerEarningsPage() {
     setError('');
   };
   const bankValidationError = () => {
-    if (!VIETNAM_BANKS.some((b) => b.code === bankCode))
-      return 'Chọn ngân hàng nhận tiền trong danh sách.';
+    if (!isSupportedBankCode(bankCode)) return 'Chọn ngân hàng nhận tiền trong danh sách.';
     const account = number.replace(/\s/g, '');
     if (!/^[A-Za-z0-9]{4,40}$/.test(account))
       return 'Số tài khoản chỉ gồm chữ và số, dài từ 4 đến 40 ký tự.';
@@ -114,7 +113,7 @@ export default function FreelancerEarningsPage() {
         await (editingBank ? financePut : financePost)(
           editingBank ? `/finance/bank-accounts/${editingBank}` : '/finance/bank-accounts',
           {
-            bankCode,
+            bankCode: normalizeBankCode(bankCode),
             accountNumber: number.replace(/\s/g, ''),
             accountHolder: holder.trim().replace(/\s+/g, ' ').toUpperCase(),
             password,
@@ -370,7 +369,7 @@ export default function FreelancerEarningsPage() {
                       className="mt-4 text-sm font-medium text-slate-600 underline"
                       onClick={() => {
                         open('bank');
-                        setBankCode(bank.bankCode);
+                        setBankCode(normalizeBankCode(bank.bankCode));
                         setEditingBank(bank.id);
                         setNotice(
                           'Nhập lại đầy đủ thông tin ngân hàng. Nếu đang có lệnh chi chưa kết thúc, hãy dùng Thêm tài khoản để giữ an toàn cho lệnh cũ.'
