@@ -115,7 +115,7 @@ export default function FreelancerEarningsPage() {
           {
             bankCode,
             accountNumber: number.replace(/\s/g, ''),
-            accountHolder: holder.trim().replace(/\s+/g, ' '),
+            accountHolder: holder.trim().replace(/\s+/g, ' ').toUpperCase(),
             password,
           }
         );
@@ -523,9 +523,10 @@ export default function FreelancerEarningsPage() {
                     <input
                       required
                       autoComplete="name"
+                      autoCapitalize="characters"
                       maxLength={150}
                       value={holder}
-                      onChange={(e) => setHolder(e.target.value)}
+                      onChange={(e) => setHolder(e.target.value.toUpperCase())}
                       className={inputClass}
                     />
                   </Field>
