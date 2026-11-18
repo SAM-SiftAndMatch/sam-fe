@@ -14,6 +14,7 @@ import {
   statusLabel,
 } from '../api/finance';
 import AppHeader from '../components/AppHeader';
+import BankSelect from '../components/finance/BankSelect';
 import BankSetupNotice from '../components/finance/BankSetupNotice';
 import {
   Field,
@@ -487,23 +488,9 @@ export default function FreelancerEarningsPage() {
                 <>
                   <Field
                     label="Ngân hàng nhận tiền"
-                    hint="Chọn đúng ngân hàng bạn đang mở tài khoản. Mã ngân hàng được dùng để đối soát lệnh chi."
+                    hint="Gõ tên hoặc mã ngân hàng để tìm, ví dụ Vietcombank hoặc VCB."
                   >
-                    <select
-                      required
-                      value={bankCode}
-                      onChange={(e) => setBankCode(e.target.value)}
-                      className={inputClass}
-                    >
-                      {!VIETNAM_BANKS.some((b) => b.code === bankCode) && (
-                        <option value={bankCode}>{bankCode} (đang lưu)</option>
-                      )}
-                      {VIETNAM_BANKS.map((bank) => (
-                        <option key={bank.code} value={bank.code}>
-                          {bank.name} ({bank.code})
-                        </option>
-                      ))}
-                    </select>
+                    <BankSelect value={bankCode} onChange={setBankCode} />
                   </Field>
                   <Field label="Số tài khoản">
                     <input
