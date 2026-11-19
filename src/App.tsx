@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Analytics } from '@vercel/analytics/react';
 import { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import AppToastContainer from './components/AppToastContainer';
 import AppRoutes from './routes';
 import { useAuthStore } from './stores/useAuthStore';
 import { useThemeStore } from './stores/useThemeStore';
@@ -35,6 +36,7 @@ function App() {
           <AppRoutes />
           <Analytics />
         </BrowserRouter>
+        <AppToastContainer />
       </div>
     </QueryClientProvider>
   );

@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 import { dateTime, financeError, financeGet, financePost, money } from '../../api/finance';
 import { Field, Modal, Notice, inputClass, primaryClass, secondaryClass } from './FinanceUI';
 
@@ -86,10 +87,19 @@ export default function PaymentCasesPanel({ owner }: { owner: string }) {
         password,
         evidenceReference: evidence,
       });
-      await cache.invalidateQueries({ queryKey: ['payment-cases', owner] });
       close();
+      toast.success('Đã ghi nhận thao tác xử lý hồ sơ thanh toán.');
+      await cache
+        .invalidateQueries({ queryKey: ['payment-cases', owner] }, { throwOnError: true })
+        .catch(() => {
+          toast.warning(
+            'Thao tác đã thành công nhưng chưa tải lại được hồ sơ. Vui lòng tải lại trang.'
+          );
+        });
     } catch (cause) {
-      setError(financeError(cause));
+      const message = financeError(cause);
+      setError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
       setPassword('');
@@ -168,7 +178,7 @@ export default function PaymentCasesPanel({ owner }: { owner: string }) {
         </button>
       </div>
       {selected && (
-        <Modal title="Hồ sơ đối soát thanh toán" onClose={close}>
+        <Modal title="Hồ sơ đối soát thanh toán" onClose={close} busy={busy}>
           <div className="mb-4 max-h-60 space-y-3 overflow-auto text-sm">
             {history.data?.map((item, index) => (
               <p key={`${item.createdAt}:${index}`}>
