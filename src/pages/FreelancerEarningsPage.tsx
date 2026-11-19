@@ -26,6 +26,8 @@ import {
 } from '../components/finance/FinanceUI';
 import IncomeOverview from '../components/finance/IncomeOverview';
 import { isSupportedBankCode, normalizeBankCode } from '../lib/banks';
+import { BANK_PASSWORD_SETUP_RETURN } from '../lib/password-setup';
+import { PATH_PASSWORD_SETUP } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export default function FreelancerEarningsPage() {
@@ -570,7 +572,7 @@ export default function FreelancerEarningsPage() {
               )}
               <Field
                 label="Mật khẩu hiện tại"
-                hint="Xác thực lại để bảo vệ thông tin nhận tiền và giao dịch của bạn."
+                hint="Nhập mật khẩu tài khoản SAM để xác thực thao tác này."
               >
                 <input
                   required
@@ -582,6 +584,16 @@ export default function FreelancerEarningsPage() {
                   className={inputClass}
                 />
               </Field>
+              <p className="text-xs leading-5 text-slate-500">
+                Nếu bạn sử dụng Google để đăng nhập, hãy{' '}
+                <Link
+                  to={`${PATH_PASSWORD_SETUP}?returnTo=${encodeURIComponent(BANK_PASSWORD_SETUP_RETURN)}`}
+                  className="font-semibold text-blue-700 underline hover:text-blue-800"
+                >
+                  thiết lập mật khẩu
+                </Link>{' '}
+                SAM để có thể xác thực thêm tài khoản ngân hàng.
+              </p>
               {error && <Notice error>{error}</Notice>}
               <div className="flex justify-end gap-2">
                 <button type="button" disabled={busy} onClick={close} className={secondaryClass}>
