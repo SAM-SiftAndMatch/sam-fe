@@ -1,4 +1,8 @@
+import apiClient from './axios';
 import { tokenManager } from './token-manager';
+
+export const paymentDemoEnabled =
+  import.meta.env.DEV && import.meta.env.VITE_PAYMENT_DEMO === 'true';
 export interface Checkout {
   orderId: string;
   purpose: string;
@@ -33,7 +37,7 @@ export function safePaymentDestination(value: unknown): string {
     return value;
   return '/workspaces';
 }
-export function beginCheckout(
+export async function beginCheckout(
   checkout: { orderId?: string | null; checkoutUrl?: string | null },
   returnTo: string
 ) {
@@ -55,6 +59,11 @@ export function beginCheckout(
     'sam:checkout',
     JSON.stringify({ orderId: id, returnTo: safePaymentDestination(returnTo), user })
   );
+  if (paymentDemoEnabled) {
+    await apiClient.post(`/payments/demo/${id}/simulate-paid`);
+    window.location.assign(`/payment/return?orderId=${id}`);
+    return;
+  }
   window.location.assign(checkout.checkoutUrl || `/payment/return?orderId=${id}`);
 }
 export function checkoutMessage(order: Checkout): string {

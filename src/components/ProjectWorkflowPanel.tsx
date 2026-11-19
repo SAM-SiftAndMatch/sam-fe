@@ -56,7 +56,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   const [qaPlans, setQaPlans] = useState<Record<string, QaPlan>>({});
   const [expandedQaId, setExpandedQaId] = useState<string | null>(null);
   const [loadingQaId, setLoadingQaId] = useState<string | null>(null);
-  const [settlement, setSettlement] = useState<SandboxSettlement | null>(null);
+  const [settlementState, setSettlementState] = useState<SandboxSettlement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reportTaskId, setReportTaskId] = useState<string | null>(null);
   const [reportContent, setReportContent] = useState('');
@@ -90,8 +90,16 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
     refetchInterval: 30_000,
     refetchOnWindowFocus: true,
   });
+  const settlementQuery = useQuery({
+    queryKey: ['project-settlement', userId, jobId],
+    queryFn: () => workflowApi.getSettlement(jobId),
+    enabled: canUseWorkflow && Boolean(userId) && jobStatus === 'COMPLETED',
+    staleTime: 60_000,
+    retry: false,
+  });
   const timeline = timelineQuery.data ?? null;
   const deliveries = deliveriesQuery.data ?? [];
+  const settlement = settlementQuery.data ?? settlementState;
   const loading = canUseWorkflow && (timelineQuery.isPending || deliveriesQuery.isPending);
   const queryError = timelineQuery.error ?? deliveriesQuery.error;
   const loadWorkflow = () => {
@@ -262,7 +270,8 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
       );
       void queryClient.invalidateQueries({ queryKey: workspaceKeys.deliveries(userId, jobId) });
       void queryClient.invalidateQueries({ queryKey: workspaceKeys.timeline(userId, jobId) });
-      setSettlement(result.settlement);
+      queryClient.setQueryData(['project-settlement', userId, jobId], result.settlement);
+      setSettlementState(result.settlement);
       setModalMode(null);
       setActiveDelivery(null);
       onSettlementCompleted?.();
@@ -378,7 +387,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                       </span>
                       <span className="text-[10px] font-bold text-gray-500">{task.progress}%</span>
                     </div>
-                    {latestReport && (
+                    {latestReport && expandedTaskId !== task.id && (
                       <div className="mt-2 pt-2 border-t border-gray-200">
                         <p className="text-[11px] text-gray-600 line-clamp-3">
                           {latestReport.content}
@@ -424,7 +433,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                       <button
                         type="button"
                         onClick={() => openReport(task.id, task.progress, task.status)}
-                        className="mt-2 text-[11px] font-bold text-blue-700 bg-transparent border-0 p-0 cursor-pointer"
+                        className="mt-2 block text-[11px] font-bold text-blue-700 bg-transparent border-0 p-0 cursor-pointer"
                       >
                         Cập nhật tiến độ
                       </button>
@@ -503,7 +512,7 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
               onClick={() => setShowDeliveryForm((current) => !current)}
               className="text-[11px] font-bold text-blue-700 bg-transparent border-0 cursor-pointer"
             >
-              Nộp phiên bản mới
+              {deliveries.length === 0 ? 'Nộp sản phẩm bàn giao' : 'Nộp phiên bản mới'}
             </button>
           )}
         </div>
@@ -639,6 +648,12 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                       Xác nhận nghiệm thu
                     </button>
                   </div>
+                )}
+                {role === 'client' && delivery.status === 'SUBMITTED' && !qaPlans[delivery.id] && (
+                  <p className="mt-2 text-[10px] text-gray-500">
+                    Bấm “Xem checklist nghiệm thu” để tải tiêu chí; sau đó nút nghiệm thu mới khả
+                    dụng.
+                  </p>
                 )}
               </div>
             ))

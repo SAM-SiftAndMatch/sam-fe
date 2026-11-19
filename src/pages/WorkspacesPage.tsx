@@ -174,7 +174,7 @@ const WorkspacesPage: React.FC = () => {
 
                   <div className="flex items-center gap-2 mb-1.5">
                     <span className="text-sm text-gray-500 truncate">với {otherName(room)}</span>
-                    <JobStatusBadge status={room.jobStatus} />
+                    <JobStatusBadge status={room.jobStatus} variant="workspace" />
                   </div>
 
                   <div className="flex justify-between items-center">

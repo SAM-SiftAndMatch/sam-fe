@@ -50,7 +50,11 @@ const ClientPricingPage: React.FC = () => {
     }
     const result = await purchase(packageId);
     if (result?.checkout) {
-      beginCheckout(result.checkout, '/client/pricing');
+      try {
+        await beginCheckout(result.checkout, '/client/pricing');
+      } catch (cause) {
+        console.error(cause);
+      }
       return;
     }
     if (result) {
@@ -153,7 +157,7 @@ const ClientPricingPage: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-slate-400 text-xs mt-0.5">✓</span>
-                    <span>Phí dịch vụ 5%</span>
+                    <span>Không thu phí nền tảng từ khách hàng</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-slate-400 text-xs mt-0.5">✓</span>

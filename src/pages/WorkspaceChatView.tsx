@@ -175,12 +175,10 @@ export default function WorkspaceChatView() {
   const previousLastId = useRef<string | undefined>(undefined);
   const initializedScroll = useRef(false);
   const otherName = role === 'client' ? summary.freelancerName : summary.clientName;
-  const canOpenContract =
-    role === 'client'
-      ? !summary.selectedFreelancerId || summary.selectedFreelancerId === summary.freelancerId
-      : summary.selectedFreelancerId === userId;
-  const canChat =
-    !summary.selectedFreelancerId || summary.selectedFreelancerId === summary.freelancerId;
+  const selectionPending = !summary.selectedFreelancerId;
+  const isSelectedRoom = summary.selectedFreelancerId === summary.freelancerId;
+  const canOpenContract = role === 'client' ? selectionPending || isSelectedRoom : isSelectedRoom;
+  const canChat = selectionPending || isSelectedRoom;
 
   useEffect(() => {
     if (!awaitingReview) return;
@@ -318,7 +316,11 @@ export default function WorkspaceChatView() {
             </button>
           ) : (
             <span className="shrink-0 text-xs font-medium text-gray-500">
-              Dự án đã chọn freelancer khác
+              {selectionPending
+                ? summary.jobStatus === 'CANCELLED'
+                  ? 'Dự án đã đóng'
+                  : 'Chờ khách hàng mở hợp đồng'
+                : 'Dự án đã chọn freelancer khác'}
             </span>
           )}
         </div>

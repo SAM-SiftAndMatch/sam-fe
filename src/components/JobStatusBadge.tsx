@@ -8,7 +8,7 @@ type JobStatusAppearance = {
 
 const JOB_STATUS_APPEARANCE: Record<JobStatus, JobStatusAppearance> = {
   OPEN: {
-    label: 'Đang chờ đề xuất',
+    label: 'Đang nhận đề xuất',
     badgeClass: 'border-blue-200 bg-blue-50 text-blue-700',
     textClass: 'text-blue-700',
   },
@@ -49,14 +49,23 @@ export function getJobStatusAppearance(status?: JobStatus | null): JobStatusAppe
   return status ? (JOB_STATUS_APPEARANCE[status] ?? UNKNOWN_STATUS) : UNKNOWN_STATUS;
 }
 
+/** Trong không gian chat, job OPEN nghĩa là hai bên đang trao đổi chứ không còn chờ đề xuất. */
+export function getWorkspaceStatusAppearance(status?: JobStatus | null): JobStatusAppearance {
+  const appearance = getJobStatusAppearance(status);
+  return status === 'OPEN' ? { ...appearance, label: 'Đang trao đổi' } : appearance;
+}
+
 export default function JobStatusBadge({
   status,
   className = '',
+  variant = 'default',
 }: {
   status?: JobStatus | null;
   className?: string;
+  variant?: 'default' | 'workspace';
 }) {
-  const appearance = getJobStatusAppearance(status);
+  const appearance =
+    variant === 'workspace' ? getWorkspaceStatusAppearance(status) : getJobStatusAppearance(status);
   return (
     <span
       className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${appearance.badgeClass} ${className}`}

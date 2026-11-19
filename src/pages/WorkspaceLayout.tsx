@@ -9,7 +9,7 @@ import { type ChatMessage, type SendChatMessage, chatApi } from '../api/chat';
 import type { ContractBroadcast } from '../api/contract';
 import { type WorkspaceSummary, workspaceApi } from '../api/workspace';
 import AppHeader from '../components/AppHeader';
-import { getJobStatusAppearance } from '../components/JobStatusBadge';
+import { getWorkspaceStatusAppearance } from '../components/JobStatusBadge';
 import MaintenancePanel from '../components/finance/MaintenancePanel';
 import { createAuthenticatedStompClient } from '../lib/authenticated-stomp';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -227,9 +227,9 @@ export default function WorkspaceLayout() {
                   {summary?.jobTitle || 'Đang tải dự án...'}
                 </h1>
                 <span
-                  className={`mt-1 block text-[10px] font-semibold uppercase tracking-wide ${getJobStatusAppearance(summary?.jobStatus).textClass}`}
+                  className={`mt-1 block text-[10px] font-semibold uppercase tracking-wide ${getWorkspaceStatusAppearance(summary?.jobStatus).textClass}`}
                 >
-                  {getJobStatusAppearance(summary?.jobStatus).label}
+                  {getWorkspaceStatusAppearance(summary?.jobStatus).label}
                 </span>
               </div>
             </div>

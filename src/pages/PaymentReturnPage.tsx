@@ -29,6 +29,7 @@ import {
   checkoutId,
   checkoutMessage,
   checkoutPurposeLabel,
+  paymentDemoEnabled,
   safePaymentDestination,
 } from '../lib/checkout';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -320,7 +321,7 @@ export default function PaymentReturnPage() {
                       <button
                         type="button"
                         className={`${primary} w-full sm:w-auto`}
-                        onClick={() => beginCheckout(order, destination)}
+                        onClick={() => void beginCheckout(order, destination)}
                       >
                         <CreditCard size={17} />
                         Tiếp tục thanh toán
@@ -461,8 +462,9 @@ export default function PaymentReturnPage() {
                 <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
                   <Info size={17} className="mt-0.5 shrink-0 text-blue-500" />
                   <p className="text-xs leading-6 text-blue-900/70">
-                    Kết quả được cập nhật trực tiếp từ Pay2S. Bạn có thể rời trang và xem lại giao
-                    dịch trong lịch sử thanh toán.
+                    {paymentDemoEnabled
+                      ? 'Chế độ mô phỏng thanh toán đang bật: SAM tự giả lập xác nhận từ Pay2S. Tắt VITE_PAYMENT_DEMO để quay lại thanh toán thật.'
+                      : 'Kết quả được cập nhật trực tiếp từ Pay2S. Bạn có thể rời trang và xem lại giao dịch trong lịch sử thanh toán.'}
                   </p>
                 </div>
               </div>

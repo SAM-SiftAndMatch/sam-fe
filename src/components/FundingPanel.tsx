@@ -102,7 +102,7 @@ const FundingPanel: React.FC<FundingPanelProps> = ({ roomId, contractId }) => {
         return;
       }
       // Navigation only. The backend confirms funding through verified provider IPN.
-      beginCheckout(created, `/workspace/${roomId}/contract`);
+      await beginCheckout(created, `/workspace/${roomId}/contract`);
     } catch (e) {
       // Khoản có rồi (bấm Nạp 2 lần / quay lại sau khi chưa trả xong): tải lại bảng cho đúng
       void loadFunding();

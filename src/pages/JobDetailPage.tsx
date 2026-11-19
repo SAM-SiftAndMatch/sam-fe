@@ -3,6 +3,7 @@ import type React from 'react';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
+import { chatApi } from '../api/chat';
 import { jobApi } from '../api/job';
 import { proposalApi } from '../api/proposal';
 import AppHeader from '../components/AppHeader';
@@ -39,10 +40,22 @@ function formatBudget(min?: number | null, max?: number | null): string {
   return `Đến ${fmt(max!)}`;
 }
 
+function formatJoinedDate(value?: string | null): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date);
+}
+
 const JobDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [contacting, setContacting] = useState(false);
 
   const {
     data: job,
@@ -201,6 +214,51 @@ const JobDetailPage: React.FC = () => {
     }
   };
 
+  const handleContactClient = async () => {
+    if (!job || contacting) return;
+    if (job.clientId === user?.userId) {
+      navigate(paths.PATH_WORKSPACES);
+      return;
+    }
+    setContacting(true);
+    try {
+      try {
+        const room = await chatApi.getRoomByJob(job.id);
+        navigate(paths.PATH_WORKSPACE.replace(':projectId', room.id));
+        return;
+      } catch (cause) {
+        if (extractApiResponse(cause)?.code !== 1007) throw cause;
+      }
+      if (myProposal?.status === 'INVITED') {
+        await handleAcceptProposalInvite();
+        return;
+      }
+      if (myRec?.status === 'CLIENT_REQUESTED') {
+        await handleAcceptInvite();
+        return;
+      }
+      if (myRec?.status === 'ACCEPTED' || myProposal?.status === 'ACCEPTED') {
+        navigate(paths.PATH_WORKSPACES);
+        return;
+      }
+      if (myRec?.status === 'AUTO_MATCHED') {
+        await handleClaim();
+        alert('Đã gửi yêu cầu trò chuyện. Vui lòng chờ khách hàng phản hồi.');
+        return;
+      }
+      if (myRec?.status === 'DEV_REQUESTED') {
+        alert('Yêu cầu trò chuyện đang chờ khách hàng phản hồi.');
+        return;
+      }
+      alert('Hãy ứng tuyển hoặc chờ khách hàng mời bạn trước khi liên hệ.');
+    } catch (cause) {
+      console.error(cause);
+      alert(extractApiResponse(cause)?.message || 'Không mở được phòng chat. Vui lòng thử lại.');
+    } finally {
+      setContacting(false);
+    }
+  };
+
   // ── Loading / Error states ──
   if (isLoading) {
     return (
@@ -312,7 +370,7 @@ const JobDetailPage: React.FC = () => {
                     className="text-xs font-medium text-[#1D4ED8] bg-blue-50/70 border border-blue-100 px-2.5 py-1 rounded-md"
                   >
                     {skill.name}
-                    {skill.yearsOfExperience ? ` (${skill.yearsOfExperience}+năm)` : ''}
+                    {skill.yearsOfExperience ? ` (${skill.yearsOfExperience}+ năm)` : ''}
                   </span>
                 ))}
               </div>
@@ -503,7 +561,7 @@ const JobDetailPage: React.FC = () => {
                       </button>
                     )}
                   </>
-                ) : (
+                ) : !user || isFreelancer ? (
                   <>
                     <button type="button" onClick={handleApplyClick} className={getButtonClass()}>
                       {getButtonText()}
@@ -519,7 +577,7 @@ const JobDetailPage: React.FC = () => {
                         </button>
                       )}
                   </>
-                )}
+                ) : null}
               </div>
             </section>
 
@@ -784,7 +842,6 @@ const JobDetailPage: React.FC = () => {
                 <span className="text-[10px] text-slate-400 uppercase tracking-widest">
                   THÔNG TIN DỰ ÁN
                 </span>
-                <JobStatusBadge status={job.status} />
               </div>
 
               <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
@@ -894,56 +951,43 @@ const JobDetailPage: React.FC = () => {
                   <h3 className="text-sm font-bold text-slate-900 leading-tight">
                     {job.clientName || 'Khách hàng'}
                   </h3>
-                  <div className="flex items-center gap-1 mt-1 text-xs">
-                    <span className="text-amber-500">★</span>
-                    <span className="font-bold text-slate-900">4.9</span>
-                    <span className="text-slate-400 text-[11px]">(42)</span>
-                  </div>
+                  {job.clientRating != null && (job.clientReviewCount ?? 0) > 0 ? (
+                    <div className="flex items-center gap-1 mt-1 text-xs">
+                      <span className="text-amber-500">★</span>
+                      <span className="font-bold text-slate-900">
+                        {job.clientRating.toFixed(1)}
+                      </span>
+                      <span className="text-slate-400 text-[11px]">
+                        ({job.clientReviewCount} đánh giá)
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="mt-1 text-xs text-slate-400">Chưa có đánh giá</p>
+                  )}
                 </div>
               </div>
 
               <div className="flex flex-col gap-2.5 mb-6 border-t border-slate-100 pt-4 text-xs text-slate-600">
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-3.5 h-3.5 text-slate-400 shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    role="img"
-                    aria-label="Location"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  <span>Hồ Chí Minh, Việt Nam</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-3.5 h-3.5 text-slate-400 shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    role="img"
-                    aria-label="Join date"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <span>Đã tham gia vào 15/05/2023</span>
-                </div>
+                {formatJoinedDate(job.clientJoinedAt) && (
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="w-3.5 h-3.5 text-slate-400 shrink-0"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      role="img"
+                      aria-label="Join date"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span>Đã tham gia vào {formatJoinedDate(job.clientJoinedAt)}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <svg
                     className="w-3.5 h-3.5 text-slate-400 shrink-0"
@@ -960,13 +1004,19 @@ const JobDetailPage: React.FC = () => {
                       d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                     />
                   </svg>
-                  <span>24 công việc đã đăng</span>
+                  <span>
+                    {job.clientJobCount
+                      ? `${job.clientJobCount} công việc đã đăng`
+                      : 'Chưa đăng công việc nào'}
+                  </span>
                 </div>
               </div>
 
               <button
                 type="button"
-                className="w-full h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer btn-sweep border-t border-t-blue-400/30 active:scale-[0.97]"
+                onClick={() => void handleContactClient()}
+                disabled={contacting}
+                className="w-full h-[44px] bg-[#1D4ED8] hover:bg-[#1e40af] disabled:bg-slate-300 disabled:cursor-wait text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer btn-sweep border-t border-t-blue-400/30 active:scale-[0.97]"
               >
                 <svg
                   className="w-4 h-4"
@@ -983,7 +1033,11 @@ const JobDetailPage: React.FC = () => {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
-                Liên hệ khách hàng
+                {contacting
+                  ? 'Đang kết nối…'
+                  : job.clientId === user?.userId
+                    ? 'Quản lý tin nhắn dự án'
+                    : 'Liên hệ khách hàng'}
               </button>
             </section>
           </div>

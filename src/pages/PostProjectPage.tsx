@@ -21,6 +21,16 @@ const SKILLS_SUGGESTION = [
   'Quản trị Admin',
 ];
 
+const SKILLS_BY_CATEGORY: Record<string, string[]> = {
+  dev: ['Java', 'Spring Boot', 'React', 'Node.js', 'Python', 'SQL', 'API', 'DevOps'],
+  text: ['Soạn thảo văn bản', 'Nhập liệu', 'Word/Excel', 'Trợ lý ảo', 'Quản trị Admin'],
+  translate: ['Dịch thuật', 'Tiếng Anh', 'Tiếng Nhật', 'Tiếng Trung', 'Biên tập'],
+  marketing: ['SEO', 'Quảng cáo Facebook', 'Google Ads', 'Content Marketing', 'Social Media'],
+  data: ['Phân tích dữ liệu', 'SQL', 'Excel nâng cao', 'Power BI', 'Python', 'Thống kê'],
+};
+
+const DURATION_MONTHS: Record<string, number> = { fast: 1, normal: 3, slow: 6 };
+
 type LocationState = {
   projectId?: string;
   keyword?: string;
@@ -86,6 +96,7 @@ const PostProjectPage: React.FC = () => {
 
   // State quản lý kỹ năng yêu cầu
   const [selectedSkills, setSelectedSkills] = useState<string[]>(initialSkills);
+  const skillSuggestions = SKILLS_BY_CATEGORY[category] ?? SKILLS_SUGGESTION;
   const [showCustomSkillInput, setShowCustomSkillInput] = useState(false);
   const [customSkill, setCustomSkill] = useState('');
 
@@ -267,6 +278,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
     budgetAmount,
     budgetType,
     duration,
+    durationMonths: DURATION_MONTHS[duration] ?? 3,
     upgrades,
     deadline,
     currentStep,
@@ -610,7 +622,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                 </label>
                 <div id="skills-dummy" className="flex flex-wrap items-center gap-2.5">
                   {/* Gợi ý kỹ năng */}
-                  {SKILLS_SUGGESTION.map((skill) => {
+                  {skillSuggestions.map((skill) => {
                     const isSelected = selectedSkills.includes(skill);
                     return (
                       <button
@@ -630,7 +642,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
 
                   {/* Kỹ năng được thêm tùy chỉnh */}
                   {selectedSkills
-                    .filter((s) => !SKILLS_SUGGESTION.includes(s))
+                    .filter((s) => !skillSuggestions.includes(s))
                     .map((skill) => (
                       <button
                         key={skill}

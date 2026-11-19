@@ -14,6 +14,7 @@ import ProjectDraftProgress from '../components/ProjectDraftProgress';
 import InteractiveBackground from '../components/landing/InteractiveBackground';
 import { PrimaryButton } from '../components/landing/LandingButtons';
 import { PACKAGE_BUSINESS_ID } from '../features/subscription';
+import { notificationDestination } from '../lib/notification-routing';
 import { SUPPORT_FACEBOOK_URL } from '../lib/support';
 import {
   PATH_CLIENT_AI_BRIEF,
@@ -23,7 +24,6 @@ import {
   PATH_CLIENT_PROJECTS,
   PATH_CLIENT_PROJECT_DETAIL,
   PATH_NOTIFICATIONS,
-  PATH_WORKSPACE,
 } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 import type { ClientDashboardOverview } from '../types/job';
@@ -145,13 +145,7 @@ export default function ClientDashboardPage() {
         .then(() => queryClient.invalidateQueries({ queryKey: ['user-notifications'] }))
         .catch(() => undefined);
     }
-    if (notification.roomId) {
-      navigate(PATH_WORKSPACE.replace(':projectId', notification.roomId));
-    } else if (notification.jobId) {
-      navigate(PATH_CLIENT_PROJECT_DETAIL.replace(':id', notification.jobId));
-    } else {
-      navigate(PATH_NOTIFICATIONS);
-    }
+    navigate(notificationDestination(notification, user?.role) ?? PATH_NOTIFICATIONS);
   };
 
   return (

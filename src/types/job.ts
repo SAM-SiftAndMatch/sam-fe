@@ -33,6 +33,10 @@ export interface JobResponse {
   isUrgentHiring: boolean;
   requiresAiQa: boolean;
   skills: JobSkill[];
+  clientJoinedAt: string | null;
+  clientJobCount: number | null;
+  clientRating: number | null;
+  clientReviewCount: number | null;
   createdAt: string;
   updatedAt: string;
 }

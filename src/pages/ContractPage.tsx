@@ -1035,7 +1035,9 @@ const ContractPage: React.FC = () => {
                   <div className="bg-slate-50 border border-slate-200 rounded-[24px] p-6 text-center">
                     <p className="text-base font-bold text-slate-700">Hợp đồng chỉ có thể xem.</p>
                     <p className="text-xs text-slate-500 mt-1">
-                      Hợp đồng ở trạng thái {contract.status.toLowerCase()} không thể chỉnh sửa.
+                      {contract.status === 'COMPLETED'
+                        ? 'Hợp đồng đã hoàn thành nên không thể chỉnh sửa.'
+                        : 'Hợp đồng đã hủy nên không thể chỉnh sửa.'}
                     </p>
                   </div>
                 ) : isEditing ? (

@@ -172,7 +172,7 @@ export default function PaidMaintenancePanel({
       const payment = await financePost<{ checkoutUrl?: string; orderId?: string }>(
         `/paid-maintenance-orders/${order}/checkout`
       );
-      beginCheckout(payment, window.location.pathname);
+      await beginCheckout(payment, window.location.pathname);
     } catch (cause) {
       setError(financeError(cause));
     } finally {
