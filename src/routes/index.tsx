@@ -18,6 +18,7 @@ import GoogleConnectPage from '../pages/GoogleConnectPage';
 import GoogleLinkPendingPage from '../pages/GoogleLinkPendingPage';
 // Pages
 import LoginPage from '../pages/LoginPage';
+import PasswordSetupPage from '../pages/PasswordSetupPage';
 import RegisterPage from '../pages/RegisterPage';
 import RoleSelectionPage from '../pages/RoleSelectionPage';
 
@@ -201,6 +202,7 @@ const AppRoutes = () => {
         {/* Both contract funding and freelancer deposits return to this legacy URL. */}
         <Route path={paths.PATH_GOOGLE_AUTH_LINK} element={<GoogleLinkPendingPage />} />
         <Route path={paths.PATH_GOOGLE_AUTH_CONNECT} element={<GoogleConnectPage />} />
+        <Route path={paths.PATH_PASSWORD_SETUP} element={<PasswordSetupPage />} />
         <Route path={paths.PATH_NOTIFICATIONS} element={<NotificationsPage />} />
         <Route path={paths.PATH_WORKSPACES} element={<WorkspacesPage />} />
         <Route
