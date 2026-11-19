@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 import { dateTime, financeError, financeGet, financePost, money } from '../../api/finance';
 import { beginCheckout } from '../../lib/checkout';
 import { useAuthStore } from '../../stores/useAuthStore';
@@ -188,10 +189,29 @@ export default function PaidMaintenancePanel({
       await financePost(`/paid-maintenance-orders/${selected.id}/actions`, { action, content });
       setSelected(null);
       setContent('');
-      await cache.invalidateQueries({ queryKey: ['paid-maintenance', user] });
-      await cache.invalidateQueries({ queryKey: ['maintenance', user] });
+      const refresh = () =>
+        Promise.all([
+          cache.invalidateQueries(
+            { queryKey: ['paid-maintenance', user] },
+            { throwOnError: viewerRole === 'admin' }
+          ),
+          cache.invalidateQueries(
+            { queryKey: ['maintenance', user] },
+            { throwOnError: viewerRole === 'admin' }
+          ),
+        ]);
+      if (viewerRole === 'admin') {
+        toast.success('Đã ghi nhận quyết định xử lý đơn bảo trì.');
+        await refresh().catch(() => {
+          toast.warning(
+            'Thao tác đã thành công nhưng chưa tải lại được đơn bảo trì. Vui lòng tải lại trang.'
+          );
+        });
+      } else await refresh();
     } catch (cause) {
-      setError(financeError(cause));
+      const message = financeError(cause);
+      setError(message);
+      if (viewerRole === 'admin') toast.error(message);
     } finally {
       setBusy(false);
     }
