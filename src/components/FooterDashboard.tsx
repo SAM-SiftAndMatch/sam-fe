@@ -1,5 +1,7 @@
 import type React from 'react';
+import { Link } from 'react-router-dom';
 import { SUPPORT_FACEBOOK_URL } from '../lib/support';
+import { PATH_FEEDBACK } from '../routes/paths';
 import { PolicyButton } from './PolicyLinks';
 import SamBrandLogo from './SamBrandLogo';
 
@@ -100,6 +102,12 @@ const FooterDashboard: React.FC = () => {
           <div className="flex flex-col items-start col-span-1">
             <h3 className="text-gray-900 font-bold mb-5">Về chúng tôi</h3>
             <div className="flex flex-col gap-4">
+              <Link
+                to={PATH_FEEDBACK}
+                className="text-gray-500 hover:text-[#0047FF] text-sm text-left transition-colors"
+              >
+                Đánh giá SAM
+              </Link>
               <button
                 type="button"
                 className="text-gray-500 hover:text-[#0047FF] text-sm text-left transition-colors cursor-pointer bg-transparent border-0 p-0"

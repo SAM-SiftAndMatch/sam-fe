@@ -14,6 +14,7 @@ import {
   PATH_CLIENT_PRICING,
   PATH_CLIENT_PROFILE,
   PATH_CLIENT_PROJECTS,
+  PATH_FEEDBACK,
   PATH_FREELANCER,
   PATH_FREELANCER_APPLICATIONS,
   PATH_FREELANCER_CREATE_PROFILE,
@@ -442,6 +443,18 @@ const AppHeader: React.FC = () => {
                     >
                       {profileLabel}
                     </button>
+                    {(user?.role === 'CLIENT' || user?.role === 'FREELANCER') && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          closeMenus();
+                          navigate(PATH_FEEDBACK);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
+                      >
+                        Đánh giá & góp ý
+                      </button>
+                    )}
                     {googleAuthEnabled && (
                       <button
                         type="button"
