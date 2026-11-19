@@ -13,6 +13,28 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import { Field, Modal, Notice, inputClass, primaryClass, secondaryClass } from './FinanceUI';
 import PaidMaintenancePanel, { QuotePanel } from './PaidMaintenancePanel';
 
+const eventActionLabel: Record<string, string> = {
+  CREATED: 'Đã tạo ticket',
+  COMMENT: 'Trao đổi thêm',
+  START: 'Tiếp nhận xử lý',
+  NEED_INFORMATION: 'Cần khách hàng bổ sung thông tin',
+  SUBMIT_FIX: 'Gửi bản vá',
+  ACCEPT_FIX: 'Xác nhận đã sửa',
+  REJECT_FIX: 'Báo lỗi vẫn còn',
+  WITHDRAW: 'Rút ticket',
+  ESCALATE: 'Chuyển admin hỗ trợ',
+  ADMIN_RESOLVE: 'Admin kết luận đã giải quyết',
+  ADMIN_OUT_OF_SCOPE: 'Admin kết luận ngoài phạm vi bảo hành',
+  ADMIN_EXTENDED: 'Admin gia hạn xử lý',
+  OVERDUE: 'Quá hạn xử lý',
+  QUOTE_CREATED: 'Freelancer gửi báo giá',
+  QUOTE_ACCEPTED: 'Khách hàng chấp thuận báo giá',
+  ACCEPTED_QUOTE: 'Chấp thuận báo giá',
+};
+
+const eventLabel = (action: string) =>
+  eventActionLabel[action] ?? action.replaceAll('_', ' ').toLowerCase();
+
 export default function MaintenancePanel({
   jobId,
   completed,
@@ -336,7 +358,7 @@ export default function MaintenancePanel({
                   {ticket.events?.map((event) => (
                     <div key={event.id} className="rounded-xl bg-slate-50 p-3">
                       <p className="text-xs text-slate-500">
-                        {dateTime(event.createdAt)} · {event.action}
+                        {dateTime(event.createdAt)} · {eventLabel(event.action)}
                       </p>
                       <p className="mt-1 whitespace-pre-wrap break-words text-sm">
                         {event.content}

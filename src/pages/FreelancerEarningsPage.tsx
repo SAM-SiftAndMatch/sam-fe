@@ -14,6 +14,7 @@ import {
   statusLabel,
 } from '../api/finance';
 import AppHeader from '../components/AppHeader';
+import BankSelect from '../components/finance/BankSelect';
 import BankSetupNotice from '../components/finance/BankSetupNotice';
 import {
   Field,
@@ -24,6 +25,7 @@ import {
   secondaryClass,
 } from '../components/finance/FinanceUI';
 import IncomeOverview from '../components/finance/IncomeOverview';
+import { isSupportedBankCode, normalizeBankCode } from '../lib/banks';
 import { useAuthStore } from '../stores/useAuthStore';
 
 export default function FreelancerEarningsPage() {
@@ -67,6 +69,7 @@ export default function FreelancerEarningsPage() {
     setPassword('');
     setNumber('');
     setHolder('');
+    setBankCode('VCB');
     setEditingBank(null);
     setModal(kind);
     if (kind === 'withdraw') {
@@ -83,18 +86,36 @@ export default function FreelancerEarningsPage() {
     setHolder('');
     setError('');
   };
+  const bankValidationError = () => {
+    if (!isSupportedBankCode(bankCode)) return 'Chọn ngân hàng nhận tiền trong danh sách.';
+    const account = number.replace(/\s/g, '');
+    if (!/^[A-Za-z0-9]{4,40}$/.test(account))
+      return 'Số tài khoản chỉ gồm chữ và số, dài từ 4 đến 40 ký tự.';
+    const name = holder.trim().replace(/\s+/g, ' ');
+    if (name.length < 2) return 'Nhập tên chủ tài khoản.';
+    if (/[@\d]/.test(name))
+      return 'Tên chủ tài khoản phải là tên người thụ hưởng đăng ký tại ngân hàng, không dùng email hoặc số.';
+    return '';
+  };
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setBusy(true);
     setError('');
+    if (modal === 'bank') {
+      const invalid = bankValidationError();
+      if (invalid) {
+        setError(invalid);
+        return;
+      }
+    }
+    setBusy(true);
     try {
       if (modal === 'bank')
         await (editingBank ? financePut : financePost)(
           editingBank ? `/finance/bank-accounts/${editingBank}` : '/finance/bank-accounts',
           {
-            bankCode,
-            accountNumber: number,
-            accountHolder: holder,
+            bankCode: normalizeBankCode(bankCode),
+            accountNumber: number.replace(/\s/g, ''),
+            accountHolder: holder.trim().replace(/\s+/g, ' ').toUpperCase(),
             password,
           }
         );
@@ -137,6 +158,7 @@ export default function FreelancerEarningsPage() {
     if (bankAction === 'add-bank') {
       setModal('bank');
       setEditingBank(null);
+      setBankCode('VCB');
       setNumber('');
       setHolder('');
       setPassword('');
@@ -347,7 +369,7 @@ export default function FreelancerEarningsPage() {
                       className="mt-4 text-sm font-medium text-slate-600 underline"
                       onClick={() => {
                         open('bank');
-                        setBankCode(bank.bankCode);
+                        setBankCode(normalizeBankCode(bank.bankCode));
                         setEditingBank(bank.id);
                         setNotice(
                           'Nhập lại đầy đủ thông tin ngân hàng. Nếu đang có lệnh chi chưa kết thúc, hãy dùng Thêm tài khoản để giữ an toàn cho lệnh cũ.'
@@ -464,16 +486,10 @@ export default function FreelancerEarningsPage() {
               {modal === 'bank' ? (
                 <>
                   <Field
-                    label="Mã ngân hàng"
-                    hint="Ví dụ VCB, ACB, MBB, BIDV. Đối chiếu với ngân hàng nhận tiền của bạn."
+                    label="Ngân hàng nhận tiền"
+                    hint="Gõ tên hoặc mã ngân hàng để tìm, ví dụ Vietcombank hoặc VCB."
                   >
-                    <input
-                      required
-                      maxLength={20}
-                      value={bankCode}
-                      onChange={(e) => setBankCode(e.target.value.toUpperCase())}
-                      className={inputClass}
-                    />
+                    <BankSelect value={bankCode} onChange={setBankCode} />
                   </Field>
                   <Field label="Số tài khoản">
                     <input
@@ -488,14 +504,15 @@ export default function FreelancerEarningsPage() {
                   </Field>
                   <Field
                     label="Tên chủ tài khoản"
-                    hint="Nhập đúng tên người thụ hưởng đã đăng ký tại ngân hàng."
+                    hint="Nhập đúng tên người thụ hưởng đã đăng ký tại ngân hàng, không dùng email hoặc số điện thoại."
                   >
                     <input
                       required
                       autoComplete="name"
+                      autoCapitalize="characters"
                       maxLength={150}
                       value={holder}
-                      onChange={(e) => setHolder(e.target.value)}
+                      onChange={(e) => setHolder(e.target.value.toUpperCase())}
                       className={inputClass}
                     />
                   </Field>

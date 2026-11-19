@@ -5,12 +5,7 @@ import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import PaginationNav from '../components/PaginationNav';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
-import {
-  PATH_CLIENT_PROJECT_DETAIL,
-  PATH_FREELANCER_INVITATIONS,
-  PATH_JOB_DETAIL,
-  PATH_WORKSPACE,
-} from '../routes/paths';
+import { notificationDestination } from '../lib/notification-routing';
 import { useAuthStore } from '../stores/useAuthStore';
 
 const notificationTitles: Record<string, string> = {
@@ -28,6 +23,15 @@ const notificationTitles: Record<string, string> = {
   PROJECT_ADDON_PAYMENT_PENDING: 'Chưa thanh toán tính năng dự án',
   PROJECT_ADDON_PAYMENT_PAID: 'Đã kích hoạt tính năng dự án',
   PROJECT_ADDON_PAYMENT_REVIEW: 'Thanh toán tính năng cần hỗ trợ',
+  PAYMENT_ESCROW_HELD: 'Đã nạp tiền vào escrow',
+  PROJECT_STARTED: 'Dự án đã bắt đầu',
+  PROJECT_SETTLEMENT_POSTED: 'Đã nghiệm thu và ghi công nợ',
+  SUBSCRIPTION_ACTIVE: 'Gói dịch vụ đã kích hoạt',
+  DELIVERY_SUBMITTED: 'Có bản bàn giao mới',
+  DELIVERY_REVISION_REQUESTED: 'Yêu cầu chỉnh sửa',
+  PROJECT_DELIVERY_ACCEPTED: 'Sản phẩm đã được nghiệm thu',
+  MAINTENANCE_TICKET_UPDATED: 'Cập nhật bảo trì',
+  MAINTENANCE_ESCALATED: 'Bảo trì cần hỗ trợ',
 };
 
 const titleFor = (type: string) => notificationTitles[type] ?? 'Cập nhật mới';
@@ -48,17 +52,8 @@ export default function NotificationsPage() {
       await notificationsApi.markRead(notification.id);
       await queryClient.invalidateQueries({ queryKey: ['user-notifications'] });
     }
-    if (notification.roomId) {
-      navigate(PATH_WORKSPACE.replace(':projectId', notification.roomId));
-    } else if (user?.role === 'FREELANCER' && notification.type.startsWith('JOB_INVITE')) {
-      navigate(PATH_FREELANCER_INVITATIONS);
-    } else if (notification.jobId) {
-      navigate(
-        user?.role === 'CLIENT' && notification.type !== '1_TOUCH_INVITE'
-          ? PATH_CLIENT_PROJECT_DETAIL.replace(':id', notification.jobId)
-          : PATH_JOB_DETAIL.replace(':id', notification.jobId)
-      );
-    }
+    const destination = notificationDestination(notification, user?.role);
+    if (destination) navigate(destination);
   };
 
   return (

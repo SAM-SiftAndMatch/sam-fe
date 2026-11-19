@@ -49,7 +49,11 @@ const FreelancerPricingPage: React.FC = () => {
     }
     const result = await purchase(PACKAGE_PRO_DEV_ID);
     if (result?.checkout) {
-      beginCheckout(result.checkout, '/freelancer/pricing');
+      try {
+        await beginCheckout(result.checkout, '/freelancer/pricing');
+      } catch (cause) {
+        console.error(cause);
+      }
       return;
     }
     if (result) {
@@ -112,11 +116,11 @@ const FreelancerPricingPage: React.FC = () => {
                 <ul className="space-y-3 mb-8 text-xs sm:text-sm text-slate-700">
                   <li className="flex items-start gap-2.5">
                     <span className="text-slate-400 text-xs mt-0.5">✓</span>
-                    <span>Đăng dự án không giới hạn</span>
+                    <span>Ứng tuyển không giới hạn</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-slate-400 text-xs mt-0.5">✓</span>
-                    <span>Phí dịch vụ 5%</span>
+                    <span>Phí nền tảng 10% mỗi hợp đồng</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-slate-400 text-xs mt-0.5">✓</span>

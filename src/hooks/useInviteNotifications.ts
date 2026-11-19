@@ -57,7 +57,16 @@ export function useInviteNotifications(onEvent?: (n: InviteNotification) => void
             payload.type !== 'CHAT_MESSAGE' &&
             payload.type !== 'PROJECT_ADDON_PAYMENT_PENDING' &&
             payload.type !== 'PROJECT_ADDON_PAYMENT_PAID' &&
-            payload.type !== 'PROJECT_ADDON_PAYMENT_REVIEW'
+            payload.type !== 'PROJECT_ADDON_PAYMENT_REVIEW' &&
+            payload.type !== 'PAYMENT_ESCROW_HELD' &&
+            payload.type !== 'PROJECT_STARTED' &&
+            payload.type !== 'PROJECT_SETTLEMENT_POSTED' &&
+            payload.type !== 'DELIVERY_SUBMITTED' &&
+            payload.type !== 'DELIVERY_REVISION_REQUESTED' &&
+            payload.type !== 'PROJECT_DELIVERY_ACCEPTED' &&
+            payload.type !== 'MAINTENANCE_TICKET_UPDATED' &&
+            payload.type !== 'MAINTENANCE_ESCALATED' &&
+            payload.type !== 'SUBSCRIPTION_ACTIVE'
           ) {
             return;
           }
