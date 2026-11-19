@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageSquareWarning, ShieldCheck } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { toast } from 'react-toastify';
 import {
   type MaintenanceTicket,
   dateTime,
@@ -82,8 +83,14 @@ export default function MaintenancePanel({
   });
   const refresh = () =>
     Promise.all([
-      cache.invalidateQueries({ queryKey: ['maintenance', user, jobId] }),
-      cache.invalidateQueries({ queryKey: ['finance', user] }),
+      cache.invalidateQueries(
+        { queryKey: ['maintenance', user, jobId] },
+        { throwOnError: viewerRole === 'admin' }
+      ),
+      cache.invalidateQueries(
+        { queryKey: ['finance', user] },
+        { throwOnError: viewerRole === 'admin' }
+      ),
     ]);
   if (!completed) return null;
   if (summary.isPending)
@@ -148,9 +155,22 @@ export default function MaintenancePanel({
       else await financePost(`/maintenance-tickets/${selected}/actions`, { action, content });
       setContent('');
       setAction('COMMENT');
-      await refresh();
+      if (viewerRole === 'admin') {
+        toast.success(
+          action === 'ADMIN_EXTEND'
+            ? 'Đã gia hạn xử lý ticket bảo trì.'
+            : 'Đã cập nhật ticket bảo trì thành công.'
+        );
+        await refresh().catch(() => {
+          toast.warning(
+            'Thao tác đã thành công nhưng chưa tải lại được ticket. Vui lòng tải lại trang.'
+          );
+        });
+      } else await refresh();
     } catch (cause) {
-      setError(financeError(cause));
+      const message = financeError(cause);
+      setError(message);
+      if (viewerRole === 'admin') toast.error(message);
     } finally {
       setBusy(false);
     }

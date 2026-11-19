@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
   type BankAccount,
   type Beneficiary,
@@ -43,6 +44,17 @@ interface FinanceAudit {
   detail: string;
   createdAt: string;
 }
+const operationSuccessMessages: Record<string, string> = {
+  'reveal-bank': 'Đã mở thông tin tài khoản ngân hàng để xác minh.',
+  verify: 'Đã xác minh tài khoản ngân hàng thành công.',
+  'reject-bank': 'Đã từ chối xác minh tài khoản ngân hàng.',
+  approve: 'Đã duyệt yêu cầu rút tiền. Lệnh chi đang chờ chuyển khoản.',
+  reject: 'Đã từ chối yêu cầu rút tiền.',
+  'start-manual-payment': 'Đã nhận xử lý chuyển khoản và mở thông tin người nhận.',
+  'confirm-manual-payment': 'Đã ghi nhận xác nhận chi trả thành công.',
+  reconcile: 'Đã chuyển lệnh chi sang chờ đối soát.',
+  'confirm-failed': 'Đã ghi nhận lệnh chi không thành công.',
+};
 function AdminFinanceContent({ tab }: { tab: string }) {
   const user = useAuthStore((s) => s.user);
   const cache = useQueryClient();
@@ -54,7 +66,6 @@ function AdminFinanceContent({ tab }: { tab: string }) {
   const [evidence, setEvidence] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
   const [job, setJob] = useState<string | null>(null);
   useEffect(() => {
@@ -127,7 +138,7 @@ function AdminFinanceContent({ tab }: { tab: string }) {
   };
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!operation) return;
+    if (!operation || busy) return;
     setBusy(true);
     setError('');
     const { id, type } = operation;
@@ -154,10 +165,18 @@ function AdminFinanceContent({ tab }: { tab: string }) {
           evidenceReference: evidence,
         });
       setOperation(null);
-      setNotice('Đã ghi nhận thao tác và nhật ký.');
-      await cache.invalidateQueries({ queryKey: ['admin-finance', user.userId] });
+      toast.success(operationSuccessMessages[type] ?? 'Đã ghi nhận thao tác thành công.');
+      await cache
+        .invalidateQueries({ queryKey: ['admin-finance', user.userId] }, { throwOnError: true })
+        .catch(() => {
+          toast.warning(
+            'Thao tác đã thành công nhưng chưa tải lại được danh sách. Vui lòng tải lại trang.'
+          );
+        });
     } catch (cause) {
-      setError(financeError(cause));
+      const message = financeError(cause);
+      setError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
       setPassword('');
@@ -185,7 +204,6 @@ function AdminFinanceContent({ tab }: { tab: string }) {
             lại. Nếu bật kiểm soát kép, người chuyển tiền phải khác người duyệt.
           </Notice>
         )}
-        {notice && <Notice>{notice}</Notice>}
         {tab !== 'payment-cases' && list.isError && (
           <Notice error>
             Không tải được dữ liệu.{' '}
