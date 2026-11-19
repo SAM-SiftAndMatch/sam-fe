@@ -1,9 +1,33 @@
+import { assertApiSuccess, requireApiResult } from '../lib/api-error';
 import apiClient from '../lib/axios';
 import { tokenManager } from '../lib/token-manager';
 import type { ApiResponse } from '../types/api';
 import type { AuthResponse, LoginRequest, RegisterRequest } from '../types/auth';
 
+export interface PasswordSetupStatus {
+  hasPassword: boolean;
+  canSetup: boolean;
+  googleConfirmed: boolean;
+}
+
 export const authApi = {
+  passwordSetupStatus: async (): Promise<PasswordSetupStatus> => {
+    const res = await apiClient.get<ApiResponse<PasswordSetupStatus>>('/auth/password/status');
+    return requireApiResult(res.data, 'Không tải được trạng thái mật khẩu SAM.');
+  },
+  startPasswordSetup: async (): Promise<string> => {
+    const res = await apiClient.post<ApiResponse<{ authorizationUrl: string }>>(
+      '/auth/password/setup/start'
+    );
+    return requireApiResult(res.data, 'Không bắt đầu được xác nhận Google.').authorizationUrl;
+  },
+  setupPassword: async (newPassword: string, confirmPassword: string): Promise<void> => {
+    const res = await apiClient.post<ApiResponse<void>>('/auth/password/setup', {
+      newPassword,
+      confirmPassword,
+    });
+    assertApiSuccess(res.data, 'Không thiết lập được mật khẩu SAM.');
+  },
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const res = await apiClient.post<ApiResponse<AuthResponse>>('/auth/login', data);
     const auth = res.data.result;
