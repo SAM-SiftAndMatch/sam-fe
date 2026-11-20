@@ -62,6 +62,8 @@ const AdminLayout = lazy(() => import('../components/admin/AdminLayout'));
 const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage'));
 const AdminRevenuePage = lazy(() => import('../pages/AdminRevenuePage'));
 const AdminUsersPage = lazy(() => import('../pages/AdminUsersPage'));
+const AdminFeedbackPage = lazy(() => import('../pages/AdminFeedbackPage'));
+const FeedbackPage = lazy(() => import('../pages/FeedbackPage'));
 const WorkspaceLayout = lazy(() => import('../pages/WorkspaceLayout'));
 const WorkspaceChatView = lazy(() => import('../pages/WorkspaceChatView'));
 const WorkspaceTimelineView = lazy(() => import('../pages/WorkspaceTimelineView'));
@@ -191,12 +193,23 @@ const AppRoutes = () => {
           <Route index element={<AdminDashboardPage />} />
           <Route path="revenue" element={<AdminRevenuePage />} />
           <Route path="users" element={<AdminUsersPage />} />
+          <Route path="feedback" element={<AdminFeedbackPage />} />
           <Route path="finance" element={<Navigate to="/admin/finance/payment-cases" replace />} />
           <Route path="finance/:section" element={<AdminFinancePage />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>
       </Route>
       {/* Authenticated routes (any role) */}
+      <Route element={<RoleGuard allowedRoles={['CLIENT', 'FREELANCER']} />}>
+        <Route
+          path={paths.PATH_FEEDBACK}
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <FeedbackPage />
+            </Suspense>
+          }
+        />
+      </Route>
       <Route element={<AuthGuard />}>
         <Route path="/payments/history" element={<PaymentHistoryPage />} />
         {/* Both contract funding and freelancer deposits return to this legacy URL. */}
