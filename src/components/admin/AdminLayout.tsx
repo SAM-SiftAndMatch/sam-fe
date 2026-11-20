@@ -4,6 +4,7 @@ import {
   Banknote,
   ChevronRight,
   CircleDollarSign,
+  Cpu,
   CreditCard,
   FileCheck2,
   History,
@@ -46,6 +47,7 @@ const navigation = [
   {
     group: 'DỊCH VỤ & KIỂM SOÁT',
     items: [
+      { to: '/admin/ai', label: 'AI & API Keys', icon: Cpu },
       { to: '/admin/finance/tickets', label: 'Ticket bảo trì', icon: Ticket },
       { to: '/admin/finance/audit', label: 'Nhật ký vận hành', icon: History },
     ],
