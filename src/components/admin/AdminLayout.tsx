@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageSquare,
   PanelLeftClose,
   ShieldCheck,
   Ticket,
@@ -29,6 +30,7 @@ const navigation = [
       { to: '/admin', label: 'Tổng quan', icon: LayoutDashboard, end: true },
       { to: '/admin/revenue', label: 'Doanh thu nền tảng', icon: CircleDollarSign },
       { to: '/admin/users', label: 'Người dùng', icon: Users },
+      { to: '/admin/feedback', label: 'Đánh giá & góp ý', icon: MessageSquare },
     ],
   },
   {

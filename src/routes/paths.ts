@@ -6,6 +6,8 @@ export const PATH_GOOGLE_AUTH_COMPLETE = '/auth/google/complete';
 export const PATH_GOOGLE_AUTH_LINK = '/auth/google/link';
 export const PATH_GOOGLE_AUTH_CONNECT = '/auth/google/connect';
 export const PATH_PASSWORD_SETUP = '/account/password/setup';
+export const PATH_FEEDBACK = '/feedback';
+export const PATH_ADMIN_FEEDBACK = '/admin/feedback';
 
 export const PATH_HOME = '/';
 export const PATH_HOME_ALT = '/home';
