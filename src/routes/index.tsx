@@ -63,6 +63,7 @@ const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage'));
 const AdminRevenuePage = lazy(() => import('../pages/AdminRevenuePage'));
 const AdminUsersPage = lazy(() => import('../pages/AdminUsersPage'));
 const AdminFeedbackPage = lazy(() => import('../pages/AdminFeedbackPage'));
+const AdminAiPage = lazy(() => import('../pages/AdminAiPage'));
 const FeedbackPage = lazy(() => import('../pages/FeedbackPage'));
 const WorkspaceLayout = lazy(() => import('../pages/WorkspaceLayout'));
 const WorkspaceChatView = lazy(() => import('../pages/WorkspaceChatView'));
@@ -194,6 +195,7 @@ const AppRoutes = () => {
           <Route path="revenue" element={<AdminRevenuePage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="feedback" element={<AdminFeedbackPage />} />
+          <Route path="ai" element={<AdminAiPage />} />
           <Route path="finance" element={<Navigate to="/admin/finance/payment-cases" replace />} />
           <Route path="finance/:section" element={<AdminFinancePage />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
