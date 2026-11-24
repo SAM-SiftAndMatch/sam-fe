@@ -18,6 +18,7 @@ function load(file, dependency = require) {
     exports,
     module: { exports },
     require: dependency,
+    crypto: require('node:crypto').webcrypto,
     FormData,
     Blob,
     URL,
@@ -37,8 +38,8 @@ test('attachment limits apply to each file, image, file count and combined messa
     /5 tệp/
   );
   assert.match(
-    policy.validateChatFiles(Array.from({ length: 3 }, () => file('x.zip', 10 * 1024 * 1024))),
-    /25MB/
+    policy.validateChatFiles(Array.from({ length: 3 }, () => file('x.mp4', 40 * 1024 * 1024))),
+    /100MB/
   );
   assert.equal(
     policy.validateChatFiles([
@@ -150,4 +151,117 @@ test('shared links safely ignore malformed, non-web and credential URLs', () => 
   const link = parseSharedChatLink('https://example.com/docs?q=project#section');
   assert.equal(link.hostname, 'example.com');
   assert.equal(link.url, 'https://example.com/docs?q=project#section');
+});
+
+test('video limits accept MP4 and WebM and reject videos above 50MB', () => {
+  assert.equal(policy.validateChatFiles([file('demo.mp4', 50 * 1024 * 1024)]), null);
+  assert.equal(policy.validateChatFiles([file('demo.webm', 1024)]), null);
+  assert.match(policy.validateChatFiles([file('large.mp4', 50 * 1024 * 1024 + 1)]), /50MB/);
+});
+
+test('chat separators use Vietnam hours, date transitions and explicit timestamp offsets', () => {
+  const { chatSeparator, chatTime } = load('src/lib/chat-time.ts');
+  assert.equal(chatTime('2026-11-24T06:05:00Z'), '13:05');
+  assert.equal(chatSeparator('2026-11-24T07:10:00Z', '2026-11-24T06:48:00Z'), '14:10');
+  assert.equal(chatSeparator('2026-11-24T07:20:00Z', '2026-11-24T07:10:00Z'), null);
+  assert.equal(chatSeparator('2026-11-24T17:01:00Z', '2026-11-24T16:59:00Z'), '25/11/2026 · 00:01');
+  assert.equal(chatSeparator('bad', null), null);
+});
+
+function outboxHarness(uploadAttachment = async () => ({ id: 'upload-a' })) {
+  const auth = { user: { userId: 'user-a' } };
+  const outbox = load('src/lib/chat-outbox.ts', (name) => {
+    if (name === 'zustand')
+      return {
+        create: (initializer) => {
+          let state = initializer();
+          return {
+            getState: () => state,
+            setState: (update) => {
+              state = { ...state, ...(typeof update === 'function' ? update(state) : update) };
+            },
+          };
+        },
+      };
+    if (name === '../api/chat') return { chatApi: { uploadAttachment } };
+    if (name === '../stores/useAuthStore')
+      return { useAuthStore: { getState: () => auth, subscribe: () => () => {} } };
+    return require(name);
+  });
+  return { ...outbox, auth };
+}
+
+test('outbox displays a message before acknowledgement and accepts another send immediately', async () => {
+  const outbox = outboxHarness();
+  let acknowledge;
+  outbox.enqueueChatMessage({
+    userId: 'user-a',
+    roomId: 'room-a',
+    content: 'first',
+    files: [],
+    send: () =>
+      new Promise((resolve) => {
+        acknowledge = resolve;
+      }),
+  });
+  const first = outbox.useChatOutbox.getState().items[0];
+  assert.equal(first.status, 'sending');
+  outbox.enqueueChatMessage({
+    userId: 'user-a',
+    roomId: 'room-a',
+    content: 'second',
+    files: [],
+    send: async () => ({ id: 'server-second' }),
+  });
+  assert.equal(outbox.useChatOutbox.getState().items.length, 2);
+  acknowledge({ id: 'server-first', clientMessageId: first.id });
+  await new Promise(setImmediate);
+  assert.equal(outbox.useChatOutbox.getState().items[0].status, 'sent');
+});
+
+test('retry preserves request identity and already uploaded files after a lost response', async () => {
+  let uploads = 0;
+  const outbox = outboxHarness(async () => {
+    uploads++;
+    return { id: 'upload-a' };
+  });
+  const attempts = [];
+  outbox.enqueueChatMessage({
+    userId: 'user-a',
+    roomId: 'room-a',
+    content: 'attachment',
+    files: [{ name: 'notes.txt', type: 'text/plain' }],
+    send: async (input) => {
+      attempts.push(input);
+      if (attempts.length === 1) throw new Error('response lost');
+      return { id: 'server-a', clientMessageId: input.clientMessageId };
+    },
+  });
+  await new Promise(setImmediate);
+  const failed = outbox.useChatOutbox.getState().items[0];
+  assert.equal(failed.status, 'failed');
+  await outbox.retryOutbox(failed.id);
+  assert.equal(uploads, 1);
+  assert.equal(attempts[0].clientMessageId, attempts[1].clientMessageId);
+  assert.equal(attempts[1].attachmentIds[0], 'upload-a');
+  assert.equal(outbox.useChatOutbox.getState().items[0].status, 'sent');
+});
+
+test('retry does not send under another account', async () => {
+  const outbox = outboxHarness();
+  let calls = 0;
+  outbox.enqueueChatMessage({
+    userId: 'user-a',
+    roomId: 'room-a',
+    content: 'private',
+    files: [],
+    send: async () => {
+      calls++;
+      throw new Error('offline');
+    },
+  });
+  await new Promise(setImmediate);
+  outbox.auth.user.userId = 'user-b';
+  await outbox.retryOutbox(outbox.useChatOutbox.getState().items[0].id);
+  assert.equal(calls, 1);
 });

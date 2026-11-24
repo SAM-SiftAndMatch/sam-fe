@@ -51,6 +51,7 @@ export interface SendChatMessage {
 }
 
 export interface ChatMessage {
+  clientMessageId?: string | null;
   id: string;
   roomId: string;
   senderId?: string | null;
@@ -90,14 +91,21 @@ export const chatApi = {
   uploadAttachment: async (
     roomId: string,
     file: File,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    onProgress?: (percent: number) => void
   ): Promise<ChatAttachment> => {
     const form = new FormData();
     form.append('file', file);
     const res = await apiClient.post<ApiResponse<ChatAttachment>>(
       `/chat/rooms/${roomId}/attachments`,
       form,
-      { signal, headers: { 'Content-Type': 'multipart/form-data' } }
+      {
+        signal,
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (event) => {
+          if (event.total) onProgress?.(Math.round((event.loaded * 100) / event.total));
+        },
+      }
     );
     return requireApiResult(res.data, 'Không tải được tệp đính kèm.');
   },

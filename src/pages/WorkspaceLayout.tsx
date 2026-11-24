@@ -21,7 +21,7 @@ export interface WorkspaceContext {
   role: 'client' | 'freelancer';
   workspacesPage: number;
   markCompleted: () => void;
-  sendMessage: (input: SendChatMessage) => Promise<void>;
+  sendMessage: (input: SendChatMessage) => Promise<ChatMessage | undefined>;
   getDraft: () => string;
   saveDraft: (content: string) => void;
   getScrollTop: () => number | undefined;
@@ -146,6 +146,7 @@ export default function WorkspaceLayout() {
       } else {
         void queryClient.invalidateQueries({ queryKey: key });
       }
+      return message;
     },
     [roomId, userId, queryClient]
   );
