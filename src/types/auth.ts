@@ -3,6 +3,7 @@ export type UserRole = 'FREELANCER' | 'CLIENT' | 'ADMIN';
 export interface LoginRequest {
   email: string;
   password: string;
+  rememberMe: boolean;
 }
 
 export interface RegisterRequest {

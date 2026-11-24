@@ -49,7 +49,7 @@ const LoginPage: React.FC = () => {
     setServerError(null);
     try {
       if (googleLink) setGoogleLinkPending();
-      const auth = await login(data);
+      const auth = await login({ ...data, rememberMe });
       if (googleLink) {
         navigate(paths.PATH_GOOGLE_AUTH_LINK, { replace: true });
         return;
@@ -280,12 +280,6 @@ const LoginPage: React.FC = () => {
                 <label htmlFor="password" className="block text-xs font-semibold text-slate-700">
                   Mật khẩu
                 </label>
-                <button
-                  type="button"
-                  className="text-xs font-semibold text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0 p-0"
-                >
-                  Quên mật khẩu?
-                </button>
               </div>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
@@ -434,7 +428,11 @@ const LoginPage: React.FC = () => {
                 </span>
                 <span className="h-px flex-1 bg-slate-200" />
               </div>
-              <GoogleLoginButton returnTo={state?.returnTo} initialQuery={state?.initialQuery} />
+              <GoogleLoginButton
+                rememberMe={rememberMe}
+                returnTo={state?.returnTo}
+                initialQuery={state?.initialQuery}
+              />
             </div>
           )}
 
