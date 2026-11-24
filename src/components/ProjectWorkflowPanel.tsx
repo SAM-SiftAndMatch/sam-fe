@@ -13,7 +13,6 @@ import type {
   ProjectWorkflowPanelProps,
   QaPlan,
   SandboxSettlement,
-  TaskReport,
 } from '../types/workflow';
 
 const statusLabel: Record<ProjectTaskStatus, string> = {
@@ -51,8 +50,6 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const reportTask = searchParams.get('task');
-  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
-  const [reportLists, setReportLists] = useState<Record<string, TaskReport[]>>({});
   const [qaPlans, setQaPlans] = useState<Record<string, QaPlan>>({});
   const [expandedQaId, setExpandedQaId] = useState<string | null>(null);
   const [loadingQaId, setLoadingQaId] = useState<string | null>(null);
@@ -102,27 +99,25 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
   const settlement = settlementQuery.data ?? settlementState;
   const loading = canUseWorkflow && (timelineQuery.isPending || deliveriesQuery.isPending);
   const queryError = timelineQuery.error ?? deliveriesQuery.error;
+  const expandedTaskId =
+    canUseWorkflow && timeline?.tasks.some((task) => task.id === reportTask) ? reportTask : null;
+  const reportsQuery = useQuery({
+    queryKey: workspaceKeys.reports(userId, jobId, expandedTaskId ?? ''),
+    queryFn: () => workflowApi.getTaskReports(jobId, expandedTaskId!),
+    enabled: Boolean(userId && expandedTaskId),
+    staleTime: 10_000,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+  });
+
   const loadWorkflow = () => {
     setError(null);
-    void Promise.all([timelineQuery.refetch(), deliveriesQuery.refetch()]);
+    void Promise.all([
+      timelineQuery.refetch(),
+      deliveriesQuery.refetch(),
+      ...(expandedTaskId ? [reportsQuery.refetch()] : []),
+    ]);
   };
-
-  const loadTaskReports = useCallback(
-    async (taskId: string) => {
-      try {
-        const result = await queryClient.fetchQuery({
-          queryKey: workspaceKeys.reports(userId, jobId, taskId),
-          queryFn: () => workflowApi.getTaskReports(jobId, taskId),
-          staleTime: 10_000,
-        });
-        setReportLists((current) => ({ ...current, [taskId]: result }));
-        setExpandedTaskId(taskId);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Không tải được báo cáo');
-      }
-    },
-    [jobId, queryClient, userId]
-  );
 
   const setReportLocation = useCallback(
     (taskId: string | null, replace = false) => {
@@ -155,15 +150,6 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
       { replace: true }
     );
   }, [searchParams, setSearchParams]);
-
-  useEffect(() => {
-    if (!canUseWorkflow || !reportTask || !timeline?.tasks.some((task) => task.id === reportTask)) {
-      setExpandedTaskId(null);
-      return;
-    }
-    // Khi timeline được đồng bộ lại, làm mới báo cáo đang mở của phía còn lại.
-    void loadTaskReports(reportTask);
-  }, [canUseWorkflow, loadTaskReports, reportTask, timeline?.tasks, timelineQuery.dataUpdatedAt]);
 
   const toggleQaPlan = async (deliveryId: string) => {
     if (expandedQaId === deliveryId) {
@@ -217,11 +203,6 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
       void queryClient.invalidateQueries({ queryKey: workspaceKeys.timeline(userId, jobId) });
       void queryClient.invalidateQueries({
         queryKey: workspaceKeys.reports(userId, jobId, reportTaskId),
-      });
-      setReportLists((current) => {
-        const next = { ...current };
-        delete next[reportTaskId];
-        return next;
       });
       setReportLocation(reportTaskId, true);
       setReportTaskId(null);
@@ -372,7 +353,6 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
             <p className="text-xs font-extrabold text-gray-900 mb-2">Tuần {weekNumber}</p>
             <div className="flex flex-col gap-2">
               {tasks.map((task) => {
-                const latestReport = reportLists[task.id]?.[0];
                 return (
                   <article
                     key={task.id}
@@ -387,48 +367,60 @@ const ProjectWorkflowPanel: React.FC<ProjectWorkflowPanelProps> = ({
                       </span>
                       <span className="text-[10px] font-bold text-gray-500">{task.progress}%</span>
                     </div>
-                    {latestReport && expandedTaskId !== task.id && (
-                      <div className="mt-2 pt-2 border-t border-gray-200">
-                        <p className="text-[11px] text-gray-600 line-clamp-3">
-                          {latestReport.content}
-                        </p>
-                        {latestReport.evidenceUrl && (
-                          <a
-                            href={latestReport.evidenceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[11px] font-bold text-blue-700 hover:underline"
-                          >
-                            Xem bằng chứng
-                          </a>
-                        )}
-                      </div>
-                    )}
                     <button
                       type="button"
                       onClick={() => {
                         if (expandedTaskId === task.id) setReportLocation(null);
                         else setReportLocation(task.id);
                       }}
+                      aria-expanded={expandedTaskId === task.id}
+                      aria-controls={
+                        expandedTaskId === task.id ? `task-reports-${task.id}` : undefined
+                      }
                       className="mt-2 text-[11px] font-bold text-blue-700 bg-transparent border-0 p-0 cursor-pointer"
                     >
                       {expandedTaskId === task.id ? 'Ẩn báo cáo' : 'Xem báo cáo'}
                     </button>
-                    {expandedTaskId === task.id &&
-                      reportTask === task.id &&
-                      reportLists[task.id] && (
-                        <div className="mt-2 text-[11px] text-gray-500">
-                          {reportLists[task.id].map((report) => (
-                            <p
-                              key={report.id}
-                              className="border-t border-gray-200 py-2 whitespace-pre-wrap"
+                    {expandedTaskId === task.id && (
+                      <div
+                        id={`task-reports-${task.id}`}
+                        className="mt-2 text-[11px] text-gray-500"
+                      >
+                        {reportsQuery.isPending ? (
+                          <output>Đang tải báo cáo...</output>
+                        ) : reportsQuery.isError ? (
+                          <div role="alert">
+                            <p>Không tải được báo cáo.</p>
+                            <button
+                              type="button"
+                              onClick={() => void reportsQuery.refetch()}
+                              className="mt-1 text-blue-700 underline"
                             >
-                              {report.content}
-                            </p>
-                          ))}
-                          {reportLists[task.id].length === 0 && <p>Chưa có báo cáo.</p>}
-                        </div>
-                      )}
+                              Thử lại
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            {(reportsQuery.data ?? []).map((report) => (
+                              <div key={report.id} className="border-t border-gray-200 py-2">
+                                <p className="whitespace-pre-wrap break-words">{report.content}</p>
+                                {report.evidenceUrl && (
+                                  <a
+                                    href={report.evidenceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-1 inline-block text-blue-700 font-bold hover:underline"
+                                  >
+                                    Xem bằng chứng
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                            {reportsQuery.data?.length === 0 && <p>Chưa có báo cáo.</p>}
+                          </>
+                        )}
+                      </div>
+                    )}
                     {canReport && (
                       <button
                         type="button"
