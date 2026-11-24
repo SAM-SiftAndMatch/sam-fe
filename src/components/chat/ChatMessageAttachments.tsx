@@ -98,6 +98,7 @@ export function ChatAttachmentItem({
 }) {
   const image = attachment.contentType.startsWith('image/');
   const pdf = attachment.contentType === 'application/pdf';
+  const video = attachment.contentType.startsWith('video/');
   const container = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [preview, setPreview] = useState(false);
@@ -144,7 +145,7 @@ export function ChatAttachmentItem({
     setTimeout(() => URL.revokeObjectURL(linkUrl), 5000);
   };
   const open = async () => {
-    if (!image && !pdf) {
+    if (!image && !pdf && !video) {
       await download();
       return;
     }
@@ -182,6 +183,18 @@ export function ChatAttachmentItem({
           )}
         </button>
       )}
+      {video && url && (
+        <video
+          src={url}
+          controls
+          playsInline
+          preload="metadata"
+          onLoadedMetadata={onImageLoad}
+          className="max-h-72 w-full rounded-xl"
+        >
+          <track kind="captions" />
+        </video>
+      )}
       {!image && (
         <div className="flex items-center gap-3 p-3">
           <FileText size={24} className="shrink-0 text-blue-600" />
@@ -194,7 +207,8 @@ export function ChatAttachmentItem({
           >
             <span className="block truncate text-xs font-semibold">{attachment.fileName}</span>
             <span className="mt-1 block text-[10px] text-slate-500">
-              {chatFileSize(attachment.sizeBytes)} · {pdf ? 'Xem trước' : 'Tải file'}
+              {chatFileSize(attachment.sizeBytes)} ·{' '}
+              {video ? 'Xem video' : pdf ? 'Xem trước' : 'Tải file'}
             </span>
           </button>
           <button
@@ -220,7 +234,7 @@ export function ChatAttachmentItem({
           </button>
         </p>
       )}
-      {preview && url && (
+      {preview && url && !video && (
         <Preview url={url} attachment={attachment} onClose={() => setPreview(false)} />
       )}
     </div>
