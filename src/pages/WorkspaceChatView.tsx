@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ListChecks, Menu } from 'lucide-react';
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import { type ChatMessage, chatApi } from '../api/chat';
 import { workflowApi } from '../api/workflow';
@@ -8,6 +8,8 @@ import ChatComposer from '../components/chat/ChatComposer';
 import ChatMessageAttachments from '../components/chat/ChatMessageAttachments';
 import WorkspacePanelDrawer from '../components/chat/WorkspacePanelDrawer';
 import WorkspaceResourcesPanel from '../components/chat/WorkspaceResourcesPanel';
+import { discardOutbox, retryOutbox, useChatOutbox } from '../lib/chat-outbox';
+import { chatSeparator, chatTime } from '../lib/chat-time';
 import { formatMoney } from '../utils/format';
 import type { WorkspaceContext } from './WorkspaceLayout';
 import { workspaceKeys } from './workspace-query';
@@ -29,7 +31,7 @@ const ChatBubble = memo(function ChatBubble({
           </p>
           {message.createdAt && (
             <p className="text-[10px] text-white/60 mt-1.5 text-right">
-              {new Date(message.createdAt).toLocaleString('vi-VN')}
+              {chatTime(message.createdAt)}
             </p>
           )}
         </div>
@@ -59,7 +61,8 @@ const ChatBubble = memo(function ChatBubble({
       )}
       <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
         {message.senderName}
-        {message.createdAt ? ` • ${new Date(message.createdAt).toLocaleString('vi-VN')}` : ''}
+        {message.createdAt ? ` • ${chatTime(message.createdAt)}` : ''}
+        {mine && ' · Đã gửi'}
       </div>
     </div>
   );
@@ -159,6 +162,29 @@ export default function WorkspaceChatView() {
     () => [...(messagesQuery.data?.pages ?? [])].reverse().flatMap((page) => page.items),
     [messagesQuery.data]
   );
+  const outboxItems = useChatOutbox((state) => state.items);
+  const roomOutbox = outboxItems.filter(
+    (item) => item.roomId === summary.roomId && item.userId === userId
+  );
+  useEffect(() => {
+    for (const item of roomOutbox) {
+      if (
+        messages.some(
+          (message) => message.clientMessageId === item.id || message.id === item.confirmed?.id
+        )
+      )
+        discardOutbox(item.id);
+    }
+  }, [messages, outboxItems, summary.roomId, userId]);
+  const pending = roomOutbox.filter(
+    (item) =>
+      !messages.some(
+        (message) => message.clientMessageId === item.id || message.id === item.confirmed?.id
+      )
+  );
+  useLayoutEffect(() => {
+    if (pending.length && shouldScrollBottom.current) bottomRef.current?.scrollIntoView();
+  }, [outboxItems]);
   const latestMessageId = messages.at(-1)?.id;
   useEffect(() => {
     if (!messagesQuery.isSuccess) return;
@@ -360,22 +386,96 @@ export default function WorkspaceChatView() {
           )}
           {messagesQuery.isPending ? (
             <p className="text-center text-sm text-gray-400 py-16">Đang tải tin nhắn...</p>
-          ) : messages.length === 0 ? (
+          ) : messages.length === 0 && pending.length === 0 ? (
             <p className="text-center text-sm text-gray-500 py-16">
               Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện.
             </p>
           ) : (
-            messages.map((message) => (
-              <ChatBubble
-                key={message.id}
-                message={message}
-                myId={userId}
-                onImageLoad={() => {
-                  if (shouldScrollBottom.current) bottomRef.current?.scrollIntoView();
-                }}
-              />
+            messages.map((message, index) => (
+              <Fragment key={message.id}>
+                {chatSeparator(message.createdAt, messages[index - 1]?.createdAt) && (
+                  <div className="self-center rounded-full bg-slate-200/70 px-3 py-1 text-[11px] text-slate-500">
+                    {chatSeparator(message.createdAt, messages[index - 1]?.createdAt)}
+                  </div>
+                )}
+                <ChatBubble
+                  key={message.id}
+                  message={message}
+                  myId={userId}
+                  onImageLoad={() => {
+                    if (shouldScrollBottom.current) bottomRef.current?.scrollIntoView();
+                  }}
+                />
+              </Fragment>
             ))
           )}
+          {pending.map((item, index) => (
+            <Fragment key={item.id}>
+              {chatSeparator(
+                item.confirmed?.createdAt ?? item.createdAt,
+                index ? pending[index - 1].createdAt : messages.at(-1)?.createdAt
+              ) && (
+                <div className="self-center rounded-full bg-slate-200/70 px-3 py-1 text-[11px] text-slate-500">
+                  {chatSeparator(
+                    item.confirmed?.createdAt ?? item.createdAt,
+                    index ? pending[index - 1].createdAt : messages.at(-1)?.createdAt
+                  )}
+                </div>
+              )}
+              <div className="flex max-w-[80%] flex-col items-end gap-1.5 self-end">
+                {item.content && (
+                  <p className="whitespace-pre-wrap break-words rounded-2xl rounded-tr-sm bg-[#1D4ED8] p-4 text-sm text-white">
+                    {item.content}
+                  </p>
+                )}
+                {item.files.map((entry, fileIndex) => (
+                  <div
+                    key={`${item.id}:${fileIndex}`}
+                    className="max-w-full rounded-xl bg-white p-2 text-xs"
+                  >
+                    {entry.preview && entry.file.type.startsWith('image/') ? (
+                      <img
+                        src={entry.preview}
+                        alt={entry.file.name}
+                        className="max-h-64 rounded-xl"
+                      />
+                    ) : entry.preview && entry.file.type.startsWith('video/') ? (
+                      <video
+                        src={entry.preview}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="max-h-64 max-w-full rounded-xl"
+                      >
+                        <track kind="captions" />
+                      </video>
+                    ) : (
+                      entry.file.name
+                    )}
+                  </div>
+                ))}
+                <div aria-live="polite" className="text-[10px] text-slate-500">
+                  {chatTime(item.confirmed?.createdAt ?? item.createdAt)} ·{' '}
+                  {item.status === 'uploading'
+                    ? `Đang tải lên ${item.progress}%`
+                    : item.status === 'sent'
+                      ? 'Đã gửi'
+                      : item.status === 'failed'
+                        ? 'Gửi thất bại'
+                        : 'Đang gửi'}
+                  {item.status === 'failed' && (
+                    <button
+                      type="button"
+                      onClick={() => void retryOutbox(item.id)}
+                      className="ml-2 text-blue-700 underline"
+                    >
+                      Thử lại
+                    </button>
+                  )}
+                </div>
+              </div>
+            </Fragment>
+          ))}
           <div ref={bottomRef} />
         </div>
         {canChat ? (
