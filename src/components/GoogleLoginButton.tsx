@@ -7,12 +7,14 @@ import {
 } from '../lib/google-auth';
 
 interface GoogleLoginButtonProps {
+  rememberMe?: boolean;
   role?: 'CLIENT' | 'FREELANCER';
   returnTo?: string;
   initialQuery?: string;
 }
 
 export default function GoogleLoginButton({
+  rememberMe = false,
   role,
   returnTo,
   initialQuery,
@@ -21,7 +23,7 @@ export default function GoogleLoginButton({
 
   return (
     <a
-      href={googleAuthStartUrl}
+      href={`${googleAuthStartUrl}?rememberMe=${rememberMe}`}
       onClick={() => {
         if (role) rememberGoogleRole(role);
         rememberGoogleReturnTo(returnTo, initialQuery);
