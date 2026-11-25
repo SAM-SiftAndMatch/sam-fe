@@ -21,6 +21,7 @@
     "@vercel/analytics": "^2.0.1",
     "axios": "^1.20.0",
     "lucide-react": "^1.21.0",
+    "pdfjs-dist": "^5.7.284",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.80.0",
@@ -46,7 +47,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.0.8",
     "typescript": "^6.0.3",
-    "vite": "^6.0.11"
+    "vite": "^6.0.11",
+    "vite-plugin-static-copy": "^3.4.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,css,json,md}": ["biome check --write --no-errors-on-unmatched"]

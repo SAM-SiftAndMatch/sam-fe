@@ -184,6 +184,7 @@ function outboxHarness(uploadAttachment = async () => ({ id: 'upload-a' })) {
         },
       };
     if (name === '../api/chat') return { chatApi: { uploadAttachment } };
+    if (name === './api-error') return load('src/lib/api-error.ts');
     if (name === '../stores/useAuthStore')
       return { useAuthStore: { getState: () => auth, subscribe: () => () => {} } };
     return require(name);
@@ -245,6 +246,27 @@ test('retry preserves request identity and already uploaded files after a lost r
   assert.equal(attempts[0].clientMessageId, attempts[1].clientMessageId);
   assert.equal(attempts[1].attachmentIds[0], 'upload-a');
   assert.equal(outbox.useChatOutbox.getState().items[0].status, 'sent');
+});
+
+test('an oversized upload reports the server limit and stops before sending the message', async () => {
+  const outbox = outboxHarness(async () => {
+    throw { isAxiosError: true, response: { status: 413 } };
+  });
+  let sendCalls = 0;
+  outbox.enqueueChatMessage({
+    userId: 'user-a',
+    roomId: 'room-a',
+    content: '',
+    files: [{ name: 'clip.mp4', type: '' }],
+    send: async () => {
+      sendCalls++;
+    },
+  });
+  await new Promise(setImmediate);
+  const [item] = outbox.useChatOutbox.getState().items;
+  assert.equal(item.status, 'failed');
+  assert.match(item.error, /vượt giới hạn dung lượng tải lên/);
+  assert.equal(sendCalls, 0);
 });
 
 test('retry does not send under another account', async () => {
