@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { type ChatAttachment, chatApi } from '../../api/chat';
 import { chatFileSize } from '../../lib/chat-attachments';
+import ChatPdfPreview from './ChatPdfPreview';
 
 function Preview({
   url,
@@ -76,7 +77,7 @@ function Preview({
           className="mx-auto max-h-[80dvh] max-w-full object-contain"
         />
       ) : (
-        <iframe src={url} title={attachment.fileName} className="h-[75dvh] w-full bg-white" />
+        <ChatPdfPreview key={url} url={url} />
       )}
     </dialog>,
     document.body

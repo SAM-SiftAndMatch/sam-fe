@@ -461,7 +461,7 @@ export default function WorkspaceChatView() {
                     : item.status === 'sent'
                       ? 'Đã gửi'
                       : item.status === 'failed'
-                        ? 'Gửi thất bại'
+                        ? (item.error ?? 'Gửi thất bại')
                         : 'Đang gửi'}
                   {item.status === 'failed' && (
                     <button

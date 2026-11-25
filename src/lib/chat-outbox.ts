@@ -1,6 +1,8 @@
+import { isAxiosError } from 'axios';
 import { create } from 'zustand';
 import { type ChatAttachment, type ChatMessage, type SendChatMessage, chatApi } from '../api/chat';
 import { useAuthStore } from '../stores/useAuthStore';
+import { extractApiResponse, getApiErrorMessage } from './api-error';
 
 export type OutboxFile = { file: File; preview?: string; uploaded?: ChatAttachment };
 export type OutboxMessage = {
@@ -37,7 +39,8 @@ export async function retryOutbox(id: string) {
   )
     return;
   running.add(id);
-  update(id, { status: item.files.length ? 'uploading' : 'sending', error: undefined });
+  let uploading = item.files.length > 0;
+  update(id, { status: uploading ? 'uploading' : 'sending', error: undefined });
   try {
     for (const [index, file] of item.files.entries()) {
       if (!file.uploaded)
@@ -51,6 +54,7 @@ export async function retryOutbox(id: string) {
       if (useAuthStore.getState().user?.userId !== item.userId)
         throw new Error('Phiên đăng nhập đã thay đổi.');
     }
+    uploading = false;
     update(id, { status: 'sending', progress: 100 });
     const confirmed = await item.send({
       content: item.content,
@@ -59,10 +63,16 @@ export async function retryOutbox(id: string) {
     });
     if (!confirmed) throw new Error('Phiên đăng nhập đã thay đổi.');
     update(id, { status: 'sent', confirmed });
-  } catch {
+  } catch (cause) {
     // A websocket confirmation can arrive before a failed HTTP response.
-    if (useChatOutbox.getState().items.some((entry) => entry.id === id))
-      update(id, { status: 'failed', error: 'Không gửi được tin nhắn' });
+    if (useChatOutbox.getState().items.some((entry) => entry.id === id)) {
+      const fallback = uploading ? 'Không tải được tệp đính kèm.' : 'Không gửi được tin nhắn.';
+      const tooLarge = uploading && isAxiosError(cause) && cause.response?.status === 413;
+      const error = tooLarge
+        ? 'Tệp vượt giới hạn dung lượng tải lên của máy chủ.'
+        : getApiErrorMessage(extractApiResponse(cause), fallback);
+      update(id, { status: 'failed', error });
+    }
   } finally {
     running.delete(id);
   }
