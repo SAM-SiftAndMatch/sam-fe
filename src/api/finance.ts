@@ -121,6 +121,7 @@ export interface Withdrawal {
   earlyPayableId?: string;
   requestReason?: string;
   images?: WithdrawalImage[];
+  receiptImages?: WithdrawalImage[];
   project?: {
     jobId: string;
     jobTitle: string;
@@ -214,6 +215,39 @@ export async function financePut<T>(path: string, body: unknown): Promise<T> {
   return requireApiResult(response.data, 'Không cập nhật được thông tin');
 }
 export const financeApi = {
+  confirmManualPayment: async (
+    withdrawalId: string,
+    input: {
+      password: string;
+      bankReference: string;
+      note: string;
+    },
+    images: File[]
+  ) => {
+    const body = new FormData();
+    body.append('request', new Blob([JSON.stringify(input)], { type: 'application/json' }));
+    for (const image of images) body.append('images', image);
+    const response = await apiClient.post<ApiResponse<boolean>>(
+      `/finance/admin/withdrawals/${withdrawalId}/confirm-manual-payment`,
+      body,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 60000,
+      }
+    );
+    return requireApiResult(response.data, 'Không lưu được biên lai và xác nhận chi trả');
+  },
+  payoutReceiptImage: async (withdrawal: string, image: string, signal?: AbortSignal) =>
+    (
+      await apiClient.get<Blob>(
+        `/finance/admin/withdrawals/${withdrawal}/receipt-images/${image}`,
+        {
+          responseType: 'blob',
+          signal,
+          timeout: 30000,
+        }
+      )
+    ).data,
   requestEarly: async (
     input: {
       bankAccountId: string;
