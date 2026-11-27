@@ -17,6 +17,7 @@ import {
 import AppHeader from '../components/AppHeader';
 import BankSelect from '../components/finance/BankSelect';
 import BankSetupNotice from '../components/finance/BankSetupNotice';
+import EarlyWithdrawalAction from '../components/finance/EarlyWithdrawalAction';
 import EarlyWithdrawalForm from '../components/finance/EarlyWithdrawalForm';
 import {
   Field,
@@ -347,25 +348,12 @@ function FreelancerEarningsContent() {
                             ? 'Đã chi trả'
                             : 'Đủ hạn bảo trì'}
                   </span>
-                  {p.earlyRequestId ? (
-                    <button
-                      type="button"
-                      className="mt-3 block text-sm text-blue-700 underline"
-                      onClick={() => void loadDetail(p.earlyRequestId!)}
-                    >
-                      Xem ticket rút sớm đang xử lý
-                    </button>
-                  ) : p.canRequestEarly &&
-                    data.withdrawalsEnabled &&
-                    (p.earlyAvailableAmount || 0) >= data.minimumWithdrawal ? (
-                    <button
-                      type="button"
-                      className={`${secondaryClass} mt-3`}
-                      onClick={() => setEarlyPayable(p)}
-                    >
-                      Xin rút tiền sớm
-                    </button>
-                  ) : null}
+                  <EarlyWithdrawalAction
+                    payable={p}
+                    wallet={data}
+                    onRequest={() => setEarlyPayable(p)}
+                    onViewRequest={(id) => void loadDetail(id)}
+                  />
                 </div>
               </div>
             ))}

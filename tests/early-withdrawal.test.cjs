@@ -1,8 +1,54 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { evidenceError, earlyRequestError } = require('../src/lib/early-withdrawal.ts');
+const {
+  evidenceError,
+  earlyRequestError,
+  earlyWithdrawalBlockReason,
+} = require('../src/lib/early-withdrawal.ts');
 const { notificationDestination } = require('../src/lib/notification-routing.ts');
 const image = { name: 'proof.png', type: 'image/png', size: 1000 };
+
+const now = Date.parse('2026-11-27T00:00:00Z');
+const payable = {
+  sandbox: false,
+  blocked: false,
+  acceptedAt: '2026-11-26T00:00:00Z',
+  availableAt: '2026-12-03T00:00:00Z',
+  canRequestEarly: true,
+  earlyAvailableAmount: 90000,
+};
+const wallet = { withdrawalsEnabled: true, minimumWithdrawal: 50000 };
+
+test('closed payouts explain why a project still under warranty cannot request early withdrawal', () => {
+  assert.match(
+    earlyWithdrawalBlockReason(payable, { ...wallet, withdrawalsEnabled: false }, now),
+    /chưa mở chức năng chi trả/
+  );
+  assert.equal(earlyWithdrawalBlockReason(payable, wallet, now), null);
+});
+
+test('simulations, warranty holds, elapsed windows and small balances provide actionable reasons', () => {
+  assert.match(
+    earlyWithdrawalBlockReason({ ...payable, sandbox: true }, wallet, now),
+    /tiền mô phỏng/
+  );
+  assert.match(
+    earlyWithdrawalBlockReason({ ...payable, blocked: true }, wallet, now),
+    /ticket bảo trì chặn chi/
+  );
+  assert.match(
+    earlyWithdrawalBlockReason(payable, wallet, Date.parse(payable.availableAt)),
+    /Yêu cầu rút tiền/
+  );
+  assert.match(
+    earlyWithdrawalBlockReason({ ...payable, earlyAvailableAmount: 49000 }, wallet, now),
+    /tối thiểu/
+  );
+  assert.match(
+    earlyWithdrawalBlockReason({ ...payable, canRequestEarly: undefined }, wallet, now),
+    /chưa được cập nhật/
+  );
+});
 
 test('early withdrawals require a nonblank reason and one to five images', () => {
   assert.ok(earlyRequestError('   ', [image]));
