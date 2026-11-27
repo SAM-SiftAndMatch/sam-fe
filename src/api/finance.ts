@@ -55,6 +55,7 @@ export interface Payable {
   id: string;
   jobId: string;
   contractId: string;
+  maintenanceOrderId?: string | null;
   jobTitle: string;
   amount: number;
   earnings: number;
