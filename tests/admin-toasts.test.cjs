@@ -20,6 +20,9 @@ function harness(options = {}) {
         '',
         null,
         null,
+        '',
+        null,
+        false,
       ];
   if (options.busy) states[6] = true;
   const notifications = [];
@@ -107,7 +110,11 @@ function harness(options = {}) {
             secondaryClass: '',
           };
         if (name.endsWith('/AdminUI')) return { AdminPageHeader: () => null };
-        if (name.endsWith('/MaintenancePanel') || name.endsWith('/PaymentCasesPanel'))
+        if (
+          name.endsWith('/MaintenancePanel') ||
+          name.endsWith('/PaymentCasesPanel') ||
+          name.endsWith('/WithdrawalEvidence')
+        )
           return { default: () => null };
         return require(name);
       },

@@ -24,6 +24,10 @@ export function notificationDestination(
   role?: UserRole
 ): string | null {
   const { type, jobId, roomId } = notification;
+  if (type.startsWith('EARLY_WITHDRAWAL_')) {
+    if (role === 'ADMIN') return '/admin/finance/withdrawals';
+    if (role === 'FREELANCER') return '/freelancer/earnings?tab=withdrawals';
+  }
   if (role === 'ADMIN' && type === 'MAINTENANCE_ESCALATED') return '/admin/finance/tickets';
   if (roomId) return PATH_WORKSPACE.replace(':projectId', roomId);
   if (type === 'SUBSCRIPTION_ACTIVE')
