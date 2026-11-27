@@ -25,6 +25,7 @@ import {
 } from '../components/finance/FinanceUI';
 import MaintenancePanel from '../components/finance/MaintenancePanel';
 import PaymentCasesPanel from '../components/finance/PaymentCasesPanel';
+import WithdrawalEvidence from '../components/finance/WithdrawalEvidence';
 import { useAuthStore } from '../stores/useAuthStore';
 
 interface FinanceReceipt {
@@ -68,6 +69,9 @@ function AdminFinanceContent({ tab }: { tab: string }) {
   const [error, setError] = useState('');
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
   const [job, setJob] = useState<string | null>(null);
+  const [requestType, setRequestType] = useState('');
+  const [withdrawalDetail, setWithdrawalDetail] = useState<Withdrawal | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   useEffect(() => {
     if (!beneficiary) return;
     const timer = setTimeout(() => setBeneficiary(null), 60000);
@@ -86,8 +90,11 @@ function AdminFinanceContent({ tab }: { tab: string }) {
     enabled: user?.role === 'ADMIN' && tab === 'banks',
   });
   const withdrawals = useQuery({
-    queryKey: ['admin-finance', user?.userId, 'withdrawals', page],
-    queryFn: () => financeGet<Withdrawal[]>(`/finance/admin/withdrawals?page=${page}`),
+    queryKey: ['admin-finance', user?.userId, 'withdrawals', page, requestType],
+    queryFn: () =>
+      financeGet<Withdrawal[]>(
+        `/finance/admin/withdrawals?page=${page}${requestType ? `&type=${requestType}` : ''}`
+      ),
     enabled: user?.role === 'ADMIN' && tab === 'withdrawals',
     refetchInterval: 30000,
   });
@@ -128,6 +135,16 @@ function AdminFinanceContent({ tab }: { tab: string }) {
     enabled: user?.role === 'ADMIN' && tab === 'audit',
   });
   if (user?.role !== 'ADMIN') return <Navigate to="/" replace />;
+  const loadWithdrawal = async (id: string) => {
+    setDetailLoading(true);
+    try {
+      setWithdrawalDetail(await financeGet<Withdrawal>(`/finance/withdrawals/${id}`));
+    } catch (cause) {
+      toast.error(financeError(cause));
+    } finally {
+      setDetailLoading(false);
+    }
+  };
   const open = (id: string, type: string) => {
     setOperation({ id, type });
     setPassword('');
@@ -165,6 +182,7 @@ function AdminFinanceContent({ tab }: { tab: string }) {
           evidenceReference: evidence,
         });
       setOperation(null);
+      setWithdrawalDetail(null);
       toast.success(operationSuccessMessages[type] ?? 'Đã ghi nhận thao tác thành công.');
       await cache
         .invalidateQueries({ queryKey: ['admin-finance', user.userId] }, { throwOnError: true })
@@ -203,6 +221,22 @@ function AdminFinanceContent({ tab }: { tab: string }) {
             Chi trả hiện dùng chuyển khoản thủ công có đối soát. Xem người nhận chỉ sau xác thực
             lại. Nếu bật kiểm soát kép, người chuyển tiền phải khác người duyệt.
           </Notice>
+        )}
+        {tab === 'withdrawals' && (
+          <Field label="Loại yêu cầu">
+            <select
+              className={inputClass}
+              value={requestType}
+              onChange={(event) => {
+                setRequestType(event.target.value);
+                setPage(0);
+              }}
+            >
+              <option value="">Tất cả yêu cầu</option>
+              <option value="EARLY">Ticket xin rút sớm</option>
+              <option value="NORMAL">Rút tiền thông thường</option>
+            </select>
+          </Field>
         )}
         {tab !== 'payment-cases' && list.isError && (
           <Notice error>
@@ -269,6 +303,9 @@ function AdminFinanceContent({ tab }: { tab: string }) {
               <div className="flex flex-wrap justify-between gap-3">
                 <div>
                   <p className="text-lg font-bold">{money(w.amount)}</p>
+                  {w.requestType === 'EARLY' && (
+                    <p className="text-sm font-semibold text-amber-700">Ticket xin rút tiền sớm</p>
+                  )}
                   <p className="text-sm text-slate-500">
                     {w.bankCode} · •••• {w.lastFour} · {statusLabel[w.status]}
                   </p>
@@ -277,13 +314,25 @@ function AdminFinanceContent({ tab }: { tab: string }) {
                   </p>
                 </div>
                 <div className="flex flex-wrap items-start gap-2">
+                  <button
+                    type="button"
+                    disabled={detailLoading}
+                    className={secondaryClass}
+                    onClick={() => void loadWithdrawal(w.id)}
+                  >
+                    Xem chi tiết{w.requestType === 'EARLY' ? ' & bằng chứng' : ''}
+                  </button>
                   {w.status === 'REQUESTED' && (
                     <button
                       type="button"
                       className={primaryClass}
-                      onClick={() => open(w.id, 'approve')}
+                      onClick={() =>
+                        w.requestType === 'EARLY'
+                          ? void loadWithdrawal(w.id)
+                          : open(w.id, 'approve')
+                      }
                     >
-                      Duyệt chi
+                      {w.requestType === 'EARLY' ? 'Xem để duyệt chi sớm' : 'Duyệt chi'}
                     </button>
                   )}
                   {['REQUESTED', 'APPROVED'].includes(w.status) && (
@@ -442,6 +491,43 @@ function AdminFinanceContent({ tab }: { tab: string }) {
           </button>
         </div>
         {job && <MaintenancePanel jobId={job} completed viewerRole="admin" />}
+        {withdrawalDetail && !operation && (
+          <Modal title="Chi tiết yêu cầu chi trả" onClose={() => setWithdrawalDetail(null)}>
+            <p className="text-2xl font-bold">{money(withdrawalDetail.amount)}</p>
+            <p className="text-sm">
+              {withdrawalDetail.bankCode} · •••• {withdrawalDetail.lastFour} ·{' '}
+              {statusLabel[withdrawalDetail.status]}
+            </p>
+            <WithdrawalEvidence withdrawal={withdrawalDetail} />
+            <ol className="space-y-2 border-l-2 border-blue-100 pl-3">
+              {withdrawalDetail.history?.map((event, index) => (
+                <li key={`${event.createdAt}-${index}`} className="text-sm">
+                  <span className="text-xs text-slate-500">{dateTime(event.createdAt)}</span>
+                  <p>{event.detail}</p>
+                </li>
+              ))}
+            </ol>
+            {withdrawalDetail.status === 'REQUESTED' && (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={withdrawalDetail.project?.blocked}
+                  className={primaryClass}
+                  onClick={() => open(withdrawalDetail.id, 'approve')}
+                >
+                  Duyệt chi{withdrawalDetail.requestType === 'EARLY' ? ' sớm' : ''}
+                </button>
+                <button
+                  type="button"
+                  className={secondaryClass}
+                  onClick={() => open(withdrawalDetail.id, 'reject')}
+                >
+                  Từ chối
+                </button>
+              </div>
+            )}
+          </Modal>
+        )}
         {operation && (
           <Modal
             title="Xác nhận thao tác tài chính"
@@ -463,7 +549,8 @@ function AdminFinanceContent({ tab }: { tab: string }) {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </Field>
-              {!['reveal-bank', 'start-manual-payment', 'approve'].includes(operation.type) && (
+              {(!['reveal-bank', 'start-manual-payment', 'approve'].includes(operation.type) ||
+                (operation.type === 'approve' && withdrawalDetail?.requestType === 'EARLY')) && (
                 <Field label="Lý do / căn cứ đối soát">
                   <textarea
                     required
@@ -565,6 +652,7 @@ const financeDescriptions: Record<string, string> = {
 };
 export default function AdminFinancePage() {
   const { section = 'payment-cases' } = useParams();
+  const userId = useAuthStore((state) => state.user?.userId);
   if (!financeTitles[section]) return <Navigate to="/admin/finance/payment-cases" replace />;
-  return <AdminFinanceContent key={section} tab={section} />;
+  return <AdminFinanceContent key={`${userId}:${section}`} tab={section} />;
 }

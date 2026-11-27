@@ -3,6 +3,7 @@ import { ArrowUpRight, Clock3, Landmark, LockKeyhole, Wallet } from 'lucide-reac
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
+  type Payable,
   type Withdrawal,
   dateTime,
   financeApi,
@@ -16,6 +17,7 @@ import {
 import AppHeader from '../components/AppHeader';
 import BankSelect from '../components/finance/BankSelect';
 import BankSetupNotice from '../components/finance/BankSetupNotice';
+import EarlyWithdrawalForm from '../components/finance/EarlyWithdrawalForm';
 import {
   Field,
   Modal,
@@ -25,16 +27,21 @@ import {
   secondaryClass,
 } from '../components/finance/FinanceUI';
 import IncomeOverview from '../components/finance/IncomeOverview';
+import WithdrawalEvidence from '../components/finance/WithdrawalEvidence';
 import { isSupportedBankCode, normalizeBankCode } from '../lib/banks';
 import { BANK_PASSWORD_SETUP_RETURN } from '../lib/password-setup';
 import { PATH_PASSWORD_SETUP } from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 
-export default function FreelancerEarningsPage() {
+function FreelancerEarningsContent() {
   const userId = useAuthStore((s) => s.user?.userId);
   const cache = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [tab, setTab] = useState(searchParams.get('tab') === 'banks' ? 'banks' : 'income');
+  const [tab, setTab] = useState(
+    ['banks', 'withdrawals', 'overview'].includes(searchParams.get('tab') || '')
+      ? searchParams.get('tab')!
+      : 'income'
+  );
   const [editingBank, setEditingBank] = useState<string | null>(null);
   const [modal, setModal] = useState<'bank' | 'withdraw' | 'disable' | null>(null);
   const [busy, setBusy] = useState(false);
@@ -48,6 +55,7 @@ export default function FreelancerEarningsPage() {
   const [bankId, setBankId] = useState('');
   const [page, setPage] = useState(0);
   const [detail, setDetail] = useState<Withdrawal | null>(null);
+  const [earlyPayable, setEarlyPayable] = useState<Payable | null>(null);
   const requestKey = useRef(crypto.randomUUID());
   const wallet = useQuery({
     queryKey: ['finance', userId, 'wallet'],
@@ -205,8 +213,9 @@ export default function FreelancerEarningsPage() {
             <LockKeyhole size={20} className="mt-0.5 shrink-0" />
             <p>
               Tiền được ghi công nợ ngay sau nghiệm thu. Bạn chỉ có thể rút sau{' '}
-              <strong>7 ngày bảo trì</strong> và khi các ticket liên quan đã được giải quyết. Hoàn
-              cọc được theo dõi riêng với thù lao.
+              <strong>7 ngày bảo trì</strong> và khi các ticket liên quan đã được giải quyết. Nếu
+              cần gấp, bạn có thể gửi ticket xin rút sớm kèm lý do và ảnh bằng chứng để admin xét
+              duyệt. Tiền hoàn cọc vẫn chờ đủ điều kiện thông thường.
             </p>
           </div>
         )}
@@ -338,6 +347,25 @@ export default function FreelancerEarningsPage() {
                             ? 'Đã chi trả'
                             : 'Đủ hạn bảo trì'}
                   </span>
+                  {p.earlyRequestId ? (
+                    <button
+                      type="button"
+                      className="mt-3 block text-sm text-blue-700 underline"
+                      onClick={() => void loadDetail(p.earlyRequestId!)}
+                    >
+                      Xem ticket rút sớm đang xử lý
+                    </button>
+                  ) : p.canRequestEarly &&
+                    data.withdrawalsEnabled &&
+                    (p.earlyAvailableAmount || 0) >= data.minimumWithdrawal ? (
+                    <button
+                      type="button"
+                      className={`${secondaryClass} mt-3`}
+                      onClick={() => setEarlyPayable(p)}
+                    >
+                      Xin rút tiền sớm
+                    </button>
+                  ) : null}
                 </div>
               </div>
             ))}
@@ -417,6 +445,9 @@ export default function FreelancerEarningsPage() {
                   <p className="font-semibold">
                     {w.bankCode} · •••• {w.lastFour}
                   </p>
+                  {w.requestType === 'EARLY' && (
+                    <p className="mt-1 text-xs font-semibold text-amber-700">Ticket rút tiền sớm</p>
+                  )}
                   <p className="mt-1 text-xs text-slate-500">
                     {dateTime(w.createdAt)} · {w.id.slice(0, 8)}
                   </p>
@@ -469,6 +500,23 @@ export default function FreelancerEarningsPage() {
               Tiếp
             </button>
           </div>
+        )}
+        {earlyPayable && (
+          <EarlyWithdrawalForm
+            payable={earlyPayable}
+            banks={banks.data || []}
+            minimum={data?.minimumWithdrawal || 50000}
+            onClose={() => setEarlyPayable(null)}
+            onCreated={() => {
+              setEarlyPayable(null);
+              setTab('withdrawals');
+              setPage(0);
+              setNotice(
+                'Đã gửi ticket rút sớm cùng ảnh bằng chứng. Số tiền được giữ riêng để chờ admin duyệt, chưa chuyển ngân hàng.'
+              );
+              void refresh();
+            }}
+          />
         )}
         {modal && (
           <Modal
@@ -619,6 +667,7 @@ export default function FreelancerEarningsPage() {
               {detail.bankCode} · •••• {detail.lastFour} · {statusLabel[detail.status]}
             </p>
             <p className="break-all text-xs text-slate-400">{detail.id}</p>
+            <WithdrawalEvidence withdrawal={detail} />
             <ol className="space-y-3 border-l-2 border-blue-100 pl-4">
               {detail.history?.map((event, index) => (
                 <li key={`${event.createdAt}-${index}`}>
@@ -654,4 +703,9 @@ export default function FreelancerEarningsPage() {
       </main>
     </div>
   );
+}
+
+export default function FreelancerEarningsPage() {
+  const userId = useAuthStore((state) => state.user?.userId);
+  return <FreelancerEarningsContent key={userId} />;
 }

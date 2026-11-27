@@ -32,6 +32,9 @@ const notificationTitles: Record<string, string> = {
   PROJECT_DELIVERY_ACCEPTED: 'Sản phẩm đã được nghiệm thu',
   MAINTENANCE_TICKET_UPDATED: 'Cập nhật bảo trì',
   MAINTENANCE_ESCALATED: 'Bảo trì cần hỗ trợ',
+  EARLY_WITHDRAWAL_REQUESTED: 'Yêu cầu rút tiền sớm',
+  EARLY_WITHDRAWAL_UPDATED: 'Cập nhật yêu cầu rút sớm',
+  EARLY_WITHDRAWAL_APPROVED: 'Đã duyệt chi trả sớm',
 };
 
 const titleFor = (type: string) => notificationTitles[type] ?? 'Cập nhật mới';

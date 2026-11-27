@@ -79,7 +79,7 @@ const complete = {
   phoneNumber: '0901234567',
   acceptedTerms: true,
   policyAcceptedAt: '2026-11-09T10:00:00Z',
-  policyVersion: '2026-11-09',
+  policyVersion: '2026-11-27',
 };
 
 test('both profile forms require valid contact details and explicit consent', () => {
@@ -150,7 +150,14 @@ test('policies are readable without login and contain current funding and warran
   const html = renderToStaticMarkup(
     React.createElement(router.StaticRouter, { location: '/terms' }, React.createElement(Policy))
   );
-  for (const text of ['3.000.000đ', '100%', '2%', '168 giờ', '2026-11-09'])
+  for (const text of [
+    '3.000.000đ',
+    '100%',
+    '2%',
+    '168 giờ',
+    '2026-11-27',
+    'lý do và ảnh bằng chứng',
+  ])
     assert.ok(html.includes(text), text);
   assert.match(html, /aria-haspopup="dialog"/);
   assert.doesNotMatch(html, /href="\/privacy"/);

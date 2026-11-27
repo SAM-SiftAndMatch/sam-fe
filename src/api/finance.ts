@@ -66,6 +66,9 @@ export interface Payable {
   acceptedAt: string;
   availableAt: string;
   blocked: boolean;
+  canRequestEarly?: boolean;
+  earlyAvailableAmount?: number;
+  earlyRequestId?: string;
 }
 export interface FinanceWallet {
   currency: string;
@@ -113,6 +116,25 @@ export interface Withdrawal {
   bankReference?: string;
   evidenceReference?: string;
   history?: AuditEvent[];
+  requestType: 'NORMAL' | 'EARLY';
+  earlyPayableId?: string;
+  requestReason?: string;
+  images?: WithdrawalImage[];
+  project?: {
+    jobId: string;
+    jobTitle: string;
+    acceptedAt: string;
+    availableAt: string;
+    earnings: number;
+    depositRefund: number;
+    blocked: boolean;
+  };
+}
+export interface WithdrawalImage {
+  id: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
 }
 export interface Beneficiary {
   bankCode: string;
@@ -191,6 +213,38 @@ export async function financePut<T>(path: string, body: unknown): Promise<T> {
   return requireApiResult(response.data, 'Không cập nhật được thông tin');
 }
 export const financeApi = {
+  requestEarly: async (
+    input: {
+      bankAccountId: string;
+      requestKey: string;
+      payableId: string;
+      amount: number;
+      reason: string;
+      password: string;
+    },
+    images: File[]
+  ) => {
+    const body = new FormData();
+    body.append('request', new Blob([JSON.stringify(input)], { type: 'application/json' }));
+    for (const image of images) body.append('images', image);
+    const response = await apiClient.post<ApiResponse<Withdrawal>>(
+      '/finance/withdrawals/early',
+      body,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 60000,
+      }
+    );
+    return requireApiResult(response.data, 'Không tạo được yêu cầu rút sớm');
+  },
+  withdrawalImage: async (withdrawal: string, image: string, signal?: AbortSignal) =>
+    (
+      await apiClient.get<Blob>(`/finance/withdrawals/${withdrawal}/images/${image}`, {
+        responseType: 'blob',
+        signal,
+        timeout: 30000,
+      })
+    ).data,
   income: (year?: number) =>
     financeGet<FreelancerIncome>(`/finance/income${year === undefined ? '' : `?year=${year}`}`),
   incomeEntries: (year: number, page = 0) =>
