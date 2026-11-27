@@ -1,4 +1,4 @@
-export const POLICY_VERSION = '2026-11-09';
+export const POLICY_VERSION = '2026-11-27';
 export const MINIMUM_PROJECT_BUDGET = 3_000_000;
 
 export const policySections = [
@@ -16,7 +16,7 @@ export const policySections = [
   },
   {
     title: 'Nạp tiền, cọc và bảo trì',
-    text: 'Client nạp 100% giá trị hợp đồng; freelancer đóng cọc cam kết 2%. Thời hạn bảo trì là 168 giờ (7 ngày) kể từ nghiệm thu. Công nợ được giải phóng sau khi hết thời hạn bảo trì và không còn yêu cầu bảo trì hoặc tranh chấp chặn chi. Không tự động phạt hoặc tịch thu cọc chỉ vì yêu cầu bảo trì chưa được đóng.',
+    text: 'Client nạp 100% giá trị hợp đồng; freelancer đóng cọc cam kết 2%. Thời hạn bảo trì là 168 giờ (7 ngày) kể từ nghiệm thu. Công nợ được giải phóng sau khi hết thời hạn bảo trì và không còn yêu cầu bảo trì hoặc tranh chấp chặn chi. Trong thời hạn bảo trì, freelancer có thể xin rút sớm thù lao sau phí bằng yêu cầu kèm lý do và ảnh bằng chứng; admin xét duyệt từng khoản khi không có ticket chặn chi. Tiền hoàn cọc vẫn chờ đủ điều kiện thông thường. Chi sớm không thay đổi thời hạn hoặc nghĩa vụ bảo trì. Không tự động phạt hoặc tịch thu cọc chỉ vì yêu cầu bảo trì chưa được đóng.',
   },
   {
     title: 'Thanh toán, bàn giao và hỗ trợ',
