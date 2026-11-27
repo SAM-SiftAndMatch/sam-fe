@@ -8,6 +8,7 @@ import {
   type MaintenanceTicket,
   type Withdrawal,
   dateTime,
+  financeApi,
   financeError,
   financeGet,
   financePost,
@@ -25,7 +26,9 @@ import {
 } from '../components/finance/FinanceUI';
 import MaintenancePanel from '../components/finance/MaintenancePanel';
 import PaymentCasesPanel from '../components/finance/PaymentCasesPanel';
-import WithdrawalEvidence from '../components/finance/WithdrawalEvidence';
+import PayoutReceiptUpload from '../components/finance/PayoutReceiptUpload';
+import WithdrawalEvidence, { PayoutReceipts } from '../components/finance/WithdrawalEvidence';
+import { evidenceError } from '../lib/early-withdrawal';
 import { useAuthStore } from '../stores/useAuthStore';
 
 interface FinanceReceipt {
@@ -64,7 +67,7 @@ function AdminFinanceContent({ tab }: { tab: string }) {
   const [password, setPassword] = useState('');
   const [note, setNote] = useState('');
   const [reference, setReference] = useState('');
-  const [evidence, setEvidence] = useState('');
+  const [receiptFiles, setReceiptFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [beneficiary, setBeneficiary] = useState<Beneficiary | null>(null);
@@ -150,12 +153,19 @@ function AdminFinanceContent({ tab }: { tab: string }) {
     setPassword('');
     setNote('');
     setReference('');
-    setEvidence('');
+    setReceiptFiles([]);
     setError('');
   };
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!operation || busy) return;
+    if (operation.type === 'confirm-manual-payment') {
+      const invalid = evidenceError(receiptFiles);
+      if (invalid) {
+        setError(invalid);
+        return;
+      }
+    }
     setBusy(true);
     setError('');
     const { id, type } = operation;
@@ -174,14 +184,20 @@ function AdminFinanceContent({ tab }: { tab: string }) {
         setBeneficiary(
           await financePost<Beneficiary>(`/finance/admin/withdrawals/${id}/${type}`, { password })
         );
+      else if (type === 'confirm-manual-payment')
+        await financeApi.confirmManualPayment(
+          id,
+          { password, note, bankReference: reference },
+          receiptFiles
+        );
       else
         await financePost(`/finance/admin/withdrawals/${id}/${type}`, {
           password,
           note,
           bankReference: reference,
-          evidenceReference: evidence,
         });
       setOperation(null);
+      setReceiptFiles([]);
       setWithdrawalDetail(null);
       toast.success(operationSuccessMessages[type] ?? 'Đã ghi nhận thao tác thành công.');
       await cache
@@ -499,6 +515,7 @@ function AdminFinanceContent({ tab }: { tab: string }) {
               {statusLabel[withdrawalDetail.status]}
             </p>
             <WithdrawalEvidence withdrawal={withdrawalDetail} />
+            <PayoutReceipts withdrawal={withdrawalDetail} />
             <ol className="space-y-2 border-l-2 border-blue-100 pl-3">
               {withdrawalDetail.history?.map((event, index) => (
                 <li key={`${event.createdAt}-${index}`} className="text-sm">
@@ -534,6 +551,7 @@ function AdminFinanceContent({ tab }: { tab: string }) {
             onClose={() => {
               setOperation(null);
               setPassword('');
+              setReceiptFiles([]);
             }}
             busy={busy}
           >
@@ -573,18 +591,12 @@ function AdminFinanceContent({ tab }: { tab: string }) {
                       onChange={(e) => setReference(e.target.value)}
                     />
                   </Field>
-                  <Field
-                    label="Tham chiếu chứng từ nội bộ"
-                    hint="Dùng tham chiếu chứng từ có kiểm soát quyền truy cập, không dùng URL công khai chứa dữ liệu người nhận."
-                  >
-                    <input
-                      required
-                      maxLength={300}
-                      className={inputClass}
-                      value={evidence}
-                      onChange={(e) => setEvidence(e.target.value)}
-                    />
-                  </Field>
+                  <PayoutReceiptUpload
+                    files={receiptFiles}
+                    onChange={setReceiptFiles}
+                    onError={setError}
+                    disabled={busy}
+                  />
                   <Notice>
                     Chỉ xác nhận khi đã đối chiếu số tiền, người nhận và kết quả ngân hàng. Nếu chưa
                     rõ kết quả, chuyển sang đối soát để tránh chi trùng.
@@ -592,7 +604,13 @@ function AdminFinanceContent({ tab }: { tab: string }) {
                 </>
               )}
               {error && <Notice error>{error}</Notice>}
-              <button type="submit" disabled={busy} className={primaryClass}>
+              <button
+                type="submit"
+                disabled={
+                  busy || (operation.type === 'confirm-manual-payment' && !receiptFiles.length)
+                }
+                className={primaryClass}
+              >
                 {busy ? 'Đang xử lý…' : 'Xác nhận'}
               </button>
             </form>
