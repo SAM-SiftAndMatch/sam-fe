@@ -15,7 +15,7 @@ function harness(options = {}) {
         'secret',
         '',
         '',
-        '',
+        options.receiptFiles || [],
         false,
         '',
         null,
@@ -89,6 +89,13 @@ function harness(options = {}) {
           };
         if (name.endsWith('/api/finance'))
           return {
+            financeApi: {
+              confirmManualPayment: async (...args) => {
+                requests.push(['receipt-upload', ...args]);
+                if (options.apiFails) throw new Error('Không lưu được biên lai.');
+                return true;
+              },
+            },
             financePost: async (...args) => {
               requests.push(args);
               if (options.apiFails) throw new Error('Mật khẩu không đúng.');
@@ -113,9 +120,11 @@ function harness(options = {}) {
         if (
           name.endsWith('/MaintenancePanel') ||
           name.endsWith('/PaymentCasesPanel') ||
-          name.endsWith('/WithdrawalEvidence')
+          name.endsWith('/WithdrawalEvidence') ||
+          name.endsWith('/PayoutReceiptUpload')
         )
-          return { default: () => null };
+          return { default: () => null, PayoutReceipts: () => null };
+        if (name.endsWith('/early-withdrawal')) return require('../src/lib/early-withdrawal.ts');
         return require(name);
       },
     }
@@ -196,6 +205,32 @@ test('payment-case actions also notify success and distinguish refresh failures'
   );
   assert.equal(h.states[1], null);
   assert.equal(h.states[3], '');
+});
+
+test('confirming payment requires receipt images and sends files with the bank reference', async () => {
+  const missing = harness({ action: 'confirm-manual-payment' });
+  await submit(missing);
+  assert.equal(missing.requests.length, 0);
+  assert.match(missing.states[7], /ảnh bằng chứng/);
+  const files = [{ name: 'receipt.png', type: 'image/png', size: 1000 }];
+  const h = harness({ action: 'confirm-manual-payment', receiptFiles: files });
+  await submit(h);
+  assert.equal(h.requests[0][0], 'receipt-upload');
+  assert.equal(h.requests[0][1], 'bank-a');
+  assert.equal(h.requests[0][3], files);
+  assert.equal(h.states[1], null);
+  assert.equal(h.states[5].length, 0);
+  assert.match(h.notifications[0].message, /chi trả thành công/);
+});
+
+test('receipt upload failures preserve the pending operation and selected images for retry', async () => {
+  const files = [{ name: 'receipt.png', type: 'image/png', size: 1000 }];
+  const h = harness({ action: 'confirm-manual-payment', receiptFiles: files, apiFails: true });
+  await submit(h);
+  assert.equal(h.states[1].type, 'confirm-manual-payment');
+  assert.equal(h.states[5], files);
+  assert.equal(h.invalidations.length, 0);
+  assert.deepEqual(h.notifications, [{ type: 'error', message: 'Không lưu được biên lai.' }]);
 });
 
 test('toasts stay inside the focused modal and survive closing or removing it', () => {

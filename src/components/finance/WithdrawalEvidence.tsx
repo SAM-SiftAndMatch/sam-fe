@@ -9,7 +9,11 @@ import {
 } from '../../api/finance';
 import { Notice } from './FinanceUI';
 
-function EvidenceImage({ withdrawal, image }: { withdrawal: string; image: WithdrawalImage }) {
+function EvidenceImage({
+  withdrawal,
+  image,
+  receipt = false,
+}: { withdrawal: string; image: WithdrawalImage; receipt?: boolean }) {
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
@@ -18,8 +22,8 @@ function EvidenceImage({ withdrawal, image }: { withdrawal: string; image: Withd
     let objectUrl = '';
     setUrl('');
     setError('');
-    void financeApi
-      .withdrawalImage(withdrawal, image.id, controller.signal)
+    const loadImage = receipt ? financeApi.payoutReceiptImage : financeApi.withdrawalImage;
+    void loadImage(withdrawal, image.id, controller.signal)
       .then((blob) => {
         if (controller.signal.aborted) return;
         objectUrl = URL.createObjectURL(new Blob([blob], { type: image.contentType }));
@@ -32,7 +36,7 @@ function EvidenceImage({ withdrawal, image }: { withdrawal: string; image: Withd
       controller.abort();
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [withdrawal, image.id, image.contentType, attempt]);
+  }, [withdrawal, image.id, image.contentType, attempt, receipt]);
   return (
     <div className="space-y-2 rounded-xl border border-slate-200 p-2">
       {url ? (
@@ -61,9 +65,29 @@ function EvidenceImage({ withdrawal, image }: { withdrawal: string; image: Withd
           </button>
         </Notice>
       ) : (
-        <p className="p-4 text-sm text-slate-500">Đang tải ảnh bằng chứng…</p>
+        <p className="p-4 text-sm text-slate-500">
+          Đang tải ảnh {receipt ? 'biên lai' : 'bằng chứng'}…
+        </p>
       )}
       <p className="break-all text-xs text-slate-500">{image.fileName}</p>
+    </div>
+  );
+}
+
+export function PayoutReceipts({ withdrawal }: { withdrawal: Withdrawal }) {
+  const images = withdrawal.receiptImages || [];
+  if (!images.length && !withdrawal.evidenceReference) return null;
+  return (
+    <div className="space-y-3">
+      <p className="font-semibold">Biên lai chuyển khoản</p>
+      {withdrawal.evidenceReference && (
+        <p className="break-all text-xs text-slate-500">
+          Tham chiếu chứng từ: {withdrawal.evidenceReference}
+        </p>
+      )}
+      {images.map((image) => (
+        <EvidenceImage key={image.id} withdrawal={withdrawal.id} image={image} receipt />
+      ))}
     </div>
   );
 }
