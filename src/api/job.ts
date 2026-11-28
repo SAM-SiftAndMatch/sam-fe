@@ -9,6 +9,7 @@ import type {
   JobAddonSummary,
   JobCreateRequest,
   JobResponse,
+  JobUpdateRequest,
   RecommendationResponse,
 } from '../types/job';
 
@@ -134,6 +135,11 @@ export const jobApi = {
   cancelJob: async (jobId: string): Promise<JobResponse> => {
     const res = await apiClient.patch<ApiResponse<JobResponse>>(`/jobs/${jobId}/cancel`);
     return requireApiResult(res.data, 'Failed to cancel job');
+  },
+
+  updateJob: async (jobId: string, data: JobUpdateRequest): Promise<JobResponse> => {
+    const res = await apiClient.put<ApiResponse<JobResponse>>(`/jobs/${jobId}`, data);
+    return requireApiResult(res.data, 'Cập nhật dự án thất bại');
   },
 
   // Lưu ý: BE yêu cầu Bearer (không public như mô tả spec cũ)

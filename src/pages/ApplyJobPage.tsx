@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type React from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { jobApi } from '../api/job';
 import { proposalApi } from '../api/proposal';
@@ -8,6 +8,7 @@ import { storageApi } from '../api/storage';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import { extractApiResponse } from '../lib/api-error';
+import { MINIMUM_PROJECT_BUDGET } from '../lib/participation-policy';
 import { PATH_JOB_APPLY_SUCCESS } from '../routes/paths';
 
 const ApplyJobPage: React.FC = () => {
@@ -25,12 +26,27 @@ const ApplyJobPage: React.FC = () => {
   });
 
   const [greeting, setGreeting] = useState('');
+  const [proposedBudget, setProposedBudget] = useState('');
+  const [estimatedDays, setEstimatedDays] = useState('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const errorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!job) return;
+    setProposedBudget((prev) => {
+      if (prev) return prev;
+      const defaultBudget = job.budgetMax ?? job.budgetMin ?? MINIMUM_PROJECT_BUDGET;
+      return String(Math.max(MINIMUM_PROJECT_BUDGET, Number(defaultBudget)));
+    });
+    setEstimatedDays((prev) => {
+      if (prev || !job.estimatedDurationMonths) return prev;
+      return String(Math.max(1, Math.round(Number(job.estimatedDurationMonths) * 30)));
+    });
+  }, [job]);
 
   const showError = (msg: string) => {
     setServerError(msg);
@@ -130,13 +146,24 @@ const ApplyJobPage: React.FC = () => {
       showError('Vui lòng viết vài lời chào giới thiệu với client.');
       return;
     }
+    const parsedBudget = Number(proposedBudget.replaceAll('.', '').replaceAll(',', '').trim());
+    if (!Number.isFinite(parsedBudget) || parsedBudget <= 0) {
+      showError('Vui lòng nhập mức giá đề xuất hợp lệ.');
+      return;
+    }
+    const parsedDays = estimatedDays.trim() ? Number(estimatedDays.trim()) : undefined;
+    if (parsedDays !== undefined && (!Number.isInteger(parsedDays) || parsedDays <= 0)) {
+      showError('Thời gian dự kiến phải là số ngày nguyên dương.');
+      return;
+    }
     setIsSubmitting(true);
     setServerError(null);
     try {
       await proposalApi.submit({
         jobId: job.id,
         coverLetter: greeting.trim(),
-        proposedBudget: job.budgetMax ?? job.budgetMin ?? 0,
+        proposedBudget: parsedBudget,
+        estimatedDurationDays: parsedDays,
         attachmentUrl: pdfUrl || undefined,
         attachmentName: pdfFile?.name,
       });
@@ -164,6 +191,7 @@ const ApplyJobPage: React.FC = () => {
           {serverError && (
             <div
               ref={errorRef}
+              role="alert"
               className="p-4 bg-red-50 border border-red-200 text-red-600 text-sm font-medium rounded-xl text-center"
             >
               {serverError}
@@ -215,6 +243,48 @@ const ApplyJobPage: React.FC = () => {
             )}
           </div>
 
+          <div className="bg-white rounded-xl p-6 md:p-8 shadow-xs border border-slate-200/90 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="proposed-budget"
+                className="block text-sm font-bold text-gray-900 mb-2"
+              >
+                Giá đề xuất (VNĐ) <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="proposed-budget"
+                type="number"
+                min={100000}
+                step={100000}
+                value={proposedBudget}
+                onChange={(e) => setProposedBudget(e.target.value)}
+                placeholder="VD: 8000000"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8]"
+              />
+              <p className="text-[11px] text-gray-500 mt-1">
+                Có thể đề xuất khác ngân sách khách hàng đưa ra để thương lượng.
+              </p>
+            </div>
+            <div>
+              <label
+                htmlFor="estimated-days"
+                className="block text-sm font-bold text-gray-900 mb-2"
+              >
+                Thời gian dự kiến (ngày)
+              </label>
+              <input
+                id="estimated-days"
+                type="number"
+                min={1}
+                step={1}
+                value={estimatedDays}
+                onChange={(e) => setEstimatedDays(e.target.value)}
+                placeholder="VD: 14"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8]"
+              />
+            </div>
+          </div>
+
           <div className="bg-white rounded-xl p-6 md:p-8 shadow-xs border border-slate-200/90">
             <label htmlFor="greeting" className="block text-sm font-bold text-gray-900 mb-2">
               Lời chào / thư giới thiệu
@@ -228,12 +298,6 @@ const ApplyJobPage: React.FC = () => {
               className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4 text-sm text-gray-700 focus:outline-none focus:border-[#1D4ED8] focus:ring-1 focus:ring-[#1D4ED8] transition-colors resize-none placeholder:text-gray-400"
             />
           </div>
-
-          {serverError && (
-            <div className="p-4 bg-red-50 border border-red-200 text-red-600 text-sm font-medium rounded-xl text-center">
-              {serverError}
-            </div>
-          )}
 
           <div className="flex flex-col sm:flex-row gap-3 mt-2">
             <button

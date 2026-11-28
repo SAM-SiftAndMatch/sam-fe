@@ -133,7 +133,7 @@ const ClientProfilePage: React.FC = () => {
       <AppHeader />
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full px-4 md:px-8 py-8 mb-24 overflow-y-auto">
+      <main className="flex-1 w-full px-4 md:px-8 pt-8 pb-32 overflow-y-auto">
         <div className="w-full max-w-3xl mx-auto">
           {/* Notification Banners */}
           {serverError && (

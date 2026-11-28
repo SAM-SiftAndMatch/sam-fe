@@ -191,11 +191,12 @@ const ClientProjectListPage: React.FC = () => {
             </div>
 
             {/* Filters */}
-            <div className="relative w-full md:w-48 shrink-0">
+            <div className="w-full md:w-48 shrink-0">
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value as FilterKey)}
-                className="w-full appearance-none bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-10 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
+                aria-label="Lọc trạng thái dự án"
+                className="w-full bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
               >
                 {[
                   { id: 'all', label: 'Tất cả trạng thái' },
@@ -211,16 +212,6 @@ const ClientProjectListPage: React.FC = () => {
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
             </div>
           </div>
         </div>
@@ -232,10 +223,12 @@ const ClientProjectListPage: React.FC = () => {
           </div>
         )}
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-gray-500">
-            Tổng {totalElements} dự án
-            {isRefreshing && <span className="ml-2">Đang đồng bộ...</span>}
-          </p>
+          {!isLoading && (
+            <p className="text-sm text-gray-500">
+              Tổng {totalElements} dự án
+              {isRefreshing && <span className="ml-2">Đang đồng bộ...</span>}
+            </p>
+          )}
           {isLoading ? (
             <p className="text-sm text-gray-500 text-center py-10">Đang tải dự án...</p>
           ) : (
@@ -268,8 +261,8 @@ const ClientProjectListPage: React.FC = () => {
                     </span>
                     <span className="text-sm font-bold text-gray-900">
                       {project.budgetMin === project.budgetMax || !project.budgetMax
-                        ? formatMoney(project.budgetMin)
-                        : `${formatMoney(project.budgetMin)} – ${formatMoney(project.budgetMax)}`}
+                        ? `${formatMoney(project.budgetMin)} đ`
+                        : `${formatMoney(project.budgetMin)} – ${formatMoney(project.budgetMax)} đ`}
                     </span>
                   </div>
                   <div className="flex flex-col">

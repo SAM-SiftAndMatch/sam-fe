@@ -3,6 +3,7 @@ import type React from 'react';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { chatApi } from '../api/chat';
 import { jobApi } from '../api/job';
 import { proposalApi } from '../api/proposal';
@@ -10,6 +11,7 @@ import AppHeader from '../components/AppHeader';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
 import JobStatusBadge from '../components/JobStatusBadge';
+import SrsPdfActions from '../components/SrsPdfActions';
 import { useInviteNotifications } from '../hooks/useInviteNotifications';
 import { extractApiResponse } from '../lib/api-error';
 import * as paths from '../routes/paths';
@@ -74,7 +76,7 @@ const JobDetailPage: React.FC = () => {
   const { data: myRec, refetch: refetchMyRec } = useQuery({
     queryKey: ['my-recommendation', id],
     queryFn: () => jobApi.getMyRecommendation(id!),
-    enabled: !!id && isFreelancer,
+    enabled: !!id && isFreelancer && Boolean(job?.isUrgentHiring),
     retry: false, // Don't retry if 404
   });
 
@@ -85,6 +87,13 @@ const JobDetailPage: React.FC = () => {
     enabled: !!id && isFreelancer,
     retry: false, // Don't retry if 404 (chưa nộp)
   });
+
+  const { data: similarJobsPage } = useQuery({
+    queryKey: ['similar-open-jobs', id],
+    queryFn: () => jobApi.getOpenJobsPage({ page: 0, size: 6 }),
+    enabled: !!id,
+  });
+  const similarJobs = (similarJobsPage?.items ?? []).filter((item) => item.id !== id).slice(0, 2);
 
   // Realtime: client vừa bấm "Mời làm việc" -> tự refetch + hiện banner mà không cần F5
   const { latest } = useInviteNotifications((n) => {
@@ -158,7 +167,7 @@ const JobDetailPage: React.FC = () => {
       void refetchMyRec();
     } catch (e) {
       console.error(e);
-      alert('Yêu cầu thất bại');
+      toast.error('Gửi yêu cầu trò chuyện thất bại.');
     }
   };
 
@@ -173,7 +182,7 @@ const JobDetailPage: React.FC = () => {
       void refetchMyRec();
     } catch (e) {
       console.error(e);
-      alert('Chấp nhận thất bại');
+      toast.error('Chấp nhận lời mời thất bại.');
     }
   };
 
@@ -184,7 +193,7 @@ const JobDetailPage: React.FC = () => {
       void refetchMyRec();
     } catch (e) {
       console.error(e);
-      alert('Từ chối thất bại');
+      toast.error('Từ chối lời mời thất bại.');
     }
   };
 
@@ -199,7 +208,7 @@ const JobDetailPage: React.FC = () => {
       void refetchMyProposal();
     } catch (e) {
       console.error(e);
-      alert('Chấp nhận thất bại');
+      toast.error('Chấp nhận lời mời thất bại.');
     }
   };
 
@@ -210,7 +219,7 @@ const JobDetailPage: React.FC = () => {
       void refetchMyProposal();
     } catch (e) {
       console.error(e);
-      alert('Từ chối thất bại');
+      toast.error('Từ chối lời mời thất bại.');
     }
   };
 
@@ -243,17 +252,19 @@ const JobDetailPage: React.FC = () => {
       }
       if (myRec?.status === 'AUTO_MATCHED') {
         await handleClaim();
-        alert('Đã gửi yêu cầu trò chuyện. Vui lòng chờ khách hàng phản hồi.');
+        toast.info('Đã gửi yêu cầu trò chuyện. Vui lòng chờ khách hàng phản hồi.');
         return;
       }
       if (myRec?.status === 'DEV_REQUESTED') {
-        alert('Yêu cầu trò chuyện đang chờ khách hàng phản hồi.');
+        toast.info('Yêu cầu trò chuyện đang chờ khách hàng phản hồi.');
         return;
       }
-      alert('Hãy ứng tuyển hoặc chờ khách hàng mời bạn trước khi liên hệ.');
+      toast.info('Hãy ứng tuyển hoặc chờ khách hàng mời bạn trước khi liên hệ.');
     } catch (cause) {
       console.error(cause);
-      alert(extractApiResponse(cause)?.message || 'Không mở được phòng chat. Vui lòng thử lại.');
+      toast.error(
+        extractApiResponse(cause)?.message || 'Không mở được phòng chat. Vui lòng thử lại.'
+      );
     } finally {
       setContacting(false);
     }
@@ -409,6 +420,7 @@ const JobDetailPage: React.FC = () => {
                       </a>
                     )}
                   </div>
+                  <SrsPdfActions jobId={job.id} />
                   <div className="prose prose-sm max-w-none bg-[#F8FAFC] border border-gray-100 rounded-xl p-6 text-gray-700">
                     <ReactMarkdown
                       components={{
@@ -685,154 +697,60 @@ const JobDetailPage: React.FC = () => {
               </div>
             </section>
 
-            <section className="bg-white rounded-xl p-8 border border-slate-200/90 shadow-xs">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-base font-bold text-slate-900">Các công việc tương tự</h2>
-                <button
-                  type="button"
-                  className="text-xs font-medium text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0"
-                >
-                  XEM TẤT CẢ →
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border border-slate-200/90 rounded-lg p-5 hover:border-[#1D4ED8]/60 transition-colors bg-white flex flex-col">
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-bold text-white bg-[#1D4ED8] px-2 py-0.5 rounded">
-                      MỚI ĐĂNG
-                    </span>
-                    <button
-                      type="button"
-                      className="text-slate-400 hover:text-slate-600 bg-transparent border-0 cursor-pointer"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        role="img"
-                        aria-label="Bookmark"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 leading-snug mb-2">
-                    Kỹ sư Computer Vision cho Hệ thống An ninh
-                  </h3>
-                  <div className="flex gap-2 mb-4">
-                    <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                      OpenCV
-                    </span>
-                    <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                      C++
-                    </span>
-                  </div>
-                  <div className="mt-auto flex items-center justify-between pt-2 border-t border-slate-100">
-                    <span className="text-sm font-bold text-[#1D4ED8]">₫35,000,000</span>
-                    <button
-                      type="button"
-                      className="text-xs font-medium text-[#1D4ED8] bg-blue-50 px-3 py-1.5 rounded-md cursor-pointer border border-blue-100 hover:bg-blue-100/60 transition-colors"
-                    >
-                      Chi tiết
-                    </button>
-                  </div>
+            {similarJobs.length > 0 && (
+              <section className="bg-white rounded-xl p-8 border border-slate-200/90 shadow-xs">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-base font-bold text-slate-900">Các công việc đang mở khác</h2>
+                  <button
+                    type="button"
+                    onClick={() => navigate(paths.PATH_FREELANCER_JOBS)}
+                    className="text-xs font-medium text-[#1D4ED8] hover:underline cursor-pointer bg-transparent border-0"
+                  >
+                    XEM TẤT CẢ →
+                  </button>
                 </div>
 
-                <div className="border border-slate-200/90 rounded-lg p-5 hover:border-[#1D4ED8]/60 transition-colors bg-white flex flex-col">
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-bold text-white bg-[#1D4ED8] px-2 py-0.5 rounded">
-                      MỚI ĐĂNG
-                    </span>
-                    <button
-                      type="button"
-                      className="text-slate-400 hover:text-slate-600 bg-transparent border-0 cursor-pointer"
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {similarJobs.map((sim) => (
+                    <div
+                      key={sim.id}
+                      className="border border-slate-200/90 rounded-lg p-5 hover:border-[#1D4ED8]/60 transition-colors bg-white flex flex-col"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        role="img"
-                        aria-label="Bookmark"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 leading-snug mb-2">
-                    Chuyên gia AI tạo hình & Stable Diffusion
-                  </h3>
-                  <div className="flex gap-2 mb-4">
-                    <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                      Stable Diffusion
-                    </span>
-                    <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                      Midjourney
-                    </span>
-                  </div>
-                  <div className="mt-auto flex items-center justify-between pt-2 border-t border-slate-100">
-                    <span className="text-sm font-bold text-[#1D4ED8]">₫30,000,000</span>
-                    <button
-                      type="button"
-                      className="text-xs font-medium text-[#1D4ED8] bg-blue-50 px-3 py-1.5 rounded-md cursor-pointer border border-blue-100 hover:bg-blue-100/60 transition-colors"
-                    >
-                      Chi tiết
-                    </button>
-                  </div>
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="text-[10px] font-bold text-white bg-[#1D4ED8] px-2 py-0.5 rounded">
+                          ĐANG TUYỂN
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-bold text-slate-900 leading-snug mb-2 line-clamp-2">
+                        {sim.title}
+                      </h3>
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {(sim.skills ?? []).slice(0, 3).map((sk) => (
+                          <span
+                            key={sk.id}
+                            className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded"
+                          >
+                            {sk.name}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-auto flex items-center justify-between pt-2 border-t border-slate-100">
+                        <span className="text-sm font-bold text-[#1D4ED8]">
+                          {formatBudget(sim.budgetMin, sim.budgetMax)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', sim.id))}
+                          className="text-xs font-medium text-[#1D4ED8] bg-blue-50 px-3 py-1.5 rounded-md cursor-pointer border border-blue-100 hover:bg-blue-100/60 transition-colors"
+                        >
+                          Chi tiết
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            </section>
-
-            <div className="w-full rounded-xl bg-slate-900 border border-slate-800 p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
-              <div className="md:w-1/2">
-                <span className="text-[10px] text-blue-400 uppercase tracking-widest block mb-1">
-                  {'//'} HỆ SINH THÁI
-                </span>
-                <h3 className="text-lg font-bold mb-1.5 tracking-tight">Thông tin về SAM</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Hệ sinh thái AI Matching hàng đầu Đông Nam Á, kết nối tài năng công nghệ với những
-                  dự án tương lai.
-                </p>
-              </div>
-              <div className="md:w-1/2 flex justify-between w-full">
-                <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-white">4.8</span>
-                  <span className="text-[9px] uppercase tracking-wider text-slate-400">
-                    Sao đánh giá
-                  </span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-white">#1</span>
-                  <span className="text-[9px] uppercase tracking-wider text-slate-400">
-                    Nền tảng
-                  </span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-white">2M+</span>
-                  <span className="text-[9px] uppercase tracking-wider text-slate-400">
-                    Truy cập
-                  </span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-white">$15M</span>
-                  <span className="text-[9px] uppercase tracking-wider text-slate-400">
-                    Đã chi trả
-                  </span>
-                </div>
-              </div>
-            </div>
+              </section>
+            )}
           </div>
 
           {/* ================= CỘT PHẢI ================= */}
@@ -900,10 +818,10 @@ const JobDetailPage: React.FC = () => {
                   </div>
                   <div>
                     <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">
-                      Thanh toán
+                      Thanh toán & Bảo trì
                     </div>
                     <div className="text-xs font-semibold text-slate-900">
-                      Theo cột mốc (Milestones)
+                      Ký quỹ Escrow 100% (bảo trì 7 ngày)
                     </div>
                   </div>
                 </div>

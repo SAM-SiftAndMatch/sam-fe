@@ -55,6 +55,18 @@ const ClientProjectDetailPage: React.FC = () => {
   const [addonModalOpen, setAddonModalOpen] = useState(false);
   const [addonSelection, setAddonSelection] = useState({ featured: false, urgent: false });
   const [addonSubmitting, setAddonSubmitting] = useState(false);
+  const [viewingProposal, setViewingProposal] = useState<ProposalResponse | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    budgetMin: '',
+    budgetMax: '',
+    estimatedDurationMonths: '',
+    deadline: '',
+  });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const addonPrices = useQuery({ queryKey: ['job-addon-prices'], queryFn: jobApi.getAddonPrices });
   const addons = useQuery({
@@ -158,6 +170,85 @@ const ClientProjectDetailPage: React.FC = () => {
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    if (!addonModalOpen && !viewingProposal && !editModalOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      if (addonModalOpen && !addonSubmitting) setAddonModalOpen(false);
+      if (viewingProposal) setViewingProposal(null);
+      if (editModalOpen && !editSaving) setEditModalOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [addonModalOpen, addonSubmitting, viewingProposal, editModalOpen, editSaving]);
+
+  const openEditModal = () => {
+    if (!project) return;
+    setEditError(null);
+    setEditForm({
+      title: project.title,
+      description: project.description,
+      budgetMin: String(project.budgetMin ?? ''),
+      budgetMax: String(project.budgetMax ?? project.budgetMin ?? ''),
+      estimatedDurationMonths:
+        project.estimatedDurationMonths != null ? String(project.estimatedDurationMonths) : '',
+      deadline: project.deadline ? project.deadline.slice(0, 10) : '',
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!id || editSaving) return;
+    const budgetMin = Number(editForm.budgetMin);
+    const budgetMax = Number(editForm.budgetMax || editForm.budgetMin);
+    if (!editForm.title.trim() || !editForm.description.trim()) {
+      setEditError('Vui lòng nhập đầy đủ tiêu đề và mô tả dự án.');
+      return;
+    }
+    if (
+      !Number.isFinite(budgetMin) ||
+      !Number.isFinite(budgetMax) ||
+      budgetMin < 3_000_000 ||
+      budgetMax < budgetMin
+    ) {
+      setEditError('Ngân sách tối thiểu 3.000.000 đ và ngân sách tối đa >= tối thiểu.');
+      return;
+    }
+    const parsedDuration = editForm.estimatedDurationMonths.trim()
+      ? Number(editForm.estimatedDurationMonths)
+      : null;
+    if (parsedDuration !== null && (!Number.isFinite(parsedDuration) || parsedDuration <= 0)) {
+      setEditError('Thời gian thực hiện phải lớn hơn 0 tháng.');
+      return;
+    }
+    setEditSaving(true);
+    setEditError(null);
+    try {
+      const updated = await jobApi.updateJob(id, {
+        title: editForm.title.trim(),
+        description: editForm.description.trim(),
+        budgetMin,
+        budgetMax,
+        estimatedDurationMonths: parsedDuration,
+        deadline: editForm.deadline ? `${editForm.deadline}T23:59:59` : null,
+      });
+      setProject(updated);
+      setEditModalOpen(false);
+      setSuccessMessage('Đã cập nhật thông tin dự án.');
+      await queryClient.invalidateQueries({ queryKey: ['job', id] });
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        const data = e.response?.data as { message?: string } | undefined;
+        setEditError(data?.message || 'Cập nhật dự án thất bại');
+      } else {
+        setEditError(e instanceof Error ? e.message : 'Cập nhật dự án thất bại');
+      }
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   // Realtime: dev vừa Claim / chấp nhận / nộp hồ sơ -> tự reload mà không cần F5
   useInviteNotifications((n) => {
@@ -394,8 +485,8 @@ const ClientProjectDetailPage: React.FC = () => {
                       Ngân sách:{' '}
                       <span className="text-[#1D4ED8]">
                         {project.budgetMin === project.budgetMax
-                          ? formatMoney(project.budgetMin)
-                          : `${formatMoney(project.budgetMin)} – ${formatMoney(project.budgetMax)}`}
+                          ? `${formatMoney(project.budgetMin)} đ`
+                          : `${formatMoney(project.budgetMin)} – ${formatMoney(project.budgetMax)} đ`}
                       </span>
                     </span>
                     {project.estimatedDurationMonths != null && (
@@ -685,10 +776,18 @@ const ClientProjectDetailPage: React.FC = () => {
                               &ldquo;{p.coverLetter}&rdquo;
                             </p>
                           )}
-                          <div className="mt-auto flex gap-3">
+                          <div className="mt-auto flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setViewingProposal(p)}
+                              className="px-4 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors cursor-pointer border-0"
+                            >
+                              Xem hồ sơ
+                            </button>
                             {p.status === 'PENDING' && (
                               <>
                                 <button
+                                  type="button"
                                   onClick={() => void handleInviteProposal(p.id)}
                                   disabled={proposalInvitingId === p.id}
                                   className="flex-1 py-2.5 rounded-full bg-[#1D4ED8] hover:bg-[#153bb5] text-white font-bold transition-colors cursor-pointer text-sm border-0 shadow-md disabled:opacity-60"
@@ -696,6 +795,7 @@ const ClientProjectDetailPage: React.FC = () => {
                                   {proposalInvitingId === p.id ? 'Đang mời...' : 'Mời hợp tác'}
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={() => void handleRejectProposal(p.id)}
                                   className="px-6 py-2.5 rounded-full bg-white border-2 border-gray-300 text-gray-500 font-bold text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                                 >
@@ -918,13 +1018,22 @@ const ClientProjectDetailPage: React.FC = () => {
                   ) : (
                     <>
                       {project.status === 'OPEN' && (
-                        <button
-                          type="button"
-                          onClick={() => setIsDeleteModalOpen(true)}
-                          className="w-full py-3 bg-white text-red-500 font-bold text-sm border-2 border-red-500 rounded-full hover:bg-red-50 transition-colors cursor-pointer"
-                        >
-                          Hủy dự án
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={openEditModal}
+                            className="w-full py-3 bg-white text-[#1D4ED8] font-bold text-sm border-2 border-[#1D4ED8] rounded-full hover:bg-blue-50 transition-colors cursor-pointer"
+                          >
+                            Chỉnh sửa dự án
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsDeleteModalOpen(true)}
+                            className="w-full py-3 bg-white text-red-500 font-bold text-sm border-2 border-red-500 rounded-full hover:bg-red-50 transition-colors cursor-pointer"
+                          >
+                            Hủy dự án
+                          </button>
+                        </>
                       )}
                     </>
                   )}
@@ -958,10 +1067,21 @@ const ClientProjectDetailPage: React.FC = () => {
         >
           <dialog
             open
+            aria-modal="true"
             aria-label="Chọn tính năng cho dự án"
             className="relative m-0 w-full max-w-md rounded-2xl border-0 bg-white p-6 text-gray-900 shadow-2xl"
           >
-            <h2 className="text-xl font-bold">Tăng hiệu quả tuyển dụng</h2>
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-xl font-bold">Tăng hiệu quả tuyển dụng</h2>
+              <button
+                type="button"
+                onClick={() => !addonSubmitting && setAddonModalOpen(false)}
+                aria-label="Đóng"
+                className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center border-0 cursor-pointer shrink-0"
+              >
+                ✕
+              </button>
+            </div>
             <p className="mt-2 text-sm text-gray-600">
               Chọn tính năng muốn kích hoạt cho dự án đang tuyển.
             </p>
@@ -1020,13 +1140,9 @@ const ClientProjectDetailPage: React.FC = () => {
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row">
               <button
                 type="button"
-                onClick={() => void saveAddonChoice(false)}
-                disabled={
-                  addonSubmitting ||
-                  !addonPrices.data ||
-                  (!addonSelection.featured && !addonSelection.urgent)
-                }
-                className="h-11 flex-1 cursor-pointer rounded-lg border border-gray-300 font-semibold hover:bg-gray-50 disabled:opacity-50"
+                onClick={() => setAddonModalOpen(false)}
+                disabled={addonSubmitting}
+                className="h-11 flex-1 cursor-pointer rounded-lg border border-gray-300 bg-white text-gray-700 font-semibold hover:bg-gray-50 disabled:opacity-50"
               >
                 Để sau
               </button>
@@ -1038,11 +1154,265 @@ const ClientProjectDetailPage: React.FC = () => {
                   !addonPrices.data ||
                   (!addonSelection.featured && !addonSelection.urgent)
                 }
-                className="h-11 flex-1 cursor-pointer rounded-lg bg-blue-700 font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
+                className="h-11 flex-1 cursor-pointer rounded-lg bg-blue-700 font-semibold text-white hover:bg-blue-800 disabled:opacity-50 border-0"
               >
                 Thanh toán
               </button>
             </div>
+          </dialog>
+        </div>
+      )}
+
+      {viewingProposal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setViewingProposal(null);
+          }}
+        >
+          <dialog
+            open
+            aria-modal="true"
+            aria-label="Hồ sơ ứng viên"
+            className="relative m-0 w-full max-w-xl rounded-2xl border-0 bg-white p-6 text-left text-gray-900 shadow-2xl"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-bold">{viewingProposal.freelancerName}</h2>
+                <p className="text-sm text-gray-600 mt-0.5">
+                  {viewingProposal.headline || 'Freelancer'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewingProposal(null)}
+                aria-label="Đóng"
+                className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center border-0 cursor-pointer shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3 text-xs font-semibold">
+              <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-blue-700">
+                Giá đề xuất: {formatMoney(Number(viewingProposal.proposedBudget))} đ
+              </span>
+              {viewingProposal.estimatedDurationDays != null && (
+                <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-slate-700">
+                  Thời gian: ~{viewingProposal.estimatedDurationDays} ngày
+                </span>
+              )}
+              {viewingProposal.hourlyRate != null && (
+                <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-slate-700">
+                  Mức phí/giờ: {formatMoney(Number(viewingProposal.hourlyRate))} đ/giờ
+                </span>
+              )}
+            </div>
+            <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
+              {viewingProposal.freelancerBio || 'Freelancer chưa cập nhật phần giới thiệu.'}
+            </p>
+            {(viewingProposal.freelancerSkills?.length ?? 0) > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {viewingProposal.freelancerSkills?.map((skill) => (
+                  <span
+                    key={skill}
+                    className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="mt-4 flex flex-wrap gap-4 text-sm">
+              {viewingProposal.portfolioUrl?.startsWith('https://') && (
+                <a
+                  href={viewingProposal.portfolioUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-700 underline"
+                >
+                  Portfolio
+                </a>
+              )}
+              {viewingProposal.githubUrl?.startsWith('https://') && (
+                <a
+                  href={viewingProposal.githubUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-700 underline"
+                >
+                  GitHub
+                </a>
+              )}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setViewingProposal(null)}
+                className="rounded-xl border border-gray-300 bg-white px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
+              >
+                Đóng
+              </button>
+            </div>
+          </dialog>
+        </div>
+      )}
+
+      {editModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !editSaving) setEditModalOpen(false);
+          }}
+        >
+          <dialog
+            open
+            aria-modal="true"
+            aria-label="Chỉnh sửa dự án"
+            className="relative m-0 w-full max-w-xl rounded-2xl border-0 bg-white p-6 text-left text-gray-900 shadow-2xl max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <h2 className="text-xl font-bold">Chỉnh sửa dự án</h2>
+              <button
+                type="button"
+                onClick={() => !editSaving && setEditModalOpen(false)}
+                aria-label="Đóng"
+                className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center border-0 cursor-pointer shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+            {editError && (
+              <p
+                role="alert"
+                className="mb-3 rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700"
+              >
+                {editError}
+              </p>
+            )}
+            <form onSubmit={(e) => void handleSaveEdit(e)} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="edit-job-title"
+                  className="block text-xs font-bold text-gray-700 mb-1"
+                >
+                  Tiêu đề dự án
+                </label>
+                <input
+                  id="edit-job-title"
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
+                  maxLength={200}
+                  className="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="edit-job-desc"
+                  className="block text-xs font-bold text-gray-700 mb-1"
+                >
+                  Mô tả dự án
+                </label>
+                <textarea
+                  id="edit-job-desc"
+                  rows={4}
+                  value={editForm.description}
+                  onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
+                  className="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label
+                    htmlFor="edit-job-min"
+                    className="block text-xs font-bold text-gray-700 mb-1"
+                  >
+                    Ngân sách tối thiểu (VNĐ)
+                  </label>
+                  <input
+                    id="edit-job-min"
+                    type="number"
+                    min={3000000}
+                    step={100000}
+                    value={editForm.budgetMin}
+                    onChange={(e) => setEditForm((f) => ({ ...f, budgetMin: e.target.value }))}
+                    className="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="edit-job-max"
+                    className="block text-xs font-bold text-gray-700 mb-1"
+                  >
+                    Ngân sách tối đa (VNĐ)
+                  </label>
+                  <input
+                    id="edit-job-max"
+                    type="number"
+                    min={3000000}
+                    step={100000}
+                    value={editForm.budgetMax}
+                    onChange={(e) => setEditForm((f) => ({ ...f, budgetMax: e.target.value }))}
+                    className="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label
+                    htmlFor="edit-job-dur"
+                    className="block text-xs font-bold text-gray-700 mb-1"
+                  >
+                    Thời gian thực hiện (tháng)
+                  </label>
+                  <input
+                    id="edit-job-dur"
+                    type="number"
+                    min={0.1}
+                    step={0.1}
+                    value={editForm.estimatedDurationMonths}
+                    onChange={(e) =>
+                      setEditForm((f) => ({ ...f, estimatedDurationMonths: e.target.value }))
+                    }
+                    className="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="edit-job-deadline"
+                    className="block text-xs font-bold text-gray-700 mb-1"
+                  >
+                    Hạn nộp hồ sơ
+                  </label>
+                  <input
+                    id="edit-job-deadline"
+                    type="date"
+                    value={editForm.deadline}
+                    onChange={(e) => setEditForm((f) => ({ ...f, deadline: e.target.value }))}
+                    className="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm"
+                  />
+                </div>
+              </div>
+              <div className="pt-2 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditModalOpen(false)}
+                  disabled={editSaving}
+                  className="rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSaving}
+                  className="rounded-xl bg-[#1D4ED8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#153bb5] cursor-pointer border-0 disabled:opacity-60"
+                >
+                  {editSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </button>
+              </div>
+            </form>
           </dialog>
         </div>
       )}

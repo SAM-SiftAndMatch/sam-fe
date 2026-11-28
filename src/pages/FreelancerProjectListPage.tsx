@@ -227,11 +227,12 @@ const FreelancerProjectListPage: React.FC = () => {
             />
           </div>
 
-          <div className="relative w-full md:w-52 shrink-0">
+          <div className="w-full md:w-52 shrink-0">
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="w-full appearance-none bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-10 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
+              aria-label="Lọc trạng thái dự án"
+              className="w-full bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
             >
               <option value="all">Tất cả trạng thái</option>
               <option value="in_progress">Đang thực hiện</option>
@@ -239,16 +240,6 @@ const FreelancerProjectListPage: React.FC = () => {
               <option value="completed">Hoàn thành</option>
               <option value="cancelled">Đã hủy</option>
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
           </div>
         </div>
 

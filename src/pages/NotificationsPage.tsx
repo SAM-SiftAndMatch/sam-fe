@@ -48,6 +48,8 @@ export default function NotificationsPage() {
     queryKey: ['user-notifications', 'page', user?.userId, page],
     queryFn: () => notificationsApi.page({ page, size: 10 }),
     enabled: Boolean(user?.userId),
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   const open = async (notification: UserNotification) => {
@@ -69,9 +71,19 @@ export default function NotificationsPage() {
         </p>
         {notifications.isLoading && <p className="text-gray-600">Đang tải thông báo...</p>}
         {notifications.isError && (
-          <p role="alert" className="text-red-700">
-            Không tải được thông báo.
-          </p>
+          <div
+            role="alert"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+          >
+            <span>Không tải được thông báo. Vui lòng thử lại.</span>
+            <button
+              type="button"
+              onClick={() => void notifications.refetch()}
+              className="rounded-lg bg-red-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-red-700 border-0 cursor-pointer"
+            >
+              Thử lại
+            </button>
+          </div>
         )}
         {notifications.data?.items.length === 0 && (
           <p className="rounded-2xl border border-gray-200 bg-white p-8 text-gray-600">

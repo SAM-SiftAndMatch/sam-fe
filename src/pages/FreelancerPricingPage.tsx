@@ -4,6 +4,7 @@ import {
   usePurchasePackage,
 } from '@/features/subscription';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
@@ -21,20 +22,25 @@ import type { ApiResponse } from '../types/api';
 
 const FreelancerPricingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuthStore();
   const { subscriptions, refetch } = useMySubscriptions();
   const catalog = useQuery({
-    queryKey: ['package-catalog', user?.userId],
+    queryKey: ['package-catalog', 'FREELANCER', user?.userId ?? 'guest'],
     queryFn: async () =>
       requireApiResult(
-        (await apiClient.get<ApiResponse<{ id: string; price: number }[]>>('/packages')).data,
+        (
+          await apiClient.get<ApiResponse<{ id: string; price: number }[]>>('/packages', {
+            params: { role: 'FREELANCER' },
+          })
+        ).data,
         'Không tải được bảng giá'
       ),
-    enabled: isAuthenticated,
+    enabled: !authLoading,
     refetchOnWindowFocus: true,
   });
   const catalogPrice = catalog.data?.find((p) => p.id === PACKAGE_PRO_DEV_ID)?.price;
   const { purchase, purchasingId, error, successMessage } = usePurchasePackage();
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const ownsProDev = subscriptions.some((s) => s.packageId === PACKAGE_PRO_DEV_ID && s.entitled);
 
@@ -47,12 +53,17 @@ const FreelancerPricingPage: React.FC = () => {
       navigate(paths.PATH_CLIENT_PRICING);
       return;
     }
+    setCheckoutError(null);
     const result = await purchase(PACKAGE_PRO_DEV_ID);
     if (result?.checkout) {
       try {
         await beginCheckout(result.checkout, '/freelancer/pricing');
       } catch (cause) {
-        console.error(cause);
+        setCheckoutError(
+          cause instanceof Error
+            ? cause.message
+            : 'Không mở được cổng thanh toán. Vui lòng thử lại.'
+        );
       }
       return;
     }
@@ -72,9 +83,9 @@ const FreelancerPricingPage: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 flex flex-col items-center relative z-10">
         {/* Alerts */}
-        {error && (
+        {(error || checkoutError) && (
           <div className="w-full max-w-3xl mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-[8px]">
-            {error}
+            {error || checkoutError}
           </div>
         )}
         {successMessage && (
@@ -130,10 +141,18 @@ const FreelancerPricingPage: React.FC = () => {
               </div>
 
               <SecondaryButton
-                onClick={() => navigate(paths.PATH_REGISTER)}
+                onClick={() =>
+                  navigate(
+                    isAuthenticated
+                      ? user?.role === 'FREELANCER'
+                        ? paths.PATH_FREELANCER_JOBS
+                        : paths.PATH_CLIENT_DASHBOARD
+                      : paths.PATH_REGISTER
+                  )
+                }
                 className="w-full mt-auto"
               >
-                Bắt đầu miễn phí
+                {isAuthenticated ? 'Tìm việc ngay' : 'Bắt đầu miễn phí'}
               </SecondaryButton>
             </div>
           </ScrollReveal>
@@ -153,14 +172,14 @@ const FreelancerPricingPage: React.FC = () => {
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900 mb-1">PRO DEV</h2>
                 <p className="text-xs text-slate-500 mb-6">
-                  Nhận việc 1 chạm + lá chắn Scope Shield, hiệu lực 30 ngày
+                  Ưu tiên AI matching + tiếp cận dự án tuyển gấp sớm 5 phút, hiệu lực 30 ngày
                 </p>
 
                 <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-slate-100">
                   <span className="text-4xl sm:text-5xl font-extrabold text-[#1D4ED8] leading-none">
                     {catalogPrice != null
                       ? `${new Intl.NumberFormat('vi-VN').format(catalogPrice)}đ`
-                      : 'Xem giá khi đăng nhập'}
+                      : 'Đang cập nhật'}
                   </span>
                   <span className="text-xs text-slate-500">/tháng</span>
                 </div>
@@ -168,7 +187,7 @@ const FreelancerPricingPage: React.FC = () => {
                 <ul className="space-y-3 mb-8 text-xs sm:text-sm text-slate-800">
                   <li className="flex items-start gap-2.5 font-medium">
                     <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
-                    <span>Nhận việc 1 chạm, không cần đấu thầu</span>
+                    <span>Ưu tiên xếp hạng trong gợi ý AI Headhunter</span>
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
                     <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
@@ -176,11 +195,11 @@ const FreelancerPricingPage: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
                     <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
-                    <span>Lá chắn yêu cầu tự động (Scope Shield)</span>
+                    <span>Tiếp cận dự án tuyển gấp 1-chạm</span>
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
                     <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
-                    <span>Hỗ trợ 24/7 qua Hotline</span>
+                    <span>Hỗ trợ ưu tiên qua kênh hỗ trợ chính thức</span>
                   </li>
                 </ul>
               </div>
