@@ -215,6 +215,9 @@ const ContractPage: React.FC = () => {
       await contractApi.generateAiDraft(room.id);
       const c = await contractApi.getContractByRoom(room.id);
       setContract(c);
+      if (myId) {
+        void queryClient.invalidateQueries({ queryKey: ['workspace', 'summary', myId] });
+      }
     } catch (e) {
       try {
         const c = await contractApi.getContractByRoom(room.id);
@@ -569,7 +572,7 @@ const ContractPage: React.FC = () => {
     <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col">
       <AppHeader />
 
-      <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-4 pt-8 pb-28">
         {room && (
           <button
             type="button"
@@ -729,7 +732,11 @@ const ContractPage: React.FC = () => {
                             {r.editorName}
                           </span>
                           <span className="block text-[11px] text-gray-400 mt-0.5">
-                            {r.createdAt ? new Date(r.createdAt).toLocaleString('vi-VN') : ''}
+                            {r.createdAt
+                              ? new Date(r.createdAt).toLocaleString('vi-VN', {
+                                  timeZone: 'Asia/Ho_Chi_Minh',
+                                })
+                              : ''}
                           </span>
                         </button>
                       ))}

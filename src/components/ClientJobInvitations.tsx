@@ -56,7 +56,9 @@ export default function ClientJobInvitations({
         <div>
           <h2 className="text-xl font-bold text-gray-900">Ứng viên đã mời</h2>
           <p className="mt-1 text-sm text-gray-600">
-            Đồng ý lời mời chỉ mở chat. Bạn chọn một người trước khi tạo hợp đồng.
+            {isOpen
+              ? 'Đồng ý lời mời chỉ mở chat. Bạn có thể chọn một người trước khi tạo hợp đồng.'
+              : 'Đã chốt ứng viên ký hợp đồng cho dự án này.'}
           </p>
         </div>
         {isOpen && (

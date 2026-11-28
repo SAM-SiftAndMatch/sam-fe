@@ -166,26 +166,21 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
     .split('T')[0];
   const [deadline, setDeadline] = useState(defaultDeadline);
 
-  // Kích hoạt AI Pricing khi vào bước 2
+  // Tính gợi ý ngân sách tham khảo ngay khi vào bước 2
   useEffect(() => {
     if (currentStep === 2 && aiPricingState === 'idle') {
-      setAiPricingState('analyzing');
+      let basePrice = MINIMUM_PROJECT_BUDGET;
+      if (description.length > 500) basePrice += 500000;
 
-      setTimeout(() => {
-        // Giả lập tính toán giá dựa trên độ dài description hoặc tags
-        let basePrice = MINIMUM_PROJECT_BUDGET;
-        if (description.length > 500) basePrice += 500000;
+      const hasUrgency = selectedTags.some(
+        (t) => t.toLowerCase().includes('sớm') || t.toLowerCase().includes('gấp')
+      );
+      if (hasUrgency) basePrice += 1000000;
 
-        const hasUrgency = selectedTags.some(
-          (t) => t.toLowerCase().includes('sớm') || t.toLowerCase().includes('gấp')
-        );
-        if (hasUrgency) basePrice += 1000000;
-
-        setAiSuggestedPrice(basePrice);
-        setBudgetAmount(basePrice);
-        setBudgetType('ai');
-        setAiPricingState('done');
-      }, 1500);
+      setAiSuggestedPrice(basePrice);
+      setBudgetAmount(basePrice);
+      setBudgetType('ai');
+      setAiPricingState('done');
     }
   }, [currentStep, aiPricingState, description, selectedTags]);
 
@@ -855,7 +850,7 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                       className={`relative p-4 rounded-2xl border ${budgetType === 'ai' ? 'border-[#1D4ED8] bg-[#EEF2FF] shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'} flex flex-col items-center justify-center transition-colors cursor-pointer`}
                     >
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#1D4ED8] text-white text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider whitespace-nowrap">
-                        Đề xuất bởi AI
+                        Mức tham khảo
                       </div>
                       <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 mt-1">
                         Đề xuất
@@ -907,9 +902,12 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-base font-bold text-gray-900 mb-1">Định giá bằng AI</h3>
+                        <h3 className="text-base font-bold text-gray-900 mb-1">
+                          Gợi ý ngân sách tham khảo
+                        </h3>
                         <p className="text-xs text-gray-500 max-w-xs leading-relaxed">
-                          Nhấp để xem giải thích chi tiết từ SAM AI về mức giá đề xuất này.
+                          Nhấp để xem cơ sở tính mức ngân sách tham khảo từ độ dài mô tả và mức độ
+                          gấp.
                         </p>
                       </div>
                     </div>
@@ -934,19 +932,20 @@ Ngân sách linh hoạt dựa trên năng lực thực tế. Thời gian hoàn t
                       <div className="bg-[#F8FAFC] rounded-2xl p-5 border border-[#EEF2FF]">
                         <div className="flex items-center gap-2 mb-2 text-[#1D4ED8] font-bold text-sm">
                           <span>💡</span>
-                          Insight từ SAM AI:
+                          Cơ sở tính mức tham khảo:
                         </div>
                         <p className="text-sm text-gray-600 leading-relaxed">
-                          Dựa trên yêu cầu của bạn về danh mục{' '}
+                          Dựa trên danh mục{' '}
                           <strong>
                             {category === 'dev' ? 'Lập trình & IT' : 'Thiết kế/Văn bản'}
                           </strong>
-                          , mức thù lao trung bình hiện nay rơi vào khoảng{' '}
+                          , độ chi tiết mô tả và độ gấp của các thẻ đã chọn, mức tham khảo khởi điểm
+                          khoảng{' '}
                           <strong>
                             {new Intl.NumberFormat('vi-VN').format(aiSuggestedPrice)} VNĐ
                           </strong>
-                          . Việc đưa ra mức giá hợp lý này sẽ giúp bạn thu hút được lượng lớn
-                          Freelancer chất lượng cao trong thời gian ngắn nhất.
+                          . Bạn có thể tự điều chỉnh lên hoặc giữ tối thiểu từ 3.000.000 đ tùy phạm
+                          vi thực tế.
                         </p>
                       </div>
                     </div>

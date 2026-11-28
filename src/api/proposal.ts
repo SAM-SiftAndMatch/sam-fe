@@ -54,6 +54,11 @@ export const proposalApi = {
     const res = await apiClient.post<ApiResponse<void>>(`/proposals/${proposalId}/reject`);
     assertApiSuccess(res.data, 'Failed to reject proposal');
   },
+
+  withdraw: async (proposalId: string): Promise<void> => {
+    const res = await apiClient.post<ApiResponse<void>>(`/proposals/${proposalId}/withdraw`);
+    assertApiSuccess(res.data, 'Không thể rút hồ sơ ứng tuyển');
+  },
 };
 
 export default proposalApi;

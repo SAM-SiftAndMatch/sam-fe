@@ -4,6 +4,7 @@ import {
   usePurchasePackage,
 } from '@/features/subscription';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
@@ -21,20 +22,25 @@ import type { ApiResponse } from '../types/api';
 
 const ClientPricingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuthStore();
   const { subscriptions, refetch } = useMySubscriptions();
   const catalog = useQuery({
-    queryKey: ['package-catalog', user?.userId],
+    queryKey: ['package-catalog', 'CLIENT', user?.userId ?? 'guest'],
     queryFn: async () =>
       requireApiResult(
-        (await apiClient.get<ApiResponse<{ id: string; price: number }[]>>('/packages')).data,
+        (
+          await apiClient.get<ApiResponse<{ id: string; price: number }[]>>('/packages', {
+            params: { role: 'CLIENT' },
+          })
+        ).data,
         'Không tải được bảng giá'
       ),
-    enabled: isAuthenticated,
+    enabled: !authLoading,
     refetchOnWindowFocus: true,
   });
   const catalogPrice = catalog.data?.find((p) => p.id === PACKAGE_BUSINESS_ID)?.price;
   const { purchase, purchasingId, error, successMessage } = usePurchasePackage();
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const ownsPackage = (packageId: string) =>
     subscriptions.some((s) => s.packageId === packageId && s.entitled);
@@ -48,12 +54,17 @@ const ClientPricingPage: React.FC = () => {
       navigate(paths.PATH_FREELANCER_PRICING);
       return;
     }
+    setCheckoutError(null);
     const result = await purchase(packageId);
     if (result?.checkout) {
       try {
         await beginCheckout(result.checkout, '/client/pricing');
       } catch (cause) {
-        console.error(cause);
+        setCheckoutError(
+          cause instanceof Error
+            ? cause.message
+            : 'Không mở được cổng thanh toán. Vui lòng thử lại.'
+        );
       }
       return;
     }
@@ -120,9 +131,9 @@ const ClientPricingPage: React.FC = () => {
         </ScrollReveal>
 
         {/* Feedback Alerts */}
-        {error && (
+        {(error || checkoutError) && (
           <div className="w-full max-w-5xl mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-[8px]">
-            {error}
+            {error || checkoutError}
           </div>
         )}
         {successMessage && (
@@ -167,10 +178,18 @@ const ClientPricingPage: React.FC = () => {
               </div>
 
               <SecondaryButton
-                onClick={() => navigate(paths.PATH_REGISTER)}
+                onClick={() =>
+                  navigate(
+                    isAuthenticated
+                      ? user?.role === 'FREELANCER'
+                        ? paths.PATH_FREELANCER_JOBS
+                        : paths.PATH_CLIENT_DASHBOARD
+                      : paths.PATH_REGISTER
+                  )
+                }
                 className="w-full mt-auto"
               >
-                Bắt đầu miễn phí
+                {isAuthenticated ? 'Về trang chính' : 'Bắt đầu miễn phí'}
               </SecondaryButton>
             </div>
           </ScrollReveal>
@@ -198,7 +217,7 @@ const ClientPricingPage: React.FC = () => {
                   <span className="text-4xl sm:text-5xl font-extrabold text-[#1D4ED8] leading-none">
                     {catalogPrice != null
                       ? `${new Intl.NumberFormat('vi-VN').format(catalogPrice)}đ`
-                      : 'Xem giá khi đăng nhập'}
+                      : 'Đang cập nhật'}
                   </span>
                   <span className="text-xs text-slate-500">/tháng</span>
                 </div>
@@ -222,7 +241,7 @@ const ClientPricingPage: React.FC = () => {
                   </li>
                   <li className="flex items-start gap-2.5 font-medium">
                     <span className="text-[#1D4ED8] text-xs mt-0.5 font-bold">✓</span>
-                    <span>Hỗ trợ 24/7 qua Hotline</span>
+                    <span>Hỗ trợ ưu tiên qua kênh hỗ trợ chính thức</span>
                   </li>
                 </ul>
               </div>

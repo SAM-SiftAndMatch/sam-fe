@@ -1,6 +1,6 @@
 import type React from 'react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ProjectBriefPrompt from '../components/ProjectBriefPrompt';
 import AnimatedNumber from '../components/landing/AnimatedNumber';
 import CategoriesSection from '../components/landing/CategoriesSection';
@@ -18,12 +18,27 @@ import * as paths from '../routes/paths';
 
 const ClientLandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
+  const [promptHint, setPromptHint] = useState('');
+
+  useEffect(() => {
+    if (!location.hash) return;
+    const id = location.hash.replace('#', '');
+    window.setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }, 80);
+  }, [location.hash]);
 
   const handleSearch = (query?: string) => {
-    const q = query || searchQuery;
-    if (!q.trim()) return; // Do nothing if empty
-
+    const q = (query ?? searchQuery).trim();
+    if (!q) {
+      setPromptHint(
+        'Hãy mô tả ngắn dự án bạn cần làm (ví dụ: Website bán hàng, App mobile...) rồi bấm Tiếp tục.'
+      );
+      return;
+    }
+    setPromptHint('');
     navigate(paths.PATH_LOGIN, {
       state: { initialQuery: q, returnTo: paths.PATH_CLIENT_AI_BRIEF },
     });
@@ -61,9 +76,17 @@ const ClientLandingPage: React.FC = () => {
           >
             <ProjectBriefPrompt
               value={searchQuery}
-              onChange={setSearchQuery}
+              onChange={(val) => {
+                setSearchQuery(val);
+                if (promptHint && val.trim()) setPromptHint('');
+              }}
               onSubmit={handleSearch}
             />
+            {promptHint && (
+              <p role="alert" className="mb-3 text-xs font-medium text-amber-700">
+                {promptHint}
+              </p>
+            )}
           </div>
 
           {/* 3 Small Example-Prompt Chips (Item 5 - 320ms delay, outside chat component) */}
@@ -76,7 +99,10 @@ const ClientLandingPage: React.FC = () => {
               <button
                 key={tag}
                 type="button"
-                onClick={() => handleSearch(tag)}
+                onClick={() => {
+                  setSearchQuery(tag);
+                  setPromptHint('');
+                }}
                 className="text-xs px-3 py-1.5 rounded-[6px] border border-slate-200 bg-white text-slate-700 hover:border-[#1D4ED8] hover:text-[#1D4ED8] hover:bg-[#1D4ED8]/[0.06] transition-colors cursor-pointer active:scale-[0.97]"
               >
                 + {tag}

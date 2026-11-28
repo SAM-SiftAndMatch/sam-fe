@@ -50,9 +50,9 @@ import FreelancerApplicationsPage from '../pages/FreelancerApplicationsPage';
 import FreelancerEarningsPage from '../pages/FreelancerEarningsPage';
 import FreelancerInvitationsPage from '../pages/FreelancerInvitationsPage';
 import FreelancerJobsPage from '../pages/FreelancerJobsPage';
-import FreelancerProjectDetailPage from '../pages/FreelancerProjectDetailPage';
 import FreelancerProjectListPage from '../pages/FreelancerProjectListPage';
 import JobDetailPage from '../pages/JobDetailPage';
+import NotFoundPage from '../pages/NotFoundPage';
 import NotificationsPage from '../pages/NotificationsPage';
 import SuccessApplicationPage from '../pages/SuccessApplicationPage';
 import WorkspacesPage from '../pages/WorkspacesPage';
@@ -166,10 +166,6 @@ const AppRoutes = () => {
           }
         />
         <Route path={paths.PATH_FREELANCER_PROJECTS} element={<FreelancerProjectListPage />} />
-        <Route
-          path={paths.PATH_FREELANCER_PROJECT_DETAIL}
-          element={<FreelancerProjectDetailPage />}
-        />
         <Route path={paths.PATH_FREELANCER_EARNINGS} element={<FreelancerEarningsPage />} />
         <Route
           path={paths.PATH_JOB_APPLY}
@@ -240,6 +236,7 @@ const AppRoutes = () => {
           }
         />
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

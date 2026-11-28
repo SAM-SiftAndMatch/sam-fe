@@ -212,8 +212,9 @@ const AppHeader: React.FC = () => {
     path === PATH_WORKSPACES
       ? location.pathname === PATH_WORKSPACES || location.pathname.startsWith('/workspace/')
       : location.pathname === path || location.pathname.startsWith(`${path}/`);
+  const compactNav = navItems.length > 5;
   const navClass = (path: string) =>
-    `app-header-nav-item cursor-pointer rounded-full px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8] ${
+    `app-header-nav-item cursor-pointer whitespace-nowrap rounded-full ${compactNav ? 'px-2.5 py-2' : 'px-3 py-2'} text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D4ED8] ${
       isActive(path)
         ? 'app-header-nav-item--active bg-[#1D4ED8]/10 text-[#1D4ED8]'
         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'

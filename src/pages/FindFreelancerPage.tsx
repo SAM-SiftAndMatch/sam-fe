@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   type ClientInvitationStatus,
@@ -10,8 +10,10 @@ import { jobApi } from '../api/job';
 import AppHeader from '../components/AppHeader';
 import Footer from '../components/Footer';
 import PaginationNav from '../components/PaginationNav';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const FindFreelancerPage = () => {
+  const { user } = useAuthStore();
   const [params, setParams] = useSearchParams();
   const page = Math.max(0, (Number(params.get('page')) || 1) - 1);
   const search = params.get('search') || '';
@@ -30,14 +32,16 @@ const FindFreelancerPage = () => {
   });
   const freelancerIds = freelancers.data?.items.map((freelancer) => freelancer.userId) ?? [];
   const invitationStatuses = useQuery({
-    queryKey: ['client-open-invitation-statuses', freelancerIds],
+    queryKey: ['client-open-invitation-statuses', user?.userId, freelancerIds],
     queryFn: () => invitationsApi.clientFreelancerStatuses(freelancerIds),
     enabled: freelancerIds.length > 0,
   });
   const projects = useQuery({
-    queryKey: ['invite-open-projects'],
+    queryKey: ['invite-open-projects', user?.userId],
     queryFn: () => jobApi.getMyJobsPage({ status: 'OPEN', page: 0, size: 100 }),
     enabled: !!candidate,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
   const presetJob = useQuery({
     queryKey: ['invite-preset-project', presetJobId],
@@ -49,7 +53,7 @@ const FindFreelancerPage = () => {
     onSuccess: (invitation) => {
       void queryClient.invalidateQueries({ queryKey: ['job-invitations', invitation.jobId] });
       queryClient.setQueryData<ClientInvitationStatus[]>(
-        ['client-open-invitation-statuses', freelancerIds],
+        ['client-open-invitation-statuses', user?.userId, freelancerIds],
         (current) => [
           ...(current ?? []).filter(
             (item) =>
@@ -70,8 +74,23 @@ const FindFreelancerPage = () => {
       setMessage('');
     },
   });
+
+  useEffect(() => {
+    if (!profile && !candidate) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      if (profile) setProfile(null);
+      if (candidate && !invite.isPending) setCandidate(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [profile, candidate, invite.isPending]);
+
   const candidateProjectInvitation = invitationStatuses.data?.find(
-    (item) => item.freelancerId === candidate?.userId && item.jobId === projectId
+    (item) =>
+      item.freelancerId === candidate?.userId &&
+      item.jobId === projectId &&
+      ['PENDING', 'ACCEPTED', 'SELECTED'].includes(item.status)
   );
   const projectIsSelectable =
     invitationStatuses.isSuccess &&
@@ -311,12 +330,18 @@ const FindFreelancerPage = () => {
                   <option
                     value={presetJobId}
                     disabled={invitationStatuses.data?.some(
-                      (item) => item.jobId === presetJobId && item.freelancerId === candidate.userId
+                      (item) =>
+                        item.jobId === presetJobId &&
+                        item.freelancerId === candidate.userId &&
+                        ['PENDING', 'ACCEPTED', 'SELECTED'].includes(item.status)
                     )}
                   >
                     {presetJob.data.title}
                     {invitationStatuses.data?.some(
-                      (item) => item.jobId === presetJobId && item.freelancerId === candidate.userId
+                      (item) =>
+                        item.jobId === presetJobId &&
+                        item.freelancerId === candidate.userId &&
+                        ['PENDING', 'ACCEPTED', 'SELECTED'].includes(item.status)
                     )
                       ? ' — Đã mời'
                       : ''}
@@ -324,7 +349,10 @@ const FindFreelancerPage = () => {
                 )}
               {projects.data?.items.map((job) => {
                 const alreadyInvited = invitationStatuses.data?.some(
-                  (item) => item.jobId === job.id && item.freelancerId === candidate.userId
+                  (item) =>
+                    item.jobId === job.id &&
+                    item.freelancerId === candidate.userId &&
+                    ['PENDING', 'ACCEPTED', 'SELECTED'].includes(item.status)
                 );
                 return (
                   <option key={job.id} value={job.id} disabled={alreadyInvited}>
