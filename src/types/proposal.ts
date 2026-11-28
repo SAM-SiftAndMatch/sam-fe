@@ -16,6 +16,11 @@ export interface ProposalResponse {
   freelancerId: string;
   freelancerName: string;
   headline?: string | null;
+  freelancerBio?: string | null;
+  freelancerSkills?: string[] | null;
+  hourlyRate?: number | null;
+  portfolioUrl?: string | null;
+  githubUrl?: string | null;
   coverLetter?: string | null;
   proposedBudget: number;
   estimatedDurationDays?: number | null;

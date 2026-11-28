@@ -141,17 +141,19 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
                     </button>
                   );
                 })}
-                {/* Nút Khác */}
-                {q.allowCustomInput && !ans.showCustom && (
-                  <button
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => toggleShowCustom(q.id)}
-                    className="ai-question-option text-xs px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-gray-400 bg-white hover:border-gray-400 hover:text-gray-600 transition-all cursor-pointer font-medium"
-                  >
-                    Khác...
-                  </button>
-                )}
+                {/* Nút Khác (chỉ thêm nếu options chưa có sẵn mục Khác) */}
+                {q.allowCustomInput &&
+                  !ans.showCustom &&
+                  !q.options?.some((o) => o.trim().toLowerCase().startsWith('khác')) && (
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => toggleShowCustom(q.id)}
+                      className="ai-question-option text-xs px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-gray-400 bg-white hover:border-gray-400 hover:text-gray-600 transition-all cursor-pointer font-medium"
+                    >
+                      Khác...
+                    </button>
+                  )}
               </div>
             )}
 
@@ -218,6 +220,7 @@ const AiQuestionPanel: React.FC<AiQuestionPanelProps> = ({
 // === Component bong bóng chat ===
 interface ChatBubbleProps {
   message: ChatMessage;
+  userInitial?: string;
   onSubmitAnswers?: (summary: string) => void;
   answers?: Record<string, { selectedOptions: string[]; customInput: string; showCustom: boolean }>;
   onAnswersChange?: (
@@ -228,6 +231,7 @@ interface ChatBubbleProps {
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({
   message,
+  userInitial = 'B',
   onSubmitAnswers,
   answers,
   onAnswersChange,
@@ -246,7 +250,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
             : 'bg-gradient-to-br from-violet-500 to-blue-600 text-white shadow-md'
         }`}
       >
-        {isUser ? 'B' : 'AI'}
+        {isUser ? userInitial : 'AI'}
       </div>
 
       <div className={`flex flex-col ${isUser ? 'items-end max-w-[78%]' : 'items-start w-full'}`}>
@@ -573,7 +577,9 @@ const PHASE_LABELS = [
 const AIBriefPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const userId = useAuthStore((state) => state.user?.userId);
+  const user = useAuthStore((state) => state.user);
+  const userId = user?.userId;
+  const userInitial = (user?.fullName || user?.email || 'B').trim().charAt(0).toUpperCase() || 'B';
   const routeState = location.state as BriefRouteState | null;
   const draftKey = `sam:ai-brief:description:${userId ?? 'client'}`;
   const urlDraftId = new URLSearchParams(location.search).get('draftId');
@@ -1308,13 +1314,15 @@ const AIBriefPage: React.FC = () => {
                   {pageState === 'completed' && 'SRS đã được tạo, sẵn sàng đăng dự án'}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleSkip}
-                className="ml-auto text-xs text-gray-400 hover:text-gray-600 font-medium cursor-pointer bg-transparent border-0 underline underline-offset-2"
-              >
-                Bỏ qua
-              </button>
+              {pageState !== 'brief' && pageState !== 'completed' && (
+                <button
+                  type="button"
+                  onClick={handleSkip}
+                  className="ml-auto text-xs text-gray-400 hover:text-gray-600 font-medium cursor-pointer bg-transparent border-0 underline underline-offset-2"
+                >
+                  Bỏ qua
+                </button>
+              )}
             </div>
           </div>
 
@@ -1414,6 +1422,7 @@ const AIBriefPage: React.FC = () => {
                   <ChatBubble
                     key={msg.id}
                     message={msg}
+                    userInitial={userInitial}
                     answers={questionAnswers[msg.id]}
                     onAnswersChange={(answers) =>
                       setQuestionAnswers((current) => ({ ...current, [msg.id]: answers }))
@@ -1444,6 +1453,7 @@ const AIBriefPage: React.FC = () => {
                   />
                   <button
                     type="button"
+                    aria-label="Gửi tin nhắn"
                     onClick={() => handleSendBaMessage()}
                     disabled={isBaSending || !baInput.trim()}
                     className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-all cursor-pointer border-0 shadow-md shadow-blue-100 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
@@ -1574,6 +1584,7 @@ const AIBriefPage: React.FC = () => {
                     <ChatBubble
                       key={msg.id}
                       message={msg}
+                      userInitial={userInitial}
                       answers={questionAnswers[msg.id]}
                       onAnswersChange={(answers) =>
                         setQuestionAnswers((current) => ({ ...current, [msg.id]: answers }))
@@ -1612,6 +1623,7 @@ const AIBriefPage: React.FC = () => {
                   />
                   <button
                     type="button"
+                    aria-label="Gửi tin nhắn"
                     onClick={() => handleSendRiskMessage()}
                     disabled={isRiskSending || !riskInput.trim()}
                     className="bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl transition-all cursor-pointer border-0 shadow-md shadow-amber-100 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"

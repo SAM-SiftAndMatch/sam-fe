@@ -40,6 +40,7 @@ function harness(options = {}) {
               },
             ];
           },
+          useEffect() {},
         };
       if (name === 'react-hook-form')
         return {
@@ -93,6 +94,7 @@ function harness(options = {}) {
         return { default: 'policy-links', PolicyButton: 'policy-button' };
       if (name.endsWith('/InteractiveBackground')) return { InteractiveBackground: 'background' };
       if (name.endsWith('/SamBrandLogo')) return { default: 'brand' };
+      if (name.endsWith('/lib/support')) return require('../src/lib/support.ts');
       if (name.endsWith('/routes/paths')) return require('../src/routes/paths.ts');
       return require(name);
     },

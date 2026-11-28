@@ -1,13 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { proposalApi } from '../api/proposal';
 import AppHeader from '../components/AppHeader';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import Footer from '../components/Footer';
 import PaginationNav from '../components/PaginationNav';
 import ProposalStatusBadge from '../components/ProposalStatusBadge';
 import { usePageSearchParam } from '../hooks/usePageSearchParam';
+import { extractApiResponse } from '../lib/api-error';
 import * as paths from '../routes/paths';
 import type { ProposalResponse } from '../types/proposal';
 
@@ -21,8 +24,11 @@ const TABS = [
 
 const FreelancerApplicationsPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<string>('all');
   const [page, setPage] = usePageSearchParam();
+  const [withdrawTarget, setWithdrawTarget] = useState<ProposalResponse | null>(null);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   const { data: proposalPage, isLoading } = useQuery({
     queryKey: ['my-proposals-page', page, activeTab],
@@ -33,6 +39,22 @@ const FreelancerApplicationsPage: React.FC = () => {
         status: activeTab === 'all' ? undefined : activeTab,
       }),
   });
+
+  const handleWithdraw = async () => {
+    if (!withdrawTarget || withdrawing) return;
+    setWithdrawing(true);
+    try {
+      await proposalApi.withdraw(withdrawTarget.id);
+      toast.success('Đã rút hồ sơ ứng tuyển.');
+      await queryClient.invalidateQueries({ queryKey: ['my-proposals-page'] });
+      await queryClient.invalidateQueries({ queryKey: ['my-proposal', withdrawTarget.jobId] });
+      setWithdrawTarget(null);
+    } catch (err) {
+      toast.error(extractApiResponse(err)?.message || 'Không rút được hồ sơ ứng tuyển.');
+    } finally {
+      setWithdrawing(false);
+    }
+  };
 
   const filteredApps = proposalPage?.items ?? [];
 
@@ -60,14 +82,15 @@ const FreelancerApplicationsPage: React.FC = () => {
           </div>
 
           {/* Tabs / Filter */}
-          <div className="relative w-full md:w-56 shrink-0">
+          <div className="w-full md:w-56 shrink-0">
             <select
               value={activeTab}
               onChange={(e) => {
                 setActiveTab(e.target.value);
                 setPage(0);
               }}
-              className="w-full appearance-none bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-10 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
+              aria-label="Lọc trạng thái hồ sơ"
+              className="w-full bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-full text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/20 focus:border-[#1D4ED8] transition-all shadow-sm cursor-pointer"
             >
               {TABS.map((tab) => (
                 <option key={tab.id} value={tab.id}>
@@ -75,16 +98,6 @@ const FreelancerApplicationsPage: React.FC = () => {
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
           </div>
         </div>
 
@@ -134,7 +147,7 @@ const FreelancerApplicationsPage: React.FC = () => {
                     </div>
                     <h2
                       onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', app.jobId))}
-                      className="text-xl font-bold text-gray-900 mb-2 cursor-pointer hover:text-[#1D4ED8] transition-colors"
+                      className="text-xl font-bold text-gray-900 mb-2 cursor-pointer hover:text-[#1D4ED8]"
                     >
                       {app.jobTitle}
                     </h2>
@@ -144,10 +157,20 @@ const FreelancerApplicationsPage: React.FC = () => {
                   </div>
 
                   {/* Cột phải */}
-                  <div className="flex items-center gap-3 w-full md:w-auto">
+                  <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    {app.status === 'PENDING' && (
+                      <button
+                        type="button"
+                        onClick={() => setWithdrawTarget(app)}
+                        className="flex-1 md:flex-none bg-white hover:bg-red-50 text-red-600 font-bold py-2.5 px-5 rounded-xl border border-red-200 cursor-pointer"
+                      >
+                        Rút hồ sơ
+                      </button>
+                    )}
                     <button
+                      type="button"
                       onClick={() => navigate(paths.PATH_JOB_DETAIL.replace(':id', app.jobId))}
-                      className="flex-1 md:flex-none bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold py-2.5 px-6 rounded-xl transition-colors border border-gray-200 cursor-pointer"
+                      className="flex-1 md:flex-none bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold py-2.5 px-6 rounded-xl border border-gray-200 cursor-pointer"
                     >
                       {app.status === 'INVITED' ? 'Xem lời mời' : 'Xem dự án'}
                     </button>
@@ -167,6 +190,17 @@ const FreelancerApplicationsPage: React.FC = () => {
       </main>
 
       <Footer />
+
+      <ConfirmDeleteModal
+        isOpen={withdrawTarget !== null}
+        title="Rút hồ sơ ứng tuyển"
+        message={`Bạn có chắc chắn muốn rút hồ sơ đã nộp cho dự án “${withdrawTarget?.jobTitle ?? ''}”?`}
+        confirmText={withdrawing ? 'Đang rút...' : 'Rút hồ sơ'}
+        cancelText="Giữ lại"
+        isPending={withdrawing}
+        onConfirm={() => void handleWithdraw()}
+        onCancel={() => !withdrawing && setWithdrawTarget(null)}
+      />
     </div>
   );
 };

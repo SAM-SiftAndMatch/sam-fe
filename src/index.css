@@ -13,6 +13,11 @@
   [aria-disabled="true"] {
     cursor: not-allowed;
   }
+
+  select[class*="appearance-none"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
   button:focus-visible,
   a:focus-visible {
     outline: 2px solid #2563eb;
@@ -390,12 +395,19 @@ html.theme-dark [class~="bg-transparent"] {
   color: inherit;
 }
 
+html.theme-dark [class~="text-slate-950"],
 html.theme-dark [class~="text-slate-900"],
 html.theme-dark [class~="text-slate-800"],
 html.theme-dark [class~="text-gray-900"],
 html.theme-dark [class~="text-gray-800"],
 html.theme-dark [class*="text-[#0F172A]"] {
   color: #f8fbff !important;
+}
+
+html.theme-dark [class~="text-blue-950"],
+html.theme-dark [class~="text-blue-900"],
+html.theme-dark [class~="text-blue-800"] {
+  color: #dbeafe !important;
 }
 
 html.theme-dark [class~="text-slate-700"],

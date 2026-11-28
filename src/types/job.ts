@@ -74,6 +74,15 @@ export interface JobCreateRequest {
   clientRequestId?: string;
 }
 
+export interface JobUpdateRequest {
+  title: string;
+  description: string;
+  budgetMin: number;
+  budgetMax: number;
+  estimatedDurationMonths?: number | null;
+  deadline?: string | null;
+}
+
 export interface JobAddonPrices {
   featuredFee: number;
   urgentFee: number;

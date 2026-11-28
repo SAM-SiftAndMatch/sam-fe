@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { jobApi } from '../api/job';
 
 type Props = { jobId: string; compact?: boolean };
@@ -8,6 +8,7 @@ export default function SrsPdfActions({ jobId, compact = false }: Props) {
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const status = useQuery({
     queryKey: ['job-srs-pdf', jobId],
     queryFn: () => jobApi.getSrsPdfStatus(jobId),
@@ -21,8 +22,22 @@ export default function SrsPdfActions({ jobId, compact = false }: Props) {
     },
   });
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  useEffect(() => {
+    if (!previewUrl) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPreviewUrl(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [previewUrl]);
+
   const openPdf = async (download: boolean) => {
-    const tab = download ? null : window.open('', '_blank');
     setBusy(true);
     setError(null);
     try {
@@ -35,14 +50,14 @@ export default function SrsPdfActions({ jobId, compact = false }: Props) {
         document.body.appendChild(link);
         link.click();
         link.remove();
-      } else if (tab) {
-        tab.location.href = url;
+        window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
       } else {
-        window.location.href = url;
+        setPreviewUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return url;
+        });
       }
-      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch {
-      tab?.close();
       setError('Không mở được PDF. Vui lòng thử lại.');
     } finally {
       setBusy(false);
@@ -116,6 +131,49 @@ export default function SrsPdfActions({ jobId, compact = false }: Props) {
         <p role="alert" className="mt-2 text-red-700">
           {error}
         </p>
+      )}
+
+      {previewUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setPreviewUrl(null);
+          }}
+        >
+          <dialog
+            open
+            aria-modal="true"
+            aria-label="Xem trước PDF SRS"
+            className="relative m-0 flex h-[86vh] w-full max-w-4xl flex-col rounded-2xl border-0 bg-white p-4 text-slate-900 shadow-2xl"
+          >
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-200">
+              <h3 className="text-base font-bold text-slate-900">Tài liệu đặc tả SRS (PDF)</h3>
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewUrl}
+                  download={`srs-${jobId}.pdf`}
+                  className="rounded-lg bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-800"
+                >
+                  Tải về
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setPreviewUrl(null)}
+                  aria-label="Đóng"
+                  className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center border-0 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <iframe
+              title="Xem trước PDF SRS"
+              src={previewUrl}
+              className="mt-3 flex-1 w-full rounded-xl border border-slate-200 bg-slate-100"
+            />
+          </dialog>
+        </div>
       )}
     </div>
   );

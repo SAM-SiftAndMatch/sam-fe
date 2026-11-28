@@ -37,20 +37,56 @@ const FreelancerPage: React.FC = () => {
   const { user, isAuthenticated, isLoading } = useAuthStore();
 
   const [activeFilter, setActiveFilter] = useState('Tất cả');
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!guideModalOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setGuideModalOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [guideModalOpen]);
   const [profile, setProfile] = useState<FreelancerProfileResponse | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   const { data: openJobPage } = useQuery({
     queryKey: ['open-jobs-preview'],
-    queryFn: () => jobApi.getOpenJobsPage({ page: 0, size: 4 }),
+    queryFn: () => jobApi.getOpenJobsPage({ page: 0, size: 12 }),
     staleTime: 60_000,
   });
   const openJobs = openJobPage?.items ?? [];
 
-  // If a Client lands here, redirect to Client dashboard
+  const filteredJobs = openJobs.filter((job) => {
+    if (activeFilter === 'Tất cả') return true;
+    const haystack =
+      `${job.title} ${(job.skills ?? []).map((s) => s.name).join(' ')}`.toLowerCase();
+    if (activeFilter === 'Lập trình') {
+      return /(\breact\b|\btypescript\b|\bjavascript\b|\bjava\b|\bpython\b|\bnode\b|\bweb\b|\bapp\b|\bapi\b|\bcode\b|\bdev\b|\bbackend\b|\bfrontend\b|\bmobile\b|\bsql\b|\bphp\b|\bnext\b|\bflutter\b|lập trình)/.test(
+        haystack
+      );
+    }
+    if (activeFilter === 'Thiết kế') {
+      return /(thiết kế|\bdesign\b|\bfigma\b|ui\/ux|\bui\b|\bux\b|\blogo\b|\bbanner\b|\bphotoshop\b|\billustrator\b|\bbranding\b|đồ họa)/.test(
+        haystack
+      );
+    }
+    if (activeFilter === 'Viết lách') {
+      return /(viết bài|\bcontent\b|\bseo\b|dịch thuật|\bcopywriting\b|\bblog\b|kịch bản|biên tập|soạn thảo)/.test(
+        haystack
+      );
+    }
+    return true;
+  });
+
+  // If a Client or Admin lands here, redirect to their dashboard
   useEffect(() => {
-    if (!isLoading && isAuthenticated && user?.role === 'CLIENT') {
-      navigate(paths.PATH_CLIENT_DASHBOARD, { replace: true });
+    if (!isLoading && isAuthenticated) {
+      if (user?.role === 'CLIENT') {
+        navigate(paths.PATH_CLIENT_DASHBOARD, { replace: true });
+      } else if (user?.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      }
     }
   }, [isLoading, isAuthenticated, user, navigate]);
 
@@ -285,17 +321,21 @@ const FreelancerPage: React.FC = () => {
         </ScrollReveal>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {openJobs.length === 0 ? (
+          {filteredJobs.length === 0 ? (
             <div className="col-span-full py-12 text-center text-slate-400 text-xs">
-              Hiện chưa có dự án nào đang mở tuyển.
+              {openJobs.length === 0
+                ? 'Hiện chưa có dự án nào đang mở tuyển.'
+                : `Chưa có dự án nào thuộc nhóm "${activeFilter}".`}
             </div>
           ) : (
-            openJobs.slice(0, 4).map((job, idx) => (
+            filteredJobs.slice(0, 4).map((job, idx) => (
               <ScrollReveal key={job.id} delayMs={idx * 60} className="h-full">
                 <div className="group h-full bg-white rounded-[12px] p-6 border border-slate-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#1D4ED8]/60 hover:-translate-y-[2px] transition-all duration-200 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-end gap-2 mb-4">
-                      <span className="text-[10px] text-slate-400">AI MATCHED</span>
+                      <span className="text-[10px] text-slate-400">
+                        {isAuthenticated ? 'AI MATCHED' : 'ĐANG TUYỂN'}
+                      </span>
                     </div>
                     <h3 className="text-base font-bold text-slate-900 leading-snug mb-3 line-clamp-2">
                       {job.title}
@@ -367,11 +407,16 @@ const FreelancerPage: React.FC = () => {
               </PrimaryButton>
             </div>
 
-            {/* Video preview container */}
-            <div className="flex-1 w-full relative rounded-[8px] overflow-hidden border border-slate-200 shadow-sm group cursor-pointer bg-slate-900 aspect-[16/10]">
+            {/* Interactive guide preview */}
+            <button
+              type="button"
+              onClick={() => setGuideModalOpen(true)}
+              aria-label="Xem hướng dẫn cách hoạt động của SAM"
+              className="flex-1 w-full relative rounded-[8px] overflow-hidden border border-slate-200 shadow-sm group cursor-pointer bg-slate-900 aspect-[16/10] p-0 text-left"
+            >
               <img
                 src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80"
-                alt="Video Thumbnail"
+                alt="Hướng dẫn quy trình SAM"
                 className="w-full h-full object-cover opacity-75 group-hover:opacity-90 transition-opacity"
               />
 
@@ -386,18 +431,74 @@ const FreelancerPage: React.FC = () => {
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex justify-between items-end">
                 <div>
                   <span className="text-white/70 text-[10px] tracking-widest uppercase mb-0.5 block">
-                    HƯỚNG DẪN {'//'} ONBOARDING
+                    HƯỚNG DẪN · ONBOARDING
                   </span>
                   <span className="text-white font-bold text-sm">Cách hoạt động của SAM</span>
                 </div>
                 <span className="bg-slate-900/80 text-white text-[10px] px-2 py-0.5 rounded-[4px] border border-slate-700">
-                  02:45
+                  3 BƯỚC
                 </span>
               </div>
-            </div>
+            </button>
           </div>
         </ScrollReveal>
       </section>
+
+      {guideModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setGuideModalOpen(false);
+          }}
+        >
+          <dialog
+            open
+            aria-modal="true"
+            aria-label="Cách hoạt động của SAM cho Freelancer"
+            className="relative m-0 w-full max-w-lg rounded-2xl border-0 bg-white p-6 text-slate-900 shadow-2xl"
+          >
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h3 className="text-lg font-bold text-slate-900">Quy trình nhận việc trên SAM</h3>
+              <button
+                type="button"
+                onClick={() => setGuideModalOpen(false)}
+                aria-label="Đóng"
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center border-0 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            <ol className="space-y-3 text-sm text-slate-600 leading-relaxed list-decimal list-inside mb-5">
+              <li>
+                <strong>Hoàn thiện hồ sơ & kỹ năng:</strong> Cập nhật bio, mức phí/giờ và GitHub để
+                AI Matching gợi ý dự án sát nhất.
+              </li>
+              <li>
+                <strong>Ứng tuyển & Ký hợp đồng AI:</strong> Gửi đề xuất mức giá, trao đổi trong
+                Workspace và ký hợp đồng minh bạch.
+              </li>
+              <li>
+                <strong>Ký quỹ Escrow & Nhận thù lao:</strong> Khách hàng nạp 100% ký quỹ, bạn cọc
+                2% cam kết, bàn giao theo QA checklist và nhận 90% thù lao + hoàn cọc 2% sau 7 ngày
+                bảo trì.
+              </li>
+            </ol>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setGuideModalOpen(false);
+                  navigate(paths.PATH_FREELANCER_JOBS);
+                }}
+                className="rounded-xl bg-[#1D4ED8] px-5 py-2.5 text-sm font-semibold text-white border-0 cursor-pointer hover:bg-[#153bb5]"
+              >
+                Khám phá việc làm
+              </button>
+            </div>
+          </dialog>
+        </div>
+      )}
 
       {/* Footer đồng nhất */}
       <LandingFooter />

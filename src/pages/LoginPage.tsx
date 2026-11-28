@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { CircleAlert, Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import GoogleLoginButton from '../components/GoogleLoginButton';
@@ -13,6 +13,7 @@ import {
   googleAuthEnabled,
   setGoogleLinkPending,
 } from '../lib/google-auth';
+import { SUPPORT_FACEBOOK_URL } from '../lib/support';
 import * as paths from '../routes/paths';
 import { useAuthStore } from '../stores/useAuthStore';
 
@@ -20,6 +21,16 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [forgotOpen, setForgotOpen] = useState(false);
+
+  useEffect(() => {
+    if (!forgotOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setForgotOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [forgotOpen]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -62,9 +73,11 @@ const LoginPage: React.FC = () => {
     } catch (err: unknown) {
       if (googleLink) clearGoogleLinkPending();
       if (axios.isAxiosError(err)) {
+        const raw = err.response?.data?.message as string | undefined;
         const message =
-          err.response?.data?.message ||
-          'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.';
+          raw === 'Email or password is incorrect'
+            ? 'Email hoặc mật khẩu không chính xác.'
+            : raw || 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.';
         setServerError(message);
       } else if (err instanceof Error) {
         setServerError(err.message);
@@ -189,16 +202,25 @@ const LoginPage: React.FC = () => {
           )}
         </div>
 
-        <label className="auth-remember" htmlFor="remember_me">
-          <input
-            id="remember_me"
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            disabled={isSubmitting}
-          />
-          <span>Duy trì đăng nhập</span>
-        </label>
+        <div className="flex items-center justify-between gap-2">
+          <label className="auth-remember" htmlFor="remember_me">
+            <input
+              id="remember_me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              disabled={isSubmitting}
+            />
+            <span>Duy trì đăng nhập</span>
+          </label>
+          <button
+            type="button"
+            onClick={() => setForgotOpen(true)}
+            className="text-xs font-semibold text-[#1D4ED8] hover:underline bg-transparent border-0 p-0 cursor-pointer"
+          >
+            Quên mật khẩu?
+          </button>
+        </div>
 
         <button
           type="submit"
@@ -216,6 +238,60 @@ const LoginPage: React.FC = () => {
           )}
         </button>
       </form>
+
+      {forgotOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setForgotOpen(false);
+          }}
+        >
+          <dialog
+            open
+            aria-modal="true"
+            aria-label="Hỗ trợ quên mật khẩu"
+            className="relative m-0 w-full max-w-md rounded-2xl border-0 bg-white p-6 text-slate-900 shadow-2xl"
+          >
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <h2 className="text-lg font-bold text-slate-900">Quên mật khẩu?</h2>
+              <button
+                type="button"
+                onClick={() => setForgotOpen(false)}
+                aria-label="Đóng"
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center border-0 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed mb-4">
+              Hệ thống hiện chưa mở tự động đặt lại mật khẩu qua email. Nếu bạn đã liên kết Google,
+              hãy dùng nút <strong>Tiếp tục với Google</strong> để đăng nhập.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed mb-5">
+              Trường hợp cần cấp lại quyền truy cập tài khoản email, vui lòng liên hệ trực tiếp đội
+              ngũ hỗ trợ SAM:
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2.5">
+              <a
+                href={SUPPORT_FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 text-center rounded-xl bg-[#1D4ED8] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#153bb5] transition-colors"
+              >
+                Liên hệ hỗ trợ SAM
+              </a>
+              <button
+                type="button"
+                onClick={() => setForgotOpen(false)}
+                className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer bg-white"
+              >
+                Đóng
+              </button>
+            </div>
+          </dialog>
+        </div>
+      )}
     </AuthLayout>
   );
 };
